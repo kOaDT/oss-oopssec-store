@@ -11,70 +11,59 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  username  String   @unique
-  password  String
-  firstName String?
-  lastName  String?
   role      UserRole @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  carts     Cart[]
   orders    Order[]
 
   @@map("users")
 }
 
-model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  products    Product[]
-
-  @@map("categories")
-}
-
 model Product {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
+  id         String      @id @default(cuid())
+  name       String
+  price      Float
   description String?
-  price       Float
-  stock       Int       @default(0)
-  imageUrl    String?
-  categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  orderItems  OrderItem[]
+  cartItems  CartItem[]
 
   @@map("products")
 }
 
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+
+  @@map("cart_items")
+}
+
 model Order {
-  id         String     @id @default(cuid())
-  userId     String
-  user       User       @relation(fields: [userId], references: [id])
-  status     OrderStatus @default(PENDING)
-  total      Float
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  orderItems OrderItem[]
+  id     String      @id @default(cuid())
+  userId String
+  user   User        @relation(fields: [userId], references: [id])
+  total  Float
+  status OrderStatus @default(PENDING)
 
   @@map("orders")
 }
 
-model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  price     Float
+model Vulnerability {
+  id    String @id @default(cuid())
+  cve   String @unique
+  title String
 
-  @@map("order_items")
+  @@map("vulnerabilities")
 }
 
 enum UserRole {
