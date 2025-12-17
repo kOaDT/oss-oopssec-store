@@ -1,11 +1,57 @@
-export default function Home() {
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import ProductGrid from "./components/ProductGrid";
+import Features from "./components/Features";
+import Newsletter from "./components/Newsletter";
+import Footer from "./components/Footer";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string | null;
+  imageUrl: string;
+}
+
+async function getProducts(): Promise<Product[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/products`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  return res.json();
+}
+
+export default async function Home() {
+  const products = await getProducts();
+  const featuredProducts = products.slice(0, 10);
+  const newProducts = products.slice(10, 17);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex items-center justify-center">
-        <h1 className="text-5xl font-semibold tracking-tight text-black dark:text-zinc-50">
-          Hello OSS
-        </h1>
+    <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
+      <Header />
+      <main className="flex-1">
+        <Hero />
+        <ProductGrid
+          products={featuredProducts}
+          title="Featured Products"
+          subtitle="Handpicked selection of our most popular items"
+        />
+        <Features />
+        {newProducts.length > 0 && (
+          <ProductGrid
+            products={newProducts}
+            title="New Arrivals"
+            subtitle="Discover our latest additions to the collection"
+          />
+        )}
+        <Newsletter />
       </main>
+      <Footer />
     </div>
   );
 }

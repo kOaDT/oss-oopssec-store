@@ -40,22 +40,8 @@ The setup script will:
 - Generate Prisma Client
 - Create and initialize the SQLite database
 - Seed the database with sample data
-
-### Running the Application
-
-```bash
-npm run dev
-```
-
-The application will be available at: `http://localhost:3000`
-
-### Database Commands
-
-- `npm run db:generate` - Generate Prisma Client
-- `npm run db:push` - Push schema changes to the database
-- `npm run db:migrate` - Create and apply migrations
-- `npm run db:seed` - Seed the database with initial data
-- `npm run db:studio` - Open Prisma Studio (database GUI)
+- Run the application on port 3000
+- Run Prisma Studio on port 5555
 
 ---
 
