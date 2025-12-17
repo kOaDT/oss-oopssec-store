@@ -1,0 +1,45 @@
+{
+  "name": "oss-oopssec-store",
+  "author": "kOaDT",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kOaDT/oss-oopssec-store"
+  },
+  "bugs": {
+    "url": "https://github.com/kOaDT/oss-oopssec-store/issues"
+  },
+  "homepage": "https://github.com/kOaDT/oss-oopssec-store#readme",
+  "keywords": [
+    "oss",
+    "oopssec",
+    "store",
+    "vulnerable",
+    "web",
+    "security"
+  ],
+  "description": "OSS – OopsSec Store, a vulnerable e-commerce for modern web security training.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "16.0.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
