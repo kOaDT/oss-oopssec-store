@@ -29,10 +29,37 @@ This application must never be deployed in a production environment.
 git clone https://github.com/<your-organization>/oss-oopssec-store.git
 cd oss-oopssec-store
 npm install
+```
+
+### Database Setup
+
+Create a `.env` file in the root directory with the following content:
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+Then initialize the database:
+
+```bash
+npm run db:generate
+npm run db:push
+```
+
+### Running the Application
+
+```bash
 npm run dev
 ```
 
 The application will be available at: `http://localhost:3000`
+
+### Database Commands
+
+- `npm run db:generate` - Generate Prisma Client
+- `npm run db:push` - Push schema changes to the database
+- `npm run db:migrate` - Create and apply migrations
+- `npm run db:studio` - Open Prisma Studio (database GUI)
 
 ---
 

@@ -29,7 +29,11 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,scss,md}": [
@@ -38,7 +42,9 @@
     ]
   },
   "dependencies": {
+    "@prisma/client": "^6.19.1",
     "next": "16.0.6",
+    "prisma": "^6.19.1",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
