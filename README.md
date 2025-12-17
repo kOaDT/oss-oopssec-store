@@ -23,28 +23,23 @@ This application must never be deployed in a production environment.
 
 ## Getting Started
 
-### Installation
+### Quick Setup
+
+Clone the repository and run the setup script to install dependencies, initialize the database, and seed it with initial data:
 
 ```bash
 git clone https://github.com/<your-organization>/oss-oopssec-store.git
 cd oss-oopssec-store
-npm install
+npm run setup
 ```
 
-### Database Setup
+The setup script will:
 
-Create a `.env` file in the root directory with the following content:
-
-```env
-DATABASE_URL="file:./dev.db"
-```
-
-Then initialize the database:
-
-```bash
-npm run db:generate
-npm run db:push
-```
+- Create a `.env` file with the database configuration
+- Install all dependencies
+- Generate Prisma Client
+- Create and initialize the SQLite database
+- Seed the database with sample data
 
 ### Running the Application
 
@@ -59,6 +54,7 @@ The application will be available at: `http://localhost:3000`
 - `npm run db:generate` - Generate Prisma Client
 - `npm run db:push` - Push schema changes to the database
 - `npm run db:migrate` - Create and apply migrations
+- `npm run db:seed` - Seed the database with initial data
 - `npm run db:studio` - Open Prisma Studio (database GUI)
 
 ---
