@@ -3,6 +3,27 @@ import { PrismaClient } from "../lib/generated/prisma/client";
 import path from "path";
 import crypto from "crypto";
 
+/**
+ * If you want to add a new flag, you can add it here.
+ * The flag should be in the format of "OSS{flag}"
+ * The cve is optional
+ * The markdown file should be in the content/vulnerabilities folder
+ * The markdown file should be in the format of "vulnerability-name.md"
+ */
+const flags = [
+  {
+    flag: "OSS{r3act2sh3ll}",
+    slug: "react2shell",
+    cve: "CVE-2025-55182",
+    markdownFile: "react2shell.md",
+  },
+  {
+    flag: "OSS{public_3nvir0nment_v4ri4bl3}",
+    slug: "public-env-variable",
+    markdownFile: "public-env-variable.md",
+  },
+];
+
 config();
 
 const hashMD5 = (text: string): string => {
@@ -234,20 +255,6 @@ async function main() {
   }
 
   console.log(`Created ${products.length} products`);
-
-  const flags = [
-    {
-      flag: "OSS{r3act2sh3ll}",
-      slug: "react2shell",
-      cve: "CVE-2025-55182",
-      markdownFile: "react2shell.md",
-    },
-    {
-      flag: "OSS{public_3nvir0nment_v4ri4bl3}",
-      slug: "public-env-variable",
-      markdownFile: "public-env-variable.md",
-    },
-  ];
 
   const existingFlags = await prisma.flag.findMany();
   if (existingFlags.length === 0) {
