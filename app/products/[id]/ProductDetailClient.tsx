@@ -1,0 +1,238 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string | null;
+  imageUrl: string;
+}
+
+interface ProductDetailClientProps {
+  product: Product;
+}
+
+export default function ProductDetailClient({
+  product,
+}: ProductDetailClientProps) {
+  const [quantity, setQuantity] = useState(1);
+  const maxQuantity = 99;
+
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  const handleIncrement = () => {
+    if (quantity < maxQuantity) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && value >= 1 && value <= maxQuantity) {
+      setQuantity(value);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (quantity > maxQuantity) {
+      alert(`Maximum order limit is ${maxQuantity} per customer`);
+      return;
+    }
+    alert(`Added ${quantity} item(s) to cart`);
+  };
+
+  return (
+    <section className="container mx-auto px-4 py-6 lg:px-6 lg:py-10">
+      <nav
+        className="mb-6 text-sm text-slate-500 dark:text-slate-400"
+        aria-label="Breadcrumb"
+      >
+        <ol className="flex items-center gap-2">
+          <li>
+            <Link
+              href="/"
+              className="cursor-pointer transition-colors hover:text-primary-600 hover:underline dark:hover:text-primary-400"
+            >
+              Back to products
+            </Link>
+          </li>
+          <li>•</li>
+          <li className="text-slate-700 dark:text-slate-300">{product.name}</li>
+        </ol>
+      </nav>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-6">
+          <div className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-slate-800">
+            <div className="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={90}
+                priority
+              />
+            </div>
+          </div>
+
+          {product.description && (
+            <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
+              <h2 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                About this product
+              </h2>
+              <p className="leading-relaxed text-slate-600 dark:text-slate-400">
+                {product.description}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <aside className="sticky top-6">
+          <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800 lg:p-8">
+            <div className="mb-6 flex items-start justify-between">
+              <h1 className="flex-1 text-2xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 lg:text-3xl">
+                {product.name}
+              </h1>
+              <button
+                aria-label="Add to wishlist"
+                className="ml-4 cursor-pointer rounded-lg border border-slate-200 p-2.5 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-pink-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.656 3.172 11.83a4 4 0 010-5.656z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="text-4xl font-extrabold text-primary-600 dark:text-primary-400 lg:text-5xl">
+                ${product.price.toFixed(2)}
+              </div>
+              <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Inclusive of all taxes
+              </div>
+            </div>
+
+            <div className="mb-6 flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/50">
+              <div className="flex-1">
+                <div className="font-semibold text-slate-900 dark:text-slate-100">
+                  Delivery in 10-15 mins
+                </div>
+                <div className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                  Shipment of {quantity} item{quantity !== 1 ? "s" : ""}
+                </div>
+              </div>
+              <div className="rounded-full bg-primary-100 px-3 py-1.5 text-sm font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                In Stock
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label
+                htmlFor="qty"
+                className="mb-3 block text-sm font-semibold text-slate-900 dark:text-slate-100"
+              >
+                Quantity{" "}
+                <span className="font-normal text-slate-500 dark:text-slate-400">
+                  ({maxQuantity} available)
+                </span>
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center overflow-hidden rounded-xl border-2 border-slate-200 dark:border-slate-700">
+                  <button
+                    onClick={handleDecrement}
+                    className="cursor-pointer bg-white px-4 py-3 text-lg font-medium transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <input
+                    id="qty"
+                    type="number"
+                    value={quantity}
+                    min={1}
+                    max={maxQuantity}
+                    onChange={handleQuantityChange}
+                    className="w-20 border-x-2 border-slate-200 p-2 text-center font-semibold outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    aria-label="Quantity"
+                  />
+                  <button
+                    onClick={handleIncrement}
+                    className="cursor-pointer bg-white px-4 py-3 text-lg font-medium transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600 lg:flex-none"
+                >
+                  Add to Cart
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                Max order limit:{" "}
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  {maxQuantity} per customer
+                </span>
+              </p>
+            </div>
+
+            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+              <div>
+                <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Price
+                </dt>
+                <dd className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                  ${product.price.toFixed(2)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Availability
+                </dt>
+                <dd className="mt-1 font-semibold text-primary-600 dark:text-primary-400">
+                  In Stock
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="fixed bottom-4 left-0 right-0 z-10 px-4 lg:hidden">
+            <div className="mx-auto max-w-3xl">
+              <button
+                onClick={handleAddToCart}
+                className="w-full cursor-pointer rounded-xl bg-primary-600 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-primary-700 hover:shadow-xl dark:bg-primary-500 dark:hover:bg-primary-600"
+              >
+                Add to Cart — ${(product.price * quantity).toFixed(2)}
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
