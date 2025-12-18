@@ -102,14 +102,3 @@ To identify this vulnerability in your application:
 The flag for this vulnerability is: **OSS{r3act2sh3ll}**
 
 The flag can be found in the `.env.local` file on the server. To retrieve it, you must exploit the React2Shell vulnerability to execute `cat .env.local` on the server.
-
-## Learning Objectives
-
-This vulnerability demonstrates:
-
-- The dangers of unsafe deserialization in modern web frameworks
-- How prototype chain traversal can lead to code execution
-- The importance of secure deserialization practices
-- How React Server Components' Flight protocol can be exploited
-- The critical nature of pre-authentication RCE vulnerabilities
-- Secure coding practices for handling serialized data

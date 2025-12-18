@@ -96,6 +96,13 @@ export default function CheckoutClient() {
       return;
     }
 
+    const paymentSecret = process.env.NEXT_PUBLIC_PAYMENT_SECRET;
+
+    if (paymentSecret !== "T1NTe3B1YmxpY18zbnZpcjBubWVudF92NHJpNGJsM30=") {
+      alert("Payment failed: Payment method is not properly configured.");
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const baseUrl =

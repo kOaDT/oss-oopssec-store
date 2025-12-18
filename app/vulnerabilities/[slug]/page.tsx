@@ -99,9 +99,6 @@ export default async function VulnerabilityPage({
                   </span>
                 )}
               </div>
-              <p className="text-lg capitalize text-primary-50 md:text-xl">
-                {flag.slug.replace(/([A-Z])/g, " $1").trim()}
-              </p>
             </div>
           </div>
         </section>

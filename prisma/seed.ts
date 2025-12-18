@@ -55,18 +55,6 @@ async function main() {
     },
   });
 
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@example.com" },
-    update: {
-      password: hashMD5("admin"),
-    },
-    create: {
-      email: "admin@oss.com",
-      password: hashMD5("secure-password"),
-      role: "ADMIN",
-    },
-  });
-
   const bob = await prisma.user.upsert({
     where: { email: "bob@example.com" },
     update: {
@@ -75,6 +63,18 @@ async function main() {
     create: {
       email: "bob@example.com",
       password: hashMD5("qwerty"),
+      role: "CUSTOMER",
+    },
+  });
+
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@example.com" },
+    update: {
+      password: hashMD5("admin"),
+    },
+    create: {
+      email: "admin@oss.com",
+      password: hashMD5("secure-password"),
       role: "ADMIN",
     },
   });
@@ -241,6 +241,11 @@ async function main() {
       slug: "react2shell",
       cve: "CVE-2025-55182",
       markdownFile: "react2shell.md",
+    },
+    {
+      flag: "OSS{public_3nvir0nment_v4ri4bl3}",
+      slug: "public-env-variable",
+      markdownFile: "public-env-variable.md",
     },
   ];
 
