@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: string;
@@ -16,11 +17,33 @@ interface ProductDetailClientProps {
   product: Product;
 }
 
+const getStoredUser = () => {
+  if (typeof window === "undefined") return null;
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      localStorage.removeItem("user");
+      localStorage.removeItem("authToken");
+      return null;
+    }
+  }
+  return null;
+};
+
 export default function ProductDetailClient({
   product,
 }: ProductDetailClientProps) {
   const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const router = useRouter();
   const maxQuantity = 99;
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
 
   const handleDecrement = () => {
     if (quantity > 1) {
@@ -41,12 +64,52 @@ export default function ProductDetailClient({
     }
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
     if (quantity > maxQuantity) {
       alert(`Maximum order limit is ${maxQuantity} per customer`);
       return;
     }
-    alert(`Added ${quantity} item(s) to cart`);
+
+    setIsLoading(true);
+
+    try {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const token = localStorage.getItem("authToken");
+
+      const response = await fetch(`${baseUrl}/api/cart/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: quantity,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to add to cart");
+      }
+
+      router.push("/cart");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to add item to cart. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -186,9 +249,10 @@ export default function ProductDetailClient({
 
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600 lg:flex-none"
+                  disabled={isLoading}
+                  className="flex-1 cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600 lg:flex-none"
                 >
-                  Add to Cart
+                  {isLoading ? "Adding..." : "Add to Cart"}
                 </button>
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
@@ -225,9 +289,12 @@ export default function ProductDetailClient({
             <div className="mx-auto max-w-3xl">
               <button
                 onClick={handleAddToCart}
-                className="w-full cursor-pointer rounded-xl bg-primary-600 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-primary-700 hover:shadow-xl dark:bg-primary-500 dark:hover:bg-primary-600"
+                disabled={isLoading}
+                className="w-full cursor-pointer rounded-xl bg-primary-600 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-primary-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600"
               >
-                Add to Cart — ${(product.price * quantity).toFixed(2)}
+                {isLoading
+                  ? "Adding..."
+                  : `Add to Cart — ${(product.price * quantity).toFixed(2)}`}
               </button>
             </div>
           </div>
