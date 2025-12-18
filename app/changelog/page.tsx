@@ -13,9 +13,24 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
-    version: "0.1.0",
+    version: "1.1.0",
+    date: "2025-12-18",
+    changes: [
+      {
+        type: "added",
+        description: "Added a new flag: Weak JWT None Algorithm",
+      },
+    ],
+  },
+  {
+    version: "1.0.0",
     date: "2025-12-17",
-    changes: [],
+    changes: [
+      {
+        type: "added",
+        description: "Launch of the OSS – OopsSec Store",
+      },
+    ],
   },
 ];
 

@@ -22,6 +22,11 @@ const flags = [
     slug: "public-env-variable",
     markdownFile: "public-env-variable.md",
   },
+  {
+    flag: "OSS{w34k_jwt_n0n3_4lg0r1thm}",
+    slug: "weak-jwt-none-algorithm",
+    markdownFile: "weak-jwt-none-algorithm.md",
+  },
 ];
 
 config();
