@@ -154,13 +154,18 @@ export default function Footer() {
         <div className="mt-8 border-t border-slate-200 pt-8 dark:border-slate-800">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              © {new Date().getFullYear()} OSS – OopsSec Store. All rights
-              reserved.
+              {new Date().getFullYear()} OSS – OopsSec Store.
               <span className="ml-2 text-xs text-slate-500 dark:text-slate-500">
                 v{packageJson.version}
               </span>
             </p>
             <div className="flex gap-6 text-sm text-slate-600 dark:text-slate-400">
+              <Link
+                href="/flags"
+                className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
+              >
+                Flags
+              </Link>
               <Link
                 href="/changelog"
                 className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
