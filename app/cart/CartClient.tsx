@@ -354,15 +354,11 @@ export default function CartClient() {
               </div>
 
               <button
-                className="w-full rounded-xl bg-primary-600 px-6 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
-                disabled
+                onClick={() => router.push("/checkout")}
+                className="w-full rounded-xl cursor-pointer bg-primary-600 px-6 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
               >
                 Proceed to Checkout
               </button>
-
-              <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
-                Checkout functionality coming soon
-              </p>
             </div>
           </div>
         </div>
