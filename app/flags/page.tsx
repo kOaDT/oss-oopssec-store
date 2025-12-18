@@ -1,10 +1,35 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Link from "next/link";
-import { getAllVulnerabilities } from "@/lib/vulnerabilities";
 
-export default function Flags() {
-  const vulnerabilities = getAllVulnerabilities();
+interface Flag {
+  id: string;
+  flag: string;
+  slug: string;
+  cve?: string | null;
+  markdownFile: string;
+}
+
+async function getFlags(): Promise<Flag[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const response = await fetch(`${baseUrl}/api/flags`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching flags:", error);
+    return [];
+  }
+}
+
+export default async function Flags() {
+  const flags = await getFlags();
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
@@ -47,7 +72,7 @@ export default function Flags() {
               </div>
             </div>
 
-            {vulnerabilities.length === 0 ? (
+            {flags.length === 0 ? (
               <div className="rounded-lg border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="text-slate-600 dark:text-slate-400">
                   No flags available at this time.
@@ -55,26 +80,26 @@ export default function Flags() {
               </div>
             ) : (
               <div className="space-y-4">
-                {vulnerabilities.map((vuln) => (
+                {flags.map((flag) => (
                   <Link
-                    key={vuln.slug}
-                    href={`/vulnerabilities/${vuln.slug}`}
+                    key={flag.slug}
+                    href={`/vulnerabilities/${flag.slug}`}
                     className="group block rounded-lg border border-slate-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-primary-700"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="mb-2 flex items-center gap-3">
                           <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                            {vuln.flag}
+                            {flag.flag}
                           </h2>
-                          {vuln.cve && (
+                          {flag.cve && (
                             <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                              {vuln.cve}
+                              {flag.cve}
                             </span>
                           )}
                         </div>
                         <p className="text-sm font-medium capitalize text-slate-600 dark:text-slate-400">
-                          {vuln.slug.replace(/([A-Z])/g, " $1").trim()}
+                          {flag.slug.replace(/([A-Z])/g, " $1").trim()}
                         </p>
                       </div>
                       <svg

@@ -43,7 +43,7 @@ const prisma = new PrismaClient({
 async function main() {
   console.log("Seeding database...");
 
-  const visitor = await prisma.user.upsert({
+  const alice = await prisma.user.upsert({
     where: { email: "alice@example.com" },
     update: {
       password: hashMD5("duck"),
@@ -67,7 +67,7 @@ async function main() {
     },
   });
 
-  const manager = await prisma.user.upsert({
+  const bob = await prisma.user.upsert({
     where: { email: "bob@example.com" },
     update: {
       password: hashMD5("qwerty"),
@@ -80,9 +80,9 @@ async function main() {
   });
 
   console.log("Created users:", {
-    visitor: visitor.email,
+    alice: alice.email,
     admin: admin.email,
-    manager: manager.email,
+    bob: bob.email,
   });
 
   const products = [
@@ -234,6 +234,26 @@ async function main() {
   }
 
   console.log(`Created ${products.length} products`);
+
+  const flags = [
+    {
+      flag: "OSS{r3act2sh3ll}",
+      slug: "react2shell",
+      cve: "CVE-2025-55182",
+      markdownFile: "react2shell.md",
+    },
+  ];
+
+  const existingFlags = await prisma.flag.findMany();
+  if (existingFlags.length === 0) {
+    await prisma.flag.createMany({
+      data: flags,
+    });
+  } else {
+    console.log("Flags already exist, skipping flag creation");
+  }
+
+  console.log(`Created ${flags.length} flags`);
 
   console.log("Seeding completed!");
 }

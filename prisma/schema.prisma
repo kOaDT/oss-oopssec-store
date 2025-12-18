@@ -60,6 +60,16 @@ model Order {
   @@map("orders")
 }
 
+model Flag {
+  id           String  @id @default(cuid())
+  flag         String
+  slug         String  @unique
+  cve          String?
+  markdownFile String
+
+  @@map("flags")
+}
+
 enum UserRole {
   CUSTOMER
   ADMIN

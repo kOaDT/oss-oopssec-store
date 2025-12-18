@@ -1,6 +1,5 @@
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { getVulnerabilityBySlug } from "@/lib/vulnerabilities";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -9,6 +8,32 @@ import { join } from "path";
 
 interface VulnerabilityPageProps {
   params: Promise<{ slug: string }>;
+}
+
+interface Flag {
+  id: string;
+  flag: string;
+  slug: string;
+  cve?: string | null;
+  markdownFile: string;
+}
+
+async function getFlagBySlug(slug: string): Promise<Flag | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const response = await fetch(`${baseUrl}/api/flags/${slug}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching flag:", error);
+    return null;
+  }
 }
 
 async function getMarkdownContent(filename: string): Promise<string> {
@@ -30,9 +55,9 @@ export async function generateMetadata({
   params,
 }: VulnerabilityPageProps): Promise<{ title: string; description: string }> {
   const { slug } = await params;
-  const vulnerability = getVulnerabilityBySlug(slug);
+  const flag = await getFlagBySlug(slug);
 
-  if (!vulnerability) {
+  if (!flag) {
     return {
       title: "Vulnerability Not Found",
       description: "The requested vulnerability could not be found",
@@ -40,8 +65,8 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${vulnerability.flag} - ${vulnerability.cve || "Vulnerability"}`,
-    description: `Learn about the ${vulnerability.slug} vulnerability`,
+    title: `${flag.flag} - ${flag.cve || "Vulnerability"}`,
+    description: `Learn about the ${flag.slug} vulnerability`,
   };
 }
 
@@ -49,13 +74,13 @@ export default async function VulnerabilityPage({
   params,
 }: VulnerabilityPageProps) {
   const { slug } = await params;
-  const vulnerability = getVulnerabilityBySlug(slug);
+  const flag = await getFlagBySlug(slug);
 
-  if (!vulnerability) {
+  if (!flag) {
     notFound();
   }
 
-  const markdownContent = await getMarkdownContent(vulnerability.markdownFile);
+  const markdownContent = await getMarkdownContent(flag.markdownFile);
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
@@ -66,16 +91,16 @@ export default async function VulnerabilityPage({
             <div className="mx-auto max-w-3xl text-center">
               <div className="mb-4 flex items-center justify-center gap-3">
                 <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-                  {vulnerability.flag}
+                  {flag.flag}
                 </h1>
-                {vulnerability.cve && (
+                {flag.cve && (
                   <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                    {vulnerability.cve}
+                    {flag.cve}
                   </span>
                 )}
               </div>
               <p className="text-lg capitalize text-primary-50 md:text-xl">
-                {vulnerability.slug.replace(/([A-Z])/g, " $1").trim()}
+                {flag.slug.replace(/([A-Z])/g, " $1").trim()}
               </p>
             </div>
           </div>

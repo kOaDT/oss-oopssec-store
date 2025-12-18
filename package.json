@@ -46,7 +46,9 @@
   "dependencies": {
     "@prisma/client": "^6.19.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "canvas-confetti": "^1.9.4",
     "jsonwebtoken": "^9.0.3",
     "next": "16.0.6",
     "prisma": "^6.19.1",
