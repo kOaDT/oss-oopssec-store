@@ -1,8 +1,13 @@
 import { config } from "dotenv";
 import { PrismaClient } from "../lib/generated/prisma/client";
 import path from "path";
+import crypto from "crypto";
 
 config();
+
+const hashMD5 = (text: string): string => {
+  return crypto.createHash("md5").update(text).digest("hex");
+};
 
 const getDatabaseUrl = () => {
   const projectRoot = path.resolve(process.cwd());
@@ -39,24 +44,46 @@ async function main() {
   console.log("Seeding database...");
 
   const visitor = await prisma.user.upsert({
-    where: { email: "visitor@example.com" },
-    update: {},
+    where: { email: "alice@example.com" },
+    update: {
+      password: hashMD5("duck"),
+    },
     create: {
-      email: "visitor@example.com",
+      email: "alice@example.com",
+      password: hashMD5("iloveduck"),
       role: "CUSTOMER",
     },
   });
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: {},
+    update: {
+      password: hashMD5("admin"),
+    },
     create: {
-      email: "admin@example.com",
+      email: "admin@oss.com",
+      password: hashMD5("secure-password"),
       role: "ADMIN",
     },
   });
 
-  console.log("Created users:", { visitor: visitor.email, admin: admin.email });
+  const manager = await prisma.user.upsert({
+    where: { email: "bob@example.com" },
+    update: {
+      password: hashMD5("qwerty"),
+    },
+    create: {
+      email: "bob@example.com",
+      password: hashMD5("qwerty"),
+      role: "ADMIN",
+    },
+  });
+
+  console.log("Created users:", {
+    visitor: visitor.email,
+    admin: admin.email,
+    manager: manager.email,
+  });
 
   const products = [
     {
@@ -207,32 +234,6 @@ async function main() {
   }
 
   console.log(`Created ${products.length} products`);
-
-  const existingCart = await prisma.cart.findFirst({
-    where: { userId: visitor.id },
-  });
-
-  if (!existingCart) {
-    await prisma.cart.create({
-      data: {
-        userId: visitor.id,
-      },
-    });
-    console.log("Created empty cart for visitor");
-  } else {
-    console.log("Cart already exists for visitor");
-  }
-
-  const vulnerability = await prisma.vulnerability.upsert({
-    where: { cve: "CVE-2025-55182" },
-    update: {},
-    create: {
-      cve: "CVE-2025-55182",
-      title: "React2Shell",
-    },
-  });
-
-  console.log("Created vulnerability:", vulnerability.cve);
 
   console.log("Seeding completed!");
 }

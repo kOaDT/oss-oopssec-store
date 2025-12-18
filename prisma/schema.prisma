@@ -11,6 +11,7 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  password  String
   role      UserRole @default(CUSTOMER)
   carts     Cart[]
   orders    Order[]
@@ -57,14 +58,6 @@ model Order {
   status OrderStatus @default(PENDING)
 
   @@map("orders")
-}
-
-model Vulnerability {
-  id    String @id @default(cuid())
-  cve   String @unique
-  title String
-
-  @@map("vulnerabilities")
 }
 
 enum UserRole {

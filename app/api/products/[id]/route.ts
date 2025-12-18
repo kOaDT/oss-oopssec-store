@@ -8,13 +8,6 @@ export async function GET(
   try {
     const { id } = await params;
 
-    if (!id || typeof id !== "string") {
-      return NextResponse.json(
-        { error: "Invalid product ID" },
-        { status: 400 }
-      );
-    }
-
     const product = await prisma.product.findUnique({
       where: { id },
     });

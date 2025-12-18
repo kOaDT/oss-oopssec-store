@@ -46,6 +46,8 @@
   "dependencies": {
     "@prisma/client": "^6.19.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.3",
     "next": "16.0.6",
     "prisma": "^6.19.1",
     "react": "19.2.0",
