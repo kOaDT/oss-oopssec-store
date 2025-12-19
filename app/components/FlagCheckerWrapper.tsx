@@ -10,10 +10,10 @@ export default function FlagCheckerWrapper() {
   useEffect(() => {
     const fetchTotalFlags = async () => {
       try {
-        const response = await fetch("/api/flags");
+        const response = await fetch("/api/flags/count");
         if (response.ok) {
-          const flags = await response.json();
-          setTotalFlags(flags.length);
+          const data = await response.json();
+          setTotalFlags(data.count);
         }
       } catch (error) {
         console.error("Error fetching total flags:", error);

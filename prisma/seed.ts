@@ -27,6 +27,11 @@ const flags = [
     slug: "weak-jwt-none-algorithm",
     markdownFile: "weak-jwt-none-algorithm.md",
   },
+  {
+    flag: "OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}",
+    slug: "client-side-price-manipulation",
+    markdownFile: "client-side-price-manipulation.md",
+  },
 ];
 
 config();

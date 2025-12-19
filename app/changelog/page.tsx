@@ -13,6 +13,16 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
+    version: "1.2.0",
+    date: "2025-12-19",
+    changes: [
+      {
+        type: "added",
+        description: "Added a new flag: Client Side Price Manipulation",
+      },
+    ],
+  },
+  {
     version: "1.1.0",
     date: "2025-12-18",
     changes: [

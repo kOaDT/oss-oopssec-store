@@ -23,13 +23,22 @@ export async function POST(request: NextRequest) {
     const cart = await prisma.cart.findFirst({
       where: { userId: user.id },
       include: {
-        cartItems: true,
+        cartItems: {
+          include: {
+            product: true,
+          },
+        },
       },
     });
 
     if (!cart || cart.cartItems.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
+
+    const calculatedTotal = cart.cartItems.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0
+    );
 
     const order = await prisma.order.create({
       data: {
@@ -45,11 +54,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    const response: {
+      id: string;
+      total: number;
+      status: string;
+      flag?: string;
+    } = {
       id: order.id,
       total: order.total,
       status: order.status,
-    });
+    };
+
+    if (Math.abs(total - calculatedTotal) > 0.01) {
+      response.flag = "OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}";
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json(
