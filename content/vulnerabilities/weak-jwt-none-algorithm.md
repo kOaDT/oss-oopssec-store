@@ -4,10 +4,6 @@
 
 This vulnerability occurs when a JWT (JSON Web Token) is created with the `alg: "none"` algorithm, which means the token has no signature verification. This allows attackers to modify the token payload without detection, potentially escalating privileges or accessing unauthorized resources.
 
-## Vulnerability Summary
-
-The application uses JWTs with `alg: "none"` for authentication. When a JWT uses the "none" algorithm, it means there is no cryptographic signature to verify the token's integrity. This allows anyone who intercepts or receives a JWT to decode it, modify its contents (such as changing the user role to ADMIN), and use the modified token to gain unauthorized access.
-
 ## Root Cause
 
 The vulnerability stems from:
@@ -24,13 +20,6 @@ This vulnerability allows attackers to:
 - Gain administrative access without proper authentication
 - Access resources restricted to administrators
 - Potentially perform unauthorized actions on the system
-
-### Potential Consequences
-
-- Unauthorized privilege escalation
-- Access to sensitive administrative functions
-- Data manipulation or exfiltration
-- System compromise
 
 ## Exploitation
 

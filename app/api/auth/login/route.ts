@@ -38,11 +38,15 @@ export async function POST(request: Request) {
       },
     });
 
-    if (!user || user.password !== hashedPassword) {
+    if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
       );
+    }
+
+    if (user.password !== hashedPassword) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
     const token = createWeakJWT({

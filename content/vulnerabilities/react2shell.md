@@ -36,14 +36,6 @@ This vulnerability allows attackers to:
 - Exfiltrate data
 - Perform any operation the Node.js process has permissions to execute
 
-### Potential Consequences
-
-- Remote code execution on the server
-- Unauthorized access to sensitive data
-- System compromise
-- Data exfiltration
-- Privilege escalation
-
 ## Exploitation
 
 ### How to Retrieve the Flag

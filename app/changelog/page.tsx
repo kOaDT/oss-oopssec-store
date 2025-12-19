@@ -6,7 +6,7 @@ interface ChangelogEntry {
   version: string;
   date: string;
   changes: {
-    type: "added" | "changed" | "fixed" | "security" | "removed";
+    type: "added" | "fixed" | "refactored";
     description: string;
   }[];
 }
@@ -19,6 +19,10 @@ const changelog: ChangelogEntry[] = [
       {
         type: "added",
         description: "Added a new flag: Client Side Price Manipulation",
+      },
+      {
+        type: "added",
+        description: "Added a new flag: Weak MD5 Hashing",
       },
     ],
   },
@@ -46,20 +50,16 @@ const changelog: ChangelogEntry[] = [
 
 const typeColors = {
   added: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  changed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   fixed:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  security: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  removed:
+  refactored:
     "bg-slate-100 text-slate-800 dark:bg-slate-800/50 dark:text-slate-400",
 };
 
 const typeLabels = {
   added: "Added",
-  changed: "Changed",
   fixed: "Fixed",
-  security: "Security",
-  removed: "Removed",
+  refactored: "Refactored",
 };
 
 export default function Changelog() {

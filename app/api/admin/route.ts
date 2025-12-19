@@ -36,6 +36,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const md5Flag = await prisma.flag.findUnique({
+      where: { slug: "weak-md5-hashing" },
+    });
+
+    if (md5Flag) {
+      return NextResponse.json({
+        message: "Welcome, administrator",
+        flag: md5Flag.flag,
+        user: {
+          id: dbUser.id,
+          email: dbUser.email,
+          role: dbUser.role,
+        },
+      });
+    }
+
     return NextResponse.json({
       message: "Welcome, administrator",
       user: {

@@ -32,6 +32,11 @@ const flags = [
     slug: "client-side-price-manipulation",
     markdownFile: "client-side-price-manipulation.md",
   },
+  {
+    flag: "OSS{w34k_md5_h4sh1ng}",
+    slug: "weak-md5-hashing",
+    markdownFile: "weak-md5-hashing.md",
+  },
 ];
 
 config();
@@ -77,7 +82,7 @@ async function main() {
   const alice = await prisma.user.upsert({
     where: { email: "alice@example.com" },
     update: {
-      password: hashMD5("duck"),
+      password: hashMD5("iloveduck"),
     },
     create: {
       email: "alice@example.com",
@@ -99,13 +104,13 @@ async function main() {
   });
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@example.com" },
+    where: { email: "admin@oss.com" },
     update: {
       password: hashMD5("admin"),
     },
     create: {
       email: "admin@oss.com",
-      password: hashMD5("secure-password"),
+      password: hashMD5("admin"),
       role: "ADMIN",
     },
   });
