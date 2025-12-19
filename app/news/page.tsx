@@ -103,7 +103,7 @@ export default function News() {
                   <thead>
                     <tr className="bg-slate-200 dark:bg-slate-700">
                       <th className="border border-slate-300 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-100">
-                        Password Hash (MD5)
+                        Password Hash
                       </th>
                     </tr>
                   </thead>
