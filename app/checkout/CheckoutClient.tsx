@@ -37,17 +37,22 @@ const getStoredUser = () => {
   return null;
 };
 
-const DELIVERY_ADDRESS = {
-  name: "John Doe",
-  street: "Al-Buhtori St. 58",
-  city: "Amman",
-  state: "Amman Governorate",
-  zipCode: "11118",
-  country: "Jordan",
-};
+interface UserAddress {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+interface UserData {
+  email: string;
+  address: UserAddress | null;
+}
 
 export default function CheckoutClient() {
   const [cartData, setCartData] = useState<CartData | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
@@ -59,36 +64,56 @@ export default function CheckoutClient() {
       return;
     }
 
-    const fetchCart = async () => {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const token = localStorage.getItem("authToken");
+
+    const fetchData = async () => {
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-        const token = localStorage.getItem("authToken");
+        const [cartResponse, userResponse] = await Promise.all([
+          fetch(`${baseUrl}/api/cart`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`${baseUrl}/api/user`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-        const response = await fetch(`${baseUrl}/api/cart`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
+        if (!cartResponse.ok) {
+          if (cartResponse.status === 401) {
             router.push("/login");
             return;
           }
           throw new Error("Failed to fetch cart");
         }
 
-        const data = await response.json();
-        setCartData(data);
+        if (!userResponse.ok) {
+          if (userResponse.status === 401) {
+            router.push("/login");
+            return;
+          }
+          throw new Error("Failed to fetch user");
+        }
+
+        const cartData = await cartResponse.json();
+        const userData = await userResponse.json();
+
+        setCartData(cartData);
+        setUserData({
+          email: userData.email,
+          address: userData.address,
+        });
       } catch (error) {
-        console.error("Error fetching cart:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCart();
+    fetchData();
   }, [router]);
 
   const handlePayment = async () => {
@@ -205,15 +230,24 @@ export default function CheckoutClient() {
                 <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-slate-100">
                   Delivery Address
                 </h2>
-                <div className="space-y-2 text-slate-700 dark:text-slate-300">
-                  <p className="font-semibold">{DELIVERY_ADDRESS.name}</p>
-                  <p>{DELIVERY_ADDRESS.street}</p>
-                  <p>
-                    {DELIVERY_ADDRESS.city}, {DELIVERY_ADDRESS.state}{" "}
-                    {DELIVERY_ADDRESS.zipCode}
+                {userData?.address ? (
+                  <div className="space-y-2 text-slate-700 dark:text-slate-300">
+                    <p className="font-semibold">
+                      {userData.email.split("@")[0].charAt(0).toUpperCase() +
+                        userData.email.split("@")[0].slice(1)}
+                    </p>
+                    <p>{userData.address.street}</p>
+                    <p>
+                      {userData.address.city}, {userData.address.state}{" "}
+                      {userData.address.zipCode}
+                    </p>
+                    <p>{userData.address.country}</p>
+                  </div>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-400">
+                    No delivery address configured
                   </p>
-                  <p>{DELIVERY_ADDRESS.country}</p>
-                </div>
+                )}
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">

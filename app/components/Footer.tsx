@@ -182,12 +182,14 @@ export default function Footer() {
               >
                 Flags
               </Link>
-              <Link
-                href="/changelog"
+              <a
+                href={`${GITHUB_REPO}/commits`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
               >
                 Changelog
-              </Link>
+              </a>
               <Link
                 href="/terms"
                 className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"

@@ -37,6 +37,11 @@ const flags = [
     slug: "weak-md5-hashing",
     markdownFile: "weak-md5-hashing.md",
   },
+  {
+    flag: "OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}",
+    slug: "insecure-direct-object-reference",
+    markdownFile: "insecure-direct-object-reference.md",
+  },
 ];
 
 config();
@@ -79,15 +84,43 @@ const prisma = new PrismaClient({
 async function main() {
   console.log("Seeding database...");
 
+  const aliceAddress = await prisma.address.upsert({
+    where: { id: "addr-alice-001" },
+    update: {},
+    create: {
+      id: "addr-alice-001",
+      street: "Al-Buhtori St. 58",
+      city: "Amman",
+      state: "Amman Governorate",
+      zipCode: "11118",
+      country: "Jordan",
+    },
+  });
+
+  const bobAddress = await prisma.address.upsert({
+    where: { id: "addr-bob-001" },
+    update: {},
+    create: {
+      id: "addr-bob-001",
+      street: "Friedrichstraße 123",
+      city: "Berlin",
+      state: "Berlin",
+      zipCode: "10117",
+      country: "Germany",
+    },
+  });
+
   const alice = await prisma.user.upsert({
     where: { email: "alice@example.com" },
     update: {
       password: hashMD5("iloveduck"),
+      addressId: aliceAddress.id,
     },
     create: {
       email: "alice@example.com",
       password: hashMD5("iloveduck"),
       role: "CUSTOMER",
+      addressId: aliceAddress.id,
     },
   });
 
@@ -95,11 +128,13 @@ async function main() {
     where: { email: "bob@example.com" },
     update: {
       password: hashMD5("qwerty"),
+      addressId: bobAddress.id,
     },
     create: {
       email: "bob@example.com",
       password: hashMD5("qwerty"),
       role: "CUSTOMER",
+      addressId: bobAddress.id,
     },
   });
 
@@ -281,6 +316,46 @@ async function main() {
   }
 
   console.log(`Created ${flags.length} flags`);
+
+  const bobOrderIds = ["ORD-001", "ORD-002", "ORD-003"];
+
+  await prisma.order.deleteMany({
+    where: {
+      id: {
+        in: bobOrderIds,
+      },
+    },
+  });
+
+  const bobOrders = [
+    {
+      id: "ORD-001",
+      userId: bob.id,
+      addressId: bobAddress.id,
+      total: 25.47,
+      status: "DELIVERED" as const,
+    },
+    {
+      id: "ORD-002",
+      userId: bob.id,
+      addressId: bobAddress.id,
+      total: 18.98,
+      status: "SHIPPED" as const,
+    },
+    {
+      id: "ORD-003",
+      userId: bob.id,
+      addressId: bobAddress.id,
+      total: 42.97,
+      status: "PROCESSING" as const,
+    },
+  ];
+
+  await prisma.order.createMany({
+    data: bobOrders,
+  });
+
+  console.log(`Created ${bobOrders.length} orders for Bob`);
 
   console.log("Seeding completed!");
 }

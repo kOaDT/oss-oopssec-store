@@ -40,9 +40,40 @@ export async function POST(request: NextRequest) {
       0
     );
 
+    const allOrders = await prisma.order.findMany({
+      select: {
+        id: true,
+      },
+    });
+
+    const ordOrders = allOrders
+      .filter((order) => order.id.startsWith("ORD-"))
+      .map((order) => {
+        const number = parseInt(order.id.replace("ORD-", ""), 10);
+        return isNaN(number) ? 0 : number;
+      });
+
+    const maxOrderNumber = ordOrders.length > 0 ? Math.max(...ordOrders) : 0;
+    const nextOrderNumber = maxOrderNumber + 1;
+    const orderId = `ORD-${nextOrderNumber.toString().padStart(3, "0")}`;
+
+    const userWithAddress = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { address: true },
+    });
+
+    if (!userWithAddress?.addressId) {
+      return NextResponse.json(
+        { error: "User address not found" },
+        { status: 400 }
+      );
+    }
+
     const order = await prisma.order.create({
       data: {
+        id: orderId,
         userId: user.id,
+        addressId: userWithAddress.addressId,
         total: total,
         status: "PENDING",
       },

@@ -13,6 +13,8 @@ model User {
   email     String   @unique
   password  String
   role      UserRole @default(CUSTOMER)
+  addressId String?
+  address   Address? @relation(fields: [addressId], references: [id])
   carts     Cart[]
   orders    Order[]
 
@@ -51,13 +53,28 @@ model CartItem {
 }
 
 model Order {
-  id     String      @id @default(cuid())
-  userId String
-  user   User        @relation(fields: [userId], references: [id])
-  total  Float
-  status OrderStatus @default(PENDING)
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  addressId String
+  address   Address     @relation(fields: [addressId], references: [id])
+  total     Float
+  status    OrderStatus @default(PENDING)
 
   @@map("orders")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  street    String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  users     User[]
+  orders    Order[]
+
+  @@map("addresses")
 }
 
 model Flag {

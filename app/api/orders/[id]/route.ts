@@ -17,21 +17,57 @@ export async function GET(
 
     const order = await prisma.order.findUnique({
       where: { id },
+      include: {
+        user: {
+          include: {
+            address: true,
+          },
+        },
+        address: true,
+      },
     });
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    if (order.userId !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const emailName = order.user.email.split("@")[0];
+    const customerName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
 
-    return NextResponse.json({
+    const response: {
+      id: string;
+      total: number;
+      status: string;
+      customerName: string;
+      customerEmail: string;
+      deliveryAddress: {
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        country: string;
+      };
+      flag?: string;
+    } = {
       id: order.id,
       total: order.total,
       status: order.status,
-    });
+      customerName,
+      customerEmail: order.user.email,
+      deliveryAddress: {
+        street: order.address.street,
+        city: order.address.city,
+        state: order.address.state,
+        zipCode: order.address.zipCode,
+        country: order.address.country,
+      },
+    };
+
+    if (order.userId !== user.id) {
+      response.flag = "OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}";
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching order:", error);
     return NextResponse.json(

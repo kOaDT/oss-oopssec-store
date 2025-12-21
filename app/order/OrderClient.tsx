@@ -3,11 +3,24 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import CopyButton from "../login/CopyButton";
+
+interface DeliveryAddress {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
 
 interface Order {
   id: string;
   total: number;
   status: string;
+  customerName: string;
+  customerEmail: string;
+  deliveryAddress: DeliveryAddress;
+  flag?: string;
 }
 
 const getStoredUser = () => {
@@ -148,6 +161,22 @@ export default function OrderClient() {
             </p>
           </div>
 
+          {order.flag && (
+            <div className="mb-8 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
+              <div className="text-center">
+                <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Flag
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="font-mono text-2xl font-bold text-primary-700 dark:text-primary-300">
+                    {order.flag}
+                  </p>
+                  <CopyButton text={order.flag} label="flag" />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mb-8 space-y-6 rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-900/50">
             <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
               <span className="font-medium text-slate-700 dark:text-slate-300">
@@ -156,6 +185,35 @@ export default function OrderClient() {
               <span className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {order.id}
               </span>
+            </div>
+            <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+              <span className="font-medium text-slate-700 dark:text-slate-300">
+                Customer Name
+              </span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                {order.customerName}
+              </span>
+            </div>
+            <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+              <span className="font-medium text-slate-700 dark:text-slate-300">
+                Customer Email
+              </span>
+              <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                {order.customerEmail}
+              </span>
+            </div>
+            <div className="border-b border-slate-200 pb-4 dark:border-slate-700">
+              <span className="mb-2 block font-medium text-slate-700 dark:text-slate-300">
+                Delivery Address
+              </span>
+              <div className="text-sm text-slate-900 dark:text-slate-100">
+                <p className="font-semibold">{order.deliveryAddress.street}</p>
+                <p>
+                  {order.deliveryAddress.city}, {order.deliveryAddress.state}{" "}
+                  {order.deliveryAddress.zipCode}
+                </p>
+                <p>{order.deliveryAddress.country}</p>
+              </div>
             </div>
             <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
               <span className="font-medium text-slate-700 dark:text-slate-300">
