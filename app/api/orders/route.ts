@@ -2,6 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth";
 
+export async function GET(request: NextRequest) {
+  try {
+    const user = await getAuthenticatedUser(request);
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const orders = await prisma.order.findMany({
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+        address: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    return NextResponse.json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch orders" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(request);

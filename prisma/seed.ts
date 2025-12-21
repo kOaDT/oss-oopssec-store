@@ -47,6 +47,11 @@ const flags = [
     slug: "cross-site-scripting-xss",
     markdownFile: "cross-site-scripting-xss.md",
   },
+  {
+    flag: "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}",
+    slug: "cross-site-request-forgery",
+    markdownFile: "cross-site-request-forgery.md",
+  },
 ];
 
 config();

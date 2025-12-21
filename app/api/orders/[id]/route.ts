@@ -76,3 +76,125 @@ export async function GET(
     );
   }
 }
+
+const updateOrderStatus = async (
+  request: NextRequest,
+  orderId: string
+): Promise<NextResponse> => {
+  try {
+    const user = await getAuthenticatedUser(request);
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    let status: string;
+
+    const contentType = request.headers.get("content-type");
+    if (contentType?.includes("application/x-www-form-urlencoded")) {
+      const formData = await request.formData();
+      status = formData.get("status") as string;
+    } else {
+      const body = await request.json();
+      status = body.status;
+    }
+
+    const validStatuses: Array<
+      "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"
+    > = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
+    if (
+      !status ||
+      !validStatuses.includes(
+        status as
+          | "PENDING"
+          | "PROCESSING"
+          | "SHIPPED"
+          | "DELIVERED"
+          | "CANCELLED"
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid status. Must be one of: " + validStatuses.join(", "),
+        },
+        { status: 400 }
+      );
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: status as
+          | "PENDING"
+          | "PROCESSING"
+          | "SHIPPED"
+          | "DELIVERED"
+          | "CANCELLED",
+      },
+    });
+
+    const referer = request.headers.get("referer");
+
+    const isFromAdminDashboard = referer?.includes("/admin") ?? false;
+
+    const response: {
+      success: boolean;
+      order: {
+        id: string;
+        status: string;
+      };
+      flag?: string;
+    } = {
+      success: true,
+      order: {
+        id: updatedOrder.id,
+        status: updatedOrder.status,
+      },
+    };
+
+    if (!isFromAdminDashboard) {
+      const csrfFlag = await prisma.flag.findUnique({
+        where: { slug: "cross-site-request-forgery" },
+      });
+      if (csrfFlag) {
+        response.flag = csrfFlag.flag;
+      }
+    }
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("Error updating order:", error);
+    return NextResponse.json(
+      { error: "Failed to update order" },
+      { status: 500 }
+    );
+  }
+};
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  return updateOrderStatus(request, id);
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  return updateOrderStatus(request, id);
+}

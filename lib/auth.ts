@@ -31,7 +31,9 @@ export async function getAuthenticatedUser(
   request: NextRequest
 ): Promise<JWTPayload | null> {
   const authHeader = request.headers.get("authorization");
-  const token = authHeader?.replace("Bearer ", "") || null;
+  const tokenFromHeader = authHeader?.replace("Bearer ", "") || null;
+  const tokenFromCookie = request.cookies.get("authToken")?.value || null;
+  const token = tokenFromHeader || tokenFromCookie;
 
   if (!token) {
     return null;

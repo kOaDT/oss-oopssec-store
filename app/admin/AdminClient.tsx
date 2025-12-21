@@ -15,6 +15,23 @@ interface AdminResponse {
   };
 }
 
+interface Order {
+  id: string;
+  userId: string;
+  total: number;
+  status: string;
+  user: {
+    email: string;
+  };
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+}
+
 const getStoredUser = () => {
   if (typeof window === "undefined") return null;
   const storedUser = localStorage.getItem("user");
@@ -31,9 +48,12 @@ const getStoredUser = () => {
 };
 
 export default function AdminClient() {
-  const [data, setData] = useState<AdminResponse | null>(null);
+  const [adminData, setAdminData] = useState<AdminResponse | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,24 +63,31 @@ export default function AdminClient() {
       return;
     }
 
-    const fetchAdmin = async () => {
+    const fetchData = async () => {
       try {
         const baseUrl =
           process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
         const token = localStorage.getItem("authToken");
 
-        const response = await fetch(`${baseUrl}/api/admin`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const [adminResponse, ordersResponse] = await Promise.all([
+          fetch(`${baseUrl}/api/admin`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`${baseUrl}/api/orders`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-        if (!response.ok) {
-          if (response.status === 401) {
+        if (!adminResponse.ok) {
+          if (adminResponse.status === 401) {
             router.push("/login");
             return;
           }
-          if (response.status === 403) {
+          if (adminResponse.status === 403) {
             setError("Forbidden: You do not have administrator privileges.");
             setIsLoading(false);
             return;
@@ -68,23 +95,98 @@ export default function AdminClient() {
           throw new Error("Failed to fetch admin data");
         }
 
-        const responseData = await response.json();
-        setData(responseData);
+        if (!ordersResponse.ok) {
+          if (ordersResponse.status === 401) {
+            router.push("/login");
+            return;
+          }
+          if (ordersResponse.status === 403) {
+            setError("Forbidden: You do not have administrator privileges.");
+            setIsLoading(false);
+            return;
+          }
+          throw new Error("Failed to fetch orders");
+        }
+
+        const adminData = await adminResponse.json();
+        const ordersData = await ordersResponse.json();
+
+        setAdminData(adminData);
+        setOrders(ordersData);
       } catch (error) {
-        console.error("Error fetching admin data:", error);
-        setError("An error occurred while fetching admin data.");
+        console.error("Error fetching data:", error);
+        setError("An error occurred while fetching data.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAdmin();
+    fetchData();
   }, [router]);
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    setUpdatingOrderId(orderId);
+    setUpdateSuccess(null);
+    setError(null);
+
+    try {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const token = localStorage.getItem("authToken");
+
+      const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update order status");
+      }
+
+      const result = await response.json();
+
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      if (result.flag) {
+        setUpdateSuccess(result.flag);
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      setError("Failed to update order status. Please try again.");
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+      case "PROCESSING":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      case "SHIPPED":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+      case "DELIVERED":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+      default:
+        return "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300";
+    }
+  };
 
   if (isLoading) {
     return (
       <section className="container mx-auto px-4 py-16">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary-600 border-r-transparent"></div>
@@ -98,7 +200,7 @@ export default function AdminClient() {
     );
   }
 
-  if (error) {
+  if (error && !adminData) {
     return (
       <section className="container mx-auto px-4 py-16">
         <div className="mx-auto max-w-4xl">
@@ -134,68 +236,11 @@ export default function AdminClient() {
     );
   }
 
-  if (data?.flag) {
-    return (
-      <section className="container mx-auto px-4 py-16">
-        <div className="mx-auto max-w-4xl">
-          <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800 md:p-12">
-            <div className="mb-8 text-center">
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                <svg
-                  className="h-8 w-8 text-green-600 dark:text-green-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h2 className="mb-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
-                Flag Retrieved!
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400">
-                {data.message}
-              </p>
-            </div>
-
-            <div className="mb-8 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
-              <div className="text-center">
-                <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Flag
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="font-mono text-2xl font-bold text-primary-700 dark:text-primary-300">
-                    {data.flag}
-                  </p>
-                  <CopyButton text={data.flag} label="flag" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <Link
-                href="/"
-                className="cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
-              >
-                Go to Home
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className="container mx-auto px-4 py-16">
-      <div className="mx-auto max-w-4xl">
-        <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800 md:p-12">
-          <div className="mb-8 text-center">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800 md:p-12">
+          <div className="mb-6 text-center">
             <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
               <svg
                 className="h-8 w-8 text-primary-600 dark:text-primary-400"
@@ -212,44 +257,148 @@ export default function AdminClient() {
               </svg>
             </div>
             <h2 className="mb-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
-              {data?.message || "Welcome"}
+              Admin Dashboard
             </h2>
-            {data?.user && (
+            {adminData?.user && (
               <p className="text-slate-600 dark:text-slate-400">
-                Logged in as {data.user.email}
+                Logged in as {adminData.user.email}
               </p>
             )}
           </div>
 
-          {data?.user && (
-            <div className="mb-8 space-y-6 rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-900/50">
-              <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  User ID
-                </span>
-                <span className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  {data.user.id}
-                </span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  Email
-                </span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {data.user.email}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  Role
-                </span>
-                <span className="rounded-full bg-primary-100 px-3 py-1 text-sm font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
-                  {data.user.role}
-                </span>
+          {adminData?.flag && (
+            <div className="mb-6 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
+              <div className="text-center">
+                <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Flag Retrieved!
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="font-mono text-lg font-bold text-primary-700 dark:text-primary-300">
+                    {adminData.flag}
+                  </p>
+                  <CopyButton text={adminData.flag} label="flag" />
+                </div>
               </div>
             </div>
           )}
 
+          {updateSuccess && (
+            <div className="mb-6 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
+              <div className="text-center">
+                {updateSuccess.startsWith("OSS{") ? (
+                  <>
+                    <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Flag Retrieved!
+                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      <p className="font-mono text-lg font-bold text-primary-700 dark:text-primary-300">
+                        {updateSuccess}
+                      </p>
+                      <CopyButton text={updateSuccess} label="flag" />
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-slate-700 dark:text-slate-300">
+                    {updateSuccess}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-6 rounded-xl border-2 border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+              <p className="text-center text-sm text-red-700 dark:text-red-300">
+                {error}
+              </p>
+            </div>
+          )}
+
+          <div className="mb-8">
+            <h3 className="mb-4 text-xl font-bold text-slate-900 dark:text-slate-100">
+              Order Management
+            </h3>
+            {orders.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-900/50">
+                <p className="text-slate-600 dark:text-slate-400">
+                  No orders found.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                <table className="w-full">
+                  <thead className="bg-slate-50 dark:bg-slate-900/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Order ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Customer
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Total
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-800">
+                    {orders.map((order) => (
+                      <tr key={order.id}>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <span className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
+                            {order.id}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-slate-900 dark:text-slate-100">
+                            {order.user.email}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            {order.address.city}, {order.address.country}
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                            ${order.total.toFixed(2)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(
+                              order.status
+                            )}`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={order.status}
+                            onChange={(e) =>
+                              handleStatusChange(order.id, e.target.value)
+                            }
+                            disabled={updatingOrderId === order.id}
+                            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                          >
+                            <option value="PENDING">PENDING</option>
+                            <option value="PROCESSING">PROCESSING</option>
+                            <option value="SHIPPED">SHIPPED</option>
+                            <option value="DELIVERED">DELIVERED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
           <div className="flex justify-center">
             <Link
               href="/"
@@ -257,6 +406,19 @@ export default function AdminClient() {
             >
               Go to Home
             </Link>
+          </div>
+          <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+            <p>
+              Looking for vulnerabilities? Check the page source for hidden
+              links.
+            </p>
+            <a
+              href="/exploits/csrf-attack.html"
+              className="mt-2 inline-block text-primary-600 underline hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+              style={{ display: "none" }}
+            >
+              Special Offer
+            </a>
           </div>
         </div>
       </div>
