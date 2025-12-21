@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import CopyButton from "../../login/CopyButton";
 
 interface Product {
   id: string;
@@ -11,6 +12,13 @@ interface Product {
   price: number;
   description: string | null;
   imageUrl: string;
+}
+
+interface Review {
+  id: string;
+  content: string;
+  author: string;
+  createdAt: string;
 }
 
 interface ProductDetailClientProps {
@@ -38,12 +46,130 @@ export default function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewContent, setReviewContent] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+  const [flag, setFlag] = useState<string | null>(null);
+  const reviewRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
   const maxQuantity = 99;
 
+  const fetchReviews = useCallback(async () => {
+    try {
+      setIsLoadingReviews(true);
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const response = await fetch(
+        `${baseUrl}/api/products/${product.id}/reviews`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [product.id]);
+
   useEffect(() => {
     setUser(getStoredUser());
-  }, []);
+    fetchReviews();
+  }, [fetchReviews]);
+
+  useEffect(() => {
+    reviews.forEach((review) => {
+      const reviewElement = reviewRefs.current[review.id];
+      if (reviewElement && reviewElement.innerHTML !== review.content) {
+        reviewElement.innerHTML = review.content;
+        const scripts = reviewElement.querySelectorAll("script");
+        scripts.forEach((oldScript) => {
+          const newScript = document.createElement("script");
+          Array.from(oldScript.attributes).forEach((attr) => {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          newScript.textContent = oldScript.textContent;
+          oldScript.parentNode?.replaceChild(newScript, oldScript);
+        });
+      }
+    });
+  }, [reviews]);
+
+  useEffect(() => {
+    const hasMaliciousScript = reviews.some((review) =>
+      review.content.toLowerCase().includes("<script")
+    );
+
+    if (!hasMaliciousScript) {
+      setFlag(null);
+      return;
+    }
+
+    const fetchFlag = async () => {
+      try {
+        const baseUrl =
+          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const response = await fetch(
+          `${baseUrl}/api/flags/cross-site-scripting-xss`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.flag) {
+            setFlag(data.flag);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching flag:", error);
+      }
+    };
+
+    fetchFlag();
+  }, [reviews]);
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!reviewContent.trim()) {
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    try {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const token = localStorage.getItem("authToken");
+
+      const response = await fetch(
+        `${baseUrl}/api/products/${product.id}/reviews`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({
+            content: reviewContent,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to submit review");
+      }
+
+      setReviewContent("");
+      await fetchReviews();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Failed to submit review. Please try again.");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   const handleDecrement = () => {
     if (quantity > 1) {
@@ -299,6 +425,118 @@ export default function ProductDetailClient({
             </div>
           </div>
         </aside>
+      </div>
+
+      <div className="mt-12 border-t border-slate-200 pt-12 dark:border-slate-700">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Reviews
+          </h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
+            Share your thoughts about this product
+          </p>
+        </div>
+
+        {flag && (
+          <div className="mb-8 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
+            <div className="text-center">
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <svg
+                  className="h-8 w-8 text-green-600 dark:text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                Flag Retrieved!
+              </h3>
+              <p className="mb-4 text-slate-600 dark:text-slate-400">
+                You successfully exploited the XSS vulnerability!
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="font-mono text-2xl font-bold text-primary-700 dark:text-primary-300">
+                  {flag}
+                </p>
+                <CopyButton text={flag} label="flag" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
+          <form onSubmit={handleSubmitReview} className="space-y-4">
+            <div>
+              <label
+                htmlFor="review"
+                className="mb-2 block text-sm font-semibold text-slate-900 dark:text-slate-100"
+              >
+                Write a review
+                <span className="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">
+                  ({user?.email || "anonymous"})
+                </span>
+              </label>
+              <textarea
+                id="review"
+                value={reviewContent}
+                onChange={(e) => setReviewContent(e.target.value)}
+                rows={4}
+                className="w-full rounded-xl border-2 border-slate-200 p-4 text-slate-900 outline-none transition-colors focus:border-primary-500 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-primary-400"
+                placeholder="Share your experience with this product..."
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isSubmittingReview || !reviewContent.trim()}
+              className="cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600"
+            >
+              {isSubmittingReview ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+        </div>
+
+        <div className="space-y-6">
+          {isLoadingReviews ? (
+            <div className="text-center text-slate-500 dark:text-slate-400">
+              Loading reviews...
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="rounded-2xl bg-white p-8 text-center shadow-sm dark:bg-slate-800">
+              <p className="text-slate-600 dark:text-slate-400">
+                No reviews yet. Be the first to review this product!
+              </p>
+            </div>
+          ) : (
+            reviews.map((review) => (
+              <div
+                key={review.id}
+                className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="font-semibold text-slate-900 dark:text-slate-100">
+                    {review.author}
+                  </div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div
+                  ref={(el) => {
+                    reviewRefs.current[review.id] = el;
+                  }}
+                  className="text-slate-700 dark:text-slate-300"
+                />
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </section>
   );

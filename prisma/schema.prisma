@@ -28,6 +28,7 @@ model Product {
   description String?
   imageUrl   String
   cartItems  CartItem[]
+  reviews    Review[]
 
   @@map("products")
 }
@@ -85,6 +86,17 @@ model Flag {
   markdownFile String
 
   @@map("flags")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
 }
 
 enum UserRole {

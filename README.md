@@ -10,6 +10,8 @@ in production-like applications.
 
 This application must never be deployed in a production environment.
 
+![OSS – OopsSec Store](screen.png)
+
 ---
 
 ## Goals

@@ -42,6 +42,11 @@ const flags = [
     slug: "insecure-direct-object-reference",
     markdownFile: "insecure-direct-object-reference.md",
   },
+  {
+    flag: "OSS{cr0ss_s1t3_scr1pt1ng_xss}",
+    slug: "cross-site-scripting-xss",
+    markdownFile: "cross-site-scripting-xss.md",
+  },
 ];
 
 config();
@@ -305,6 +310,53 @@ async function main() {
   }
 
   console.log(`Created ${products.length} products`);
+
+  const allProducts = await prisma.product.findMany();
+  const existingReviews = await prisma.review.findMany();
+
+  if (existingReviews.length === 0 && allProducts.length > 0) {
+    const firstProduct = allProducts[0];
+    const secondProduct = allProducts[1];
+    const thirdProduct = allProducts[2];
+
+    await prisma.review.createMany({
+      data: [
+        {
+          productId: firstProduct.id,
+          content: "Great product! Highly recommend it.",
+          author: alice.email,
+        },
+        {
+          productId: firstProduct.id,
+          content: "Excellent quality and fast delivery.",
+          author: bob.email,
+        },
+        {
+          productId: secondProduct.id,
+          content: "Amazing value for money. Will buy again!",
+          author: alice.email,
+        },
+        {
+          productId: thirdProduct.id,
+          content: "Perfect for my needs. Very satisfied!",
+          author: bob.email,
+        },
+        {
+          productId: thirdProduct.id,
+          content: "Good product, but could be better.",
+          author: "anonymous",
+        },
+        {
+          productId: thirdProduct.id,
+          content: "This product sucks!",
+          author: "anonymous",
+        },
+      ],
+    });
+    console.log("Created sample reviews");
+  } else {
+    console.log("Reviews already exist, skipping review creation");
+  }
 
   const existingFlags = await prisma.flag.findMany();
   if (existingFlags.length === 0) {
