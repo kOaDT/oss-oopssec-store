@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OSS – OopsSec Store is an open-source, deliberately vulnerable e-commerce application to practice real-world web security vulnerabilities.">
+    <title>OSS – OopsSec Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Spectral:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">OSS – OopsSec Store</h1>
+                <nav class="nav">
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#goals" class="nav-link">Goals</a>
+                    <a href="#getting-started" class="nav-link">Getting Started</a>
+                    <a href="#contribute" class="nav-link">Contribute</a>
+                    <a href="https://github.com/kOaDT/oss-oopssec-store" class="nav-link nav-link--github" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="hero-title">Practice Real-World Web Security Vulnerabilities</h2>
+                    <p class="hero-subtitle">An open-source, deliberately vulnerable e-commerce application designed for developers, security engineers, and students.</p>
+                    <div class="hero-actions">
+                        <a href="https://github.com/kOaDT/oss-oopssec-store" class="btn btn--primary" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+                        <a href="#getting-started" class="btn btn--secondary">Get Started</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="screen.png" alt="OSS – OopsSec Store application screenshot" loading="lazy">
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="container">
+                <div class="section-content">
+                    <div class="section-header"></div>
+                    <h2 class="section-title">About OSS – OopsSec Store</h2>
+                    <p class="section-text">
+                        OSS – OopsSec Store is an open-source, deliberately vulnerable e-commerce
+                        application to practice real-world web security vulnerabilities in a modern web stack.
+                    </p>
+                    <p class="section-text">
+                        The project is designed for developers, security engineers, and students who
+                        want to understand how common and advanced web vulnerabilities actually behave
+                        in production-like applications.
+                    </p>
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> This application must never be deployed in a production environment.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="goals" class="section section--alt">
+            <div class="container">
+                <div class="section-content">
+                    <div class="section-header"></div>
+                    <h2 class="section-title">Goals</h2>
+                    <ul class="goals-list">
+                        <li class="goal-item">
+                            <div class="goal-icon">🎯</div>
+                            <div class="goal-content">
+                                <h3 class="goal-title">Realistic Vulnerabilities</h3>
+                                <p class="goal-text">Provide a realistic e-commerce application with intentional security flaws</p>
+                            </div>
+                        </li>
+                        <li class="goal-item">
+                            <div class="goal-icon">🔐</div>
+                            <div class="goal-content">
+                                <h3 class="goal-title">Modern Attack Scenarios</h3>
+                                <p class="goal-text">Simulate modern attack scenarios targeting SPA and API-based architectures</p>
+                            </div>
+                        </li>
+                        <li class="goal-item">
+                            <div class="goal-icon">📚</div>
+                            <div class="goal-content">
+                                <h3 class="goal-title">Comprehensive Documentation</h3>
+                                <p class="goal-text">Document each vulnerability with detailed explanations</p>
+                            </div>
+                        </li>
+                        <li class="goal-item">
+                            <div class="goal-icon">🎓</div>
+                            <div class="goal-content">
+                                <h3 class="goal-title">Learning Platform</h3>
+                                <p class="goal-text">Serve as a hands-on learning platform for web security and AppSec</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="getting-started" class="section">
+            <div class="container">
+                <div class="section-content">
+                    <div class="section-header"></div>
+                    <h2 class="section-title">Getting Started</h2>
+                    <div class="setup-box">
+                        <h3 class="setup-title">Quick Setup</h3>
+                        <p class="setup-text">
+                            Clone the repository and run the setup script to install dependencies, initialize the database, and seed it with initial data:
+                        </p>
+                        <div class="code-block">
+                            <pre><code>git clone https://github.com/kOaDT/oss-oopssec-store.git
+cd oss-oopssec-store
+npm run setup</code></pre>
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contribute" class="section section--alt">
+            <div class="container">
+                <div class="section-content">
+                    <div class="section-header"></div>
+                    <h2 class="section-title">Open Source</h2>
+                    <p class="section-text">
+                        OSS – OopsSec Store is released as open source under the MIT License.
+                    </p>
+                    <p class="section-text">
+                        We are looking for contributors to help improve the project. Here are some ways you can contribute:
+                    </p>
+                    <div class="contribute-grid">
+                        <div class="contribute-card">
+                            <h3 class="contribute-card-title">Add New Flags</h3>
+                            <p class="contribute-card-text">
+                                Add flags in the <code>seed.ts</code> file and create markdown documentation in <code>content/vulnerabilities</code> following the format <code>vulnerability-name.md</code>. Flags must follow the format <code>OSS{...}</code>.
+                            </p>
+                        </div>
+                        <div class="contribute-card">
+                            <h3 class="contribute-card-title">Develop the E-commerce Site</h3>
+                            <p class="contribute-card-text">
+                                Enhance the purchase flow, evolve the basic database model, create a customer back office to display orders, create an admin back office to manage the e-commerce and order statuses. These interfaces and features can accommodate new vulnerabilities.
+                            </p>
+                        </div>
+                        <div class="contribute-card">
+                            <h3 class="contribute-card-title">Fix Non-Intentional Bugs</h3>
+                            <p class="contribute-card-text">
+                                Correct UI/UX bugs or functionality issues that are not intentional vulnerabilities.
+                            </p>
+                        </div>
+                        <div class="contribute-card">
+                            <h3 class="contribute-card-title">Improve Documentation</h3>
+                            <p class="contribute-card-text">
+                                Fix spelling mistakes or improve vulnerability documentation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--legal">
+            <div class="container">
+                <div class="section-content">
+                    <div class="section-header"></div>
+                    <h2 class="section-title">Legal Notice</h2>
+                    <p class="section-text">
+                        This project is provided for educational purposes only.
+                    </p>
+                    <p class="section-text">
+                        It contains intentional security vulnerabilities and insecure configurations.
+                        The authors assume no responsibility for misuse or deployment in production
+                        environments.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-text">
+                    OSS – OopsSec Store is open source under the <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE" class="link" target="_blank" rel="noopener noreferrer">MIT License</a>.
+                </p>
+                <p class="footer-text">
+                    <a href="https://github.com/kOaDT/oss-oopssec-store" class="link" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
