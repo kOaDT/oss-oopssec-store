@@ -99,6 +99,37 @@ body {
   text-decoration: none;
 }
 
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 50;
+}
+
+.menu-toggle-icon {
+  width: 24px;
+  height: 2px;
+  background: hsl(var(--foreground));
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.menu-toggle--active .menu-toggle-icon:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle--active .menu-toggle-icon:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle--active .menu-toggle-icon:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -313,11 +344,6 @@ main {
 
 .goal-item:hover {
   border-color: hsl(var(--primary));
-}
-
-.goal-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
 }
 
 .goal-title {
@@ -539,7 +565,49 @@ code {
     font-size: 1.5rem;
   }
 
+  .menu-toggle {
+    display: flex;
+  }
+
   .nav {
-    gap: 0.5rem;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 300px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 5rem 1.5rem 2rem;
+    gap: 0;
+    transition: right 0.3s ease;
+    z-index: 45;
+    overflow-y: auto;
+    border-left: 1px solid hsl(var(--border));
+  }
+
+  .nav--open {
+    right: 0;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: 1rem;
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+
+  .nav-link--github {
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .header-content {
+    position: relative;
   }
 }

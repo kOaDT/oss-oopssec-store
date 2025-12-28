@@ -73,6 +73,11 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">OSS – OopsSec Store</div>
+                <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="menu-toggle-icon"></span>
+                    <span class="menu-toggle-icon"></span>
+                    <span class="menu-toggle-icon"></span>
+                </button>
                 <nav class="nav" aria-label="Main navigation">
                     <a href="#about" class="nav-link">About</a>
                     <a href="#goals" class="nav-link">Goals</a>
@@ -138,28 +143,24 @@
                     <h2 class="section-title">Security Training Features</h2>
                     <ul class="goals-list">
                         <li class="goal-item">
-                            <div class="goal-icon">🎯</div>
                             <div class="goal-content">
                                 <h3 class="goal-title">Realistic Vulnerabilities</h3>
                                 <p class="goal-text">Experience authentic security flaws found in real-world e-commerce applications, including OWASP Top 10 vulnerabilities like XSS, SQL injection, CSRF, IDOR, weak authentication, and insecure deserialization</p>
                             </div>
                         </li>
                         <li class="goal-item">
-                            <div class="goal-icon">🔐</div>
                             <div class="goal-content">
                                 <h3 class="goal-title">Modern Attack Scenarios</h3>
                                 <p class="goal-text">Practice penetration testing techniques on modern Single Page Application (SPA) and REST API architectures, simulating real-world attack scenarios used by security professionals and ethical hackers</p>
                             </div>
                         </li>
                         <li class="goal-item">
-                            <div class="goal-icon">📚</div>
                             <div class="goal-content">
                                 <h3 class="goal-title">Comprehensive Documentation</h3>
                                 <p class="goal-text">Each vulnerability includes detailed documentation covering attack vectors, exploitation methods, impact assessment, and secure coding practices for remediation</p>
                             </div>
                         </li>
                         <li class="goal-item">
-                            <div class="goal-icon">🎓</div>
                             <div class="goal-content">
                                 <h3 class="goal-title">Hands-On Learning Platform</h3>
                                 <p class="goal-text">Perfect for security training, CTF competitions, security labs, and application security education. Learn by doing in a safe, controlled environment designed for ethical hacking practice</p>
@@ -262,6 +263,27 @@ npm run setup</code></pre>
             </div>
         </div>
     </footer>
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const nav = document.querySelector('.nav');
+        
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
+            nav.classList.toggle('nav--open');
+            menuToggle.classList.toggle('menu-toggle--active');
+        });
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                nav.classList.remove('nav--open');
+                menuToggle.classList.remove('menu-toggle--active');
+            });
+        });
+    </script>
 </body>
 </html>
 
