@@ -57,6 +57,11 @@ const flags = [
     slug: "mass-assignment",
     markdownFile: "mass-assignment.md",
   },
+  {
+    flag: "OSS{p4th_tr4v3rs4l_4tt4ck}",
+    slug: "path-traversal",
+    markdownFile: "path-traversal.md",
+  },
 ];
 
 config();
