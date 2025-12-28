@@ -44,6 +44,7 @@ export default function OrderClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("id");
+  const flagFromUrl = searchParams.get("flag");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -82,6 +83,9 @@ export default function OrderClient() {
         }
 
         const data = await response.json();
+        if (flagFromUrl) {
+          data.flag = decodeURIComponent(flagFromUrl);
+        }
         setOrder(data);
       } catch (error) {
         console.error("Error fetching order:", error);
@@ -91,7 +95,7 @@ export default function OrderClient() {
     };
 
     fetchOrder();
-  }, [orderId, router]);
+  }, [orderId, flagFromUrl, router]);
 
   if (isLoading) {
     return (

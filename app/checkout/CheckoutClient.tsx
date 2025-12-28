@@ -150,7 +150,10 @@ export default function CheckoutClient() {
       }
 
       const order = await response.json();
-      router.push(`/order?id=${order.id}`);
+      const url = order.flag
+        ? `/order?id=${order.id}&flag=${encodeURIComponent(order.flag)}`
+        : `/order?id=${order.id}`;
+      router.push(url);
     } catch (error) {
       console.error("Error processing payment:", error);
       alert("Failed to process payment. Please try again.");
