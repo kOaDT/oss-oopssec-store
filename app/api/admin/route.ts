@@ -36,6 +36,30 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const expectedEmails = [
+      "alice@example.com",
+      "bob@example.com",
+      "admin@oss.com",
+    ];
+
+    if (dbUser.role === "ADMIN" && !expectedEmails.includes(dbUser.email)) {
+      const massAssignmentFlag = await prisma.flag.findUnique({
+        where: { slug: "mass-assignment" },
+      });
+
+      if (massAssignmentFlag) {
+        return NextResponse.json({
+          message: "Welcome, administrator",
+          flag: massAssignmentFlag.flag,
+          user: {
+            id: dbUser.id,
+            email: dbUser.email,
+            role: dbUser.role,
+          },
+        });
+      }
+    }
+
     const md5Flag = await prisma.flag.findUnique({
       where: { slug: "weak-md5-hashing" },
     });

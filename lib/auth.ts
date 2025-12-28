@@ -1,10 +1,23 @@
 import { NextRequest } from "next/server";
+import crypto from "crypto";
 
 interface JWTPayload {
   id: string;
   email: string;
   role: string;
   exp: number;
+}
+
+export function hashMD5(text: string): string {
+  return crypto.createHash("md5").update(text).digest("hex");
+}
+
+export function createWeakJWT(payload: object): string {
+  const header = Buffer.from(
+    JSON.stringify({ alg: "none", typ: "JWT" })
+  ).toString("base64url");
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return `${header}.${body}.`;
 }
 
 export function decodeWeakJWT(token: string): JWTPayload | null {

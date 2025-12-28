@@ -52,6 +52,11 @@ const flags = [
     slug: "cross-site-request-forgery",
     markdownFile: "cross-site-request-forgery.md",
   },
+  {
+    flag: "OSS{m4ss_4ss1gnm3nt_vuln3r4b1l1ty}",
+    slug: "mass-assignment",
+    markdownFile: "mass-assignment.md",
+  },
 ];
 
 config();
@@ -117,6 +122,19 @@ async function main() {
       state: "Berlin",
       zipCode: "10117",
       country: "Germany",
+    },
+  });
+
+  await prisma.address.upsert({
+    where: { id: "addr-default-001" },
+    update: {},
+    create: {
+      id: "addr-default-001",
+      street: "123 Main Street",
+      city: "New York",
+      state: "NY",
+      zipCode: "10001",
+      country: "USA",
     },
   });
 

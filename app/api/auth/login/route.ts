@@ -1,18 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
-
-const hashMD5 = (text: string): string => {
-  return crypto.createHash("md5").update(text).digest("hex");
-};
-
-const createWeakJWT = (payload: object): string => {
-  const header = Buffer.from(
-    JSON.stringify({ alg: "none", typ: "JWT" })
-  ).toString("base64url");
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  return `${header}.${body}.`;
-};
+import { hashMD5, createWeakJWT } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {

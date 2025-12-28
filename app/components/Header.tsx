@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AuthButton from "./AuthButton";
 import CartButton from "./CartButton";
+import SignUpLink from "./SignUpLink";
 
 export default function Header() {
   return (
@@ -36,6 +37,8 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <CartButton />
+
+          <SignUpLink />
 
           <AuthButton />
 
