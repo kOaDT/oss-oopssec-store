@@ -1,5 +1,9 @@
 # OSS – OopsSec Store
 
+[![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/releases)
+[![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
+
 OSS – OopsSec Store is an open-source, deliberately vulnerable e-commerce
 application to practice real-world web security
 vulnerabilities in a modern web stack.
