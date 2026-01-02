@@ -1,0 +1,38 @@
+{
+  "name": "create-oss-store",
+  "version": "1.4.0",
+  "type": "module",
+  "description": "Create a new OSS – OopsSec Store instance for web security CTF training",
+  "author": "kOaDT",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kOaDT/oss-oopssec-store"
+  },
+  "keywords": [
+    "ctf",
+    "security",
+    "vulnerable",
+    "web-security",
+    "owasp",
+    "penetration-testing",
+    "create",
+    "cli"
+  ],
+  "bin": {
+    "create-oss-store": "./bin/create-oss-store.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "degit": "^2.8.4",
+    "ora": "^8.1.1"
+  }
+}

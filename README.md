@@ -1,37 +1,51 @@
-# OSS – OopsSec Store
+# OSS – OopsSec Store | Vulnerable Web Application for Security Training
 
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/releases)
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
 
-OSS – OopsSec Store is an open-source, deliberately vulnerable e-commerce
-application to practice real-world web security
-vulnerabilities in a modern web stack.
+A self-hosted Capture The Flag platform for web security training.
 
-The project is designed for developers, security engineers, and students who
-want to understand how common and advanced web vulnerabilities actually behave
-in production-like applications.
-
-This application must never be deployed in a production environment.
+Run `npx create-oss-store` and start hunting for flags. Each vulnerability is documented and comes with a hidden flag to discover.
 
 ![OSS – OopsSec Store](screen.png)
 
 ---
 
-## Goals
+OSS – OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors.
 
-- Provide a realistic e-commerce application with intentional security flaws
-- Simulate modern attack scenarios targeting SPA and API-based architectures
-- Document each vulnerability
-- Serve as a hands-on learning platform for web security and AppSec
+Designed for penetration testers, security engineers, developers, and cybersecurity students, this project demonstrates how real-world vulnerabilities manifest in production-like single-page applications (SPA) with REST APIs.
+
+**Warning:** This application contains intentional security flaws and must never be deployed in a production environment.
 
 ---
 
-## Getting Started
+## Features
 
-### Quick Setup
+- Realistic e-commerce application with intentional security vulnerabilities (XSS, CSRF, IDOR, JWT attacks, path traversal, and more)
+- Modern tech stack: Next.js, React, Prisma
+- API security testing environment with documented attack vectors
+- Capture The Flag (CTF) challenges with hidden flags to discover
+- Comprehensive vulnerability documentation for learning and training
+- Suitable for security awareness training, penetration testing practice, and AppSec education
 
-Clone the repository and run the setup script to install dependencies, initialize the database, and seed it with initial data:
+---
+
+## Installation
+
+### Quick Start
+
+```bash
+npx create-oss-store my-ctf-lab
+cd my-ctf-lab
+npm run dev
+```
+
+Then open http://localhost:3000 in your browser.
+
+### Manual Setup
+
+Alternatively, clone the repository and run the setup script:
 
 ```bash
 git clone https://github.com/kOaDT/oss-oopssec-store.git
@@ -39,39 +53,29 @@ cd oss-oopssec-store
 npm run setup
 ```
 
-The setup script will:
-
-- Create a `.env` file with the database configuration
-- Install all dependencies
-- Generate Prisma Client
-- Create and initialize the SQLite database
-- Seed the database with sample data
-- Run the application on port 3000
-- Run Prisma Studio on port 5555
+The setup script will create the `.env` file, install dependencies, initialize the SQLite database, seed it with CTF flags, and start the application on port 3000.
 
 ---
 
-## Legal Notice
+## Disclaimer
 
-This project is provided for educational purposes only.
+This project is intended for educational and authorized security testing purposes only.
 
-It contains intentional security vulnerabilities and insecure configurations.
-The authors assume no responsibility for misuse or deployment in production
-environments.
+It contains intentional security vulnerabilities and insecure configurations. The authors assume no responsibility for any misuse, damage, or unauthorized access resulting from the use of this software. Use responsibly and only in isolated environments.
 
 ---
 
-## Open Source
+## Contributing
 
-OSS – OopsSec Store is released as open source under the MIT License.
+OSS – OopsSec Store is released under the MIT License. Contributions from the security community are welcome.
 
-We are looking for contributors to help improve the project. Here are some ways you can contribute:
+Ways to contribute:
 
-- **Add new flags to the code**: Add flags in the `seed.ts` file and create markdown documentation in `content/vulnerabilities` following the format `vulnerability-name.md`. Flags must follow the format `OSS{...}`.
-- **Develop the e-commerce site**: Enhance the purchase flow, evolve the basic database model, create a customer back office to display orders, create an admin back office to manage the e-commerce and order statuses. These interfaces and features can accommodate new vulnerabilities.
-- **Fix non-intentional bugs**: Correct UI/UX bugs or functionality issues that are not intentional vulnerabilities.
-- **Improve documentation**: Fix spelling mistakes or improve vulnerability documentation.
+- **Add new security challenges**: Implement new vulnerabilities in the `seed.ts` file and document them in `content/vulnerabilities` following the `vulnerability-name.md` format. Flags must use the `OSS{...}` format.
+- **Extend the application**: Enhance the e-commerce functionality, expand the database model, or build admin and customer interfaces. New features provide opportunities for additional vulnerability scenarios.
+- **Report and fix bugs**: Address UI/UX issues or functional bugs that are not intentional security flaws.
+- **Improve documentation**: Enhance vulnerability write-ups, fix typos, or add exploitation examples.
 
-If you notice an issue and don't wish to contribute, feel free to open an issue.
+For issues or suggestions, please open a GitHub issue.
 
-For detailed contribution guidelines and rules, please read [CONTRIBUTING.md](CONTRIBUTING.md).
+For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
