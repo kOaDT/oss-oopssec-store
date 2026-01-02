@@ -2,6 +2,7 @@
 
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/releases)
+[![npm version](https://img.shields.io/npm/v/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
 
 A self-hosted Capture The Flag platform for web security training.
