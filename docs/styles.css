@@ -217,11 +217,38 @@ main {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+.hero-commands {
+  background: rgba(13, 13, 13, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.1rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.hero-commands-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+}
+
+.hero-commands-text {
+  color: hsl(var(--muted-foreground));
+  margin-top: 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
 }
 
 .hero-image {
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 3rem auto 0;
   border-radius: 0.1rem;
   overflow: hidden;
 }
