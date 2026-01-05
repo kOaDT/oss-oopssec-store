@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
 
 const STORAGE_KEY = "oss_found_flags";
 const TOTAL_FLAGS_KEY = "oss_total_flags";
+const INITIAL_ANIMATION_DURATION = 10000;
 
 interface FlagCheckerProps {
   totalFlags: number;
@@ -16,6 +17,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [foundFlags, setFoundFlags] = useState<string[]>([]);
+  const [isInitialAnimation, setIsInitialAnimation] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -30,6 +32,14 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
 
     localStorage.setItem(TOTAL_FLAGS_KEY, totalFlags.toString());
   }, [totalFlags]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialAnimation(false);
+    }, INITIAL_ANIMATION_DURATION);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -120,28 +130,76 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="group fixed cursor-pointer bottom-6 right-6 z-50 flex h-14 items-center gap-3 overflow-hidden rounded-full bg-primary-600 px-4 text-white shadow-lg transition-all duration-300 hover:w-auto hover:bg-primary-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:bg-primary-500 dark:hover:bg-primary-600 w-14"
-        aria-label="Check flag"
+      <div
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 max-w-[calc(100vw-3rem)]"
+        onMouseEnter={() => setIsInitialAnimation(false)}
       >
-        <svg
-          className="h-6 w-6 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <span className="whitespace-nowrap text-sm font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          Found a flag? Check it here!
-        </span>
-      </button>
+        {isInitialAnimation && (
+          <span
+            className="whitespace-nowrap rounded-lg bg-slate-900/90 px-3 py-1.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm dark:bg-slate-100/90 dark:text-slate-900"
+            style={{
+              animation: "fade-in-up 0.5s ease-out",
+            }}
+          >
+            Found a flag? Check it here!
+          </span>
+        )}
+        <div className="relative flex items-center justify-end">
+          {isInitialAnimation && (
+            <>
+              <div
+                className="absolute right-0 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full border-2 border-primary-400"
+                style={{
+                  animation: "ripple-1 2s ease-out infinite",
+                }}
+              />
+              <div
+                className="absolute right-0 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full border-2 border-primary-300"
+                style={{
+                  animation: "ripple-2 2s ease-out infinite 0.3s",
+                }}
+              />
+              <div
+                className="absolute right-0 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full border-2 border-primary-200"
+                style={{
+                  animation: "ripple-3 2s ease-out infinite 0.6s",
+                }}
+              />
+            </>
+          )}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="group relative z-10 flex h-14 w-14 cursor-pointer items-center gap-3 overflow-hidden rounded-full bg-primary-600 px-4 text-white shadow-lg transition-all duration-300 hover:w-auto hover:bg-primary-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:bg-primary-500 dark:hover:bg-primary-600"
+            style={
+              isInitialAnimation
+                ? {
+                    animation: "button-glow 2s ease-in-out infinite",
+                  }
+                : undefined
+            }
+            aria-label="Check flag"
+          >
+            <svg
+              className="h-6 w-6 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {!isInitialAnimation && (
+              <span className="whitespace-nowrap text-sm font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                Found a flag? Check it here!
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
 
       {isOpen && (
         <div

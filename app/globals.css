@@ -48,3 +48,63 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins), "Poppins", sans-serif;
 }
+
+@keyframes ripple-1 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple-2 {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple-3 {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+@keyframes button-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(74, 222, 128, 0.8),
+      0 0 40px rgba(74, 222, 128, 0.6),
+      0 0 60px rgba(74, 222, 128, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(74, 222, 128, 1),
+      0 0 60px rgba(74, 222, 128, 0.8),
+      0 0 90px rgba(74, 222, 128, 0.6);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
