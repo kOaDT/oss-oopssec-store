@@ -72,6 +72,16 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
     }, 250);
   };
 
+  const triggerVictoryCelebration = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
+  const allFlagsFound = foundFlags.length === totalFlags && totalFlags > 0;
+
   const handleVerify = async () => {
     if (!flagInput.trim()) {
       return;
@@ -97,18 +107,28 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
           newFoundFlags.push(data.slug);
           setFoundFlags(newFoundFlags);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(newFoundFlags));
-          triggerConfetti();
-          setMessage(
-            `Congrats! ${newFoundFlags.length}/${totalFlags} flags already found`
-          );
+
+          if (newFoundFlags.length === totalFlags) {
+            triggerVictoryCelebration();
+            setMessage("Congratulations! You found all flags!");
+            setTimeout(() => {
+              setIsOpen(false);
+              setMessage(null);
+            }, 3000);
+          } else {
+            triggerConfetti();
+            setMessage(
+              `Congrats! ${newFoundFlags.length}/${totalFlags} flags already found`
+            );
+            setTimeout(() => {
+              setIsOpen(false);
+              setMessage(null);
+            }, 2000);
+          }
         } else {
           setMessage("Flag already found!");
         }
         setFlagInput("");
-        setTimeout(() => {
-          setIsOpen(false);
-          setMessage(null);
-        }, 2000);
       } else {
         setMessage("Invalid flag. Try again!");
         setTimeout(() => setMessage(null), 3000);
@@ -179,22 +199,40 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             }
             aria-label="Check flag"
           >
-            <svg
-              className="h-6 w-6 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            {allFlagsFound ? (
+              <svg
+                className="h-6 w-6 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="h-6 w-6 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            )}
             {!isInitialAnimation && (
               <span className="whitespace-nowrap text-sm font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                Found a flag? Check it here!
+                {allFlagsFound
+                  ? "All flags found!"
+                  : "Found a flag? Check it here!"}
               </span>
             )}
           </button>
@@ -217,8 +255,14 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                Verify Flag
+              <h2
+                className={`text-xl font-bold ${
+                  allFlagsFound
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-slate-900 dark:text-slate-100"
+                }`}
+              >
+                {allFlagsFound ? "All Flags Found" : "Verify Flag"}
               </h2>
               <button
                 onClick={() => {
@@ -247,34 +291,38 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
               </button>
             </div>
 
-            <div className="mb-4">
-              <label
-                htmlFor="flag-input"
-                className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Enter flag
-              </label>
-              <input
-                id="flag-input"
-                type="text"
-                value={flagInput}
-                onChange={(e) => setFlagInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="OSS{...}"
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-primary-400 dark:focus:ring-primary-400"
-                disabled={isVerifying}
-                autoFocus
-              />
-            </div>
+            {!allFlagsFound && (
+              <div className="mb-4">
+                <label
+                  htmlFor="flag-input"
+                  className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
+                  Enter flag
+                </label>
+                <input
+                  id="flag-input"
+                  type="text"
+                  value={flagInput}
+                  onChange={(e) => setFlagInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="OSS{...}"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-primary-400 dark:focus:ring-primary-400"
+                  disabled={isVerifying}
+                  autoFocus
+                />
+              </div>
+            )}
 
             {message && (
               <div
                 className={`mb-4 rounded-lg p-3 text-sm ${
-                  message.includes("Congrats")
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                    : message.includes("already found")
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                  message.includes("all flags")
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                    : message.includes("Congrats")
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      : message.includes("already found")
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                 }`}
               >
                 {message}
@@ -282,16 +330,25 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             )}
 
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {foundFlags.length}/{totalFlags} flags found
-              </p>
-              <button
-                onClick={handleVerify}
-                disabled={isVerifying || !flagInput.trim()}
-                className="rounded-lg cursor-pointer bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600"
+              <p
+                className={`text-sm ${
+                  allFlagsFound
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-slate-600 dark:text-slate-400"
+                }`}
               >
-                {isVerifying ? "Verifying..." : "Verify"}
-              </button>
+                {foundFlags.length}/{totalFlags} flags found
+                {allFlagsFound && " ✓"}
+              </p>
+              {!allFlagsFound && (
+                <button
+                  onClick={handleVerify}
+                  disabled={isVerifying || !flagInput.trim()}
+                  className="rounded-lg cursor-pointer bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600"
+                >
+                  {isVerifying ? "Verifying..." : "Verify"}
+                </button>
+              )}
             </div>
           </div>
         </div>
