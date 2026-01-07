@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import CopyButton from "../login/CopyButton";
+import FlagDisplay from "../components/FlagDisplay";
 
 interface DeliveryAddress {
   street: string;
@@ -165,21 +165,7 @@ export default function OrderClient() {
             </p>
           </div>
 
-          {order.flag && (
-            <div className="mb-8 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
-              <div className="text-center">
-                <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Flag
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="font-mono text-2xl font-bold text-primary-700 dark:text-primary-300">
-                    {order.flag}
-                  </p>
-                  <CopyButton text={order.flag} label="flag" />
-                </div>
-              </div>
-            </div>
-          )}
+          {order.flag && <FlagDisplay flag={order.flag} title="Flag" />}
 
           <div className="mb-8 space-y-6 rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-900/50">
             <div className="flex justify-between border-b border-slate-200 pb-4 dark:border-slate-700">

@@ -62,6 +62,11 @@ const flags = [
     slug: "path-traversal",
     markdownFile: "path-traversal.md",
   },
+  {
+    flag: "OSS{s3rv3r_s1d3_r3qu3st_f0rg3ry}",
+    slug: "server-side-request-forgery",
+    markdownFile: "server-side-request-forgery.md",
+  },
 ];
 
 config();

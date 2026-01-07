@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import CopyButton from "../../login/CopyButton";
+import FlagDisplay from "../../components/FlagDisplay";
 
 interface Product {
   id: string;
@@ -438,37 +438,11 @@ export default function ProductDetailClient({
         </div>
 
         {flag && (
-          <div className="mb-8 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
-            <div className="text-center">
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                <svg
-                  className="h-8 w-8 text-green-600 dark:text-green-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                Flag Retrieved!
-              </h3>
-              <p className="mb-4 text-slate-600 dark:text-slate-400">
-                You successfully exploited the XSS vulnerability!
-              </p>
-              <div className="flex items-center justify-center gap-2">
-                <p className="font-mono text-2xl font-bold text-primary-700 dark:text-primary-300">
-                  {flag}
-                </p>
-                <CopyButton text={flag} label="flag" />
-              </div>
-            </div>
-          </div>
+          <FlagDisplay
+            flag={flag}
+            description="You successfully exploited the XSS vulnerability!"
+            showIcon
+          />
         )}
 
         <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">

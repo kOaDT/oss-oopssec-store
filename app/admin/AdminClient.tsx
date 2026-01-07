@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import CopyButton from "../login/CopyButton";
+import FlagDisplay from "../components/FlagDisplay";
 
 interface AdminResponse {
   message: string;
@@ -267,43 +267,23 @@ export default function AdminClient() {
           </div>
 
           {adminData?.flag && (
-            <div className="mb-6 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
-              <div className="text-center">
-                <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Flag Retrieved!
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="font-mono text-lg font-bold text-primary-700 dark:text-primary-300">
-                    {adminData.flag}
-                  </p>
-                  <CopyButton text={adminData.flag} label="flag" />
-                </div>
-              </div>
-            </div>
+            <FlagDisplay flag={adminData.flag} variant="compact" />
           )}
 
           {updateSuccess && (
-            <div className="mb-6 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
-              <div className="text-center">
-                {updateSuccess.startsWith("OSS{") ? (
-                  <>
-                    <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Flag Retrieved!
+            <>
+              {updateSuccess.startsWith("OSS{") ? (
+                <FlagDisplay flag={updateSuccess} variant="compact" />
+              ) : (
+                <div className="mb-6 rounded-xl border-2 border-primary-200 bg-primary-50 p-6 dark:border-primary-800 dark:bg-primary-900/20">
+                  <div className="text-center">
+                    <p className="text-slate-700 dark:text-slate-300">
+                      {updateSuccess}
                     </p>
-                    <div className="flex items-center justify-center gap-2">
-                      <p className="font-mono text-lg font-bold text-primary-700 dark:text-primary-300">
-                        {updateSuccess}
-                      </p>
-                      <CopyButton text={updateSuccess} label="flag" />
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-slate-700 dark:text-slate-300">
-                    {updateSuccess}
-                  </p>
-                )}
-              </div>
-            </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {error && (
