@@ -90,7 +90,7 @@ To retrieve the flag `OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}`, you need to exploit the 
 
 4. **Trigger the CSRF attack:**
    - Click the "Claim My Reward" button to submit a form
-   - The form submits a `POST` request to change order `ORD-001` status to `DELIVERED`
+   - The form submits a `POST` request to change order `ORD-003` status to `DELIVERED`
    - Your browser automatically includes your authentication cookie with the request
    - **This simulates a real attack scenario:** In production, an attacker would host a similar malicious page on their own domain (e.g., `https://evil-site.com/special-offer.html`). When a logged-in admin visits that page, the attacker's website has access to the authentication token stored in the cookie and uses it to execute an unauthorized operation. The browser automatically sends the cookie with the form submission, allowing the attacker to perform actions on behalf of the authenticated user without their explicit consent.
 
