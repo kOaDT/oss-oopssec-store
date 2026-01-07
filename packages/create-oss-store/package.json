@@ -1,6 +1,6 @@
 {
   "name": "create-oss-store",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "type": "module",
   "description": "Create a new OSS – OopsSec Store instance for web security CTF training",
   "author": "kOaDT",
