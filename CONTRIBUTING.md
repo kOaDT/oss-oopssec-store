@@ -25,39 +25,12 @@ We encourage **kind and respectful reviews** from both contributors and maintain
 
 ## How to Contribute
 
-### Adding New Flags
+- Adding New Flags
+- Developing the E-commerce Site
+- Fixing Bugs
+- Improving Documentation
+- Reporting Issues
 
-When adding a new flag to the code:
+## Roadmap
 
-- Add the flag in the `seed.ts` file
-- Create markdown documentation in `content/vulnerabilities` following the format `vulnerability-name.md`
-- Flags must follow the format `OSS{...}`
-
-### Developing the E-commerce Site
-
-You can contribute by:
-
-- Enhancing the purchase flow
-- Evolving the basic database model
-- Creating a customer back office to display orders
-- Creating an admin back office to manage the e-commerce and order statuses
-
-These interfaces and features can accommodate new vulnerabilities.
-
-### Fixing Bugs
-
-You can help by:
-
-- Correcting non-intentional UI/UX bugs
-- Fixing functionality issues that are not intentional vulnerabilities
-
-### Improving Documentation
-
-Contributions to documentation are welcome:
-
-- Fix spelling mistakes
-- Improve vulnerability documentation
-
-### Reporting Issues
-
-If you notice an issue and don't wish to contribute, feel free to open an issue on GitHub.
+For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see [ROADMAP.md](ROADMAP.md). This document outlines upcoming development priorities and is a great place to find contribution opportunities.

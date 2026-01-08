@@ -5,9 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
 
-A self-hosted Capture The Flag platform for web security training.
-
-Run `npx create-oss-store` and start hunting for flags. Each vulnerability is documented and comes with a hidden flag to discover.
+A self-hosted Capture The Flag platform for web security training. Run `npx create-oss-store` and start hunting for flags. Each vulnerability is documented and comes with a hidden flag to discover.
 
 ![OSS – OopsSec Store](screen.png)
 
@@ -72,11 +70,13 @@ OSS – OopsSec Store is released under the MIT License. Contributions from the 
 
 Ways to contribute:
 
-- **Add new security challenges**: Implement new vulnerabilities in the `seed.ts` file and document them in `content/vulnerabilities` following the `vulnerability-name.md` format. Flags must use the `OSS{...}` format.
-- **Extend the application**: Enhance the e-commerce functionality, expand the database model, or build admin and customer interfaces. New features provide opportunities for additional vulnerability scenarios.
-- **Report and fix bugs**: Address UI/UX issues or functional bugs that are not intentional security flaws.
-- **Improve documentation**: Enhance vulnerability write-ups, fix typos, or add exploitation examples.
+- **Add new security challenges**
+- **Extend the application**
+- **Report and fix bugs**
+- **Improve documentation**
 
-For issues or suggestions, please open a GitHub issue.
+Looking for ideas? Check out our [ROADMAP.md](ROADMAP.md) for planned features and vulnerabilities you can help implement.
+
+For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues).
 
 For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
