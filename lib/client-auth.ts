@@ -1,8 +1,4 @@
-export interface User {
-  id: string;
-  email: string;
-  role: string;
-}
+import type { User } from "./types";
 
 export function getStoredUser(): User | null {
   if (typeof window === "undefined") return null;

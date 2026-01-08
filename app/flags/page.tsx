@@ -2,14 +2,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Link from "next/link";
 import { getBaseUrl } from "@/lib/config";
-
-interface Flag {
-  id: string;
-  flag: string;
-  slug: string;
-  cve?: string | null;
-  markdownFile: string;
-}
+import type { Flag } from "@/lib/types";
 
 async function getFlags(): Promise<Flag[]> {
   try {

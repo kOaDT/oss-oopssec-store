@@ -6,37 +6,11 @@ import Link from "next/link";
 import FlagDisplay from "../components/FlagDisplay";
 import { getBaseUrl } from "@/lib/config";
 import { getStoredUser } from "@/lib/client-auth";
-
-interface AdminResponse {
-  message: string;
-  flag?: string;
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
-
-interface Order {
-  id: string;
-  userId: string;
-  total: number;
-  status: string;
-  user: {
-    email: string;
-  };
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-}
+import type { AdminOrder, AdminResponse } from "@/lib/types";
 
 export default function AdminClient() {
   const [adminData, setAdminData] = useState<AdminResponse | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);

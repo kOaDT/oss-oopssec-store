@@ -6,36 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api, ApiError } from "@/lib/api";
 import { getStoredUser } from "@/lib/client-auth";
-
-interface CartItem {
-  id: string;
-  productId: string;
-  quantity: number;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-  };
-}
-
-interface CartData {
-  cartItems: CartItem[];
-  total: number;
-}
-
-interface UserAddress {
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-}
-
-interface UserData {
-  email: string;
-  address: UserAddress | null;
-}
+import type { CartData, UserData } from "@/lib/types";
 
 export default function CheckoutClient() {
   const [cartData, setCartData] = useState<CartData | null>(null);
@@ -55,7 +26,7 @@ export default function CheckoutClient() {
       try {
         const [cartData, userData] = await Promise.all([
           api.get<CartData>("/api/cart"),
-          api.get<{ email: string; address: UserAddress | null }>("/api/user"),
+          api.get<UserData>("/api/user"),
         ]);
 
         setCartData(cartData);

@@ -6,23 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { getStoredUser } from "@/lib/client-auth";
-
-interface CartItem {
-  id: string;
-  productId: string;
-  quantity: number;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-  };
-}
-
-interface CartData {
-  cartItems: CartItem[];
-  total: number;
-}
+import type { CartData } from "@/lib/types";
 
 export default function CartClient() {
   const [cartData, setCartData] = useState<CartData | null>(null);

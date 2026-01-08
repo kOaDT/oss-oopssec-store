@@ -6,17 +6,10 @@ import remarkGfm from "remark-gfm";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { getBaseUrl } from "@/lib/config";
+import type { Flag } from "@/lib/types";
 
 interface VulnerabilityPageProps {
   params: Promise<{ slug: string }>;
-}
-
-interface Flag {
-  id: string;
-  flag: string;
-  slug: string;
-  cve?: string | null;
-  markdownFile: string;
 }
 
 async function getFlagBySlug(slug: string): Promise<Flag | null> {

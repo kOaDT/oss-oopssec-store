@@ -7,25 +7,7 @@ import { useRouter } from "next/navigation";
 import FlagDisplay from "../../components/FlagDisplay";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  imageUrl: string;
-}
-
-interface Review {
-  id: string;
-  content: string;
-  author: string;
-  createdAt: string;
-}
-
-interface ProductDetailClientProps {
-  product: Product;
-}
+import type { Review, ProductDetailClientProps } from "@/lib/types";
 
 export default function ProductDetailClient({
   product,

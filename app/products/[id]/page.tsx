@@ -3,14 +3,7 @@ import Footer from "../../components/Footer";
 import ProductDetailClient from "./ProductDetailClient";
 import { notFound } from "next/navigation";
 import { getBaseUrl } from "@/lib/config";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  imageUrl: string;
-}
+import type { Product } from "@/lib/types";
 
 async function getProduct(id: string): Promise<Product | null> {
   try {

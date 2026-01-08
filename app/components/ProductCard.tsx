@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
-interface ProductCardProps {
-  id: string;
-  name: string;
-  price: number;
-  imageUrl: string;
-}
+import type { ProductCardProps } from "@/lib/types";
 
 export default function ProductCard({
   id,

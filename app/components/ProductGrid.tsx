@@ -1,18 +1,5 @@
 import ProductCard from "./ProductCard";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  imageUrl: string;
-}
-
-interface ProductGridProps {
-  products: Product[];
-  title?: string;
-  subtitle?: string;
-}
+import type { ProductGridProps } from "@/lib/types";
 
 export default function ProductGrid({
   products,

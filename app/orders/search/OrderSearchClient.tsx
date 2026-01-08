@@ -6,22 +6,11 @@ import Link from "next/link";
 import FlagDisplay from "../../components/FlagDisplay";
 import { getBaseUrl } from "@/lib/config";
 import { getStoredUser } from "@/lib/client-auth";
-
-interface Order {
-  id: string;
-  total: number;
-  status: string;
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  flag?: string;
-}
+import type { OrderSearchResult } from "@/lib/types";
 
 export default function OrderSearchClient() {
   const [status, setStatus] = useState("");
-  const [allOrders, setAllOrders] = useState<Order[]>([]);
+  const [allOrders, setAllOrders] = useState<OrderSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flag, setFlag] = useState<string | null>(null);
@@ -75,7 +64,7 @@ export default function OrderSearchClient() {
       }
 
       const filteredResults = results.filter(
-        (order: Order) => order.id && order.status
+        (order: OrderSearchResult) => order.id && order.status
       );
       setAllOrders(filteredResults);
     } catch (err) {

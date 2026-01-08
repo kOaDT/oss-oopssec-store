@@ -5,14 +5,7 @@ import Features from "./components/Features";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
 import { getBaseUrl } from "@/lib/config";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  imageUrl: string;
-}
+import type { Product } from "@/lib/types";
 
 async function getProducts(): Promise<Product[]> {
   const baseUrl = getBaseUrl();
