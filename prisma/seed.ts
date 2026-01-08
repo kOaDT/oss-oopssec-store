@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { PrismaClient } from "../lib/generated/prisma/client";
-import path from "path";
+import { getDatabaseUrl } from "../lib/database";
 import crypto from "crypto";
 
 /**
@@ -78,27 +78,6 @@ config();
 
 const hashMD5 = (text: string): string => {
   return crypto.createHash("md5").update(text).digest("hex");
-};
-
-const getDatabaseUrl = () => {
-  const projectRoot = path.resolve(process.cwd());
-  const defaultPath = path.resolve(projectRoot, "prisma", "dev.db");
-
-  if (process.env.DATABASE_URL) {
-    const dbUrl = process.env.DATABASE_URL.trim().replace(/^"|"$/g, "");
-
-    if (dbUrl.startsWith("file:./")) {
-      const relativePath = dbUrl.replace("file:./", "");
-      const absolutePath = path.resolve(projectRoot, relativePath);
-      return `file:${absolutePath}`;
-    }
-
-    if (dbUrl.startsWith("file:")) {
-      return dbUrl;
-    }
-  }
-
-  return `file:${defaultPath}`;
 };
 
 const databaseUrl = getDatabaseUrl();
