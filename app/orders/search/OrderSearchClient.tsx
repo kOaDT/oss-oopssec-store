@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FlagDisplay from "../../components/FlagDisplay";
 import { getBaseUrl } from "@/lib/config";
+import { getStoredUser } from "@/lib/client-auth";
 
 interface Order {
   id: string;
@@ -17,8 +18,6 @@ interface Order {
   country: string;
   flag?: string;
 }
-
-import { getStoredUser } from "@/lib/utils/auth";
 
 export default function OrderSearchClient() {
   const [status, setStatus] = useState("");

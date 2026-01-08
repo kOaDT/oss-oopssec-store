@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getStoredUser } from "@/lib/utils/auth";
-import { getBaseUrl } from "@/lib/config";
+import { getStoredUser } from "@/lib/client-auth";
+import { api } from "@/lib/api";
 
 export default function CartButton() {
   const [cartCount, setCartCount] = useState(0);
@@ -18,23 +18,15 @@ export default function CartButton() {
 
     const fetchCartCount = async () => {
       try {
-        const baseUrl = getBaseUrl();
-        const token = localStorage.getItem("authToken");
-
-        const response = await fetch(`${baseUrl}/api/cart`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const totalItems = data.cartItems.reduce(
-            (sum: number, item: { quantity: number }) => sum + item.quantity,
-            0
-          );
-          setCartCount(totalItems);
-        }
+        const data = await api.get<{
+          cartItems: { quantity: number }[];
+          total: number;
+        }>("/api/cart");
+        const totalItems = data.cartItems.reduce(
+          (sum: number, item: { quantity: number }) => sum + item.quantity,
+          0
+        );
+        setCartCount(totalItems);
       } catch (error) {
         console.error("Error fetching cart count:", error);
       } finally {
@@ -55,24 +47,15 @@ export default function CartButton() {
       if (user) {
         const fetchCartCount = async () => {
           try {
-            const baseUrl = getBaseUrl();
-            const token = localStorage.getItem("authToken");
-
-            const response = await fetch(`${baseUrl}/api/cart`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              const totalItems = data.cartItems.reduce(
-                (sum: number, item: { quantity: number }) =>
-                  sum + item.quantity,
-                0
-              );
-              setCartCount(totalItems);
-            }
+            const data = await api.get<{
+              cartItems: { quantity: number }[];
+              total: number;
+            }>("/api/cart");
+            const totalItems = data.cartItems.reduce(
+              (sum: number, item: { quantity: number }) => sum + item.quantity,
+              0
+            );
+            setCartCount(totalItems);
           } catch (error) {
             console.error("Error fetching cart count:", error);
           }

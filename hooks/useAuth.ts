@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getStoredUser, type User, clearAuth } from "@/lib/utils/auth";
+import { getStoredUser, type User, clearAuth } from "@/lib/client-auth";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(() => getStoredUser());

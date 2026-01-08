@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FlagDisplay from "../components/FlagDisplay";
 import { getBaseUrl } from "@/lib/config";
+import { getStoredUser } from "@/lib/client-auth";
 
 interface AdminResponse {
   message: string;
@@ -32,8 +33,6 @@ interface Order {
     country: string;
   };
 }
-
-import { getStoredUser } from "@/lib/utils/auth";
 
 export default function AdminClient() {
   const [adminData, setAdminData] = useState<AdminResponse | null>(null);

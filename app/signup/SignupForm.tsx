@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
 
 export default function SignupForm() {
   const [email, setEmail] = useState("");
@@ -29,22 +29,10 @@ export default function SignupForm() {
     setIsLoading(true);
 
     try {
-      const baseUrl = getBaseUrl();
-      const response = await fetch(`${baseUrl}/api/auth/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Signup failed");
-        setIsLoading(false);
-        return;
-      }
+      const data = await api.post<{
+        token: string;
+        user: { id: string; email: string; role: string };
+      }>("/api/auth/signup", { email, password }, { requireAuth: false });
 
       if (data.token) {
         localStorage.setItem("authToken", data.token);
@@ -57,8 +45,12 @@ export default function SignupForm() {
         }
         router.refresh();
       }
-    } catch {
-      setError("An error occurred. Please try again.");
+    } catch (error) {
+      const errorMessage =
+        error instanceof ApiError
+          ? error.message
+          : "An error occurred. Please try again.";
+      setError(errorMessage);
       setIsLoading(false);
     }
   };

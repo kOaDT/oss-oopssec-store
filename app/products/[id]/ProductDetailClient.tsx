@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FlagDisplay from "../../components/FlagDisplay";
 import { useAuth } from "@/hooks/useAuth";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
 
 interface Product {
   id: string;
@@ -45,15 +45,11 @@ export default function ProductDetailClient({
   const fetchReviews = useCallback(async () => {
     try {
       setIsLoadingReviews(true);
-      const baseUrl = getBaseUrl();
-      const response = await fetch(
-        `${baseUrl}/api/products/${product.id}/reviews`
+      const data = await api.get<Review[]>(
+        `/api/products/${product.id}/reviews`,
+        { requireAuth: false }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data);
-      }
+      setReviews(data);
     } catch (error) {
       console.error("Error fetching reviews:", error);
     } finally {
@@ -95,15 +91,12 @@ export default function ProductDetailClient({
 
     const fetchFlag = async () => {
       try {
-        const baseUrl = getBaseUrl();
-        const response = await fetch(
-          `${baseUrl}/api/flags/cross-site-scripting-xss`
+        const data = await api.get<{ flag?: string }>(
+          "/api/flags/cross-site-scripting-xss",
+          { requireAuth: false }
         );
-        if (response.ok) {
-          const data = await response.json();
-          if (data.flag) {
-            setFlag(data.flag);
-          }
+        if (data.flag) {
+          setFlag(data.flag);
         }
       } catch (error) {
         console.error("Error fetching flag:", error);
@@ -123,26 +116,9 @@ export default function ProductDetailClient({
     setIsSubmittingReview(true);
 
     try {
-      const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
-
-      const response = await fetch(
-        `${baseUrl}/api/products/${product.id}/reviews`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          body: JSON.stringify({
-            content: reviewContent,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit review");
-      }
+      await api.post(`/api/products/${product.id}/reviews`, {
+        content: reviewContent,
+      });
 
       setReviewContent("");
       await fetchReviews();
@@ -187,34 +163,19 @@ export default function ProductDetailClient({
     setIsLoading(true);
 
     try {
-      const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
-
-      const response = await fetch(`${baseUrl}/api/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity: quantity,
-        }),
+      await api.post("/api/cart/add", {
+        productId: product.id,
+        quantity: quantity,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to add to cart");
-      }
 
       router.push("/cart");
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert(
-        error instanceof Error
+      const errorMessage =
+        error instanceof ApiError
           ? error.message
-          : "Failed to add item to cart. Please try again."
-      );
+          : "Failed to add item to cart. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

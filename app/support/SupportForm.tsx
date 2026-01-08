@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
 
 export default function SupportForm() {
   const [email, setEmail] = useState("");
@@ -24,32 +24,33 @@ export default function SupportForm() {
     setSubmittedData(null);
 
     try {
-      const baseUrl = getBaseUrl();
-      const response = await fetch(`${baseUrl}/api/support`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const data = await api.post<{
+        success: boolean;
+        data: {
+          email: string;
+          title: string;
+          description: string;
+          screenshotContent?: string;
+        };
+      }>(
+        "/api/support",
+        {
           email,
           title,
           description,
           screenshotUrl: screenshotUrl || undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to submit support request");
-        setIsLoading(false);
-        return;
-      }
+        },
+        { requireAuth: false }
+      );
 
       setSubmittedData(data.data);
       setIsLoading(false);
-    } catch {
-      setError("An error occurred. Please try again.");
+    } catch (error) {
+      const errorMessage =
+        error instanceof ApiError
+          ? error.message
+          : "An error occurred. Please try again.";
+      setError(errorMessage);
       setIsLoading(false);
     }
   };

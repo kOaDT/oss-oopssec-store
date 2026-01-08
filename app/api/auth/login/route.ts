@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashMD5, createWeakJWT } from "@/lib/auth";
+import { hashMD5, createWeakJWT } from "@/lib/server-auth";
 
 export async function POST(request: Request) {
   try {

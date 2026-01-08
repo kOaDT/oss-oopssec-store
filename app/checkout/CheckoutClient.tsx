@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
+import { getStoredUser } from "@/lib/client-auth";
 
 interface CartItem {
   id: string;
@@ -22,8 +23,6 @@ interface CartData {
   cartItems: CartItem[];
   total: number;
 }
-
-import { getStoredUser } from "@/lib/utils/auth";
 
 interface UserAddress {
   street: string;
@@ -52,42 +51,12 @@ export default function CheckoutClient() {
       return;
     }
 
-    const baseUrl = getBaseUrl();
-    const token = localStorage.getItem("authToken");
-
     const fetchData = async () => {
       try {
-        const [cartResponse, userResponse] = await Promise.all([
-          fetch(`${baseUrl}/api/cart`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          fetch(`${baseUrl}/api/user`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
+        const [cartData, userData] = await Promise.all([
+          api.get<CartData>("/api/cart"),
+          api.get<{ email: string; address: UserAddress | null }>("/api/user"),
         ]);
-
-        if (!cartResponse.ok) {
-          if (cartResponse.status === 401) {
-            router.push("/login");
-            return;
-          }
-          throw new Error("Failed to fetch cart");
-        }
-
-        if (!userResponse.ok) {
-          if (userResponse.status === 401) {
-            router.push("/login");
-            return;
-          }
-          throw new Error("Failed to fetch user");
-        }
-
-        const cartData = await cartResponse.json();
-        const userData = await userResponse.json();
 
         setCartData(cartData);
         setUserData({
@@ -96,6 +65,10 @@ export default function CheckoutClient() {
         });
       } catch (error) {
         console.error("Error fetching data:", error);
+        if (error instanceof ApiError && error.status === 401) {
+          router.push("/login");
+          return;
+        }
       } finally {
         setIsLoading(false);
       }
@@ -118,25 +91,14 @@ export default function CheckoutClient() {
 
     setIsProcessing(true);
     try {
-      const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
-
-      const response = await fetch(`${baseUrl}/api/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          total: cartData.total,
-        }),
+      const order = await api.post<{
+        id: string;
+        total: number;
+        status: string;
+        flag?: string;
+      }>("/api/orders", {
+        total: cartData.total,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to create order");
-      }
-
-      const order = await response.json();
       const url = order.flag
         ? `/order?id=${order.id}&flag=${encodeURIComponent(order.flag)}`
         : `/order?id=${order.id}`;

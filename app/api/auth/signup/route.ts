@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/lib/generated/prisma/enums";
-import { hashMD5, createWeakJWT } from "@/lib/auth";
+import { hashMD5, createWeakJWT } from "@/lib/server-auth";
 
 const DEFAULT_ADDRESS_ID = "addr-default-001";
 

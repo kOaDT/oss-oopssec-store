@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
+import { getStoredUser } from "@/lib/client-auth";
 
 interface CartItem {
   id: string;
@@ -23,8 +24,6 @@ interface CartData {
   total: number;
 }
 
-import { getStoredUser } from "@/lib/utils/auth";
-
 export default function CartClient() {
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,27 +32,14 @@ export default function CartClient() {
 
   const fetchCart = useCallback(async () => {
     try {
-      const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
-
-      const response = await fetch(`${baseUrl}/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.push("/login");
-          return;
-        }
-        throw new Error("Failed to fetch cart");
-      }
-
-      const data = await response.json();
+      const data = await api.get<CartData>("/api/cart");
       setCartData(data);
     } catch (error) {
       console.error("Error fetching cart:", error);
+      if (error instanceof ApiError && error.status === 401) {
+        router.push("/login");
+        return;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -72,20 +58,7 @@ export default function CartClient() {
   const handleRemoveItem = async (itemId: string) => {
     setIsUpdating(itemId);
     try {
-      const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
-
-      const response = await fetch(`${baseUrl}/api/cart/items/${itemId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to remove item");
-      }
-
+      await api.delete(`/api/cart/items/${itemId}`);
       await fetchCart();
     } catch (error) {
       console.error("Error removing item:", error);
@@ -102,22 +75,7 @@ export default function CartClient() {
 
     setIsUpdating(itemId);
     try {
-      const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
-
-      const response = await fetch(`${baseUrl}/api/cart/items/${itemId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quantity: newQuantity }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update quantity");
-      }
-
+      await api.patch(`/api/cart/items/${itemId}`, { quantity: newQuantity });
       await fetchCart();
     } catch (error) {
       console.error("Error updating quantity:", error);

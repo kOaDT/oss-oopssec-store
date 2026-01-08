@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import CopyButton from "./CopyButton";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -18,22 +18,10 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const baseUrl = getBaseUrl();
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-        setIsLoading(false);
-        return;
-      }
+      const data = await api.post<{
+        token: string;
+        user: { id: string; email: string; role: string };
+      }>("/api/auth/login", { email, password }, { requireAuth: false });
 
       if (data.token) {
         localStorage.setItem("authToken", data.token);
@@ -46,8 +34,12 @@ export default function LoginForm() {
         }
         router.refresh();
       }
-    } catch {
-      setError("An error occurred. Please try again.");
+    } catch (error) {
+      const errorMessage =
+        error instanceof ApiError
+          ? error.message
+          : "An error occurred. Please try again.";
+      setError(errorMessage);
       setIsLoading(false);
     }
   };

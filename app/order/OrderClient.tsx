@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import FlagDisplay from "../components/FlagDisplay";
-import { getBaseUrl } from "@/lib/config";
+import { api, ApiError } from "@/lib/api";
 
 interface DeliveryAddress {
   street: string;
@@ -24,7 +24,7 @@ interface Order {
   flag?: string;
 }
 
-import { getStoredUser } from "@/lib/utils/auth";
+import { getStoredUser } from "@/lib/client-auth";
 
 export default function OrderClient() {
   const [order, setOrder] = useState<Order | null>(null);
@@ -48,34 +48,23 @@ export default function OrderClient() {
 
     const fetchOrder = async () => {
       try {
-        const baseUrl = getBaseUrl();
-        const token = localStorage.getItem("authToken");
-
-        const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            router.push("/login");
-            return;
-          }
-          if (response.status === 404) {
-            router.push("/");
-            return;
-          }
-          throw new Error("Failed to fetch order");
-        }
-
-        const data = await response.json();
+        const data = await api.get<Order>(`/api/orders/${orderId}`);
         if (flagFromUrl) {
           data.flag = decodeURIComponent(flagFromUrl);
         }
         setOrder(data);
       } catch (error) {
         console.error("Error fetching order:", error);
+        if (error instanceof ApiError) {
+          if (error.status === 401) {
+            router.push("/login");
+            return;
+          }
+          if (error.status === 404) {
+            router.push("/");
+            return;
+          }
+        }
       } finally {
         setIsLoading(false);
       }
