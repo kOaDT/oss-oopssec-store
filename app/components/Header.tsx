@@ -2,6 +2,7 @@ import Link from "next/link";
 import AuthButton from "./AuthButton";
 import CartButton from "./CartButton";
 import SignUpLink from "./SignUpLink";
+import OrderSearchLink from "./OrderSearchLink";
 
 export default function Header() {
   return (
@@ -33,6 +34,7 @@ export default function Header() {
           >
             Contact
           </Link>
+          <OrderSearchLink />
         </div>
 
         <div className="flex items-center gap-4">

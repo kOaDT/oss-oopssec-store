@@ -67,6 +67,11 @@ const flags = [
     slug: "server-side-request-forgery",
     markdownFile: "server-side-request-forgery.md",
   },
+  {
+    flag: "OSS{sql_1nj3ct10n_vuln3r4b1l1ty}",
+    slug: "sql-injection",
+    markdownFile: "sql-injection.md",
+  },
 ];
 
 config();
