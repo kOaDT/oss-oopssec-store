@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import FlagDisplay from "../components/FlagDisplay";
+import { getBaseUrl } from "@/lib/config";
 
 interface DeliveryAddress {
   street: string;
@@ -47,8 +48,7 @@ export default function OrderClient() {
 
     const fetchOrder = async () => {
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const baseUrl = getBaseUrl();
         const token = localStorage.getItem("authToken");
 
         const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {

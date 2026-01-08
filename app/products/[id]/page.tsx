@@ -2,6 +2,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import ProductDetailClient from "./ProductDetailClient";
 import { notFound } from "next/navigation";
+import { getBaseUrl } from "@/lib/config";
 
 interface Product {
   id: string;
@@ -13,7 +14,7 @@ interface Product {
 
 async function getProduct(id: string): Promise<Product | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = getBaseUrl();
     const res = await fetch(`${baseUrl}/api/products/${id}`, {
       cache: "no-store",
     });

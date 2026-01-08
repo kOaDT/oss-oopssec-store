@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import CopyButton from "./CopyButton";
+import { getBaseUrl } from "@/lib/config";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -17,8 +18,7 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const response = await fetch(`${baseUrl}/api/auth/login`, {
         method: "POST",
         headers: {

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FlagDisplay from "../../components/FlagDisplay";
+import { getBaseUrl } from "@/lib/config";
 
 interface Order {
   id: string;
@@ -46,8 +47,7 @@ export default function OrderSearchClient() {
     }
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/orders/search`, {

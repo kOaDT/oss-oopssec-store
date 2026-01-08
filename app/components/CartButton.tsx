@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getStoredUser } from "@/lib/utils/auth";
+import { getBaseUrl } from "@/lib/config";
 
 export default function CartButton() {
   const [cartCount, setCartCount] = useState(0);
@@ -17,8 +18,7 @@ export default function CartButton() {
 
     const fetchCartCount = async () => {
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const baseUrl = getBaseUrl();
         const token = localStorage.getItem("authToken");
 
         const response = await fetch(`${baseUrl}/api/cart`, {
@@ -55,8 +55,7 @@ export default function CartButton() {
       if (user) {
         const fetchCartCount = async () => {
           try {
-            const baseUrl =
-              process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+            const baseUrl = getBaseUrl();
             const token = localStorage.getItem("authToken");
 
             const response = await fetch(`${baseUrl}/api/cart`, {

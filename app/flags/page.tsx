@@ -1,6 +1,7 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Link from "next/link";
+import { getBaseUrl } from "@/lib/config";
 
 interface Flag {
   id: string;
@@ -12,7 +13,7 @@ interface Flag {
 
 async function getFlags(): Promise<Flag[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = getBaseUrl();
     const response = await fetch(`${baseUrl}/api/flags`, {
       cache: "no-store",
     });

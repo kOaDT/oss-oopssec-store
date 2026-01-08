@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { getBaseUrl } from "@/lib/config";
 
 interface CartItem {
   id: string;
@@ -51,7 +52,7 @@ export default function CheckoutClient() {
       return;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = getBaseUrl();
     const token = localStorage.getItem("authToken");
 
     const fetchData = async () => {
@@ -117,8 +118,7 @@ export default function CheckoutClient() {
 
     setIsProcessing(true);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/orders`, {

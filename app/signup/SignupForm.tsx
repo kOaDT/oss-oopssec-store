@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { getBaseUrl } from "@/lib/config";
 
 export default function SignupForm() {
   const [email, setEmail] = useState("");
@@ -28,8 +29,7 @@ export default function SignupForm() {
     setIsLoading(true);
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const response = await fetch(`${baseUrl}/api/auth/signup`, {
         method: "POST",
         headers: {

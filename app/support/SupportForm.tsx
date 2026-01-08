@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { getBaseUrl } from "@/lib/config";
 
 export default function SupportForm() {
   const [email, setEmail] = useState("");
@@ -23,8 +24,7 @@ export default function SupportForm() {
     setSubmittedData(null);
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const response = await fetch(`${baseUrl}/api/support`, {
         method: "POST",
         headers: {

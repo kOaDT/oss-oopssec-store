@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getBaseUrl } from "@/lib/config";
 
 interface CartItem {
   id: string;
@@ -32,8 +33,7 @@ export default function CartClient() {
 
   const fetchCart = useCallback(async () => {
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/cart`, {
@@ -72,8 +72,7 @@ export default function CartClient() {
   const handleRemoveItem = async (itemId: string) => {
     setIsUpdating(itemId);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/cart/items/${itemId}`, {
@@ -103,8 +102,7 @@ export default function CartClient() {
 
     setIsUpdating(itemId);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/cart/items/${itemId}`, {

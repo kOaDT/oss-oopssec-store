@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FlagDisplay from "../../components/FlagDisplay";
 import { useAuth } from "@/hooks/useAuth";
+import { getBaseUrl } from "@/lib/config";
 
 interface Product {
   id: string;
@@ -44,8 +45,7 @@ export default function ProductDetailClient({
   const fetchReviews = useCallback(async () => {
     try {
       setIsLoadingReviews(true);
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const response = await fetch(
         `${baseUrl}/api/products/${product.id}/reviews`
       );
@@ -95,8 +95,7 @@ export default function ProductDetailClient({
 
     const fetchFlag = async () => {
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const baseUrl = getBaseUrl();
         const response = await fetch(
           `${baseUrl}/api/flags/cross-site-scripting-xss`
         );
@@ -124,8 +123,7 @@ export default function ProductDetailClient({
     setIsSubmittingReview(true);
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(
@@ -189,8 +187,7 @@ export default function ProductDetailClient({
     setIsLoading(true);
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl = getBaseUrl();
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/cart/add`, {

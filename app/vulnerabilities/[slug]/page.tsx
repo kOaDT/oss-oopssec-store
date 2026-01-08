@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import { getBaseUrl } from "@/lib/config";
 
 interface VulnerabilityPageProps {
   params: Promise<{ slug: string }>;
@@ -20,7 +21,7 @@ interface Flag {
 
 async function getFlagBySlug(slug: string): Promise<Flag | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = getBaseUrl();
     const response = await fetch(`${baseUrl}/api/flags/${slug}`, {
       cache: "no-store",
     });

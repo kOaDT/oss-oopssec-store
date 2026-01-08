@@ -4,6 +4,7 @@ import ProductGrid from "./components/ProductGrid";
 import Features from "./components/Features";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
+import { getBaseUrl } from "@/lib/config";
 
 interface Product {
   id: string;
@@ -14,7 +15,7 @@ interface Product {
 }
 
 async function getProducts(): Promise<Product[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   const res = await fetch(`${baseUrl}/api/products`, {
     cache: "no-store",
   });
