@@ -1,57 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-interface User {
-  id: string;
-  email: string;
-  role: string;
-}
-
-const getStoredUser = (): User | null => {
-  if (typeof window === "undefined") return null;
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch {
-      localStorage.removeItem("user");
-      localStorage.removeItem("authToken");
-      return null;
-    }
-  }
-  return null;
-};
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AuthButton() {
-  const [user, setUser] = useState<User | null>(getStoredUser);
+  const { user, logout } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setUser(getStoredUser());
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    const interval = setInterval(() => {
-      const currentUser = getStoredUser();
-      if (JSON.stringify(currentUser) !== JSON.stringify(user)) {
-        setUser(currentUser);
-      }
-    }, 100);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [user]);
-
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    setUser(null);
+    logout();
     router.push("/");
     router.refresh();
   };

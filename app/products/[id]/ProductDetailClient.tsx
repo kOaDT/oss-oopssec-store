@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FlagDisplay from "../../components/FlagDisplay";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Product {
   id: string;
@@ -25,27 +26,12 @@ interface ProductDetailClientProps {
   product: Product;
 }
 
-const getStoredUser = () => {
-  if (typeof window === "undefined") return null;
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch {
-      localStorage.removeItem("user");
-      localStorage.removeItem("authToken");
-      return null;
-    }
-  }
-  return null;
-};
-
 export default function ProductDetailClient({
   product,
 }: ProductDetailClientProps) {
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewContent, setReviewContent] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -76,7 +62,6 @@ export default function ProductDetailClient({
   }, [product.id]);
 
   useEffect(() => {
-    setUser(getStoredUser());
     fetchReviews();
   }, [fetchReviews]);
 

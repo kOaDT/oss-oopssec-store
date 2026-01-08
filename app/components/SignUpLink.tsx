@@ -1,50 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-
-interface User {
-  id: string;
-  email: string;
-  role: string;
-}
-
-const getStoredUser = (): User | null => {
-  if (typeof window === "undefined") return null;
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch {
-      localStorage.removeItem("user");
-      localStorage.removeItem("authToken");
-      return null;
-    }
-  }
-  return null;
-};
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SignUpLink() {
-  const [user, setUser] = useState<User | null>(getStoredUser);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setUser(getStoredUser());
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    const interval = setInterval(() => {
-      const currentUser = getStoredUser();
-      if (JSON.stringify(currentUser) !== JSON.stringify(user)) {
-        setUser(currentUser);
-      }
-    }, 100);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [user]);
+  const { user } = useAuth();
 
   if (user) {
     return null;

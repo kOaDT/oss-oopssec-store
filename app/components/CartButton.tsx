@@ -2,19 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
-const getStoredUser = () => {
-  if (typeof window === "undefined") return null;
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch {
-      return null;
-    }
-  }
-  return null;
-};
+import { getStoredUser } from "@/lib/utils/auth";
 
 export default function CartButton() {
   const [cartCount, setCartCount] = useState(0);

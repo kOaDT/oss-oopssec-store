@@ -22,20 +22,7 @@ interface CartData {
   total: number;
 }
 
-const getStoredUser = () => {
-  if (typeof window === "undefined") return null;
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch {
-      localStorage.removeItem("user");
-      localStorage.removeItem("authToken");
-      return null;
-    }
-  }
-  return null;
-};
+import { getStoredUser } from "@/lib/utils/auth";
 
 export default function CartClient() {
   const [cartData, setCartData] = useState<CartData | null>(null);
