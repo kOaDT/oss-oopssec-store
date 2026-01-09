@@ -1,5 +1,7 @@
 import type { User } from "./types";
 
+export type { User };
+
 export function getStoredUser(): User | null {
   if (typeof window === "undefined") return null;
   const storedUser = localStorage.getItem("user");
