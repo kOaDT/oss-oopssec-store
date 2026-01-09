@@ -72,6 +72,11 @@ const flags = [
     slug: "sql-injection",
     markdownFile: "sql-injection.md",
   },
+  {
+    flag: "OSS{1nf0_d1scl0sur3_4p1_3rr0r}",
+    slug: "information-disclosure-api-error",
+    markdownFile: "information-disclosure-api-error.md",
+  },
 ];
 
 config();

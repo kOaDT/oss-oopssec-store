@@ -3,6 +3,7 @@ import AuthButton from "./AuthButton";
 import CartButton from "./CartButton";
 import SignUpLink from "./SignUpLink";
 import OrderSearchLink from "./OrderSearchLink";
+import ProfileLink from "./ProfileLink";
 
 export default function Header() {
   return (
@@ -35,6 +36,7 @@ export default function Header() {
             Contact
           </Link>
           <OrderSearchLink />
+          <ProfileLink />
         </div>
 
         <div className="flex items-center gap-4">
