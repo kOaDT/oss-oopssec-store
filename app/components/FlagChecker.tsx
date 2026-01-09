@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import confetti from "canvas-confetti";
+
+function formatSlugToTitle(slug: string): string {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 const STORAGE_KEY = "oss_found_flags";
 const TOTAL_FLAGS_KEY = "oss_total_flags";
@@ -112,7 +120,6 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             triggerVictoryCelebration();
             setMessage("Congratulations! You found all flags!");
             setTimeout(() => {
-              setIsOpen(false);
               setMessage(null);
             }, 3000);
           } else {
@@ -121,7 +128,6 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
               `Congrats! ${newFoundFlags.length}/${totalFlags} flags already found`
             );
             setTimeout(() => {
-              setIsOpen(false);
               setMessage(null);
             }, 2000);
           }
@@ -326,6 +332,45 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                 }`}
               >
                 {message}
+              </div>
+            )}
+
+            {foundFlags.length > 0 && (
+              <div className="mb-4">
+                <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Found flags
+                </h3>
+                <ul className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50">
+                  {foundFlags.map((slug) => (
+                    <li
+                      key={slug}
+                      className="border-b border-slate-200 last:border-b-0 dark:border-slate-600"
+                    >
+                      <Link
+                        href={`/vulnerabilities/${slug}`}
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-primary-600 transition-colors hover:bg-slate-100 dark:text-primary-400 dark:hover:bg-slate-600/50"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <svg
+                          className="h-4 w-4 shrink-0 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="truncate">
+                          {formatSlugToTitle(slug)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
