@@ -29,21 +29,6 @@ Implement a vulnerability demonstrating the lack of rate limiting on authenticat
 
 ---
 
-### Information Disclosure via API Error Messages
-
-**Status:** Planned
-
-Create a vulnerability where API routes leak sensitive information, including flags, through error messages. This could involve a lambda route or error handler that inadvertently exposes flags when exceptions occur.
-
-**Implementation ideas:**
-
-- Implement error handling that includes flag information in stack traces or error responses
-- Create a route that processes user input and throws errors containing flags
-- Ensure error messages reveal internal structure or sensitive data
-- Flag should be discoverable by triggering specific error conditions
-
----
-
 ### Session Fixation & Weak Session Management
 
 **Status:** Planned

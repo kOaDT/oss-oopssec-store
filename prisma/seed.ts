@@ -9,6 +9,22 @@ import crypto from "crypto";
  * The cve is optional
  * The markdown file should be in the content/vulnerabilities folder
  * The markdown file should be in the format of "vulnerability-name.md"
+ *
+ * Categories:
+ * - INJECTION: SQL injection, XSS, etc.
+ * - AUTHENTICATION: JWT, session, password issues
+ * - AUTHORIZATION: IDOR, privilege escalation
+ * - REQUEST_FORGERY: CSRF, SSRF
+ * - INFORMATION_DISCLOSURE: Error messages, exposed data
+ * - INPUT_VALIDATION: Path traversal, mass assignment
+ * - CRYPTOGRAPHIC: Weak hashing, encryption issues
+ * - REMOTE_CODE_EXECUTION: RCE vulnerabilities
+ * - OTHER: Miscellaneous
+ *
+ * Difficulty levels:
+ * - EASY: Basic exploitation, no special tools needed
+ * - MEDIUM: Requires understanding of the vulnerability type
+ * - HARD: Complex exploitation, multiple steps or deep knowledge required
  */
 const flags = [
   {
@@ -16,66 +32,92 @@ const flags = [
     slug: "react2shell",
     cve: "CVE-2025-55182",
     markdownFile: "react2shell.md",
+    category: "REMOTE_CODE_EXECUTION" as const,
+    difficulty: "HARD" as const,
   },
   {
     flag: "OSS{public_3nvir0nment_v4ri4bl3}",
     slug: "public-env-variable",
     markdownFile: "public-env-variable.md",
+    category: "INFORMATION_DISCLOSURE" as const,
+    difficulty: "EASY" as const,
   },
   {
     flag: "OSS{w34k_jwt_n0n3_4lg0r1thm}",
     slug: "weak-jwt-none-algorithm",
     markdownFile: "weak-jwt-none-algorithm.md",
+    category: "AUTHENTICATION" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}",
     slug: "client-side-price-manipulation",
     markdownFile: "client-side-price-manipulation.md",
+    category: "INPUT_VALIDATION" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{w34k_md5_h4sh1ng}",
     slug: "weak-md5-hashing",
     markdownFile: "weak-md5-hashing.md",
+    category: "CRYPTOGRAPHIC" as const,
+    difficulty: "EASY" as const,
   },
   {
     flag: "OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}",
     slug: "insecure-direct-object-reference",
     markdownFile: "insecure-direct-object-reference.md",
+    category: "AUTHORIZATION" as const,
+    difficulty: "EASY" as const,
   },
   {
     flag: "OSS{cr0ss_s1t3_scr1pt1ng_xss}",
     slug: "cross-site-scripting-xss",
     markdownFile: "cross-site-scripting-xss.md",
+    category: "INJECTION" as const,
+    difficulty: "EASY" as const,
   },
   {
     flag: "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}",
     slug: "cross-site-request-forgery",
     markdownFile: "cross-site-request-forgery.md",
+    category: "REQUEST_FORGERY" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{m4ss_4ss1gnm3nt_vuln3r4b1l1ty}",
     slug: "mass-assignment",
     markdownFile: "mass-assignment.md",
+    category: "INPUT_VALIDATION" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{p4th_tr4v3rs4l_4tt4ck}",
     slug: "path-traversal",
     markdownFile: "path-traversal.md",
+    category: "INPUT_VALIDATION" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{s3rv3r_s1d3_r3qu3st_f0rg3ry}",
     slug: "server-side-request-forgery",
     markdownFile: "server-side-request-forgery.md",
+    category: "REQUEST_FORGERY" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{sql_1nj3ct10n_vuln3r4b1l1ty}",
     slug: "sql-injection",
     markdownFile: "sql-injection.md",
+    category: "INJECTION" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{1nf0_d1scl0sur3_4p1_3rr0r}",
     slug: "information-disclosure-api-error",
     markdownFile: "information-disclosure-api-error.md",
+    category: "INFORMATION_DISCLOSURE" as const,
+    difficulty: "EASY" as const,
   },
 ];
 

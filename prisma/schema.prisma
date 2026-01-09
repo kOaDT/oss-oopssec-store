@@ -79,13 +79,33 @@ model Address {
 }
 
 model Flag {
-  id           String  @id @default(cuid())
+  id           String         @id @default(cuid())
   flag         String
-  slug         String  @unique
+  slug         String         @unique
   cve          String?
   markdownFile String
+  category     FlagCategory   @default(OTHER)
+  difficulty   FlagDifficulty @default(MEDIUM)
 
   @@map("flags")
+}
+
+enum FlagCategory {
+  INJECTION
+  AUTHENTICATION
+  AUTHORIZATION
+  REQUEST_FORGERY
+  INFORMATION_DISCLOSURE
+  INPUT_VALIDATION
+  CRYPTOGRAPHIC
+  REMOTE_CODE_EXECUTION
+  OTHER
+}
+
+enum FlagDifficulty {
+  EASY
+  MEDIUM
+  HARD
 }
 
 model Review {

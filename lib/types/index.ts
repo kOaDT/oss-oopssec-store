@@ -59,12 +59,27 @@ export interface Order {
   flag?: string;
 }
 
+export type FlagCategory =
+  | "INJECTION"
+  | "AUTHENTICATION"
+  | "AUTHORIZATION"
+  | "REQUEST_FORGERY"
+  | "INFORMATION_DISCLOSURE"
+  | "INPUT_VALIDATION"
+  | "CRYPTOGRAPHIC"
+  | "REMOTE_CODE_EXECUTION"
+  | "OTHER";
+
+export type FlagDifficulty = "EASY" | "MEDIUM" | "HARD";
+
 export interface Flag {
   id: string;
   flag: string;
   slug: string;
   cve?: string | null;
   markdownFile: string;
+  category: FlagCategory;
+  difficulty: FlagDifficulty;
 }
 
 export interface ProductCardProps {
