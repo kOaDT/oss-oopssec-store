@@ -30,6 +30,13 @@ Designed for penetration testers, security engineers, developers, and cybersecur
 
 ---
 
+## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
+
+[![Timeline graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_timeline.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
+[![Trending topics](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_words.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
+
+---
+
 ## Installation
 
 ### Quick Start
@@ -53,6 +60,27 @@ npm run setup
 ```
 
 The setup script will create the `.env` file, install dependencies, initialize the SQLite database, seed it with CTF flags, and start the application on port 3000.
+
+---
+
+## Project Structure
+
+[![Structure](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/structure/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/xqocpGlYz1v1FH126K5mqp7WjOcy1VH9pbA-EuINusA_table.svg)](https://github.com/kOaDT/oss-oopssec-store)
+
+| Folder                     | Description                                                              |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `app/`                     | Next.js App Router – pages, API routes, and React components             |
+| `app/api/`                 | REST API endpoints (auth, cart, orders, products, flags, etc.)           |
+| `app/components/`          | Reusable React UI components (Header, Footer, ProductCard, etc.)         |
+| `app/vulnerabilities/`     | Pages documenting each security vulnerability                            |
+| `content/vulnerabilities/` | Markdown files describing vulnerabilities, attack vectors, and solutions |
+| `lib/`                     | Shared utilities: database client, authentication, API helpers, types    |
+| `prisma/`                  | Database schema, migrations, and seed script with CTF flags              |
+| `public/`                  | Static assets and exploit payloads (e.g., CSRF attack demo)              |
+| `hooks/`                   | Custom React hooks (authentication, etc.)                                |
+| `scripts/`                 | Setup and automation scripts                                             |
+| `docs/`                    | Static documentation site                                                |
+| `packages/`                | NPM package `create-oss-store` for quick project scaffolding             |
 
 ---
 
@@ -80,3 +108,7 @@ Looking for ideas? Check out our [ROADMAP.md](ROADMAP.md) for planned features a
 For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues).
 
 For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+<!-- [![Issue status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_issues.svg)](https://github.com/kOaDT/oss-oopssec-store/issues)
+[![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls) -->
+<!-- [![Activity map](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_map.svg)](https://github.com/kOaDT/oss-oopssec-store/commits) -->
