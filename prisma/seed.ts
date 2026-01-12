@@ -119,6 +119,13 @@ const flags = [
     category: "INFORMATION_DISCLOSURE" as const,
     difficulty: "EASY" as const,
   },
+  {
+    flag: "OSS{m4l1c10us_f1l3_upl04d_xss}",
+    slug: "malicious-file-upload",
+    markdownFile: "malicious-file-upload.md",
+    category: "INJECTION" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 config();

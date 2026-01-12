@@ -338,23 +338,25 @@ export default function AdminClient() {
               </div>
             )}
           </div>
-          <div className="flex justify-center gap-4">
-            <div className="flex justify-center">
-              <Link
-                href="/"
-                className="cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
-              >
-                Go to Home
-              </Link>
-            </div>
-            <div className="flex justify-center gap-4">
-              <Link
-                href="/documents"
-                className="inline-block cursor-pointer rounded-xl bg-secondary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-secondary-700 hover:shadow-lg dark:bg-secondary-500 dark:hover:bg-secondary-600"
-              >
-                Go to Documents
-              </Link>
-            </div>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/"
+              className="cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
+            >
+              Go to Home
+            </Link>
+            <Link
+              href="/admin/products"
+              className="cursor-pointer rounded-xl bg-secondary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-secondary-700 hover:shadow-lg dark:bg-secondary-500 dark:hover:bg-secondary-600"
+            >
+              Manage Products
+            </Link>
+            <Link
+              href="/documents"
+              className="cursor-pointer rounded-xl bg-slate-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-slate-700 hover:shadow-lg dark:bg-slate-500 dark:hover:bg-slate-600"
+            >
+              Go to Documents
+            </Link>
           </div>
           <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             <p>

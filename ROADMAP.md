@@ -46,23 +46,6 @@ Implement vulnerabilities related to session fixation and weak session managemen
 
 ---
 
-### Malicious File Upload (Stored XSS)
-
-**Status:** Planned
-
-Implement a file upload vulnerability where administrators can upload product images. By replacing an image with a malicious script, an attacker could achieve stored XSS.
-
-**Implementation ideas:**
-
-- Add an admin interface for managing product images
-- Implement file upload functionality with insufficient validation
-- Allow file types other than images to be uploaded
-- Store uploaded files in a way that makes them executable or renderable
-- Flag should be discoverable after uploading a malicious file that triggers XSS
-- Requires privilege escalation to admin role first
-
----
-
 ### SQL Injection in Product Search
 
 **Status:** Planned

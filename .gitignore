@@ -45,3 +45,6 @@ next-env.d.ts
 prisma/dev.db
 prisma/*.db
 prisma/*.db-journal
+
+# uploads
+public/uploads/*
