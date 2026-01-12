@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "OSS – OopsSec Store",
   description:
     "OSS – OopsSec Store, a vulnerable e-commerce for modern web security training.",
+  icons: {
+    icon: "/screen.jpg",
+  },
 };
 
 export default function RootLayout({
