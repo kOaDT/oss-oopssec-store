@@ -7,7 +7,7 @@
 
 A self-hosted Capture The Flag platform for web security training. Run `npx create-oss-store` and start hunting for flags. Each vulnerability is documented and comes with a hidden flag to discover.
 
-![OSS – OopsSec Store](screen.png)
+<img src="screen.jpg" alt="OSS – OopsSec Store" width="600" />
 
 ---
 
