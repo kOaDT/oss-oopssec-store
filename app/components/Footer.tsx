@@ -133,7 +133,9 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/writeups"
+                  href="https://medium.com/@oopssec-store"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
                 >
                   WriteUps
