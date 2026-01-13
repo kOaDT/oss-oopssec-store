@@ -7,10 +7,17 @@ import degit from "degit";
 
 const REPO = "kOaDT/oss-oopssec-store";
 
+const ASCII_ART = [
+  String.raw`   ____  ____ ____     ____                  ____            ____  _                  `,
+  String.raw`  / __ \/ __// __/    / __ \ ___   ___  ___ / __/ ___  ____ / __/ / /_ ___   ____ ___ `,
+  String.raw` / /_/ /\ \ _\ \     / /_/ // _ \ / _ \(_-<_\ \  / -_)/ __/_\ \  / __// _ \ / __// -_)`,
+  String.raw` \____/___//___/     \____/ \___// .__/___/___/  \__/ \__//___/  \__/ \___//_/   \__/ `,
+  String.raw`                                /_/                                                   `,
+];
+
 export async function createOssStore(projectName) {
   console.log();
-  console.log(chalk.bold("OSS – OopsSec Store"));
-  console.log(chalk.dim("Vulnerable Web Application for Security Training"));
+  ASCII_ART.forEach((line) => console.log(chalk.cyan(line)));
   console.log();
 
   if (!projectName) {

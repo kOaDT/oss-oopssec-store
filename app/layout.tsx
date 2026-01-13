@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import FlagCheckerWrapper from "./components/FlagCheckerWrapper";
+import ConsoleWelcome from "./components/ConsoleWelcome";
 
 const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "OSS – OopsSec Store, a vulnerable e-commerce for modern web security training.",
   icons: {
-    icon: "/screen.jpg",
+    icon: "/screen.png",
   },
 };
 
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} font-poppins antialiased`}>
         {children}
         <FlagCheckerWrapper />
+        <ConsoleWelcome />
       </body>
     </html>
   );

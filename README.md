@@ -1,23 +1,65 @@
-# OSS – OopsSec Store | Vulnerable Web Application for Security Training
+<div align="">
+
+```
+   ____  ____ ____     ____                  ____            ____  _
+  / __ \/ __// __/    / __ \ ___   ___  ___ / __/ ___  ____ / __/ / /_ ___   ____ ___
+ / /_/ /\ \ _\ \     / /_/ // _ \ / _ \(_-<_\ \  / -_)/ __/_\ \  / __// _ \ / __// -_)
+ \____/___//___/     \____/ \___// .__/___/___/  \__/ \__//___/  \__/ \___//_/   \__/
+                                /_/
+  $ npx create-oss-store
+  $ cd my-oss-store && npm run dev
+
+  → Open http://localhost:3000 and start hunting flags
+```
+
+</div>
+
+<p align="center">
+  <b>An intentionally vulnerable e-commerce application for hands-on web security training.</b>
+</p>
+
+<p align="center">
+  <b>Master real-world attack vectors through a realistic Capture The Flag platform. Hunt for flags, exploit vulnerabilities, and level up your security skills.</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md">Contributing</a> |
+  <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/ROADMAP.md">Roadmap</a> |
+  <a href="https://medium.com/@oopssec-store">WriteUps</a>
+</p>
+
+<div align="center">
+
+<img src="screen.png" alt="OSS – OopsSec Store" width="600" />
+
+</div>
+
+<div align="center">
 
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/releases)
 [![npm version](https://img.shields.io/npm/v/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
+[![npm downloads](https://img.shields.io/npm/dm/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
+
+</div>
+
+<div align="center">
+
+[![GitHub issues](https://img.shields.io/github/issues/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/pulls)
+![Intentionally Vulnerable](https://img.shields.io/badge/⚠️_Intentionally-Vulnerable-red?style=flat-square)
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
 
-A self-hosted Capture The Flag platform for web security training. Run `npx create-oss-store` and start hunting for flags. Each vulnerability is documented and comes with a hidden flag to discover.
+</div>
 
-<img src="screen.jpg" alt="OSS – OopsSec Store" width="600" />
-
----
+<div align="center">
+<h1>OSS - OopsSec Store</h1>
+</div>
 
 OSS – OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors.
 
 Designed for penetration testers, security engineers, developers, and cybersecurity students, this project demonstrates how real-world vulnerabilities manifest in production-like single-page applications (SPA) with REST APIs.
 
 **Warning:** This application contains intentional security flaws and must never be deployed in a production environment.
-
----
 
 ## Features
 
