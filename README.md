@@ -1,3 +1,7 @@
+<div align="center">
+<h1>OSS - OopsSec Store</h1>
+</div>
+
 <div align="">
 
 ```
@@ -30,12 +34,6 @@
 
 <div align="center">
 
-<img src="screen.png" alt="OSS – OopsSec Store" width="600" />
-
-</div>
-
-<div align="center">
-
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
 [![npm version](https://img.shields.io/npm/v/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
 [![npm downloads](https://img.shields.io/npm/dm/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
@@ -51,9 +49,7 @@
 
 </div>
 
-<div align="center">
-<h1>OSS - OopsSec Store</h1>
-</div>
+---
 
 OSS – OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors.
 
