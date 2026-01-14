@@ -33,4 +33,4 @@ We encourage **kind and respectful reviews** from both contributors and maintain
 
 ## Roadmap
 
-For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see [ROADMAP.md](ROADMAP.md). This document outlines upcoming development priorities and is a great place to find contribution opportunities.
+For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see our [Roadmap project](https://github.com/users/kOaDT/projects/3). This project outlines upcoming development priorities and is a great place to find contribution opportunities.

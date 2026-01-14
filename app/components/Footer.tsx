@@ -4,6 +4,7 @@ import packageJson from "../../package.json";
 const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
 const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
+const GITHUB_ROADMAP = "https://github.com/users/kOaDT/projects/3";
 
 export default function Footer() {
   return (
@@ -141,6 +142,16 @@ export default function Footer() {
                   WriteUps
                 </Link>
               </li>
+              <li>
+                <a
+                  href={GITHUB_ROADMAP}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
+                >
+                  Roadmap
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -161,7 +172,7 @@ export default function Footer() {
                 Flags
               </Link>
               <a
-                href={`${GITHUB_REPO}/commits`}
+                href={`${GITHUB_REPO}/releases`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"

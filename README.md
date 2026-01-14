@@ -28,7 +28,7 @@
 
 <p align="center">
   <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md">Contributing</a> |
-  <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/ROADMAP.md">Roadmap</a> |
+  <a href="https://github.com/users/kOaDT/projects/3">Roadmap</a> |
   <a href="https://medium.com/@oopssec-store">WriteUps</a>
 </p>
 
@@ -141,7 +141,7 @@ Ways to contribute:
 - **Report and fix bugs**
 - **Improve documentation**
 
-Looking for ideas? Check out our [ROADMAP.md](ROADMAP.md) for planned features and vulnerabilities you can help implement.
+Looking for ideas? Check out our [Roadmap project](https://github.com/users/kOaDT/projects/3) for planned features and vulnerabilities you can help implement.
 
 For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues).
 
