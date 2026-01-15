@@ -3,9 +3,6 @@ import Footer from "../components/Footer";
 
 const leakedData = [
   {
-    passwordHash: "21232f297a57a5a743894a0e4a801fc3",
-  },
-  {
     passwordHash: "a22e69ce108be0e6eee294be7eb6c254",
   },
   {

