@@ -9,14 +9,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      UserRole @default(CUSTOMER)
-  addressId String?
-  address   Address? @relation(fields: [addressId], references: [id])
-  carts     Cart[]
-  orders    Order[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  password            String
+  role                UserRole             @default(CUSTOMER)
+  addressId           String?
+  address             Address?             @relation(fields: [addressId], references: [id])
+  carts               Cart[]
+  orders              Order[]
+  supportAccessTokens SupportAccessToken[]
 
   @@map("users")
 }
@@ -130,4 +131,17 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+model SupportAccessToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("support_access_tokens")
 }
