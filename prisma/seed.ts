@@ -133,6 +133,13 @@ const flags = [
     category: "INJECTION" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{s3ss10n_f1x4t10n_4tt4ck}",
+    slug: "session-fixation-weak-session-management",
+    markdownFile: "session-fixation-weak-session-management.md",
+    category: "AUTHENTICATION" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 config();

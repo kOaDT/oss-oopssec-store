@@ -39,7 +39,7 @@ OSS – OopsSec Store is an intentionally vulnerable e-commerce web application 
 app/
 ├── api/                    # REST API endpoints
 │   ├── admin/              # Admin-only endpoints
-│   ├── auth/               # Authentication (login, signup)
+│   ├── auth/               # Authentication (login, signup, support-login)
 │   ├── cart/               # Shopping cart operations
 │   ├── files/              # File operations (vulnerable to path traversal)
 │   ├── flags/              # CTF flag endpoints
@@ -49,7 +49,7 @@ app/
 │   └── user/               # User profile endpoints
 ├── components/             # Reusable React components
 ├── vulnerabilities/        # Vulnerability documentation pages
-└── [pages]/                # Next.js pages (cart, checkout, login, etc.)
+└── [pages]/                # Next.js pages (cart, checkout, login, support-login, etc.)
 
 content/
 └── vulnerabilities/        # Markdown files for each vulnerability
@@ -167,6 +167,7 @@ npm run setup                # Run setup script (creates .env, installs deps, se
 - **Address:** User and order addresses
 - **Flag:** CTF flags linked to vulnerabilities (slug, category, difficulty)
 - **Review:** Product reviews
+- **SupportAccessToken:** Support access tokens for customer support
 
 ### Authentication
 

@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { decodeWeakJWT } from "@/lib/server-auth";
+
+interface ExtendedJWTPayload {
+  id: string;
+  email: string;
+  role: string;
+  exp: number;
+  supportAccess?: boolean;
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser(request);
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "") || null;
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = decodeWeakJWT(token) as ExtendedJWTPayload | null;
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,6 +47,24 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           message: "Flag retrieved successfully",
           flag: flag.flag,
+        });
+      }
+    }
+
+    if (user.supportAccess && dbUser.role === "ADMIN") {
+      const sessionFixationFlag = await prisma.flag.findUnique({
+        where: { slug: "session-fixation-weak-session-management" },
+      });
+
+      if (sessionFixationFlag) {
+        return NextResponse.json({
+          message: "Unauthorized support access detected to admin account",
+          flag: sessionFixationFlag.flag,
+          user: {
+            id: dbUser.id,
+            email: dbUser.email,
+            role: dbUser.role,
+          },
         });
       }
     }

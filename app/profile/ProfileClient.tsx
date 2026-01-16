@@ -25,19 +25,34 @@ interface ExportResponse {
   format?: string;
 }
 
+interface SupportToken {
+  id: string;
+  token: string;
+  email: string;
+  expiresAt: string;
+  createdAt: string;
+  revoked: boolean;
+}
+
 export default function ProfileClient() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"profile" | "privacy" | "data">(
-    "profile"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "privacy" | "data" | "support"
+  >("profile");
 
   const [exportFormat, setExportFormat] = useState("json");
   const [exportFields, setExportFields] = useState("id,email,role");
   const [exportResult, setExportResult] = useState<ExportResponse | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  const [supportToken, setSupportToken] = useState<SupportToken | null>(null);
+  const [isSupportLoading, setIsSupportLoading] = useState(false);
+  const [supportError, setSupportError] = useState<string | null>(null);
+  const [supportSuccess, setSupportSuccess] = useState<string | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -118,6 +133,96 @@ export default function ProfileClient() {
     router.push("/login");
   };
 
+  const fetchSupportToken = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("/api/user/support-access", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.supportToken) {
+        setSupportToken(data.supportToken);
+      }
+    } catch {
+      // Token doesn't exist yet
+    }
+  };
+
+  const handleGenerateSupportToken = async () => {
+    setIsSupportLoading(true);
+    setSupportError(null);
+    setSupportSuccess(null);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("/api/user/support-access", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSupportError(data.error || "Failed to generate support token");
+        return;
+      }
+
+      setSupportToken(data.supportToken);
+      setSupportSuccess("Support access token generated successfully");
+    } catch {
+      setSupportError("An unexpected error occurred");
+    } finally {
+      setIsSupportLoading(false);
+    }
+  };
+
+  const handleRevokeSupportToken = async () => {
+    setIsSupportLoading(true);
+    setSupportError(null);
+    setSupportSuccess(null);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("/api/user/support-access", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setSupportError(data.error || "Failed to revoke support access");
+        return;
+      }
+
+      setSupportToken(null);
+      setSupportSuccess("Support access has been revoked");
+    } catch {
+      setSupportError("An unexpected error occurred");
+    } finally {
+      setIsSupportLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  useEffect(() => {
+    if (activeTab === "support" && user) {
+      fetchSupportToken();
+    }
+  }, [activeTab, user]);
+
   if (isLoading) {
     return (
       <section className="container mx-auto px-4 py-16">
@@ -178,6 +283,16 @@ export default function ProfileClient() {
             }`}
           >
             Data Export
+          </button>
+          <button
+            onClick={() => setActiveTab("support")}
+            className={`px-6 py-3 text-sm font-medium transition-colors ${
+              activeTab === "support"
+                ? "border-b-2 border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400"
+                : "cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            }`}
+          >
+            Support Access
           </button>
         </div>
 
@@ -386,6 +501,127 @@ export default function ProfileClient() {
                       : JSON.stringify(exportResult.data, null, 2)}
                   </pre>
                 )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "support" && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg dark:border-slate-800 dark:bg-slate-800">
+            <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              Support Access
+            </h2>
+            <p className="mb-6 text-slate-600 dark:text-slate-400">
+              Grant temporary access to our customer support team to help
+              troubleshoot issues with your account. The support team will be
+              able to view your account details and assist you with any
+              problems.
+            </p>
+
+            {supportError && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-900/20">
+                <p className="font-medium text-red-800 dark:text-red-200">
+                  {supportError}
+                </p>
+              </div>
+            )}
+
+            {supportSuccess && (
+              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800/50 dark:bg-green-900/20">
+                <p className="font-medium text-green-800 dark:text-green-200">
+                  {supportSuccess}
+                </p>
+              </div>
+            )}
+
+            {supportToken ? (
+              <div className="space-y-6">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Active Support Token
+                    </span>
+                    <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-slate-500 dark:text-slate-400">
+                        Token
+                      </label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="flex-1 rounded bg-slate-100 px-3 py-2 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                          {supportToken.token.substring(0, 20)}...
+                        </code>
+                        <button
+                          onClick={() =>
+                            copyToClipboard(supportToken.token, "token")
+                          }
+                          className="cursor-pointer rounded bg-primary-100 px-3 py-2 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
+                        >
+                          {copiedField === "token" ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-slate-500 dark:text-slate-400">
+                        Support Login URL
+                      </label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="flex-1 overflow-hidden text-ellipsis rounded bg-slate-100 px-3 py-2 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                          {`${typeof window !== "undefined" ? window.location.origin : ""}/support-login?token=${supportToken.token.substring(0, 10)}...`}
+                        </code>
+                        <button
+                          onClick={() =>
+                            copyToClipboard(
+                              `${window.location.origin}/support-login?token=${supportToken.token}`,
+                              "url"
+                            )
+                          }
+                          className="cursor-pointer rounded bg-primary-100 px-3 py-2 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
+                        >
+                          {copiedField === "url" ? "Copied!" : "Copy URL"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs text-slate-500 dark:text-slate-400">
+                          Created
+                        </label>
+                        <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                          {new Date(
+                            supportToken.createdAt
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleRevokeSupportToken}
+                  disabled={isSupportLoading}
+                  className="cursor-pointer rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSupportLoading ? "Revoking..." : "Revoke Support Access"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <button
+                  onClick={handleGenerateSupportToken}
+                  disabled={isSupportLoading}
+                  className="cursor-pointer rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSupportLoading
+                    ? "Generating..."
+                    : "Generate Support Access Token"}
+                </button>
               </div>
             )}
           </div>
