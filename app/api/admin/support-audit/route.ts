@@ -13,9 +13,7 @@ interface ExtendedJWTPayload {
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
-    const tokenFromHeader = authHeader?.replace("Bearer ", "") || null;
-    const tokenFromCookie = request.cookies.get("authToken")?.value || null;
-    const token = tokenFromHeader || tokenFromCookie;
+    const token = authHeader?.replace("Bearer ", "") || null;
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

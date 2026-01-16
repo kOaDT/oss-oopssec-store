@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       supportAccess: true,
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       token: authToken,
       user: {
         id: supportToken.user.id,
@@ -57,16 +57,6 @@ export async function GET(request: NextRequest) {
         role: supportToken.user.role,
       },
     });
-
-    response.cookies.set("authToken", authToken, {
-      httpOnly: false,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 365,
-      path: "/",
-    });
-
-    return response;
   } catch (error) {
     console.error("Error during support login:", error);
     return NextResponse.json(

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       token,
       user: {
         id: user.id,
@@ -52,16 +52,6 @@ export async function POST(request: Request) {
         role: user.role,
       },
     });
-
-    response.cookies.set("authToken", token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-
-    return response;
   } catch (error) {
     console.error("Error during login:", error);
     return NextResponse.json(
