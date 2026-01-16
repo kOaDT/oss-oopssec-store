@@ -1,0 +1,52 @@
+export const COUNTRY_FLAGS: Record<string, string> = {
+  Argentina: "🇦🇷",
+  Australia: "🇦🇺",
+  Austria: "🇦🇹",
+  Belgium: "🇧🇪",
+  Brazil: "🇧🇷",
+  Canada: "🇨🇦",
+  Chile: "🇨🇱",
+  China: "🇨🇳",
+  Colombia: "🇨🇴",
+  "Czech Republic": "🇨🇿",
+  Denmark: "🇩🇰",
+  Egypt: "🇪🇬",
+  Finland: "🇫🇮",
+  France: "🇫🇷",
+  Germany: "🇩🇪",
+  Greece: "🇬🇷",
+  Hungary: "🇭🇺",
+  India: "🇮🇳",
+  Ireland: "🇮🇪",
+  Israel: "🇮🇱",
+  Italy: "🇮🇹",
+  Japan: "🇯🇵",
+  Mexico: "🇲🇽",
+  Netherlands: "🇳🇱",
+  "New Zealand": "🇳🇿",
+  Norway: "🇳🇴",
+  Peru: "🇵🇪",
+  Poland: "🇵🇱",
+  Portugal: "🇵🇹",
+  Romania: "🇷🇴",
+  Russia: "🇷🇺",
+  Singapore: "🇸🇬",
+  "South Africa": "🇿🇦",
+  "South Korea": "🇰🇷",
+  Spain: "🇪🇸",
+  Sweden: "🇸🇪",
+  Switzerland: "🇨🇭",
+  Turkey: "🇹🇷",
+  UK: "🇬🇧",
+  Ukraine: "🇺🇦",
+  "United Kingdom": "🇬🇧",
+  "United States": "🇺🇸",
+  USA: "🇺🇸",
+};
+
+export function getCountryFlag(country: string | undefined): string {
+  if (!country) {
+    return "🌍";
+  }
+  return COUNTRY_FLAGS[country] || "🌍";
+}

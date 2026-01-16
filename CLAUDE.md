@@ -49,6 +49,7 @@ app/
 │   └── user/               # User profile endpoints
 ├── components/             # Reusable React components
 ├── vulnerabilities/        # Vulnerability documentation pages
+├── hall-of-fame/           # Hall of Fame page for players who found all flags
 └── [pages]/                # Next.js pages (cart, checkout, login, support-login, etc.)
 
 content/
@@ -76,6 +77,9 @@ hooks/
 
 scripts/
 └── setup.sh                # Initial setup script
+
+hall-of-fame/
+└── data.json               # Hall of Fame entries (community-driven via PRs)
 ```
 
 ## Development Commands
