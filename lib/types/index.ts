@@ -123,3 +123,11 @@ export interface OrderSearchResult extends Omit<Order, "deliveryAddress"> {
   zipCode: string;
   country: string;
 }
+
+export interface HallOfFameEntry {
+  username: string;
+  avatarUrl: string;
+  githubUrl: string;
+  date: string;
+  country?: string;
+}

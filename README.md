@@ -118,6 +118,7 @@ The setup script will create the `.env` file, install dependencies, initialize t
 | `hooks/`                   | Custom React hooks (authentication, etc.)                                |
 | `scripts/`                 | Setup and automation scripts                                             |
 | `docs/`                    | Static documentation site                                                |
+| `hall-of-fame/`            | Hall of Fame data file with player profiles who found all flags          |
 | `packages/`                | NPM package `create-oss-store` for quick project scaffolding             |
 
 ---
