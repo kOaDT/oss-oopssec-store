@@ -95,9 +95,3 @@ if (invalidFields.length > 0) {
 - [CWE-209: Generation of Error Message Containing Sensitive Information](https://cwe.mitre.org/data/definitions/209.html)
 - [CWE-200: Exposure of Sensitive Information to an Unauthorized Actor](https://cwe.mitre.org/data/definitions/200.html)
 - [PortSwigger - Information Disclosure](https://portswigger.net/web-security/information-disclosure)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{1nf0_d1scl0sur3_4p1_3rr0r}**
-
-The flag is exposed directly in the API error response when invalid field names are provided. The debug information includes "feature flags" from the database which contain all CTF flags.

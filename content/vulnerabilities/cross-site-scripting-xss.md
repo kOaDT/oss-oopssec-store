@@ -140,9 +140,3 @@ import DOMPurify from 'isomorphic-dompurify';
 - [CWE-79: Improper Neutralization of Input During Web Page Generation](https://cwe.mitre.org/data/definitions/79.html)
 - [React Security - dangerouslySetInnerHTML](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
 - [Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{cr0ss_s1t3_scr1pt1ng_xss}**
-
-The flag can be retrieved by exploiting the stored XSS vulnerability in the product review system. Inject a malicious script that fetches the flag from `/api/flags/cross-site-scripting-xss` and displays it.

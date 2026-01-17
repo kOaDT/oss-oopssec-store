@@ -126,9 +126,3 @@ const results = await prisma.order.findMany({
 - [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
 - [CWE-89: Improper Neutralization of Special Elements used in an SQL Command](https://cwe.mitre.org/data/definitions/89.html)
 - [PortSwigger Web Security Academy - SQL Injection](https://portswigger.net/web-security/sql-injection)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{sql_1nj3ct10n_vuln3r4b1l1ty}**
-
-The flag is automatically returned by the API when a SQL injection attempt is detected in the order search feature. Any SQL injection payload (containing keywords like `UNION`, `SELECT`, `OR 1=1`, `--`, etc.) will trigger the detection and return the flag. The application specifically blocks direct access to the `flags` table through SQL injection to prevent retrieving all flags at once.

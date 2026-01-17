@@ -98,9 +98,3 @@ return NextResponse.json({
 - [OWASP Top 10 - Broken Access Control](https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/)
 - [CWE-639: Authorization Bypass Through User-Controlled Key](https://cwe.mitre.org/data/definitions/639.html)
 - [OWASP Cheat Sheet Series - Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}**
-
-The flag is returned in the API response and displayed on the order confirmation page when accessing an order that belongs to another user. To retrieve it, log in as Alice and navigate to `/order?id=ORD-001` (or any of Bob's order IDs: ORD-002, ORD-003).

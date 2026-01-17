@@ -122,9 +122,3 @@ The code directly uses the `slug` parameter in `path.join()`, which allows path 
 - [CWE-22: Improper Limitation of a Pathname to a Restricted Directory](https://cwe.mitre.org/data/definitions/22.html)
 - [OWASP API Security Top 10 - API8:2019 - Injection](https://owasp.org/API-Security/editions/2019/fr/0xa8-injection/)
 - [PortSwigger - Path Traversal](https://portswigger.net/web-security/file-path-traversal)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{p4th_tr4v3rs4l_4tt4ck}**
-
-The flag can be retrieved by exploiting the path traversal vulnerability in the `/api/files` endpoints. Use the path traversal sequence `../flag.txt` to access the flag file located at the project root. The easiest method is using the query parameter: `/api/files?file=../flag.txt`

@@ -3,10 +3,16 @@ import Footer from "../components/Footer";
 
 const leakedData = [
   {
+    email: "alice@example.com",
     passwordHash: "a22e69ce108be0e6eee294be7eb6c254",
   },
   {
+    email: "bob@example.com",
     passwordHash: "d8578edf8458ce06fbc5bb76a58c5ca4",
+  },
+  {
+    email: "vis.bruta@example.com",
+    passwordHash: null,
   },
 ];
 
@@ -100,6 +106,9 @@ export default function News() {
                   <thead>
                     <tr className="bg-slate-200 dark:bg-slate-700">
                       <th className="border border-slate-300 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-100">
+                        Email
+                      </th>
+                      <th className="border border-slate-300 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-100">
                         Password Hash
                       </th>
                     </tr>
@@ -111,7 +120,14 @@ export default function News() {
                         className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                       >
                         <td className="border border-slate-300 px-4 py-3 font-mono text-sm text-slate-900 dark:border-slate-600 dark:text-slate-100">
-                          {user.passwordHash}
+                          {user.email}
+                        </td>
+                        <td className="border border-slate-300 px-4 py-3 font-mono text-sm text-slate-900 dark:border-slate-600 dark:text-slate-100">
+                          {user.passwordHash || (
+                            <span className="italic text-slate-500 dark:text-slate-400">
+                              [REDACTED]
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}

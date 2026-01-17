@@ -44,6 +44,18 @@ export async function POST(request: Request) {
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
     });
 
+    const isVisBruta = user.email === "vis.bruta@example.com";
+    let flagData = null;
+
+    if (isVisBruta) {
+      const bruteForceFlag = await prisma.flag.findUnique({
+        where: { slug: "brute-force-no-rate-limiting" },
+      });
+      if (bruteForceFlag) {
+        flagData = bruteForceFlag.flag;
+      }
+    }
+
     return NextResponse.json({
       token,
       user: {
@@ -51,6 +63,7 @@ export async function POST(request: Request) {
         email: user.email,
         role: user.role,
       },
+      flag: flagData,
     });
   } catch (error) {
     console.error("Error during login:", error);

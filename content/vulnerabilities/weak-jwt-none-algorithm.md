@@ -79,9 +79,3 @@ const createJWT = (payload: object): string => {
 - [CWE-345: Insufficient Verification of Data Authenticity](https://cwe.mitre.org/data/definitions/345.html)
 - [RFC 7519: JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519)
 - [JWT Best Practices](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{w34k_jwt_n0n3_4lg0r1thm}**
-
-The flag can be retrieved by exploiting the JWT "none" algorithm vulnerability to escalate privileges and access the admin endpoint.

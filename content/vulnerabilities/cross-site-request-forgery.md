@@ -278,9 +278,3 @@ if (cookieToken !== headerToken) {
 - [CWE-352: Cross-Site Request Forgery (CSRF)](https://cwe.mitre.org/data/definitions/352.html)
 - [MDN - SameSite Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite)
 - [MDN - CSRF Protection](https://developer.mozilla.org/en-US/docs/Glossary/CSRF)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}**
-
-The flag can be retrieved by exploiting the CSRF vulnerability to change an order status. When an authenticated admin's order status is successfully modified via a CSRF attack, the flag is returned in the API response.

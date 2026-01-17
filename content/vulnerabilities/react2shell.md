@@ -88,9 +88,3 @@ To identify this vulnerability in your application:
 - [Facebook Security Advisory](https://www.facebook.com/security/advisories/cve-2025-55182)
 - [CISA Known Exploited Vulnerabilities Catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2025-55182)
 - [OWASP Deserialization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{r3act2sh3ll}**
-
-The flag can be found in the `.env.local` file on the server. To retrieve it, you must exploit the React2Shell vulnerability to execute `cat .env.local` on the server.

@@ -113,9 +113,3 @@ To retrieve the flag `OSS{s3rv3r_s1d3_r3qu3st_f0rg3ry}`, you need to exploit the
 - [CWE-918: Server-Side Request Forgery (SSRF)](https://cwe.mitre.org/data/definitions/918.html)
 - [OWASP API Security Top 10 - API8:2019 - Injection](https://owasp.org/API-Security/editions/2019/fr/0xa8-injection/)
 - [PortSwigger - Server-Side Request Forgery (SSRF)](https://portswigger.net/web-security/ssrf)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{s3rv3r_s1d3_r3qu3st_f0rg3ry}**
-
-The flag can be retrieved by exploiting the SSRF vulnerability in the `/api/support` endpoint. Submit the support form with the URL of the internal secret page (e.g., `http://localhost:3000/internal`) in the screenshot URL field. The server will fetch this internal page and return its content, revealing the flag.

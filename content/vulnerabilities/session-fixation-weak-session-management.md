@@ -173,9 +173,3 @@ curl -X POST http://localhost:3000/api/user/support-access \
 - [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
 - [CWE-384: Session Fixation](https://cwe.mitre.org/data/definitions/384.html)
 - [CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes](https://cwe.mitre.org/data/definitions/915.html)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{s3ss10n_f1x4t10n_4tt4ck}**
-
-The flag is displayed on the admin dashboard (`/admin`) when the system detects that someone is accessing the admin account through a support access token (session fixation attack). The JWT token created via support login contains a `supportAccess: true` flag that allows the system to detect this unauthorized access pattern.
