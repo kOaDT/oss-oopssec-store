@@ -4,6 +4,7 @@ import ProductGrid from "./components/ProductGrid";
 import Features from "./components/Features";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
+import FlagToast from "./components/FlagToast";
 import { getBaseUrl } from "@/lib/config";
 import type { Product } from "@/lib/types";
 
@@ -27,6 +28,7 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
+      <FlagToast />
       <Header />
       <main className="flex-1">
         <Hero />

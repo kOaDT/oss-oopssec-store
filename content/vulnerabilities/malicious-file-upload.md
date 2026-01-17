@@ -167,9 +167,3 @@ headers: [
 - [SVG XSS Attacks](https://owasp.org/www-community/xss-filter-evasion-cheatsheet)
 - [Content-Type Spoofing](https://portswigger.net/web-security/file-upload)
 - [File Type Validation Best Practices](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{m4l1c10us_f1l3_upl04d_xss}**
-
-The flag is retrieved by exploiting the malicious file upload vulnerability. Upload a malicious SVG file containing JavaScript (script tags or event handlers) as a product image. The server detects the malicious content but still accepts and stores the file, revealing the flag in the process.

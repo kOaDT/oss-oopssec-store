@@ -90,9 +90,3 @@ const order = await prisma.order.create({
 - [OWASP Top 10 - Broken Access Control](https://owasp.org/www-project-top-ten/)
 - [CWE-602: Client-Side Enforcement of Server-Side Security](https://cwe.mitre.org/data/definitions/602.html)
 - [OWASP Cheat Sheet Series - Input Validation](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
-
-## Flag
-
-The flag for this vulnerability is: **OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}**
-
-The flag is returned in the API response when the server detects that the client-provided total differs from the server-calculated total. To retrieve it, modify the `total` field in the order creation request to a value different from the actual cart total.

@@ -21,12 +21,18 @@ export default function LoginForm() {
       const data = await api.post<{
         token: string;
         user: { id: string; email: string; role: string };
+        flag?: string | null;
       }>("/api/auth/login", { email, password }, { requireAuth: false });
 
       if (data.token) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         window.dispatchEvent(new Event("storage"));
+
+        if (data.flag) {
+          localStorage.setItem("pendingFlag", data.flag);
+        }
+
         if (data.user?.role === "ADMIN") {
           router.push("/admin");
         } else {

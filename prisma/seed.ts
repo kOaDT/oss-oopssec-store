@@ -140,6 +140,13 @@ const flags = [
     category: "AUTHENTICATION" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{brut3_f0rc3_n0_r4t3_l1m1t}",
+    slug: "brute-force-no-rate-limiting",
+    markdownFile: "brute-force-no-rate-limiting.md",
+    category: "AUTHENTICATION" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 config();
@@ -187,6 +194,19 @@ async function main() {
     },
   });
 
+  const visBrutaAddress = await prisma.address.upsert({
+    where: { id: "addr-vis-bruta-001" },
+    update: {},
+    create: {
+      id: "addr-vis-bruta-001",
+      street: "Via Forza Bruta 42",
+      city: "Rome",
+      state: "Lazio",
+      zipCode: "00100",
+      country: "Italy",
+    },
+  });
+
   await prisma.address.upsert({
     where: { id: "addr-default-001" },
     update: {},
@@ -228,6 +248,20 @@ async function main() {
     },
   });
 
+  const visBruta = await prisma.user.upsert({
+    where: { email: "vis.bruta@example.com" },
+    update: {
+      password: hashMD5("sunshine"),
+      addressId: visBrutaAddress.id,
+    },
+    create: {
+      email: "vis.bruta@example.com",
+      password: hashMD5("sunshine"),
+      role: "CUSTOMER",
+      addressId: visBrutaAddress.id,
+    },
+  });
+
   const admin = await prisma.user.upsert({
     where: { email: "admin@oss.com" },
     update: {
@@ -244,6 +278,7 @@ async function main() {
     alice: alice.email,
     admin: admin.email,
     bob: bob.email,
+    visBruta: visBruta.email,
   });
 
   const products = [
@@ -443,13 +478,12 @@ async function main() {
     console.log("Reviews already exist, skipping review creation");
   }
 
-  const existingFlags = await prisma.flag.findMany();
-  if (existingFlags.length === 0) {
-    await prisma.flag.createMany({
-      data: flags,
+  for (const flag of flags) {
+    await prisma.flag.upsert({
+      where: { slug: flag.slug },
+      update: flag,
+      create: flag,
     });
-  } else {
-    console.log("Flags already exist, skipping flag creation");
   }
 
   console.log(`Created ${flags.length} flags`);
