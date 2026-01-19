@@ -1,1 +1,7 @@
 npx lint-staged
+
+# Lint docs/ if any docs files were changed
+if git diff --cached --name-only | grep -q "^docs/"; then
+  echo "Running lint on docs/..."
+  npm run docs:format:check && npm run docs:lint
+fi

@@ -80,6 +80,14 @@ scripts/
 
 hall-of-fame/
 └── data.json               # Hall of Fame entries (community-driven via PRs)
+
+docs/                       # Static documentation site (Astro)
+├── src/
+│   ├── data/blog/          # Blog posts / walkthroughs (Markdown)
+│   └── ...                 # Astro components, layouts, pages
+├── public/                 # Static assets
+├── astro.config.ts         # Astro configuration
+└── package.json            # Separate npm project
 ```
 
 ## Development Commands
@@ -106,6 +114,13 @@ npm run db:seed              # Seed database with initial data and flags
 
 # Setup
 npm run setup                # Run setup script (creates .env, installs deps, seeds DB)
+
+# Documentation Site (Astro - in docs/)
+npm run docs:dev             # Start Astro development server
+npm run docs:build           # Build Astro site
+npm run docs:lint            # Run ESLint on docs/
+npm run docs:format          # Format docs/ with Prettier
+npm run docs:format:check    # Check docs/ formatting
 ```
 
 ## Coding Standards
@@ -277,4 +292,6 @@ const flag = await prisma.flag.findUnique({
 - The application uses SQLite for simplicity (easy to reset and seed)
 - All vulnerabilities are documented with educational content
 - There's a `create-oss-store` npm package in `packages/` for quick scaffolding
-- Static documentation site available in `docs/`
+- Static documentation site available in `docs/` (Astro project with its own `package.json`)
+- The `docs/` folder is excluded from the root ESLint/Prettier config (has its own config with Astro plugins)
+- Run `npm install` in `docs/` separately before using `docs:*` commands
