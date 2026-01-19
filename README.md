@@ -29,7 +29,7 @@
 <p align="center">
   <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md">Contributing</a> |
   <a href="https://github.com/users/kOaDT/projects/3">Roadmap</a> |
-  <a href="https://medium.com/@oopssec-store">WriteUps</a>
+  <a href="https://kOaDT.github.io/oss-oopssec-store">Walkthroughs</a>
 </p>
 
 <div align="center">
@@ -64,6 +64,7 @@ Designed for penetration testers, security engineers, developers, and cybersecur
 - API security testing environment with documented attack vectors
 - Capture The Flag (CTF) challenges with hidden flags to discover
 - Comprehensive vulnerability documentation for learning and training
+- Community-driven walkthroughs and writeups for each vulnerability
 - Suitable for security awareness training, penetration testing practice, and AppSec education
 
 ---
@@ -117,7 +118,7 @@ The setup script will create the `.env` file, install dependencies, initialize t
 | `public/`                  | Static assets and exploit payloads (e.g., CSRF attack demo)              |
 | `hooks/`                   | Custom React hooks (authentication, etc.)                                |
 | `scripts/`                 | Setup and automation scripts                                             |
-| `docs/`                    | Static documentation site                                                |
+| `docs/`                    | Static documentation site with community walkthroughs                    |
 | `hall-of-fame/`            | Hall of Fame data file with player profiles who found all flags          |
 | `packages/`                | NPM package `create-oss-store` for quick project scaffolding             |
 
@@ -138,11 +139,14 @@ OSS – OopsSec Store is released under the MIT License. Contributions from the 
 Ways to contribute:
 
 - **Add new security challenges**
+- **Write or improve walkthroughs** - Share your exploitation techniques and help others learn
 - **Extend the application**
 - **Report and fix bugs**
 - **Improve documentation**
 
 Looking for ideas? Check out our [Roadmap project](https://github.com/users/kOaDT/projects/3) for planned features and vulnerabilities you can help implement.
+
+Found all the flags? Share your walkthroughs with the community by contributing to our [documentation site](https://kOaDT.github.io/oss-oopssec-store).
 
 For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues).
 
