@@ -12,6 +12,7 @@ import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import { SITE } from "@/config";
 import { SOCIALS } from "@/constants";
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const posts = await getCollection("blog");
 
 const sortedPosts = getSortedPosts(posts);
@@ -26,7 +27,7 @@ const sortedPosts = getSortedPosts(posts);
       </h1>
       <a
         target="_blank"
-        href="/rss.xml"
+        href={`${base}/rss.xml`}
         class="inline-block"
         aria-label="rss feed"
         title="RSS Feed"
@@ -81,7 +82,7 @@ const sortedPosts = getSortedPosts(posts);
     }
 
     <div class="my-8 text-center">
-      <LinkButton href="/posts/">
+      <LinkButton href={`${base}/posts/`}>
         All Posts
         <IconArrowRight class="inline-block rtl:-rotate-180" />
       </LinkButton>
@@ -90,12 +91,12 @@ const sortedPosts = getSortedPosts(posts);
   <Footer />
 </Layout>
 
-<script>
+<script define:vars={{ base }}>
   document.addEventListener("astro:page-load", () => {
-    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-      ?.dataset?.layout;
+    const indexLayout =
+      document.querySelector("#main-content")?.dataset?.layout;
     if (indexLayout) {
-      sessionStorage.setItem("backUrl", "/");
+      sessionStorage.setItem("backUrl", base + "/");
     }
   });
 </script>
