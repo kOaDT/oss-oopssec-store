@@ -21,7 +21,8 @@ export function getPath(
     .slice(0, -1) // remove the last segment_ file name_ since it's unnecessary
     .map(segment => slugifyStr(segment)); // slugify each segment path
 
-  const basePath = includeBase ? "/posts" : "";
+  const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, ""); // Remove trailing slash
+  const basePath = includeBase ? `${baseUrl}/posts` : baseUrl;
 
   // Making sure `id` does not contain the directory
   const blogId = id.split("/");
