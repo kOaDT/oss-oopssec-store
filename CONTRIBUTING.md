@@ -93,6 +93,8 @@ description: A comprehensive guide to exploiting the SQL injection vulnerability
 ---
 ```
 
+If you need additional information on how to use AstroPaper, please refer to [this article](https://koadt.github.io/oss-oopssec-store/posts/adding-new-posts-in-astropaper-theme/).
+
 ## Roadmap
 
 For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see our [Roadmap project](https://github.com/users/kOaDT/projects/3). This project outlines upcoming development priorities and is a great place to find contribution opportunities.

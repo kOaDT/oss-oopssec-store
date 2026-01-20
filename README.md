@@ -146,7 +146,7 @@ Ways to contribute:
 
 Looking for ideas? Check out our [Roadmap project](https://github.com/users/kOaDT/projects/3) for planned features and vulnerabilities you can help implement.
 
-Found all the flags? Share your walkthroughs with the community by contributing to our [documentation site](https://kOaDT.github.io/oss-oopssec-store).
+Found all the flags? Share your walkthroughs with the community by contributing to our [walkthroughs documentation site](https://kOaDT.github.io/oss-oopssec-store).
 
 For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues).
 
