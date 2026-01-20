@@ -5,6 +5,7 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Tag from "@/components/Tag.astro";
 import Datetime from "@/components/Datetime.astro";
+import Author from "@/components/Author.astro";
 import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
@@ -26,6 +27,8 @@ const { post, posts } = Astro.props;
 const {
   title,
   author,
+  authorGithubUrl,
+  authorGithubAvatar,
   description,
   ogImage: initOgImage,
   canonicalURL,
@@ -97,7 +100,8 @@ const nextPost =
     >
       {title}
     </h1>
-    <div class="my-2 flex items-center gap-2">
+    <div class="my-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <Author {author} {authorGithubUrl} {authorGithubAvatar} size="lg" />
       <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
       <span
         aria-hidden="true"

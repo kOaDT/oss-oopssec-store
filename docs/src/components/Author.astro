@@ -1,0 +1,50 @@
+---
+import defaultAvatar from "@/assets/images/default-avatar.svg";
+
+type Props = {
+  class?: string;
+  size?: "sm" | "lg";
+  author: string;
+  authorGithubUrl?: string;
+  authorGithubAvatar?: string;
+};
+
+const {
+  author,
+  authorGithubUrl,
+  authorGithubAvatar,
+  size = "sm",
+  class: className = "",
+} = Astro.props;
+
+const avatarSrc = authorGithubAvatar || defaultAvatar.src;
+const avatarSize = size === "lg" ? "size-8" : "size-6";
+const textSize = size === "lg" ? "sm:text-base" : "";
+---
+
+<div class:list={["flex items-center gap-x-2", className]}>
+  <img
+    src={avatarSrc}
+    alt={`${author}'s avatar`}
+    class:list={["rounded-full object-cover", avatarSize]}
+    loading="lazy"
+    decoding="async"
+  />
+  {
+    authorGithubUrl ? (
+      <a
+        href={authorGithubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class:list={[
+          "text-sm opacity-80 hover:underline hover:opacity-100",
+          textSize,
+        ]}
+      >
+        {author}
+      </a>
+    ) : (
+      <span class:list={["text-sm opacity-80", textSize]}>{author}</span>
+    )
+  }
+</div>

@@ -1,5 +1,7 @@
 ---
 author: kOaDT
+authorGithubUrl: https://github.com/kOaDT
+authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
 pubDatetime: 2026-01-13T10:00:00Z
 title: "JWT None Algorithm Bypass: Forging Admin Access in OopsSec Store"
 slug: jwt-none-algorithm-admin-bypass

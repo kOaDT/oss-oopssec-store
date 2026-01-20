@@ -1,5 +1,7 @@
 ---
 author: kOaDT
+authorGithubUrl: https://github.com/kOaDT
+authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
 pubDatetime: 2026-01-14T10:00:00Z
 title: "Stored XSS in Product Reviews"
 slug: stored-xss-product-reviews
