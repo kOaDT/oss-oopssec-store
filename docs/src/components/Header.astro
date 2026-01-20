@@ -11,9 +11,14 @@ import { SITE } from "@/config";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const { pathname } = Astro.url;
 
-// Remove trailing slash from current pathname if exists
-const currentPath =
+// Remove trailing slash and base from current pathname
+let currentPath =
   pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+
+// Remove base URL prefix for path comparison
+if (base && currentPath.startsWith(base)) {
+  currentPath = currentPath.slice(base.length) || "/";
+}
 
 const isActive = (path: string) => {
   const currentPathArray = currentPath.split("/").filter(p => p.trim());

@@ -8,9 +8,11 @@ import Card from "@/components/Card.astro";
 import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
 import { SITE } from "@/config";
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 // Redirect to 404 page if `showArchives` config is false
 if (!SITE.showArchives) {
-  return Astro.redirect("/404");
+  return Astro.redirect(`${base}/404`);
 }
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
