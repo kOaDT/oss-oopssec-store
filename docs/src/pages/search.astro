@@ -13,7 +13,13 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : `${base}/`;
 <Layout title={`Search | ${SITE.title}`}>
   <Header />
   <Main pageTitle="Search" pageDesc="Search any article ...">
-    <div id="pagefind-search" transition:persist data-backurl={backUrl}></div>
+    <div
+      id="pagefind-search"
+      transition:persist
+      data-backurl={backUrl}
+      data-base={base}
+    >
+    </div>
   </Main>
   <Footer />
 </Layout>
@@ -44,10 +50,12 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : `${base}/`;
       }
 
       // Init pagefind ui
+      const baseUrl = pageFindSearch?.dataset?.base || "";
       const search = new PagefindUI({
         element: "#pagefind-search",
         showImages: false,
         showSubResults: true,
+        basePath: `${baseUrl}/pagefind/`,
         processTerm: function (term: string) {
           params.set("q", term); // Update the `q` parameter in the URL
           history.replaceState(history.state, "", "?" + params.toString()); // Push the new URL without reloading

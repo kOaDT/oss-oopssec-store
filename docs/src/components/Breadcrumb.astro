@@ -1,12 +1,15 @@
 ---
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-// Remove current url path and remove trailing slash if exists
-const currentUrlPath = Astro.url.pathname.replace(/\/+$/, "");
+// Remove current url path, base prefix, and trailing slash
+let currentUrlPath = Astro.url.pathname.replace(/\/+$/, "");
+if (base && currentUrlPath.startsWith(base)) {
+  currentUrlPath = currentUrlPath.slice(base.length);
+}
 
 // Get url array from path
 // eg: /tags/tailwindcss => ['tags', 'tailwindcss']
-const breadcrumbList = currentUrlPath.split("/").slice(1);
+const breadcrumbList = currentUrlPath.split("/").filter(Boolean);
 
 // if breadcrumb is Home > Posts > 1 <etc>
 // replace Posts with Posts (page number)
