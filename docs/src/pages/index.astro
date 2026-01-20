@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { Code } from "astro:components";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -47,6 +48,17 @@ const sortedPosts = getSortedPosts(posts);
         > platform. Hunt for flags, exploit vulnerabilities, and level up your security
         skills.
       </p>
+      <div
+        class="app-prose mt-4 prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
+      >
+        <Code
+          code={`$ npx create-oss-store
+$ cd my-oss-store && npm run dev
+
+# → Open http://localhost:3000 and start hunting flags`}
+          lang="bash"
+        />
+      </div>
       <p class="mt-2">
         Read the blog posts or check
         <LinkButton
@@ -99,4 +111,39 @@ const sortedPosts = getSortedPosts(posts);
       sessionStorage.setItem("backUrl", base + "/");
     }
   });
+</script>
+
+<script is:inline data-astro-rerun>
+  function attachCopyButtons() {
+    const copyButtonLabel = "Copy";
+    const codeBlocks = Array.from(document.querySelectorAll("#hero pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const copyButton = document.createElement("button");
+      copyButton.className =
+        "copy-code absolute end-3 -top-3 rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        const code = codeBlock.querySelector("code");
+        const text = code?.innerText;
+
+        await navigator.clipboard.writeText(text ?? "");
+
+        copyButton.innerText = "Copied";
+        setTimeout(() => {
+          copyButton.innerText = copyButtonLabel;
+        }, 700);
+      });
+    }
+  }
+  attachCopyButtons();
 </script>
