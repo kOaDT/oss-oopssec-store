@@ -2,7 +2,7 @@
 author: kOaDT
 authorGithubUrl: https://github.com/kOaDT
 authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
-pubDatetime: 2026-01-19T10:00:00Z
+pubDatetime: 2026-01-20T10:00:00Z
 title: "Insecure Direct Object Reference: Unauthorized Order Access"
 slug: idor-order-privacy-breach
 draft: false
