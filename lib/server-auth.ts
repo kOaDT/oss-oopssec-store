@@ -8,16 +8,23 @@ interface JWTPayload {
   exp: number;
 }
 
+const JWT_SECRET = process.env.JWT_SECRET || "secret";
+
 export function hashMD5(text: string): string {
   return crypto.createHash("md5").update(text).digest("hex");
 }
 
+function signHS256(data: string, secret: string): string {
+  return crypto.createHmac("sha256", secret).update(data).digest("base64url");
+}
+
 export function createWeakJWT(payload: object): string {
   const header = Buffer.from(
-    JSON.stringify({ alg: "none", typ: "JWT" })
+    JSON.stringify({ alg: "HS256", typ: "JWT" })
   ).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  return `${header}.${body}.`;
+  const signature = signHS256(`${header}.${body}`, JWT_SECRET);
+  return `${header}.${body}.${signature}`;
 }
 
 export function decodeWeakJWT(token: string): JWTPayload | null {
@@ -27,8 +34,16 @@ export function decodeWeakJWT(token: string): JWTPayload | null {
       return null;
     }
 
-    const body = Buffer.from(parts[1], "base64url").toString("utf-8");
-    const payload = JSON.parse(body) as JWTPayload;
+    const [header, body, signature] = parts;
+    const expectedSignature = signHS256(`${header}.${body}`, JWT_SECRET);
+
+    if (signature !== expectedSignature) {
+      return null;
+    }
+
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf-8")
+    ) as JWTPayload;
 
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
       return null;

@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
       id: supportToken.user.id,
       email: supportToken.user.email,
       role: supportToken.user.role,
+      hint: "The secret is not so secret",
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
       supportAccess: true,
     });

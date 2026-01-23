@@ -43,9 +43,9 @@ const flags = [
     difficulty: "EASY" as const,
   },
   {
-    flag: "OSS{w34k_jwt_n0n3_4lg0r1thm}",
-    slug: "weak-jwt-none-algorithm",
-    markdownFile: "weak-jwt-none-algorithm.md",
+    flag: "OSS{w34k_jwt_s3cr3t_k3y}",
+    slug: "weak-jwt-secret",
+    markdownFile: "weak-jwt-secret.md",
     category: "AUTHENTICATION" as const,
     difficulty: "MEDIUM" as const,
   },

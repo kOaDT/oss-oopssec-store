@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     if (dbUser.role !== "ADMIN") {
       const flag = await prisma.flag.findUnique({
-        where: { slug: "weak-jwt-none-algorithm" },
+        where: { slug: "weak-jwt-secret" },
       });
 
       if (flag) {
