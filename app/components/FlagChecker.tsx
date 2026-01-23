@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import confetti from "canvas-confetti";
 
@@ -11,8 +11,6 @@ function formatSlugToTitle(slug: string): string {
     .join(" ");
 }
 
-const STORAGE_KEY = "oss_found_flags";
-const TOTAL_FLAGS_KEY = "oss_total_flags";
 const INITIAL_ANIMATION_DURATION = 10000;
 
 interface FlagCheckerProps {
@@ -26,20 +24,21 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [foundFlags, setFoundFlags] = useState<string[]>([]);
   const [isInitialAnimation, setIsInitialAnimation] = useState(true);
+  const fetchProgress = useCallback(async () => {
+    try {
+      const response = await fetch("/api/flags/progress");
+      if (response.ok) {
+        const data = await response.json();
+        setFoundFlags(data.foundFlags.map((f: { slug: string }) => f.slug));
+      }
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+    }
+  }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const flags = JSON.parse(stored);
-        setFoundFlags(Array.isArray(flags) ? flags : []);
-      } catch {
-        setFoundFlags([]);
-      }
-    }
-
-    localStorage.setItem(TOTAL_FLAGS_KEY, totalFlags.toString());
-  }, [totalFlags]);
+    fetchProgress();
+  }, [fetchProgress]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -110,11 +109,11 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
       const data = await response.json();
 
       if (data.valid) {
-        const newFoundFlags = [...foundFlags];
-        if (!newFoundFlags.includes(data.slug)) {
-          newFoundFlags.push(data.slug);
+        if (data.alreadyFound) {
+          setMessage("Flag already found!");
+        } else {
+          const newFoundFlags = [...foundFlags, data.slug];
           setFoundFlags(newFoundFlags);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newFoundFlags));
 
           if (newFoundFlags.length === totalFlags) {
             triggerVictoryCelebration();
@@ -131,8 +130,6 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
               setMessage(null);
             }, 2000);
           }
-        } else {
-          setMessage("Flag already found!");
         }
         setFlagInput("");
       } else {

@@ -168,6 +168,16 @@ const prisma = new PrismaClient({
 async function main() {
   console.log("Seeding database...");
 
+  const existingProjectInit = await prisma.projectInit.findFirst();
+  if (!existingProjectInit) {
+    await prisma.projectInit.create({
+      data: {},
+    });
+    console.log("Created project initialization timestamp");
+  } else {
+    console.log("Project initialization already exists, skipping");
+  }
+
   const aliceAddress = await prisma.address.upsert({
     where: { id: "addr-alice-001" },
     update: {},

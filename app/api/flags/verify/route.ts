@@ -12,19 +12,42 @@ export async function POST(request: Request) {
       );
     }
 
-    const foundFlag = await prisma.flag.findFirst({
+    const matchedFlag = await prisma.flag.findFirst({
       where: {
         flag: flag.trim(),
       },
     });
 
-    if (!foundFlag) {
+    if (!matchedFlag) {
       return NextResponse.json({ valid: false });
     }
 
+    const existingFoundFlag = await prisma.foundFlag.findUnique({
+      where: {
+        flagId: matchedFlag.id,
+      },
+    });
+
+    if (existingFoundFlag) {
+      return NextResponse.json({
+        valid: true,
+        slug: matchedFlag.slug,
+        alreadyFound: true,
+        foundAt: existingFoundFlag.foundAt.toISOString(),
+      });
+    }
+
+    const newFoundFlag = await prisma.foundFlag.create({
+      data: {
+        flagId: matchedFlag.id,
+      },
+    });
+
     return NextResponse.json({
       valid: true,
-      slug: foundFlag.slug,
+      slug: matchedFlag.slug,
+      alreadyFound: false,
+      foundAt: newFoundFlag.foundAt.toISOString(),
     });
   } catch (error) {
     console.error("Error verifying flag:", error);

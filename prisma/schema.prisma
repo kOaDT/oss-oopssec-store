@@ -87,6 +87,7 @@ model Flag {
   markdownFile String
   category     FlagCategory   @default(OTHER)
   difficulty   FlagDifficulty @default(MEDIUM)
+  foundFlag    FoundFlag?
 
   @@map("flags")
 }
@@ -144,4 +145,21 @@ model SupportAccessToken {
   createdAt DateTime @default(now())
 
   @@map("support_access_tokens")
+}
+
+model FoundFlag {
+  id      String   @id @default(cuid())
+  flagId  String
+  flag    Flag     @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  foundAt DateTime @default(now())
+
+  @@unique([flagId])
+  @@map("found_flags")
+}
+
+model ProjectInit {
+  id          String   @id @default(cuid())
+  initializedAt DateTime @default(now())
+
+  @@map("project_init")
 }
