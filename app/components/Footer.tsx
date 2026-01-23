@@ -157,6 +157,12 @@ export default function Footer() {
                 Flags
               </Link>
               <Link
+                href="/player-dashboard"
+                className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
+              >
+                Dashboard
+              </Link>
+              <Link
                 href="/hall-of-fame"
                 className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
               >

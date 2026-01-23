@@ -100,25 +100,6 @@ export default function HallOfFame() {
               style={{ borderRadius: "8px" }}
             >
               <div className="flex flex-col items-center gap-8 text-center md:flex-row md:items-start md:text-left">
-                <div
-                  className="flex h-20 w-20 shrink-0 items-center justify-center bg-primary-100 shadow-sm dark:bg-primary-900/30"
-                  style={{ borderRadius: "8px" }}
-                >
-                  <svg
-                    className="h-10 w-10 text-primary-600 dark:text-primary-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                </div>
                 <div className="flex-1">
                   <h2 className="mb-4 text-3xl font-light text-slate-900 dark:text-slate-100">
                     Join the Hall of Fame
@@ -134,10 +115,6 @@ export default function HallOfFame() {
                       /hall-of-fame/data.json
                     </code>{" "}
                     file.
-                  </p>
-                  <p className="mb-8 text-lg font-medium text-slate-700 dark:text-slate-300">
-                    This is an excellent way to showcase your security expertise
-                    and put your profile in the spotlight.
                   </p>
                   <div className="flex flex-wrap justify-center gap-4 md:justify-start">
                     <a

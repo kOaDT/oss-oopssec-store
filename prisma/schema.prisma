@@ -80,14 +80,15 @@ model Address {
 }
 
 model Flag {
-  id           String         @id @default(cuid())
-  flag         String
-  slug         String         @unique
-  cve          String?
-  markdownFile String
-  category     FlagCategory   @default(OTHER)
-  difficulty   FlagDifficulty @default(MEDIUM)
-  foundFlag    FoundFlag?
+  id              String         @id @default(cuid())
+  flag            String
+  slug            String         @unique
+  cve             String?
+  markdownFile    String
+  walkthroughSlug String?
+  category        FlagCategory   @default(OTHER)
+  difficulty      FlagDifficulty @default(MEDIUM)
+  foundFlag       FoundFlag?
 
   @@map("flags")
 }
