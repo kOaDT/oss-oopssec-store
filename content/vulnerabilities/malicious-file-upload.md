@@ -2,7 +2,7 @@
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw where the application allows file uploads with insufficient validation. By relying solely on the `Content-Type` header to validate uploaded files, attackers can upload malicious SVG files containing JavaScript code that executes when the file is viewed.
+This vulnerability demonstrates a critical security flaw where the application allows file uploads with insufficient validation. By relying solely on the `Content-Type` header to validate uploaded files, attackers can upload malicious SVG files containing JavaScript code that executes when the file is viewed by **any user**, including regular customers viewing product details.
 
 ## Why This Is Dangerous
 
@@ -13,8 +13,11 @@ When an application validates file uploads based only on client-supplied metadat
 1. **Content-Type spoofing** - Attackers can easily manipulate the Content-Type header to bypass validation
 2. **SVG-based XSS** - SVG files can contain embedded JavaScript that executes in the browser
 3. **Persistent attack** - Uploaded malicious files remain on the server and can be triggered multiple times
-4. **Session hijacking** - Malicious scripts can steal authentication tokens and cookies
-5. **Privilege escalation** - Scripts can perform actions on behalf of authenticated users
+4. **Wide exposure** - The malicious content executes for **every user** who views the product, not just admins
+5. **Session hijacking** - Malicious scripts can steal authentication tokens and cookies from customers
+6. **Privilege escalation** - Scripts can perform actions on behalf of authenticated users
+7. **Data theft** - Customer data, order history, and personal information can be exfiltrated
+8. **Credential harvesting** - Fake login forms can be injected to capture customer credentials
 
 ## The Vulnerability
 
@@ -50,14 +53,26 @@ await writeFile(filepath, buffer);
 
 **Frontend Rendering (Executing SVG JavaScript):**
 
+The vulnerability is amplified because the product detail page renders SVG images unsafely:
+
 ```typescript
-// Using <object> tag renders SVG with JavaScript execution
-<object
-  data={product.imageUrl}
-  type="image/svg+xml"
-  className="h-full w-full object-cover"
->
+// Using <object> tag renders SVG with JavaScript execution in user browsers
+{product.imageUrl.startsWith("/uploads/") &&
+product.imageUrl.endsWith(".svg") ? (
+  <object
+    data={product.imageUrl}
+    type="image/svg+xml"
+    className="h-full w-full object-cover"
+  >
+    {/* Fallback */}
+    <img src={product.imageUrl} alt={product.name} />
+  </object>
+) : (
+  <Image src={product.imageUrl} alt={product.name} />
+)}
 ```
+
+This means **any regular user viewing the product page will trigger the malicious JavaScript**, making this a Stored XSS vulnerability that affects all customers.
 
 ## Exploitation
 
@@ -110,11 +125,14 @@ To retrieve the flag, you need to:
 
 ### XSS Execution
 
-After uploading, the malicious SVG is also stored on the server and can be triggered:
+After uploading, the malicious SVG is stored on the server and will be triggered whenever the product is viewed:
 
-- **Direct URL Access:** Visit `/uploads/[product-id]-[timestamp]-malicious.svg`
+- **Product Detail Page:** Any user visiting `/products/[product-id]` will trigger the XSS
+- **Direct URL Access:** Visit `/uploads/[product-id]-[timestamp]-malicious.svg` directly
 - **Admin Panel Preview:** Click on the product image in the admin panel
-- The JavaScript in the SVG will execute in the browser context
+- **Product Catalog:** Users browsing the homepage or product listings will see the compromised product
+
+The JavaScript in the SVG will execute in every visitor's browser context with their authentication credentials and session data, making this a **critical Stored XSS vulnerability**.
 
 ### Secure Implementation
 

@@ -158,15 +158,30 @@ export default function ProductDetailClient({
         <div className="space-y-6">
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-slate-800">
             <div className="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                fill
-                className="object-cover object-center"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                quality={90}
-                priority
-              />
+              {product.imageUrl.startsWith("/uploads/") &&
+              product.imageUrl.endsWith(".svg") ? (
+                <object
+                  data={product.imageUrl}
+                  type="image/svg+xml"
+                  className="h-full w-full object-cover"
+                >
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="h-full w-full object-cover object-center"
+                  />
+                </object>
+              ) : (
+                <Image
+                  src={product.imageUrl}
+                  alt={product.name}
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  quality={90}
+                  priority
+                />
+              )}
             </div>
           </div>
 
