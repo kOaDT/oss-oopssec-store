@@ -471,6 +471,12 @@ async function main() {
           content: "This product sucks!",
           author: "anonymous",
         },
+        {
+          productId: thirdProduct.id,
+          content:
+            "Heard the devs left some old flags lying around at the root... files that say exactly what they are. Classic mistake!",
+          author: "Mr. Robot",
+        },
       ],
     });
     console.log("Created sample reviews");

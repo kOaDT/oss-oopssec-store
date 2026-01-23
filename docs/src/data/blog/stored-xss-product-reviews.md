@@ -2,7 +2,7 @@
 author: kOaDT
 authorGithubUrl: https://github.com/kOaDT
 authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
-pubDatetime: 2026-01-14T10:00:00Z
+pubDatetime: 2026-01-23T19:48:00Z
 title: "Stored XSS in Product Reviews"
 slug: stored-xss-product-reviews
 draft: false
@@ -38,9 +38,17 @@ When a review is submitted, the browser sends a POST request to `/api/products/[
 
 ## Exploitation
 
+### Discovering the target
+
+Before crafting a payload, we need to identify what to target. A careful examination of the product reviews reveals an interesting comment from "Mr. Robot":
+
+> "Heard the devs left some old flags lying around at the root... files that say exactly what they are. Classic mistake!"
+
+This hints at a file at the application root. Given the naming convention, `/xss-flag.txt` is a likely candidate.
+
 ### Crafting the payload
 
-A simple payload to demonstrate arbitrary JavaScript execution:
+A simple payload to confirm arbitrary JavaScript execution:
 
 ```html
 <script>
@@ -49,6 +57,16 @@ A simple payload to demonstrate arbitrary JavaScript execution:
 ```
 
 This basic payload proves that user-controlled input is being executed as code in the browser.
+
+To retrieve the flag, we need a payload that fetches the file and displays its contents:
+
+```html
+<script>
+  fetch("/xss-flag.txt")
+    .then(r => r.text())
+    .then(flag => alert("Flag: " + flag));
+</script>
+```
 
 ### Executing the attack
 
@@ -63,13 +81,11 @@ The API stores the payload as a regular review without any validation or sanitiz
 
 Refresh the product page. The malicious review is loaded from the database and injected into the DOM. The browser parses the `<script>` tag and executes the JavaScript.
 
-An alert dialog appears with the message "XSS", confirming code execution. The application also detects the XSS payload and displays the flag:
+The script fetches `/xss-flag.txt` via a same-origin request and displays the flag in an alert dialog:
 
 ```
 OSS{cr0ss_s1t3_scr1pt1ng_xss}
 ```
-
-![Alert dialog confirming XSS execution and flag display](../../assets/images/stored-xss-product-reviews/xss-alert-and-flag.webp)
 
 Every subsequent visitor to this product page will trigger the same payload execution.
 

@@ -2,7 +2,7 @@
 author: kOaDT
 authorGithubUrl: https://github.com/kOaDT
 authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
-pubDatetime: 2026-01-23T20:11:00Z
+pubDatetime: 2026-01-23T19:11:00Z
 title: "JWT Weak Secret: Cracking the Key to Forge Admin Access in OopsSec Store"
 slug: jwt-weak-secret-admin-bypass
 draft: false

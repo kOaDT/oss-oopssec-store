@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import FlagDisplay from "../../components/FlagDisplay";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
 import type { Review, ProductDetailClientProps } from "@/lib/types";
@@ -19,7 +18,6 @@ export default function ProductDetailClient({
   const [reviewContent, setReviewContent] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
-  const [flag, setFlag] = useState<string | null>(null);
   const reviewRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
   const maxQuantity = 99;
@@ -59,33 +57,6 @@ export default function ProductDetailClient({
         });
       }
     });
-  }, [reviews]);
-
-  useEffect(() => {
-    const hasMaliciousScript = reviews.some((review) =>
-      review.content.toLowerCase().includes("<script")
-    );
-
-    if (!hasMaliciousScript) {
-      setFlag(null);
-      return;
-    }
-
-    const fetchFlag = async () => {
-      try {
-        const data = await api.get<{ flag?: string }>(
-          "/api/flags/cross-site-scripting-xss",
-          { requireAuth: false }
-        );
-        if (data.flag) {
-          setFlag(data.flag);
-        }
-      } catch (error) {
-        console.error("Error fetching flag:", error);
-      }
-    };
-
-    fetchFlag();
   }, [reviews]);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -361,14 +332,6 @@ export default function ProductDetailClient({
             Share your thoughts about this product
           </p>
         </div>
-
-        {flag && (
-          <FlagDisplay
-            flag={flag}
-            description="You successfully exploited the XSS vulnerability!"
-            showIcon
-          />
-        )}
 
         <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
           <form onSubmit={handleSubmitReview} className="space-y-4">
