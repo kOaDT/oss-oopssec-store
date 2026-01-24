@@ -131,3 +131,29 @@ export interface HallOfFameEntry {
   date: string;
   country?: string;
 }
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  quantity: number;
+  priceAtPurchase: number;
+  product?: {
+    id: string;
+    name: string;
+    price: number;
+    imageUrl: string;
+  };
+}
+
+export interface FileEntry {
+  name: string;
+  type: "file" | "directory";
+  size: number;
+  modified: string;
+}
+
+export interface DirectoryListing {
+  path: string;
+  items: FileEntry[];
+}

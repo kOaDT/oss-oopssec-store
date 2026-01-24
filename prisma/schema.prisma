@@ -23,13 +23,14 @@ model User {
 }
 
 model Product {
-  id         String      @id @default(cuid())
-  name       String
-  price      Float
+  id          String      @id @default(cuid())
+  name        String
+  price       Float
   description String?
-  imageUrl   String
-  cartItems  CartItem[]
-  reviews    Review[]
+  imageUrl    String
+  cartItems   CartItem[]
+  reviews     Review[]
+  orderItems  OrderItem[]
 
   @@map("products")
 }
@@ -62,8 +63,22 @@ model Order {
   address   Address     @relation(fields: [addressId], references: [id])
   total     Float
   status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  items     OrderItem[]
 
   @@map("orders")
+}
+
+model OrderItem {
+  id              String  @id @default(cuid())
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product @relation(fields: [productId], references: [id])
+  quantity        Int
+  priceAtPurchase Float
+
+  @@map("order_items")
 }
 
 model Address {
