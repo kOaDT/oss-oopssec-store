@@ -352,6 +352,12 @@ export default function AdminClient() {
               Manage Products
             </Link>
             <Link
+              href="/admin/analytics"
+              className="cursor-pointer rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg dark:bg-emerald-500 dark:hover:bg-emerald-600"
+            >
+              Visitor Analytics
+            </Link>
+            <Link
               href="/documents"
               className="cursor-pointer rounded-xl bg-slate-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-slate-700 hover:shadow-lg dark:bg-slate-500 dark:hover:bg-slate-600"
             >

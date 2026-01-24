@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import FlagCheckerWrapper from "./components/FlagCheckerWrapper";
 import ConsoleWelcome from "./components/ConsoleWelcome";
+import VisitorTracker from "./components/VisitorTracker";
 
 const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -27,6 +28,7 @@ export default function RootLayout({
         {children}
         <FlagCheckerWrapper />
         <ConsoleWelcome />
+        <VisitorTracker />
       </body>
     </html>
   );

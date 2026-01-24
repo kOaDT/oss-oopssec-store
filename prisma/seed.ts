@@ -7,6 +7,8 @@ import crypto from "crypto";
  * If you want to add a new flag, you can add it here.
  * The flag should be in the format of "OSS{flag}"
  * The cve is optional
+ * The walkthroughSlug is optional (from https://koadt.github.io/oss-oopssec-store/)
+ *
  * The markdown file should be in the content/vulnerabilities folder
  * The markdown file should be in the format of "vulnerability-name.md"
  *
@@ -155,6 +157,14 @@ const flags = [
     markdownFile: "brute-force-no-rate-limiting.md",
     category: "AUTHENTICATION" as const,
     difficulty: "MEDIUM" as const,
+  },
+  {
+    flag: "OSS{x_f0rw4rd3d_f0r_sql1}",
+    slug: "x-forwarded-for-sql-injection",
+    markdownFile: "x-forwarded-for-sql-injection.md",
+    walkthroughSlug: "x-forwarded-for-sql-injection",
+    category: "INJECTION" as const,
+    difficulty: "HARD" as const,
   },
 ];
 
@@ -552,6 +562,65 @@ async function main() {
   });
 
   console.log(`Created ${bobOrders.length} orders for Bob`);
+
+  // Seed visitor logs for analytics
+  const existingVisitorLogs = await prisma.visitorLog.findFirst();
+
+  if (!existingVisitorLogs) {
+    const visitorLogs = [
+      {
+        ip: "192.168.1.100",
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+        path: "/",
+      },
+      {
+        ip: "192.168.1.101",
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36",
+        path: "/products/search",
+      },
+      {
+        ip: "192.168.1.102",
+        userAgent:
+          "Mozilla/5.0 (X11; Linux x86_64) Firefox/121.0 AppleWebKit/537.36",
+        path: "/cart",
+      },
+      {
+        ip: "192.168.1.100",
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+        path: "/checkout",
+      },
+      {
+        ip: "192.168.1.103",
+        userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)",
+        path: "/",
+      },
+      {
+        ip: "192.168.1.104",
+        userAgent:
+          "Mozilla/5.0 (Linux; Android 14; SM-G991B) AppleWebKit/537.36",
+        path: "/products/search",
+      },
+      {
+        ip: "192.168.1.100",
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+        path: "/order",
+      },
+      {
+        ip: "192.168.1.105",
+        userAgent: "curl/8.0.0",
+        path: "/api/products",
+      },
+    ];
+
+    await prisma.visitorLog.createMany({
+      data: visitorLogs,
+    });
+
+    console.log(`Created ${visitorLogs.length} visitor logs`);
+  } else {
+    console.log("Visitor logs already exist, skipping visitor log creation");
+  }
 
   console.log("Seeding completed!");
 }
