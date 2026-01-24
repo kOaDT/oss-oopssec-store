@@ -358,10 +358,10 @@ export default function AdminClient() {
               Visitor Analytics
             </Link>
             <Link
-              href="/documents"
+              href="/admin/documents"
               className="cursor-pointer rounded-xl bg-slate-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-slate-700 hover:shadow-lg dark:bg-slate-500 dark:hover:bg-slate-600"
             >
-              Go to Documents
+              Documents
             </Link>
           </div>
           <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
