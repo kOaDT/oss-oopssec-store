@@ -164,3 +164,14 @@ model ProjectInit {
 
   @@map("project_init")
 }
+
+model VisitorLog {
+  id        String   @id @default(cuid())
+  ip        String
+  userAgent String?
+  path      String
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@map("visitor_logs")
+}
