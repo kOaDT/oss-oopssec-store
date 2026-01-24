@@ -48,3 +48,4 @@ prisma/*.db-journal
 
 # uploads
 public/uploads/*
+documents/invoices/*

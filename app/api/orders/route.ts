@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
+import { generateInvoice } from "@/lib/invoice";
 
 export async function GET(request: NextRequest) {
   try {
@@ -114,6 +115,43 @@ export async function POST(request: NextRequest) {
         status: "PENDING",
       },
     });
+
+    const orderItems = await Promise.all(
+      cart.cartItems.map((item) =>
+        prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            priceAtPurchase: item.product.price,
+          },
+          include: {
+            product: true,
+          },
+        })
+      )
+    );
+
+    const emailName = user.email.split("@")[0];
+    const customerName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+
+    try {
+      await generateInvoice({
+        orderId: order.id,
+        createdAt: order.createdAt,
+        customerName,
+        customerEmail: user.email,
+        address: userWithAddress.address!,
+        items: orderItems.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          priceAtPurchase: item.priceAtPurchase,
+        })),
+        total: order.total,
+      });
+    } catch (invoiceError) {
+      console.error("Failed to generate invoice:", invoiceError);
+    }
 
     await prisma.cartItem.deleteMany({
       where: {

@@ -2,6 +2,7 @@ import { config } from "dotenv";
 import { PrismaClient } from "../lib/generated/prisma/client";
 import { getDatabaseUrl } from "../lib/database";
 import crypto from "crypto";
+import { generateInvoice } from "../lib/invoice";
 
 /**
  * If you want to add a new flag, you can add it here.
@@ -525,6 +526,14 @@ async function main() {
 
   const bobOrderIds = ["ORD-001", "ORD-002", "ORD-003"];
 
+  await prisma.orderItem.deleteMany({
+    where: {
+      orderId: {
+        in: bobOrderIds,
+      },
+    },
+  });
+
   await prisma.order.deleteMany({
     where: {
       id: {
@@ -533,35 +542,85 @@ async function main() {
     },
   });
 
-  const bobOrders = [
-    {
-      id: "ORD-001",
-      userId: bob.id,
-      addressId: bobAddress.id,
-      total: 25.47,
-      status: "DELIVERED" as const,
-    },
-    {
-      id: "ORD-002",
-      userId: bob.id,
-      addressId: bobAddress.id,
-      total: 18.98,
-      status: "SHIPPED" as const,
-    },
-    {
-      id: "ORD-003",
-      userId: bob.id,
-      addressId: bobAddress.id,
-      total: 42.97,
-      status: "PROCESSING" as const,
-    },
-  ];
+  const orderItemsMapping: Record<
+    string,
+    Array<{ productIndex: number; quantity: number }>
+  > = {
+    "ORD-001": [
+      { productIndex: 0, quantity: 2 },
+      { productIndex: 1, quantity: 2 },
+      { productIndex: 5, quantity: 1 },
+    ],
+    "ORD-002": [
+      { productIndex: 2, quantity: 2 },
+      { productIndex: 16, quantity: 2 },
+    ],
+    "ORD-003": [
+      { productIndex: 3, quantity: 2 },
+      { productIndex: 14, quantity: 1 },
+    ],
+  };
 
-  await prisma.order.createMany({
-    data: bobOrders,
-  });
+  for (const orderId of bobOrderIds) {
+    const items = orderItemsMapping[orderId];
+    const orderTotal = items.reduce((sum, item) => {
+      const product = allProducts[item.productIndex];
+      return sum + product.price * item.quantity;
+    }, 0);
 
-  console.log(`Created ${bobOrders.length} orders for Bob`);
+    const order = await prisma.order.create({
+      data: {
+        id: orderId,
+        userId: bob.id,
+        addressId: bobAddress.id,
+        total: Math.round(orderTotal * 100) / 100,
+        status:
+          orderId === "ORD-001"
+            ? "DELIVERED"
+            : orderId === "ORD-002"
+              ? "SHIPPED"
+              : "PROCESSING",
+      },
+    });
+
+    const orderItems = [];
+    for (const item of items) {
+      const product = allProducts[item.productIndex];
+      const orderItem = await prisma.orderItem.create({
+        data: {
+          orderId: order.id,
+          productId: product.id,
+          quantity: item.quantity,
+          priceAtPurchase: product.price,
+        },
+      });
+      orderItems.push({ ...orderItem, product });
+    }
+
+    await generateInvoice({
+      orderId: order.id,
+      createdAt: order.createdAt,
+      customerName: "Bob",
+      customerEmail: bob.email,
+      address: {
+        street: bobAddress.street,
+        city: bobAddress.city,
+        state: bobAddress.state,
+        zipCode: bobAddress.zipCode,
+        country: bobAddress.country,
+      },
+      items: orderItems.map((item) => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        priceAtPurchase: item.priceAtPurchase,
+      })),
+      total: order.total,
+    });
+
+    console.log(`Created order ${order.id} with invoice`);
+  }
+
+  console.log(`Created ${bobOrderIds.length} orders for Bob with invoices`);
 
   // Seed visitor logs for analytics
   const existingVisitorLogs = await prisma.visitorLog.findFirst();
