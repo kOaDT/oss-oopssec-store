@@ -104,6 +104,17 @@ export async function createOssStore(projectName) {
     process.exit(1);
   }
 
+  // Build
+  const buildSpinner = ora("Building lab...").start();
+  try {
+    await runCommand("npm", ["run", "build"], targetPath);
+    buildSpinner.succeed("Lab is operational");
+  } catch (error) {
+    seedSpinner.fail("Failed to build lab");
+    console.error(chalk.red(error.message));
+    process.exit(1);
+  }
+
   // Success message
   console.log();
   console.log(chalk.green.bold("Setup complete!"));
