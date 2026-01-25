@@ -65,6 +65,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/support/ai-assistant"
+                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
+                >
+                  AI Assistant
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/news"
                   className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
                 >
