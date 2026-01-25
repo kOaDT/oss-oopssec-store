@@ -25,7 +25,7 @@ The goal is simple: hunt for hidden flags, exploit vulnerabilities, and level up
 ```bash
 npx create-oss-store my-ctf-lab
 cd my-ctf-lab
-npm run dev
+npm start
 ```
 
 Then open [http://localhost:3000](http://localhost:3000) and start hunting flags.

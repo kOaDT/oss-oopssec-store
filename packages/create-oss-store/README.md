@@ -7,7 +7,7 @@ Create a new [OSS – OopsSec Store](https://github.com/kOaDT/oss-oopssec-store)
 ```bash
 npx create-oss-store my-ctf-lab
 cd my-ctf-lab
-npm run dev
+npm start
 ```
 
 Then open http://localhost:3000 in your browser and start hunting for flags.

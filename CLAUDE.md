@@ -96,6 +96,9 @@ docs/                       # Static documentation site (Astro)
 # Development
 npm run dev                  # Start Next.js development server (port 3000)
 
+# Prod
+npm start                # Start Next.js production server
+
 # Build
 npm run build                # Build
 

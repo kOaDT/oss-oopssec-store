@@ -24,7 +24,7 @@ The lab requires Node.js. From an empty directory, run the following commands:
 ```bash
 npx create-oss-store oss-store
 cd oss-store
-npm run dev
+npm start
 ```
 
 Once Next.js has started, the application is accessible at `http://localhost:3000`.

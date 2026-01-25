@@ -11,7 +11,7 @@
  \____/___//___/     \____/ \___// .__/___/___/  \__/ \__//___/  \__/ \___//_/   \__/
                                 /_/
   $ npx create-oss-store
-  $ cd my-oss-store && npm run dev
+  $ cd my-oss-store && npm start
 
   → Open http://localhost:3000 and start hunting flags
 ```
@@ -83,7 +83,7 @@ Designed for penetration testers, security engineers, developers, and cybersecur
 ```bash
 npx create-oss-store my-ctf-lab
 cd my-ctf-lab
-npm run dev
+npm start
 ```
 
 Then open http://localhost:3000 in your browser.

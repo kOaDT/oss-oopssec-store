@@ -25,7 +25,7 @@ Initialize the OopsSec Store application in a new directory:
 ```bash
 npx create-oss-store oss-store
 cd oss-store
-npm run dev
+npm start
 ```
 
 The installer retrieves dependencies, initializes a local SQLite database, seeds test user accounts, and starts the development server. Once the server is running, navigate to `http://localhost:3000` and authenticate using the test credentials displayed on the login page. For this exercise, log in as Alice, a standard customer account.

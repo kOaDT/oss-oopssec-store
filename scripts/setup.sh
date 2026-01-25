@@ -48,7 +48,7 @@ echo "Launching Prisma Studio and application..."
 npm run db:studio &
 PRISMA_PID=$!
 
-npm run dev &
+npm start &
 DEV_PID=$!
 
 cleanup() {

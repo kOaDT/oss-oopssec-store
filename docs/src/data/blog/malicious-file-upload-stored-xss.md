@@ -34,7 +34,7 @@ If a local instance of OopsSec Store is not already running, execute the followi
 ```bash
 npx create-oss-store oss-store
 cd oss-store
-npm run dev
+npm start
 ```
 
 Once Next.js has started, the application is accessible at `http://localhost:3000`. Log in using the admin credentials recovered from the prerequisite vulnerabilities.

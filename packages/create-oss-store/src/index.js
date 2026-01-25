@@ -111,7 +111,7 @@ export async function createOssStore(projectName) {
   console.log("To start hunting for flags:");
   console.log();
   console.log(chalk.cyan(`  cd ${projectName}`));
-  console.log(chalk.cyan("  npm run dev"));
+  console.log(chalk.cyan("  npm start"));
   console.log();
   console.log(
     `Then open ${chalk.underline("http://localhost:3000")} in your browser.`
