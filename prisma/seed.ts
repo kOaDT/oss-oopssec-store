@@ -167,6 +167,14 @@ const flags = [
     category: "INJECTION" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{pr0mpt_1nj3ct10n_41_4ss1st4nt}",
+    slug: "prompt-injection-ai-assistant",
+    markdownFile: "prompt-injection-ai-assistant.md",
+    walkthroughSlug: "prompt-injection-ai-assistant",
+    category: "INJECTION" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 config();
