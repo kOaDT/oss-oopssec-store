@@ -40,7 +40,7 @@ We welcome community contributions to our [walkthroughs documentation site](http
 
 1. Fork the repository and clone it locally:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/oss-oopssec-store.git
+   git clone https://github.com/kOaDT/oss-oopssec-store.git
    cd oss-oopssec-store
    ```
 2. Install dependencies for the documentation site:
