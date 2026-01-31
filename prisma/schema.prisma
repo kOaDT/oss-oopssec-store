@@ -18,19 +18,21 @@ model User {
   carts               Cart[]
   orders              Order[]
   supportAccessTokens SupportAccessToken[]
+  wishlists           Wishlist[]
 
   @@map("users")
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  price       Float
-  description String?
-  imageUrl    String
-  cartItems   CartItem[]
-  reviews     Review[]
-  orderItems  OrderItem[]
+  id            String         @id @default(cuid())
+  name          String
+  price         Float
+  description   String?
+  imageUrl      String
+  cartItems     CartItem[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
 
   @@map("products")
 }
@@ -189,4 +191,30 @@ model VisitorLog {
   createdAt DateTime @default(now())
 
   @@map("visitor_logs")
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  name      String
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPublic  Boolean        @default(false)
+  note      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  items     WishlistItem[]
+
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  addedAt    DateTime @default(now())
+
+  @@unique([wishlistId, productId])
+  @@map("wishlist_items")
 }
