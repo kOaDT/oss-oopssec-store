@@ -175,6 +175,13 @@ const flags = [
     category: "INJECTION" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}",
+    slug: "broken-object-level-authorization",
+    markdownFile: "broken-object-level-authorization.md",
+    category: "AUTHORIZATION" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 config();
@@ -687,6 +694,72 @@ async function main() {
     console.log(`Created ${visitorLogs.length} visitor logs`);
   } else {
     console.log("Visitor logs already exist, skipping visitor log creation");
+  }
+
+  const existingWishlists = await prisma.wishlist.findFirst();
+
+  if (!existingWishlists) {
+    const aliceWishlist = await prisma.wishlist.create({
+      data: {
+        id: "wl-alice-001",
+        name: "My Favorites",
+        userId: alice.id,
+        isPublic: false,
+      },
+    });
+
+    await prisma.wishlistItem.createMany({
+      data: [
+        { wishlistId: aliceWishlist.id, productId: allProducts[0].id },
+        { wishlistId: aliceWishlist.id, productId: allProducts[3].id },
+        { wishlistId: aliceWishlist.id, productId: allProducts[8].id },
+      ],
+    });
+
+    const bobWishlist = await prisma.wishlist.create({
+      data: {
+        id: "wl-bob-001",
+        name: "Weekend Groceries",
+        userId: bob.id,
+        isPublic: false,
+      },
+    });
+
+    await prisma.wishlistItem.createMany({
+      data: [
+        { wishlistId: bobWishlist.id, productId: allProducts[1].id },
+        { wishlistId: bobWishlist.id, productId: allProducts[5].id },
+        { wishlistId: bobWishlist.id, productId: allProducts[7].id },
+        { wishlistId: bobWishlist.id, productId: allProducts[11].id },
+      ],
+    });
+
+    const bolaFlag = await prisma.flag.findUnique({
+      where: { slug: "broken-object-level-authorization" },
+    });
+
+    await prisma.wishlist.create({
+      data: {
+        id: "wl-internal-001",
+        name: "Q4 Procurement List",
+        userId: admin.id,
+        isPublic: false,
+        note: bolaFlag?.flag ?? "OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}",
+      },
+    });
+
+    await prisma.wishlistItem.createMany({
+      data: [
+        { wishlistId: "wl-internal-001", productId: allProducts[4].id },
+        { wishlistId: "wl-internal-001", productId: allProducts[9].id },
+        { wishlistId: "wl-internal-001", productId: allProducts[10].id },
+        { wishlistId: "wl-internal-001", productId: allProducts[13].id },
+      ],
+    });
+
+    console.log("Created wishlists for Alice, Bob, and admin");
+  } else {
+    console.log("Wishlists already exist, skipping wishlist creation");
   }
 
   console.log("Seeding completed!");

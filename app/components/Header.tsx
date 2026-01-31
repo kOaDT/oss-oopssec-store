@@ -4,6 +4,7 @@ import CartButton from "./CartButton";
 import SignUpLink from "./SignUpLink";
 import OrderSearchLink from "./OrderSearchLink";
 import ProfileLink from "./ProfileLink";
+import WishlistLink from "./WishlistLink";
 import ProductSearchLink from "./ProductSearchLink";
 
 export default function Header() {
@@ -37,6 +38,7 @@ export default function Header() {
             Contact
           </Link>
           <ProductSearchLink />
+          <WishlistLink />
           <OrderSearchLink />
           <ProfileLink />
         </div>

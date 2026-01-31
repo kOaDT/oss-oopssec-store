@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
 import type { Review, ProductDetailClientProps } from "@/lib/types";
+import AddToWishlistButton from "@/app/components/AddToWishlistButton";
 
 export default function ProductDetailClient({
   product,
@@ -203,24 +204,7 @@ export default function ProductDetailClient({
               <h1 className="flex-1 text-2xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 lg:text-3xl">
                 {product.name}
               </h1>
-              <button
-                aria-label="Add to wishlist"
-                className="ml-4 cursor-pointer rounded-lg border border-slate-200 p-2.5 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-pink-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.656 3.172 11.83a4 4 0 010-5.656z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
+              <AddToWishlistButton productId={product.id} />
             </div>
 
             <div className="mb-6">
