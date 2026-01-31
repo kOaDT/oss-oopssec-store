@@ -178,6 +178,7 @@ const flags = [
   {
     flag: "OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}",
     slug: "broken-object-level-authorization",
+    walkthroughSlug: "bola-wishlist-access",
     markdownFile: "broken-object-level-authorization.md",
     category: "AUTHORIZATION" as const,
     difficulty: "MEDIUM" as const,
