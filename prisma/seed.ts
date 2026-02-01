@@ -156,6 +156,7 @@ const flags = [
     flag: "OSS{brut3_f0rc3_n0_r4t3_l1m1t}",
     slug: "brute-force-no-rate-limiting",
     markdownFile: "brute-force-no-rate-limiting.md",
+    walkthroughSlug: "brute-force-no-rate-limiting",
     category: "AUTHENTICATION" as const,
     difficulty: "MEDIUM" as const,
   },
