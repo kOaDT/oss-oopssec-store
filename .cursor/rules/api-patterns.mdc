@@ -1,0 +1,59 @@
+---
+description: API route patterns for Next.js App Router
+globs:
+  - "app/api/**/*.ts"
+---
+
+# API Route Patterns
+
+## File Structure
+
+- Use Next.js App Router API route handlers (`route.ts`)
+- Export named functions: `GET`, `POST`, `PUT`, `DELETE`
+
+## Imports
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthenticatedUser } from "@/lib/server-auth";
+import { prisma } from "@/lib/prisma";
+```
+
+## Authentication Pattern
+
+```typescript
+export async function GET(request: NextRequest) {
+  const user = await getAuthenticatedUser(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // ... handler logic
+}
+```
+
+## Response Pattern
+
+```typescript
+// Success
+return NextResponse.json({ data }, { status: 200 });
+
+// Error
+return NextResponse.json({ error: "Message" }, { status: 400 });
+```
+
+## Database Access
+
+```typescript
+import { prisma } from "@/lib/prisma";
+
+const products = await prisma.product.findMany();
+const user = await prisma.user.findUnique({ where: { id } });
+```
+
+## Flag Retrieval (for vulnerability endpoints)
+
+```typescript
+const flag = await prisma.flag.findUnique({
+  where: { slug: "vulnerability-slug" },
+});
+```

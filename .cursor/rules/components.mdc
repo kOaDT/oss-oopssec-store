@@ -1,0 +1,51 @@
+---
+description: React component patterns for Next.js App Router
+globs:
+  - "app/components/**/*.tsx"
+  - "app/**/page.tsx"
+  - "app/**/*Client.tsx"
+---
+
+# Component Patterns
+
+## Server vs Client Components
+
+- **Default:** Use React Server Components
+- **Client Components:** Add `"use client"` only when needed:
+  - User interactivity (onClick, onChange, etc.)
+  - React hooks (useState, useEffect, etc.)
+  - Browser APIs (localStorage, window, etc.)
+
+## Naming Conventions
+
+- Pages: `page.tsx`
+- Client components: `*Client.tsx` (e.g., `CartClient.tsx`)
+- Shared components: PascalCase (e.g., `ProductCard.tsx`)
+
+## Styling
+
+- Use Tailwind CSS classes
+- Responsive design: `sm:`, `md:`, `lg:`, `xl:` prefixes
+- Typography: `@tailwindcss/typography` for markdown content
+
+## Accessibility
+
+- Use semantic HTML (`<nav>`, `<main>`, `<article>`, etc.)
+- Add ARIA labels where needed
+- Ensure keyboard navigation works
+- Follow WCAG guidelines
+
+## Authentication Hook
+
+```typescript
+import { useAuth } from "@/hooks/useAuth";
+
+const { user, logout } = useAuth();
+```
+
+## UI/UX Guidelines
+
+- Modern, clean e-commerce aesthetic
+- Clear error messages and loading states
+- Proper form validation with user feedback
+- Responsive on mobile, tablet, and desktop

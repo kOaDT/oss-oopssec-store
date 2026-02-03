@@ -1,0 +1,37 @@
+---
+description: Security context for intentionally vulnerable application - DO NOT fix vulnerabilities
+alwaysApply: true
+---
+
+# Security Context
+
+**IMPORTANT:** This is an intentionally vulnerable application for security training.
+
+## Rules
+
+1. **DO NOT fix intentional security flaws** - they are the core feature
+2. **Vulnerabilities are educational** - each teaches a real-world security concept
+3. **All vulnerabilities must be exploitable** - test them manually
+
+## When Adding New Vulnerabilities
+
+1. **Add CTF flag** to `prisma/seed.ts`:
+   ```typescript
+   { flag: "OSS{your_flag_here}", slug: "vulnerability-slug", category: "INJECTION", difficulty: "MEDIUM" }
+   ```
+
+2. **Create documentation** in `content/vulnerabilities/your-vulnerability.md`:
+   - Overview and why it's dangerous
+   - Vulnerable code examples
+   - Exploitation techniques
+   - Mitigation strategies
+
+3. **Ensure exploitability** - the vulnerability must be demonstrable
+
+## CTF Flag System
+
+- Flags format: `OSS{...}`
+- Stored in `Flag` model with: `flag`, `slug`, `category`, `difficulty`, `markdownFile`
+- Retrieved via API when vulnerabilities are exploited
+- Categories: INJECTION, AUTHENTICATION, AUTHORIZATION, XSS, CSRF, etc.
+- Difficulty levels: EASY, MEDIUM, HARD

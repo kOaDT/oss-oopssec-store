@@ -1,0 +1,49 @@
+---
+description: OSS – OopsSec Store project overview and architecture
+alwaysApply: true
+---
+
+# OSS – OopsSec Store
+
+Intentionally vulnerable e-commerce web application for security training and CTF challenges.
+
+**⚠️ CRITICAL:** This application contains intentional security flaws. Never deploy in production. Vulnerabilities are features, not bugs.
+
+## Tech Stack
+
+- **Frontend:** Next.js 16.0.6 (App Router), React 19.2.0, TypeScript 5, Tailwind CSS 4
+- **Backend:** Next.js API Routes, SQLite + Prisma ORM 6.19.1
+- **Auth:** JWT tokens (intentionally weak)
+
+## Project Structure
+
+```
+app/
+├── api/           # REST API endpoints (auth, cart, orders, products, flags, etc.)
+├── components/    # Reusable React components
+├── vulnerabilities/  # Vulnerability documentation pages
+└── [pages]/       # Next.js pages
+
+content/vulnerabilities/  # Markdown docs for each vulnerability
+lib/                      # Utilities (api, auth, prisma, types)
+prisma/                   # Schema and seed data with CTF flags
+public/uploads/           # User-uploaded files
+docs/                     # Astro documentation site (separate npm project)
+```
+
+## Key Commands
+
+```bash
+npm run dev          # Development server (port 3000)
+npm run lint         # ESLint
+npm run format       # Prettier
+npm run db:seed      # Seed database with flags
+npm run db:studio    # Prisma Studio
+```
+
+## Coding Standards
+
+- All code, comments, documentation in **English**
+- Follow DRY principle
+- Avoid comments unless code is not self-explanatory
+- Run `npm run lint` and `npm run format:check` after implementation

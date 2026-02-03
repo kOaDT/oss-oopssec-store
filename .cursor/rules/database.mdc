@@ -1,0 +1,62 @@
+---
+description: Prisma database patterns and schema reference
+globs:
+  - "prisma/**/*"
+  - "lib/prisma.ts"
+  - "lib/database.ts"
+---
+
+# Database Patterns
+
+## Prisma Client
+
+```typescript
+import { prisma } from "@/lib/prisma";
+```
+
+## Types
+
+Use Prisma-generated types:
+
+```typescript
+import { User, Product, Order } from "@/lib/generated/prisma";
+```
+
+## Key Models
+
+| Model | Description |
+|-------|-------------|
+| `User` | Auth & user data (email, password, role: CUSTOMER/ADMIN) |
+| `Product` | E-commerce catalog |
+| `Cart` / `CartItem` | Shopping cart |
+| `Order` | Order management with status |
+| `Address` | User and order addresses |
+| `Flag` | CTF flags (slug, category, difficulty) |
+| `Review` | Product reviews |
+| `SupportAccessToken` | Support access tokens |
+
+## Commands
+
+```bash
+npm run db:generate   # Generate Prisma Client
+npm run db:push       # Push schema changes
+npm run db:migrate    # Run migrations
+npm run db:studio     # Open Prisma Studio
+npm run db:seed       # Seed with initial data and flags
+```
+
+## Seeding Flags
+
+Add new flags in `prisma/seed.ts`:
+
+```typescript
+await prisma.flag.create({
+  data: {
+    flag: "OSS{example_flag}",
+    slug: "vulnerability-slug",
+    category: "INJECTION",
+    difficulty: "MEDIUM",
+    markdownFile: "vulnerability-slug.md"
+  }
+});
+```
