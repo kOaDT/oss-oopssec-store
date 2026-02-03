@@ -74,6 +74,9 @@ Designed for penetration testers, security engineers, developers, and cybersecur
 [![Timeline graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_timeline.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
 [![Trending topics](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_words.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
 
+[![Issue status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_issues.svg)](https://github.com/kOaDT/oss-oopssec-store/issues)
+[![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls)
+
 ---
 
 ## Installation
@@ -152,6 +155,6 @@ For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT
 
 For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-<!-- [![Issue status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_issues.svg)](https://github.com/kOaDT/oss-oopssec-store/issues)
-[![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls) -->
-<!-- [![Activity map](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_map.svg)](https://github.com/kOaDT/oss-oopssec-store/commits) -->
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
+
+[![Top contributors](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/top-contributors/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_table.svg)](https://github.com/kOaDT/oss-oopssec-store/graphs/contributors)
