@@ -78,7 +78,7 @@ export async function POST(
       );
     }
 
-    const uploadsDir = join(process.cwd(), "public", "uploads");
+    const uploadsDir = join(process.cwd(), "uploads");
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }
@@ -91,7 +91,7 @@ export async function POST(
     const filepath = join(uploadsDir, filename);
     await writeFile(filepath, buffer);
 
-    const imageUrl = `/uploads/${filename}`;
+    const imageUrl = `/api/uploads/${filename}`;
 
     await prisma.product.update({
       where: { id },

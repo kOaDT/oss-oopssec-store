@@ -159,7 +159,7 @@ export default function ProductDetailClient({
         <div className="space-y-6">
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-slate-800">
             <div className="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
-              {product.imageUrl.startsWith("/uploads/") &&
+              {product.imageUrl.startsWith("/api/uploads/") &&
               product.imageUrl.endsWith(".svg") ? (
                 <object
                   data={product.imageUrl}

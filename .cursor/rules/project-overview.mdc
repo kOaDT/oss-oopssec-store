@@ -27,7 +27,7 @@ app/
 content/vulnerabilities/  # Markdown docs for each vulnerability
 lib/                      # Utilities (api, auth, prisma, types)
 prisma/                   # Schema and seed data with CTF flags
-public/uploads/           # User-uploaded files
+uploads/                  # User-uploaded files (served via /api/uploads/)
 docs/                     # Astro documentation site (separate npm project)
 ```
 

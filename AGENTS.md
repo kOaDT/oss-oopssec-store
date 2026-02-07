@@ -36,7 +36,7 @@ app/
 content/vulnerabilities/    # Markdown files for each vulnerability
 lib/                        # Utilities (api, auth, prisma, types)
 prisma/                     # Schema and seed.ts with CTF flags
-public/uploads/             # User-uploaded files
+uploads/                    # User-uploaded files (served via /api/uploads/)
 docs/                       # Astro documentation site (separate npm project)
 hall-of-fame/data.json      # Hall of Fame entries (community-driven via PRs)
 ```

@@ -260,7 +260,7 @@ export default function ProductsManagementClient() {
                   className="relative aspect-square cursor-pointer overflow-hidden bg-slate-100 dark:bg-slate-700"
                   onClick={() => openPreview(product.imageUrl)}
                 >
-                  {product.imageUrl.startsWith("/uploads/") ? (
+                  {product.imageUrl.startsWith("/api/uploads/") ? (
                     <object
                       data={product.imageUrl}
                       type="image/svg+xml"
@@ -343,7 +343,7 @@ export default function ProductsManagementClient() {
                 />
               </svg>
             </button>
-            {previewUrl.startsWith("/uploads/") ? (
+            {previewUrl.startsWith("/api/uploads/") ? (
               <object
                 data={previewUrl}
                 type="image/svg+xml"
