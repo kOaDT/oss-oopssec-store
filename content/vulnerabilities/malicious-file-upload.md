@@ -26,7 +26,7 @@ In this application, the admin product image upload feature is vulnerable to mal
 1. **Content-Type validation only** - The server only checks the `Content-Type` header, which can be spoofed
 2. **No content inspection** - The actual file contents are not validated
 3. **SVG files allowed** - SVG files can contain `<script>` tags and event handlers
-4. **Direct file serving** - Uploaded files are served directly from the public directory
+4. **Direct file serving** - Uploaded files are served directly without sanitization
 
 ### Vulnerable Code
 
@@ -57,7 +57,7 @@ The vulnerability is amplified because the product detail page renders SVG image
 
 ```typescript
 // Using <object> tag renders SVG with JavaScript execution in user browsers
-{product.imageUrl.startsWith("/uploads/") &&
+{product.imageUrl.startsWith("/api/uploads/") &&
 product.imageUrl.endsWith(".svg") ? (
   <object
     data={product.imageUrl}
@@ -128,7 +128,7 @@ To retrieve the flag, you need to:
 After uploading, the malicious SVG is stored on the server and will be triggered whenever the product is viewed:
 
 - **Product Detail Page:** Any user visiting `/products/[product-id]` will trigger the XSS
-- **Direct URL Access:** Visit `/uploads/[product-id]-[timestamp]-malicious.svg` directly
+- **Direct URL Access:** Visit `/api/uploads/[product-id]-[timestamp]-malicious.svg` directly
 - **Admin Panel Preview:** Click on the product image in the admin panel
 - **Product Catalog:** Users browsing the homepage or product listings will see the compromised product
 
@@ -169,7 +169,7 @@ if (file.type === "image/svg+xml") {
 // In next.config.js or server configuration
 headers: [
   {
-    source: "/uploads/:path*",
+    source: "/api/uploads/:path*",
     headers: [
       { key: "Content-Security-Policy", value: "script-src 'none'" },
       { key: "X-Content-Type-Options", value: "nosniff" },

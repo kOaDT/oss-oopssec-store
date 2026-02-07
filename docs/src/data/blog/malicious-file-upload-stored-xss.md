@@ -2,7 +2,7 @@
 author: kOaDT
 authorGithubUrl: https://github.com/kOaDT
 authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
-pubDatetime: 2026-01-24T19:00:00Z
+pubDatetime: 2026-02-07T18:34:00Z
 title: "Malicious File Upload: Stored XSS via SVG"
 slug: malicious-file-upload-stored-xss
 draft: false
@@ -93,7 +93,7 @@ The malicious script executes in multiple contexts:
 
 - **Product detail page**: Navigate to `http://localhost:3000/products/[product-id]` as any user
 - **Admin panel preview**: View the product in the admin interface
-- **Direct file access**: Access the uploaded file at `/uploads/[filename].svg`
+- **Direct file access**: Access the uploaded file at `/api/uploads/[filename].svg`
 
 When the page loads, the browser parses the SVG and executes the embedded JavaScript, displaying the alert dialog.
 
@@ -190,7 +190,7 @@ Configure the server to serve uploaded files with security headers that prevent 
 // next.config.js
 headers: [
   {
-    source: "/uploads/:path*",
+    source: "/api/uploads/:path*",
     headers: [
       { key: "Content-Security-Policy", value: "script-src 'none'" },
       { key: "X-Content-Type-Options", value: "nosniff" },
