@@ -275,7 +275,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                     setMessage(null);
                   }
                 }}
-                className="text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
+                className="cursor-pointer text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
                 disabled={isVerifying}
               >
                 <svg

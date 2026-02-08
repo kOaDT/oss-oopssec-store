@@ -97,9 +97,10 @@ npm run docs:build           # Build Astro site
 ### Adding New Vulnerabilities
 
 1. Add flag to `prisma/seed.ts` in `OSS{...}` format
-2. Create documentation in `content/vulnerabilities/`
-3. Document: overview, vulnerable code, exploitation, mitigation
-4. Test exploitability
+2. Add 3 hints in the `flagHints` map in `prisma/seed.ts` (keyed by slug, levels 1→3 from vague to near-solution)
+3. Create documentation in `content/vulnerabilities/`
+4. Document: overview, vulnerable code, exploitation, mitigation
+5. Test exploitability
 
 ### CTF Flag System
 
@@ -107,6 +108,7 @@ npm run docs:build           # Build Astro site
 - Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`
 - Categories: INJECTION, AUTHENTICATION, AUTHORIZATION, XSS, CSRF, etc.
 - Difficulty: EASY, MEDIUM, HARD
+- Each flag has 3 progressive hints (stored in `Hint` model, tracked by `RevealedHint`)
 
 ## Database Models
 
@@ -118,6 +120,8 @@ npm run docs:build           # Build Astro site
 | Order              | Order management with status                 |
 | Address            | User and order addresses                     |
 | Flag               | CTF flags linked to vulnerabilities          |
+| Hint               | Progressive hints per flag (3 levels)        |
+| RevealedHint       | Tracks which hints have been revealed        |
 | Review             | Product reviews                              |
 | SupportAccessToken | Support access tokens                        |
 

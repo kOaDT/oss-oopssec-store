@@ -25,7 +25,7 @@ We encourage **kind and respectful reviews** from both contributors and maintain
 
 ## How to Contribute
 
-- Adding New Flags
+- Adding New Flags (include 3 progressive hints per flag in `prisma/seed.ts`)
 - Writing Walkthroughs and Writeups
 - Developing the E-commerce Site
 - Fixing Bugs

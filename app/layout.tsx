@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import FlagCheckerWrapper from "./components/FlagCheckerWrapper";
+import HintPanelWrapper from "./components/HintPanelWrapper";
 import ConsoleWelcome from "./components/ConsoleWelcome";
 import VisitorTracker from "./components/VisitorTracker";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} font-poppins antialiased`}>
         {children}
         <FlagCheckerWrapper />
+        <HintPanelWrapper />
         <ConsoleWelcome />
         <VisitorTracker />
       </body>
