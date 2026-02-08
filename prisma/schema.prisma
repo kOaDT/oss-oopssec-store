@@ -106,8 +106,30 @@ model Flag {
   category        FlagCategory   @default(OTHER)
   difficulty      FlagDifficulty @default(MEDIUM)
   foundFlag       FoundFlag?
+  hints           Hint[]
 
   @@map("flags")
+}
+
+model Hint {
+  id           String        @id @default(cuid())
+  flagId       String
+  flag         Flag          @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  level        Int
+  content      String
+  revealedHint RevealedHint?
+
+  @@unique([flagId, level])
+  @@map("hints")
+}
+
+model RevealedHint {
+  id         String   @id @default(cuid())
+  hintId     String   @unique
+  hint       Hint     @relation(fields: [hintId], references: [id], onDelete: Cascade)
+  revealedAt DateTime @default(now())
+
+  @@map("revealed_hints")
 }
 
 enum FlagCategory {

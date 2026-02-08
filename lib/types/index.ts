@@ -82,6 +82,22 @@ export interface Flag {
   difficulty: FlagDifficulty;
 }
 
+export interface RevealedHint {
+  level: number;
+  content: string;
+}
+
+export interface HintState {
+  activeFlag: {
+    slug: string;
+    difficulty: FlagDifficulty;
+    category: FlagCategory;
+  } | null;
+  revealedHints: RevealedHint[];
+  nextHintLevel: number | null;
+  allFlagsFound: boolean;
+}
+
 export interface ProductCardProps {
   id: string;
   name: string;

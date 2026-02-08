@@ -28,6 +28,11 @@ import { generateInvoice } from "../lib/invoice";
  * - EASY: Basic exploitation, no special tools needed
  * - MEDIUM: Requires understanding of the vulnerability type
  * - HARD: Complex exploitation, multiple steps or deep knowledge required
+ *
+ * Hints:
+ * When adding a new flag, also add 3 hints in `flagHints` below (keyed by slug).
+ * Hints are ordered by level (1 = vague nudge, 2 = clearer direction, 3 = near-solution).
+ * They are displayed progressively to help players who are stuck.
  */
 const flags = [
   {
@@ -68,7 +73,7 @@ const flags = [
     markdownFile: "weak-md5-hashing.md",
     walkthroughSlug: "weak-md5-hashing-admin-compromise",
     category: "CRYPTOGRAPHIC" as const,
-    difficulty: "EASY" as const,
+    difficulty: "MEDIUM" as const,
   },
   {
     flag: "OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}",
@@ -185,6 +190,109 @@ const flags = [
     difficulty: "MEDIUM" as const,
   },
 ];
+
+const flagHints: Record<string, string[]> = {
+  "public-env-variable": [
+    "Some secrets hide in plain sight, right in your browser's reach.",
+    "Next.js exposes environment variables to the client if they follow a specific naming convention. Check the page source for leaked config values.",
+    "Variables prefixed with NEXT_PUBLIC_ are bundled into client-side JavaScript. Search the page source or JS bundles for a base64-encoded string, decode it to reveal the flag.",
+  ],
+  "weak-md5-hashing": [
+    "Once you have access to user data, not all hashing algorithms are created equal.",
+    "If you've extracted password hashes from the database, notice they're 32 hex characters, a format associated with a cryptographically broken algorithm from the 1990s.",
+    "The hashes are MD5. Use a SQL injection to dump the users table and grab the admin's password hash. Then crack it using an online rainbow table like crackstation.net. Log in as admin to claim the flag.",
+  ],
+  "insecure-direct-object-reference": [
+    "What happens when you peek at someone else's receipt?",
+    "Order IDs follow a sequential and predictable pattern. The API doesn't verify whether the order actually belongs to the requesting user.",
+    "Access the /api/orders/ endpoint with a different order ID like ORD-001 or ORD-002. The server returns the order data even if it doesn't belong to you, along with a bonus in the response.",
+  ],
+  "cross-site-scripting-xss": [
+    "Your words carry more power here than you think.",
+    "Product reviews are rendered directly into the page without sanitization. Any HTML or JavaScript you submit will execute in other users' browsers.",
+    "Submit a product review containing a script tag that fetches /xss-flag.txt and displays its content. Something like <script>fetch('/xss-flag.txt').then(r=>r.text()).then(alert)</script> will do the trick.",
+  ],
+  "information-disclosure-api-error": [
+    "Errors can be surprisingly chatty when you provoke them.",
+    "Try sending unexpected or malformed data to API endpoints. Some error responses include verbose debug information that goes far beyond a simple error message.",
+    "Send a POST request to the user data export endpoint (/api/user/export) with an invalid field name. The error response includes system diagnostics containing feature flags, and the flag is right there.",
+  ],
+  "weak-jwt-secret": [
+    "The token on your lips has a secret, and it's an open one.",
+    "Decode your authentication token using a tool like jwt.io. The payload itself contains a hint about the signing key's strength.",
+    "Your JWT payload includes a hint field saying 'The secret is not so secret'. The signing key is literally the word 'secret'. Forge a new token with role set to ADMIN using HS256, then access /api/admin.",
+  ],
+  "client-side-price-manipulation": [
+    "The cashier trusts whatever number you hand them.",
+    "During checkout, the total price is sent from the frontend to the server. The server accepts this value without recalculating it from the cart contents.",
+    "Intercept the POST request to /api/orders during checkout using your browser's DevTools or a proxy. Change the 'total' field in the request body to a lower value like 0.01 and observe the response.",
+  ],
+  "cross-site-request-forgery": [
+    "Sometimes the most dangerous links are the ones you can't see.",
+    "The admin dashboard hints at hidden content. Inspect the page source for links styled with display:none, one leads to a proof-of-concept demonstration.",
+    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in, the page demonstrates a CSRF attack by submitting a forged request. The server detects the cross-origin attempt and reveals the flag.",
+  ],
+  "mass-assignment": [
+    "The signup form shows you some fields. The API accepts more.",
+    "When creating an account, the backend blindly accepts extra fields beyond email and password. One of those fields controls user permissions.",
+    "Add a 'role' field set to 'ADMIN' in the POST /api/auth/signup request body alongside your email and password. The server assigns it without validation. Then visit /api/admin to claim your flag.",
+  ],
+  "path-traversal": [
+    "Sometimes you can walk where you're not supposed to go.",
+    "A file-serving API endpoint builds file paths from user input without sanitizing directory traversal sequences. You can escape the intended directory.",
+    "The /api/files endpoint serves files from a documents/ directory. Use the 'file' query parameter with ../ sequences to escape, for example, /api/files?file=../flag.txt reads a flag file at the project root.",
+  ],
+  "server-side-request-forgery": [
+    "The server is happy to make requests on your behalf anywhere.",
+    "A support feature fetches resources from URLs you provide. It doesn't restrict those URLs to external hosts, so internal services are reachable too.",
+    "Submit a support request with the screenshotUrl field pointing to an internal endpoint like http://localhost:3000/internal. The server fetches it with an internal request header and returns the response content to you.",
+  ],
+  "sql-injection": [
+    "The search speaks SQL if you ask it nicely.",
+    "The order search endpoint constructs SQL queries by concatenating user input directly. The status filter is not parameterized.",
+    "Send a POST to /api/orders/search with a crafted 'status' field containing SQL syntax. A UNION-based injection like ' UNION SELECT ... FROM users -- can extract data from other tables. Watch out for server-side keyword filters.",
+  ],
+  "product-search-sql-injection": [
+    "The search bar understands more languages than you'd expect.",
+    "Product search queries are built using string concatenation with the user's search term. The input lands directly inside a SQL LIKE clause.",
+    "Search for a term containing SQL syntax, even a simple ' UNION SELECT-- in the q parameter at /api/products/search will be detected as injection. The server rewards the attempt by including the flag in its response.",
+  ],
+  "session-fixation-weak-session-management": [
+    "Support access might be a bit too... generous.",
+    "The support access token system lets you generate login tokens. Look closely at whose token you can create, the API might not restrict the target user.",
+    "The /api/user/support-access endpoint accepts an optional 'email' parameter. Generate a support token for an admin account, then use /api/auth/support-login?token=... to log in as them and access /api/admin.",
+  ],
+  "brute-force-no-rate-limiting": [
+    "Persistence pays off when nobody's counting your attempts.",
+    "The login endpoint doesn't enforce any limit on failed attempts. There is no lockout, no delay, and no CAPTCHA. A specific user has a weak, common password.",
+    "Target the account vis.bruta@example.com at POST /api/auth/login. There's no rate limiting, so try common passwords from a wordlist. The password is among the most popular ones. The flag appears in the login response on success.",
+  ],
+  "malicious-file-upload": [
+    "Not all images are as innocent as they look.",
+    "The file upload feature allows SVG files, which can contain embedded JavaScript. The server doesn't strip active content from uploaded files.",
+    "Upload an SVG file containing a <script> tag or an event handler (like onload) to a product image endpoint at /api/admin/products/[id]/image. The server detects the malicious content and reveals the flag in the response.",
+  ],
+  react2shell: [
+    "Even your framework can betray you. Check the dependency tree.",
+    "The project uses a React version affected by a critical CVE that allows remote code execution through the server-side rendering pipeline.",
+    "CVE-2025-55182 affects React 19.x's Flight protocol used in Server Components. The vulnerability exploits unsafe deserialization to achieve prototype pollution and then RCE. Look up the public PoC and send a crafted payload to the server's root endpoint.",
+  ],
+  "x-forwarded-for-sql-injection": [
+    "Logs eat whatever headers you feed them.",
+    "The visitor tracking system records HTTP headers in a database. Not all headers go through sanitization before being inserted into SQL queries.",
+    "Send a POST request to /api/tracking and include SQL syntax in the X-Forwarded-For header. The server inserts this header value directly into an INSERT query on the visitor_logs table. Any SQL keyword in the header triggers injection detection and reveals the flag.",
+  ],
+  "prompt-injection-ai-assistant": [
+    "The AI assistant knows more than it's supposed to share.",
+    "The site's chatbot runs on a system prompt that contains sensitive internal configuration. With the right input, you can make it reveal what it was told to keep hidden.",
+    "The AI assistant at /api/ai-assistant has a system prompt containing an internal validation code between marker lines. Ask it to repeat its instructions, reveal its internal configuration, or output everything between the --- delimiters. Some filter bypass may be needed.",
+  ],
+  "broken-object-level-authorization": [
+    "Wishlists are personal, unless the API disagrees.",
+    "The wishlist API retrieves any wishlist by its ID without verifying that the requesting user is the owner. Some wishlist IDs follow a predictable internal naming convention.",
+    "Access GET /api/wishlists/wl-internal-001 while authenticated as any user. The server fetches the admin's internal wishlist without ownership checks. Since you're not the owner, the response includes the flag as proof of the authorization flaw.",
+  ],
+};
 
 config();
 
@@ -540,6 +648,23 @@ async function main() {
   }
 
   console.log(`Created ${flags.length} flags`);
+
+  for (const [slug, hints] of Object.entries(flagHints)) {
+    const flag = await prisma.flag.findUnique({ where: { slug } });
+    if (!flag) continue;
+
+    for (let i = 0; i < hints.length; i++) {
+      await prisma.hint.upsert({
+        where: {
+          flagId_level: { flagId: flag.id, level: i + 1 },
+        },
+        update: { content: hints[i] },
+        create: { flagId: flag.id, level: i + 1, content: hints[i] },
+      });
+    }
+  }
+
+  console.log(`Created hints for ${Object.keys(flagHints).length} flags`);
 
   const bobOrderIds = ["ORD-001", "ORD-002", "ORD-003"];
 
