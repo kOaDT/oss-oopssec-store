@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createWeakJWT } from "@/lib/server-auth";
+import { createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,14 +50,17 @@ export async function GET(request: NextRequest) {
       supportAccess: true,
     });
 
-    return NextResponse.json({
-      token: authToken,
+    const response = NextResponse.json({
       user: {
         id: supportToken.user.id,
         email: supportToken.user.email,
         role: supportToken.user.role,
       },
     });
+
+    setAuthCookie(response, authToken);
+
+    return response;
   } catch (error) {
     console.error("Error during support login:", error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashMD5, createWeakJWT } from "@/lib/server-auth";
+import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 
 export async function POST(request: Request) {
   try {
@@ -57,8 +57,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({
-      token,
+    const response = NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
@@ -66,6 +65,10 @@ export async function POST(request: Request) {
       },
       flag: flagData,
     });
+
+    setAuthCookie(response, token);
+
+    return response;
   } catch (error) {
     console.error("Error during login:", error);
     return NextResponse.json(

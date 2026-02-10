@@ -36,13 +36,10 @@ To retrieve the flag `OSS{1nf0_d1scl0sur3_4p1_3rr0r}`, follow these steps:
 **Using browser console:**
 
 ```javascript
-const token = localStorage.getItem("authToken");
 fetch("/api/user/export", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  },
+  credentials: "include",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     format: "json",
     fields: "invalid_field",

@@ -19,27 +19,23 @@ export default function LoginForm() {
 
     try {
       const data = await api.post<{
-        token: string;
         user: { id: string; email: string; role: string };
         flag?: string | null;
-      }>("/api/auth/login", { email, password }, { requireAuth: false });
+      }>("/api/auth/login", { email, password });
 
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        window.dispatchEvent(new Event("storage"));
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("storage"));
 
-        if (data.flag) {
-          localStorage.setItem("pendingFlag", data.flag);
-        }
-
-        if (data.user?.role === "ADMIN") {
-          router.push("/admin");
-        } else {
-          router.push("/");
-        }
-        router.refresh();
+      if (data.flag) {
+        localStorage.setItem("pendingFlag", data.flag);
       }
+
+      if (data.user?.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+      router.refresh();
     } catch (error) {
       const errorMessage =
         error instanceof ApiError

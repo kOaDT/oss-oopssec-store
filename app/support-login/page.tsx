@@ -29,8 +29,7 @@ function SupportLoginContent() {
           return;
         }
 
-        if (data.token && data.user) {
-          localStorage.setItem("authToken", data.token);
+        if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
           window.dispatchEvent(new Event("storage"));
           router.push("/profile");

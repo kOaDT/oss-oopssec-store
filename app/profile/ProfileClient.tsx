@@ -80,12 +80,11 @@ export default function ProfileClient() {
     setExportResult(null);
 
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch("/api/user/export", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           format: exportFormat,
@@ -135,11 +134,8 @@ export default function ProfileClient() {
 
   const fetchSupportToken = async () => {
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch("/api/user/support-access", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
       const data = await response.json();
       if (data.supportToken) {
@@ -156,12 +152,11 @@ export default function ProfileClient() {
     setSupportSuccess(null);
 
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch("/api/user/support-access", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({}),
       });
@@ -188,12 +183,9 @@ export default function ProfileClient() {
     setSupportSuccess(null);
 
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch("/api/user/support-access", {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
       if (!response.ok) {

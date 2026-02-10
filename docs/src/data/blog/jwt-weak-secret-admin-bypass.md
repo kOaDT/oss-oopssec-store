@@ -32,7 +32,7 @@ The installer retrieves dependencies, initializes a local SQLite database, seeds
 
 ## Reconnaissance
 
-The application uses JSON Web Tokens for session management. After successful authentication, the backend issues a token that is stored in the browser's local storage and transmitted with subsequent requests.
+The application uses JSON Web Tokens for session management. After successful authentication, the backend issues a token that is stored in an HTTP-only cookie and automatically transmitted with subsequent requests.
 
 The application footer contains a visible link to `/admin`. Attempting to access this endpoint while authenticated as a customer account results in an access denied response, indicating role-based access control is enforced.
 
@@ -40,7 +40,7 @@ The application footer contains a visible link to `/admin`. Attempting to access
 
 ## Token extraction and analysis
 
-Open the browser's developer tools and navigate to Application > Local Storage. The authentication token is stored under the key `authToken`.
+Open the browser's developer tools and navigate to Application > Cookies. The authentication token is stored in an HTTP-only cookie named `authToken`.
 
 Decoding this token using [jwt.io](https://jwt.io) reveals the following structure:
 
@@ -142,7 +142,7 @@ forged_token = jwt.encode(payload, "secret", algorithm="HS256")
 print(forged_token)
 ```
 
-Replace the `authToken` value in local storage with the forged token and refresh the page. Navigate to `/admin` to confirm successful privilege escalation.
+Replace the `authToken` cookie value in Application > Cookies with the forged token and refresh the page. Navigate to `/admin` to confirm successful privilege escalation. Note: although the cookie is `httpOnly` (not accessible via JavaScript), you can still edit its value directly in DevTools.
 
 ![Admin page](../../assets/images/jwt-weak-secret-admin-bypass/admin-flag.png)
 

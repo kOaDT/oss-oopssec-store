@@ -31,12 +31,9 @@ export default function ProductsManagementClient() {
     const fetchProducts = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const token = localStorage.getItem("authToken");
 
         const response = await fetch(`${baseUrl}/api/admin/products`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -91,7 +88,6 @@ export default function ProductsManagementClient() {
 
     try {
       const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
 
       const formData = new FormData();
       formData.append("image", file);
@@ -100,9 +96,7 @@ export default function ProductsManagementClient() {
         `${baseUrl}/api/admin/products/${productId}/image`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
           body: formData,
         }
       );

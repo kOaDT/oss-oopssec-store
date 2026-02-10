@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/lib/generated/prisma/enums";
-import { hashMD5, createWeakJWT } from "@/lib/server-auth";
+import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 
 const DEFAULT_ADDRESS_ID = "addr-default-001";
 
@@ -79,14 +79,17 @@ export async function POST(request: Request) {
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
     });
 
-    return NextResponse.json({
-      token,
+    const response = NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
       },
     });
+
+    setAuthCookie(response, token);
+
+    return response;
   } catch (error) {
     console.error("Error during signup:", error);
     return NextResponse.json(
