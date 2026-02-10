@@ -188,9 +188,9 @@ curl -X POST http://localhost:3000/api/tracking \
 1. The XSS payload is stored in the database as the "IP address"
 2. Every time an admin visits `/admin/analytics`, the script executes
 3. The attacker can:
-   - Steal the admin's JWT token from localStorage
-   - Perform actions as admin (create users, modify products, etc.)
+   - Perform actions as admin (create users, modify products, etc.) by making fetch requests with `credentials: "include"`
    - Exfiltrate sensitive analytics data
+   - Note: the JWT is stored in an `httpOnly` cookie, so it cannot be directly stolen via JavaScript, but the attacker can still make authenticated requests from the XSS context
 
 ![XSS](../../assets/images/x-forwarded-for-sql-injection/xss.png)
 

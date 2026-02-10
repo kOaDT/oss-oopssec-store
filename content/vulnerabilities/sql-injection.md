@@ -81,13 +81,10 @@ You can also intercept and modify the request programmatically:
 2. Navigate to the Console tab
 3. Execute the following JavaScript to send a malicious request:
    ```javascript
-   const token = localStorage.getItem("authToken");
    fetch("/api/orders/search", {
      method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
-     },
+     credentials: "include",
+     headers: { "Content-Type": "application/json" },
      body: JSON.stringify({ status: "DELIVERED' OR 1=1--" }),
    })
      .then((r) => r.json())

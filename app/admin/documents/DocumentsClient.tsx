@@ -45,11 +45,10 @@ export default function DocumentsClient() {
 
   const fetchDirectoryListing = async (path: string) => {
     const baseUrl = getBaseUrl();
-    const token = localStorage.getItem("authToken");
     const response = await fetch(
       `${baseUrl}/api/files?list=true&path=${encodeURIComponent(path)}`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       }
     );
     if (!response.ok) throw new Error("Failed to fetch directory listing");
@@ -64,12 +63,9 @@ export default function DocumentsClient() {
 
     try {
       const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
 
       if (file.toLowerCase().endsWith(".pdf")) {
-        setPdfUrl(
-          `${baseUrl}/api/files?file=${encodeURIComponent(file)}&token=${token}`
-        );
+        setPdfUrl(`${baseUrl}/api/files?file=${encodeURIComponent(file)}`);
         setIsLoading(false);
         return;
       }
@@ -77,7 +73,7 @@ export default function DocumentsClient() {
       const response = await fetch(
         `${baseUrl}/api/files?file=${encodeURIComponent(file)}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         }
       );
 
@@ -134,13 +130,10 @@ export default function DocumentsClient() {
       }
 
       const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
 
       try {
         const response = await fetch(`${baseUrl}/api/admin`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         if (!response.ok) {

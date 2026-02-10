@@ -36,13 +36,12 @@ export default function OrderSearchClient() {
 
     try {
       const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/orders/search`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({}),
       });

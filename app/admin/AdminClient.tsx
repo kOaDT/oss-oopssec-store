@@ -27,18 +27,13 @@ export default function AdminClient() {
     const fetchData = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const token = localStorage.getItem("authToken");
 
         const [adminResponse, ordersResponse] = await Promise.all([
           fetch(`${baseUrl}/api/admin`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            credentials: "include",
           }),
           fetch(`${baseUrl}/api/orders`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            credentials: "include",
           }),
         ]);
 
@@ -91,13 +86,12 @@ export default function AdminClient() {
 
     try {
       const baseUrl = getBaseUrl();
-      const token = localStorage.getItem("authToken");
 
       const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });

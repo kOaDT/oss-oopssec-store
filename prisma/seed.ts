@@ -230,7 +230,7 @@ const flagHints: Record<string, string[]> = {
   "cross-site-request-forgery": [
     "Sometimes the most dangerous links are the ones you can't see.",
     "The admin dashboard hints at hidden content. Inspect the page source for links styled with display:none, one leads to a proof-of-concept demonstration.",
-    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in, the page demonstrates a CSRF attack by submitting a forged request. The server detects the cross-origin attempt and reveals the flag.",
+    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in as admin. The page uses your authentication cookie to submit a forged request that changes an order status, and the flag is returned in the response.",
   ],
   "mass-assignment": [
     "The signup form shows you some fields. The API accepts more.",

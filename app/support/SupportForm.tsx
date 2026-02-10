@@ -32,16 +32,12 @@ export default function SupportForm() {
           description: string;
           screenshotContent?: string;
         };
-      }>(
-        "/api/support",
-        {
-          email,
-          title,
-          description,
-          screenshotUrl: screenshotUrl || undefined,
-        },
-        { requireAuth: false }
-      );
+      }>("/api/support", {
+        email,
+        title,
+        description,
+        screenshotUrl: screenshotUrl || undefined,
+      });
 
       setSubmittedData(data.data);
       setIsLoading(false);

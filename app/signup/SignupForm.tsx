@@ -30,21 +30,17 @@ export default function SignupForm() {
 
     try {
       const data = await api.post<{
-        token: string;
         user: { id: string; email: string; role: string };
-      }>("/api/auth/signup", { email, password }, { requireAuth: false });
+      }>("/api/auth/signup", { email, password });
 
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        window.dispatchEvent(new Event("storage"));
-        if (data.user?.role === "ADMIN") {
-          router.push("/admin");
-        } else {
-          router.push("/");
-        }
-        router.refresh();
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("storage"));
+      if (data.user?.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/");
       }
+      router.refresh();
     } catch (error) {
       const errorMessage =
         error instanceof ApiError

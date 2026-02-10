@@ -55,15 +55,12 @@ export default function AnalyticsClient() {
   const fetchAnalytics = useCallback(
     async (ip?: string) => {
       try {
-        const token = localStorage.getItem("authToken");
         const url = ip
           ? `/api/admin/analytics?ip=${encodeURIComponent(ip)}`
           : "/api/admin/analytics";
 
         const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         if (!response.ok) {

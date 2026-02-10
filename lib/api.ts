@@ -1,5 +1,4 @@
 import { getBaseUrl } from "./config";
-import { getAuthToken } from "./client-auth";
 
 type RequestMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 
@@ -7,7 +6,6 @@ interface RequestOptions {
   method?: RequestMethod;
   body?: unknown;
   headers?: Record<string, string>;
-  requireAuth?: boolean;
   cache?: RequestCache;
 }
 
@@ -27,13 +25,7 @@ async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const {
-    method = "GET",
-    body,
-    headers = {},
-    requireAuth = true,
-    cache,
-  } = options;
+  const { method = "GET", body, headers = {}, cache } = options;
 
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
@@ -43,16 +35,10 @@ async function apiRequest<T>(
     ...headers,
   };
 
-  if (requireAuth) {
-    const token = getAuthToken();
-    if (token) {
-      requestHeaders.Authorization = `Bearer ${token}`;
-    }
-  }
-
   const fetchOptions: RequestInit = {
     method,
     headers: requestHeaders,
+    credentials: "include",
   };
 
   if (body) {

@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
 interface JWTPayload {
@@ -6,6 +6,7 @@ interface JWTPayload {
   email: string;
   role: string;
   exp: number;
+  supportAccess?: boolean;
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
@@ -58,12 +59,31 @@ export function decodeWeakJWT(token: string): JWTPayload | null {
 export async function getAuthenticatedUser(
   request: NextRequest
 ): Promise<JWTPayload | null> {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.replace("Bearer ", "") || null;
+  const token = request.cookies.get("authToken")?.value;
 
   if (!token) {
     return null;
   }
 
   return decodeWeakJWT(token);
+}
+
+export function setAuthCookie(response: NextResponse, token: string): void {
+  response.cookies.set("authToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+}
+
+export function clearAuthCookie(response: NextResponse): void {
+  response.cookies.set("authToken", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
 }

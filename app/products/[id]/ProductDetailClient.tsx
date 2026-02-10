@@ -27,8 +27,7 @@ export default function ProductDetailClient({
     try {
       setIsLoadingReviews(true);
       const data = await api.get<Review[]>(
-        `/api/products/${product.id}/reviews`,
-        { requireAuth: false }
+        `/api/products/${product.id}/reviews`
       );
       setReviews(data);
     } catch (error) {
