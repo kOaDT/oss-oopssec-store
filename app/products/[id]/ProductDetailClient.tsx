@@ -17,6 +17,7 @@ export default function ProductDetailClient({
   const [isLoading, setIsLoading] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewContent, setReviewContent] = useState("");
+  const [reviewAuthor, setReviewAuthor] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
   const reviewRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -40,6 +41,12 @@ export default function ProductDetailClient({
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
+
+  useEffect(() => {
+    if (user?.email && !reviewAuthor) {
+      setReviewAuthor(user.email);
+    }
+  }, [user?.email, reviewAuthor]);
 
   useEffect(() => {
     reviews.forEach((review) => {
@@ -71,9 +78,11 @@ export default function ProductDetailClient({
     try {
       await api.post(`/api/products/${product.id}/reviews`, {
         content: reviewContent,
+        author: reviewAuthor,
       });
 
       setReviewContent("");
+      setReviewAuthor(user?.email || "");
       await fetchReviews();
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -335,13 +344,29 @@ export default function ProductDetailClient({
           <form onSubmit={handleSubmitReview} className="space-y-4">
             <div>
               <label
+                htmlFor="reviewAuthor"
+                className="mb-2 block text-sm font-semibold text-slate-900 dark:text-slate-100"
+              >
+                Display name
+              </label>
+              <input
+                id="reviewAuthor"
+                type="text"
+                value={reviewAuthor}
+                onChange={(e) => setReviewAuthor(e.target.value)}
+                placeholder="Your display name"
+                className="w-full rounded-xl border-2 border-slate-200 p-3 text-slate-900 outline-none transition-colors focus:border-primary-500 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-primary-400"
+              />
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Choose how your name appears on this review
+              </p>
+            </div>
+            <div>
+              <label
                 htmlFor="review"
                 className="mb-2 block text-sm font-semibold text-slate-900 dark:text-slate-100"
               >
                 Write a review
-                <span className="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">
-                  ({user?.email || "anonymous"})
-                </span>
               </label>
               <textarea
                 id="review"
