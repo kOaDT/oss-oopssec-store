@@ -357,6 +357,12 @@ export default function AdminClient() {
             >
               Documents
             </Link>
+            <Link
+              href="/admin/reviews"
+              className="cursor-pointer rounded-xl bg-amber-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-amber-700 hover:shadow-lg dark:bg-amber-500 dark:hover:bg-amber-600"
+            >
+              Review Moderation
+            </Link>
           </div>
           <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             <p>

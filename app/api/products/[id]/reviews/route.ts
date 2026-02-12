@@ -39,7 +39,7 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { content } = body;
+    const { content, author: requestAuthor } = body;
 
     if (
       !content ||
@@ -61,7 +61,12 @@ export async function POST(
     }
 
     const user = await getAuthenticatedUser(request);
-    const author = user?.email || "anonymous";
+    const author =
+      requestAuthor &&
+      typeof requestAuthor === "string" &&
+      requestAuthor.trim().length > 0
+        ? requestAuthor.trim()
+        : user?.email || "anonymous";
 
     const review = await prisma.review.create({
       data: {

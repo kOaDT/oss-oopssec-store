@@ -189,6 +189,14 @@ const flags = [
     category: "AUTHORIZATION" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{s3c0nd_0rd3r_sql_1nj3ct10n}",
+    slug: "second-order-sql-injection",
+    markdownFile: "second-order-sql-injection.md",
+    walkthroughSlug: "second-order-sql-injection",
+    category: "INJECTION" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -291,6 +299,11 @@ const flagHints: Record<string, string[]> = {
     "Wishlists are personal, unless the API disagrees.",
     "The wishlist API retrieves any wishlist by its ID without verifying that the requesting user is the owner. Some wishlist IDs follow a predictable internal naming convention.",
     "Access GET /api/wishlists/wl-internal-001 while authenticated as any user. The server fetches the admin's internal wishlist without ownership checks. Since you're not the owner, the response includes the flag as proof of the authorization flaw.",
+  ],
+  "second-order-sql-injection": [
+    "Not all inputs are dangerous when they first arrive. Sometimes the poison sits in the well, waiting.",
+    "The review form lets you choose a display name. That name is stored safely, but the admin moderation panel reuses it in a way the developer assumed was safe because the data came from the application's own database.",
+    "Submit a product review with a SQL payload as your display name (e.g., '; DROP TABLE reviews; --). Then access the admin review moderation page at /admin/reviews and filter by that author. The backend interpolates the stored author into a raw SQL query via $queryRawUnsafe, triggering injection detection and revealing the flag.",
   ],
 };
 
