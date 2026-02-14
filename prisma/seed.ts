@@ -146,6 +146,7 @@ const flags = [
   {
     flag: "OSS{pr0duct_s34rch_sql_1nj3ct10n}",
     slug: "product-search-sql-injection",
+    walkthroughSlug: "product-search-sql-injection",
     markdownFile: "product-search-sql-injection.md",
     category: "INJECTION" as const,
     difficulty: "MEDIUM" as const,
