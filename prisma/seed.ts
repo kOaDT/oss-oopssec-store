@@ -139,6 +139,7 @@ const flags = [
   {
     flag: "OSS{m4l1c10us_f1l3_upl04d_xss}",
     slug: "malicious-file-upload",
+    walkthroughSlug: "malicious-file-upload-stored-xss",
     markdownFile: "malicious-file-upload.md",
     category: "INJECTION" as const,
     difficulty: "HARD" as const,
