@@ -2,7 +2,7 @@
 <h1>OSS - OopsSec Store</h1>
 </div>
 
-<div align="">
+<div>
 
 ```
    ____  ____ ____     ____                  ____            ____  _
@@ -29,6 +29,7 @@
 <p align="center">
   <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md">Contributing</a> |
   <a href="https://github.com/users/kOaDT/projects/3">Roadmap</a> |
+  <a href="https://github.com/users/kOaDT/projects/3/views/6">Good first issues</a> |
   <a href="https://kOaDT.github.io/oss-oopssec-store">Walkthroughs</a>
 </p>
 
@@ -44,8 +45,14 @@
 
 [![GitHub issues](https://img.shields.io/github/issues/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/pulls)
+[![Good first issues](https://img.shields.io/badge/Good_first-issues-7057ff?style=flat-square)](https://github.com/users/kOaDT/projects/3/views/6)
 ![Intentionally Vulnerable](https://img.shields.io/badge/⚠️_Intentionally-Vulnerable-red?style=flat-square)
-[![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
+
+</div>
+
+<div align="center">
+
+[![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers) [![GitHub forks](https://img.shields.io/github/forks/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/network)
 
 </div>
 
@@ -147,7 +154,7 @@ Ways to contribute:
 - **Report and fix bugs**
 - **Improve documentation**
 
-Looking for ideas? Check out our [Roadmap project](https://github.com/users/kOaDT/projects/3) for planned features and vulnerabilities you can help implement.
+Looking for ideas? Check out our [Roadmap project](https://github.com/users/kOaDT/projects/3) for planned features and vulnerabilities, or browse [good first issues](https://github.com/users/kOaDT/projects/3/views/6) to find a starter task.
 
 Found all the flags? Share your walkthroughs with the community by contributing to our [walkthroughs documentation site](https://kOaDT.github.io/oss-oopssec-store).
 

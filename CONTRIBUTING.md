@@ -25,6 +25,8 @@ We encourage **kind and respectful reviews** from both contributors and maintain
 
 ## How to Contribute
 
+New to the project? Browse our [good first issues](https://github.com/users/kOaDT/projects/3/views/6) to find a task to get started.
+
 - Adding New Flags (include 3 progressive hints per flag in `prisma/seed.ts`)
 - Writing Walkthroughs and Writeups
 - Developing the E-commerce Site
@@ -97,4 +99,6 @@ If you need additional information on how to use AstroPaper, please refer to [th
 
 ## Roadmap
 
-For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see our [Roadmap project](https://github.com/users/kOaDT/projects/3). This project outlines upcoming development priorities and is a great place to find contribution opportunities.
+For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see our [Roadmap project](https://github.com/users/kOaDT/projects/3).
+
+Looking for a starter task? See our [good first issues](https://github.com/users/kOaDT/projects/3/views/6) view.
