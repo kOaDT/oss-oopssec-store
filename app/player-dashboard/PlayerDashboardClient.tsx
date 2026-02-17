@@ -441,7 +441,7 @@ export default function PlayerDashboardClient() {
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link
-                            href={`/flags/${flag.slug}`}
+                            href={`/vulnerabilities/${flag.slug}`}
                             className="rounded border border-emerald-900 px-2 py-1 text-xs text-emerald-400 transition-colors hover:bg-emerald-950"
                           >
                             DOCS
