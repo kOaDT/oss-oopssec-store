@@ -55,6 +55,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "better-sqlite3": "^12.6.2",
     "canvas-confetti": "^1.9.4",
+    "fast-xml-parser": "^5.3.6",
     "jsonwebtoken": "^9.0.3",
     "next": "16.0.6",
     "pdf-lib": "^1.17.1",

@@ -363,6 +363,12 @@ export default function AdminClient() {
             >
               Review Moderation
             </Link>
+            <Link
+              href="/admin/suppliers"
+              className="cursor-pointer rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-indigo-700 hover:shadow-lg dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            >
+              Supplier Orders
+            </Link>
           </div>
           <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             <p>

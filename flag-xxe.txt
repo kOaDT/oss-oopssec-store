@@ -1,0 +1,6 @@
+# Supplier Integration API Configuration
+# Generated automatically — do not edit
+
+api_key=OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}
+endpoint=https://suppliers.oss-store.internal/api/v2
+timeout=30000

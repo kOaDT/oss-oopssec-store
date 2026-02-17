@@ -240,3 +240,14 @@ model WishlistItem {
   @@unique([wishlistId, productId])
   @@map("wishlist_items")
 }
+
+model SupplierOrder {
+  id         String   @id @default(cuid())
+  supplierId String
+  orderId    String
+  total      Float
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  @@map("supplier_orders")
+}
