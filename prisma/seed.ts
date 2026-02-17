@@ -199,6 +199,14 @@ const flags = [
     category: "INJECTION" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}",
+    slug: "plaintext-password-in-logs",
+    markdownFile: "plaintext-password-in-logs.md",
+    walkthroughSlug: "plaintext-password-in-logs",
+    category: "INFORMATION_DISCLOSURE" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -306,6 +314,11 @@ const flagHints: Record<string, string[]> = {
     "Not all inputs are dangerous when they first arrive. Sometimes the poison sits in the well, waiting.",
     "The review form lets you choose a display name. That name is stored safely, but the admin moderation panel reuses it in a way the developer assumed was safe because the data came from the application's own database.",
     "Submit a product review with a SQL payload as your display name (e.g., '; DROP TABLE reviews; --). Then access the admin review moderation page at /admin/reviews and filter by that author. The backend interpolates the stored author into a raw SQL query via $queryRawUnsafe, triggering injection detection and revealing the flag.",
+  ],
+  "plaintext-password-in-logs": [
+    "What the server writes down in private might not stay private forever.",
+    "The application captures all server-side console output to a file. A debug statement in the login route logs more than it should. Somewhere, an internal tool exposes those logs.",
+    "Perform a login attempt, then use directory enumeration (gobuster, dirsearch) to discover /monitoring/siem. Authenticate with the default credentials root:admin and search the logs for your login attempt. The flag is logged alongside the plaintext password.",
   ],
 };
 

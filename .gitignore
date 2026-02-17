@@ -49,3 +49,6 @@ prisma/*.db-journal
 # uploads
 uploads/*
 documents/invoices/*
+
+# logs
+logs/*

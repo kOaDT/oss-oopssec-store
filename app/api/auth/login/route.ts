@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 
+const LOGIN_FLAG = "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body;
+
+    console.log("[auth] login attempt", { email, password, flag: LOGIN_FLAG });
 
     if (!email || !password) {
       return NextResponse.json(
