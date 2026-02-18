@@ -193,10 +193,40 @@ export default function AdminClient() {
     <section className="container mx-auto px-4 py-16">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800 md:p-12">
-          <div className="mb-6 text-center">
-            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+                <svg
+                  className="h-6 w-6 text-primary-600 dark:text-primary-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  Admin Dashboard
+                </h2>
+                {adminData?.user && (
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Logged in as {adminData.user.email}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            >
               <svg
-                className="h-8 w-8 text-primary-600 dark:text-primary-400"
+                className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -205,18 +235,11 @@ export default function AdminClient() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-            </div>
-            <h2 className="mb-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Admin Dashboard
-            </h2>
-            {adminData?.user && (
-              <p className="mb-4 text-slate-600 dark:text-slate-400">
-                Logged in as {adminData.user.email}
-              </p>
-            )}
+              Back to site
+            </Link>
           </div>
 
           {adminData?.flag && (
@@ -332,43 +355,94 @@ export default function AdminClient() {
               </div>
             )}
           </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/"
-              className="cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
-            >
-              Go to Home
-            </Link>
-            <Link
-              href="/admin/products"
-              className="cursor-pointer rounded-xl bg-secondary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-secondary-700 hover:shadow-lg dark:bg-secondary-500 dark:hover:bg-secondary-600"
-            >
-              Manage Products
-            </Link>
-            <Link
-              href="/admin/analytics"
-              className="cursor-pointer rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg dark:bg-emerald-500 dark:hover:bg-emerald-600"
-            >
-              Visitor Analytics
-            </Link>
-            <Link
-              href="/admin/documents"
-              className="cursor-pointer rounded-xl bg-slate-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-slate-700 hover:shadow-lg dark:bg-slate-500 dark:hover:bg-slate-600"
-            >
-              Documents
-            </Link>
-            <Link
-              href="/admin/reviews"
-              className="cursor-pointer rounded-xl bg-amber-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-amber-700 hover:shadow-lg dark:bg-amber-500 dark:hover:bg-amber-600"
-            >
-              Review Moderation
-            </Link>
-            <Link
-              href="/admin/suppliers"
-              className="cursor-pointer rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-indigo-700 hover:shadow-lg dark:bg-indigo-500 dark:hover:bg-indigo-600"
-            >
-              Supplier Orders
-            </Link>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                href: "/admin/products",
+                title: "Products",
+                description: "Upload and manage product images",
+                color:
+                  "bg-secondary-50 text-secondary-600 dark:bg-secondary-900/20 dark:text-secondary-400",
+                icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
+              },
+              {
+                href: "/admin/analytics",
+                title: "Analytics",
+                description: "Monitor traffic and visitor data",
+                color:
+                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
+                icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+              },
+              {
+                href: "/admin/documents",
+                title: "Documents",
+                description: "Browse and manage secure files",
+                color:
+                  "bg-slate-100 text-slate-600 dark:bg-slate-700/30 dark:text-slate-400",
+                icon: "M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z",
+              },
+              {
+                href: "/admin/reviews",
+                title: "Reviews",
+                description: "Moderate customer reviews",
+                color:
+                  "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
+                icon: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
+              },
+              {
+                href: "/admin/suppliers",
+                title: "Supplier Orders",
+                description: "Import supplier order confirmations",
+                color:
+                  "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400",
+                icon: "M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4",
+              },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+              >
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${item.color}`}
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d={item.icon}
+                    />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-slate-900 group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400">
+                    {item.title}
+                  </h4>
+                  <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                    {item.description}
+                  </p>
+                </div>
+                <svg
+                  className="ml-auto h-5 w-5 shrink-0 translate-x-0 text-slate-300 opacity-0 transition-all group-hover:translate-x-1 group-hover:text-slate-400 group-hover:opacity-100 dark:text-slate-600 dark:group-hover:text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            ))}
           </div>
           <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             <p>

@@ -1,51 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/server-auth";
 import { prisma } from "@/lib/prisma";
-import { XMLParser } from "fast-xml-parser";
-import fs from "fs";
+import libxmljs from "libxmljs2";
+import path from "path";
 
-function resolveExternalEntities(xml: string): string {
-  const doctypeRegex = new RegExp(
-    "<!DOCTYPE\\s+\\w+\\s*\\[([^\\]]*)\\]\\s*>",
-    "is"
-  );
-  const doctypeMatch = xml.match(doctypeRegex);
-  if (!doctypeMatch) return xml;
-
-  const internalSubset = doctypeMatch[1];
-  const entityRegex = /<!ENTITY\s+(\w+)\s+SYSTEM\s+["']([^"']+)["']\s*>/gi;
-
-  let resolved = xml;
-  let match;
-
-  while ((match = entityRegex.exec(internalSubset)) !== null) {
-    const entityName = match[1];
-    const systemUri = match[2];
-
-    let entityValue = "";
-
-    if (systemUri.startsWith("file://")) {
-      const filePath = systemUri.slice(7);
-      try {
-        entityValue = fs.readFileSync(filePath, "utf-8");
-      } catch {
-        entityValue = `[Error: cannot read ${filePath}]`;
-      }
-    } else if (systemUri.startsWith("/")) {
-      try {
-        entityValue = fs.readFileSync(systemUri, "utf-8");
-      } catch {
-        entityValue = `[Error: cannot read ${systemUri}]`;
-      }
-    }
-
-    resolved = resolved.replaceAll(`&${entityName};`, entityValue);
-  }
-
-  resolved = resolved.replace(doctypeRegex, "");
-
-  return resolved;
-}
+const SUPPLIER_REGISTRY_PATH = path.join(process.cwd(), "flag-xxe.txt");
 
 export async function POST(request: NextRequest) {
   const user = await getAuthenticatedUser(request);
@@ -68,33 +27,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const resolvedXml = resolveExternalEntities(rawXml);
+    const doc = libxmljs.parseXmlString(rawXml, { noent: true, dtdload: true });
 
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      parseTagValue: true,
-      trimValues: true,
-    });
-
-    const parsed = parser.parse(resolvedXml);
-
-    if (!parsed.order) {
+    const root = doc.root();
+    if (!root || root.name() !== "order") {
       return NextResponse.json(
-        { error: "Invalid XML structure. Expected root element <order>." },
+        {
+          error: "Invalid XML structure. Expected root element <order>.",
+          debug: {
+            config: SUPPLIER_REGISTRY_PATH,
+            message: "The XML must match the supplier order schema.",
+            expected: ["supplierId", "orderId", "total", "notes (optional)"],
+          },
+        },
         { status: 400 }
       );
     }
 
-    const order = parsed.order;
+    const getText = (name: string) =>
+      (root.get(name) as libxmljs.Element | null)?.text()?.trim() || "";
 
-    const supplierId = String(order.supplierId || "").trim();
-    const orderId = String(order.orderId || "").trim();
-    const total = parseFloat(order.total) || 0;
-    const notes = String(order.notes ?? "").trim();
+    const supplierId = getText("supplierId");
+    const orderId = getText("orderId");
+    const total = parseFloat(getText("total")) || 0;
+    const notes = getText("notes");
 
     if (!supplierId || !orderId) {
       return NextResponse.json(
-        { error: "Missing required fields: supplierId and orderId." },
+        {
+          error: "Missing required fields: supplierId and orderId.",
+          debug: {
+            config: SUPPLIER_REGISTRY_PATH,
+            received: {
+              supplierId: supplierId || null,
+              orderId: orderId || null,
+            },
+          },
+        },
         { status: 400 }
       );
     }
@@ -122,7 +91,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: `Failed to parse XML: ${message}` },
+      {
+        error: `Failed to parse XML: ${message}`,
+      },
       { status: 400 }
     );
   }

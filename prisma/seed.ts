@@ -211,6 +211,7 @@ const flags = [
     flag: "OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}",
     slug: "xxe-supplier-order-import",
     markdownFile: "xxe-supplier-order-import.md",
+    walkthroughSlug: "xxe-supplier-order-import",
     category: "INJECTION" as const,
     difficulty: "HARD" as const,
   },
