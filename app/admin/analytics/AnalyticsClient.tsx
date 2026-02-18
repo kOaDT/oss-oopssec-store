@@ -177,6 +177,27 @@ export default function AnalyticsClient() {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="mx-auto max-w-6xl space-y-8">
+        <div>
+          <Link
+            href="/admin"
+            className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+          >
+            <svg
+              className="mr-1.5 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Back to Admin
+          </Link>
+        </div>
         {hasInvalidIp && (
           <FlagDisplay
             flag={FLAG}
@@ -361,15 +382,6 @@ export default function AnalyticsClient() {
               No visits recorded yet.
             </p>
           )}
-        </div>
-
-        <div className="flex justify-center gap-4">
-          <Link
-            href="/admin"
-            className="cursor-pointer rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-primary-700 hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600"
-          >
-            Back to Admin
-          </Link>
         </div>
       </div>
     </section>

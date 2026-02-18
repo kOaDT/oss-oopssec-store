@@ -207,6 +207,14 @@ const flags = [
     category: "INFORMATION_DISCLOSURE" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}",
+    slug: "xxe-supplier-order-import",
+    markdownFile: "xxe-supplier-order-import.md",
+    walkthroughSlug: "xxe-supplier-order-import",
+    category: "INJECTION" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -319,6 +327,11 @@ const flagHints: Record<string, string[]> = {
     "What the server writes down in private might not stay private forever.",
     "The application captures all server-side console output to a file. A debug statement in the login route logs more than it should. Somewhere, an internal tool exposes those logs.",
     "Perform a login attempt, then use directory enumeration (gobuster, dirsearch) to discover /monitoring/siem. Authenticate with the default credentials root:admin and search the logs for your login attempt. The flag is logged alongside the plaintext password.",
+  ],
+  "xxe-supplier-order-import": [
+    "Legacy integrations sometimes speak in markup that trusts too much.",
+    "The supplier import endpoint parses XML directly from user input. The parser resolves entity declarations, including those that reference external resources via the file:// protocol.",
+    "First gain admin access (e.g., via JWT forgery or mass assignment). Then navigate to the supplier import page and submit XML with a DOCTYPE declaring an external entity pointing to a file on disk. The entity value will be reflected in the parsed response.",
   ],
 };
 

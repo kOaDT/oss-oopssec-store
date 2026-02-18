@@ -197,17 +197,32 @@ export default function ProductsManagementClient() {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="mx-auto max-w-6xl">
+        <div className="mb-6">
+          <Link
+            href="/admin"
+            className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+          >
+            <svg
+              className="mr-1.5 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Back to Admin
+          </Link>
+        </div>
         <div className="mb-8 rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800 md:p-12">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Product Images
             </h2>
-            <Link
-              href="/admin"
-              className="cursor-pointer rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-              ← Back to Dashboard
-            </Link>
           </div>
 
           {flag && (
