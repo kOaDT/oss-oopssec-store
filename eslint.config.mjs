@@ -17,6 +17,14 @@ const eslintConfig = defineConfig([
     },
   },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "docs/**"]),
+  {
+    files: ["tests/**/*.ts", "cypress/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "prettier/prettier": "error",
+    },
+  },
 ]);
 
 export default eslintConfig;

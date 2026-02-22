@@ -1,9 +1,22 @@
 # Contributing
 
-OSS – OopsSec Store is an open-source project.
-Contributions are welcome via pull requests.
+OSS – OopsSec Store is an open-source project. Contributions are welcome via pull requests.
 
-## Contribution Guidelines
+---
+
+## How to contribute
+
+1. **Fork the project** on GitHub
+2. **Create a branch** for your contribution
+3. **Make your changes** following the contribution guidelines below
+4. **Submit a Pull Request (PR)** with a clear description of your changes
+5. **Be patient**, maintainers will review your PR as soon as possible
+
+We encourage **kind and respectful reviews** from both contributors and maintainers. Constructive feedback helps improve the project for everyone.
+
+---
+
+## Contribution guidelines
 
 Please ensure that:
 
@@ -11,28 +24,41 @@ Please ensure that:
 - Code remains intentionally vulnerable when required
 - No real-world secrets are introduced
 
-## Contribution Process
-
-To contribute to the project:
-
-1. **Fork the project** on GitHub
-2. **Create a branch** for your contribution
-3. **Make your changes** following the contribution guidelines
-4. **Submit a Pull Request (PR)** with a clear description of your changes
-5. **Be patient** during the review process - maintainers will review your PR as soon as possible
-
-We encourage **kind and respectful reviews** from both contributors and maintainers. Constructive feedback helps improve the project for everyone.
-
-## How to Contribute
+## What you can contribute
 
 New to the project? Browse our [good first issues](https://github.com/users/kOaDT/projects/3/views/6) to find a task to get started.
 
-- Adding New Flags (include 3 progressive hints per flag in `prisma/seed.ts`)
+- Adding New Flags
 - Writing Walkthroughs and Writeups
 - Developing the E-commerce Site
 - Fixing Bugs
 - Improving Documentation
 - Reporting Issues
+
+### Adding a Vulnerability
+
+To add a new vulnerability to the project, follow these steps:
+
+1. **Add the flag in `prisma/seed.ts`**  
+   Create a new `Flag` record with format `OSS{...}`, and set `slug`, `category`, `difficulty`, and `markdownFile` to match your vulnerability.
+
+2. **Add the hints in `prisma/seed.ts`**  
+   Add three progressive hints in the `flagHints` map (keyed by the flag slug). Level 1 = vague, level 2 = more specific, level 3 = near-solution.
+
+3. **Implement the vulnerability**  
+   Implement the vulnerable code path (e.g. API route, page, or feature) that allows an attacker to obtain the flag. The vulnerability must be exploitable and demonstrable.
+
+4. **Document the vulnerability**  
+   Add a markdown file under `content/vulnerabilities/` (e.g. `your-vulnerability.md`) with an overview, vulnerable code examples, exploitation steps, and mitigation strategies.
+
+5. **Add regression tests**  
+   Add tests so the vulnerability stays exploitable and is not accidentally fixed:
+   - **Unit tests** in `tests/unit/` for helpers (e.g. hashing, filters).
+   - **API tests** in `tests/api/` for exploitation scenarios against endpoints.
+   - **E2E tests** in `cypress/e2e/` for full exploitation flows via the UI.
+
+6. **Optional: Write a walkthrough**  
+   Contribute a writeup to the [walkthroughs documentation site](https://kOaDT.github.io/oss-oopssec-store) (see [Writing Walkthroughs](#writing-walkthroughs) below).
 
 ### Writing Walkthroughs
 

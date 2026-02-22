@@ -58,6 +58,18 @@
 
 ---
 
+## Table of contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Hall of Fame](#hall-of-fame)
+- [Project Structure](#project-structure)
+- [Recent activity](#recent-activity)
+- [Testing](#testing)
+- [Disclaimer](#disclaimer)
+- [Contributing](#contributing)
+- [Top contributors](#top-contributors)
+
 OSS – OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors.
 
 Designed for penetration testers, security engineers, developers, and cybersecurity students, this project demonstrates how real-world vulnerabilities manifest in production-like single-page applications (SPA) with REST APIs.
@@ -73,16 +85,6 @@ Designed for penetration testers, security engineers, developers, and cybersecur
 - Comprehensive vulnerability documentation for learning and training
 - Community-driven walkthroughs and writeups for each vulnerability
 - Suitable for security awareness training, penetration testing practice, and AppSec education
-
----
-
-## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
-
-[![Timeline graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_timeline.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
-[![Trending topics](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_words.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
-
-[![Issue status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_issues.svg)](https://github.com/kOaDT/oss-oopssec-store/issues)
-[![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls)
 
 ---
 
@@ -112,9 +114,19 @@ The setup script will create the `.env` file, install dependencies, initialize t
 
 ---
 
+### Hall of Fame
+
+Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-fame/data.json)! Add your entry to `hall-of-fame/data.json`. Your profile will appear on the Hall of Fame page in the app (`/hall-of-fame`) alongside other players who completed the challenge.
+
+---
+
 ## Project Structure
 
+<div align="center">
+
 [![Structure](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/structure/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/xqocpGlYz1v1FH126K5mqp7WjOcy1VH9pbA-EuINusA_table.svg)](https://github.com/kOaDT/oss-oopssec-store)
+
+</div>
 
 | Folder                     | Description                                                              |
 | -------------------------- | ------------------------------------------------------------------------ |
@@ -131,6 +143,48 @@ The setup script will create the `.env` file, install dependencies, initialize t
 | `docs/`                    | Static documentation site with community walkthroughs                    |
 | `hall-of-fame/`            | Hall of Fame data file with player profiles who found all flags          |
 | `packages/`                | NPM package `create-oss-store` for quick project scaffolding             |
+| `tests/`                   | Jest unit and API tests validating exploitation scenarios                |
+| `cypress/`                 | Cypress E2E tests for full exploitation workflows through the UI         |
+
+---
+
+## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
+
+<div align="center">
+
+[![Timeline graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_timeline.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
+[![Trending topics](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_words.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
+
+[![Issue status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_issues.svg)](https://github.com/kOaDT/oss-oopssec-store/issues)
+[![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls)
+
+</div>
+
+---
+
+## Testing
+
+This project includes automated **security regression tests** that ensure all vulnerability chains and flags remain functional. These tests deliberately validate insecure behaviors.
+Tests run automatically on pull requests. Any PR that accidentally patches or alters an exploit chain will fail CI.
+
+### Running Tests
+
+```bash
+# Unit tests (utility functions: MD5 hashing, JWT, input filters)
+npm run test:unit
+
+# API exploitation tests (requires a running server)
+npm run test:api
+
+# E2E exploitation tests (requires a running server)
+npm run test:e2e
+
+# Open Cypress interactive mode
+npm run test:e2e:open
+
+# All tests
+npm run test:ci
+```
 
 ---
 
@@ -164,4 +218,22 @@ For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 
+<div align="center">
+
 [![Top contributors](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/top-contributors/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_table.svg)](https://github.com/kOaDT/oss-oopssec-store/graphs/contributors)
+
+</div>
+
+---
+
+<div align="center">
+
+Original author: [kOaDT](https://github.com/kOaDT)  
+Project: [OopsSec Store](https://github.com/kOaDT/oss-oopssec-store)  
+Contact: koadt@proton.me
+
+License: [MIT](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
+
+Do not remove or modify the LICENSE file in your fork.
+
+</div>

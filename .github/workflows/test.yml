@@ -1,0 +1,80 @@
+name: Exploitation Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Jest Unit Tests
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:${{ github.workspace }}/prisma/test.db"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+  api-tests:
+    name: Jest API Exploitation Tests
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:${{ github.workspace }}/prisma/test.db"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          build: "true"
+
+      - name: Start server and run API tests
+        run: |
+          npm run start &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID || true" EXIT
+          npx wait-on http://localhost:3000 --timeout 60000
+          npm run test:api
+
+  e2e-tests:
+    name: Cypress E2E Exploitation Tests
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:${{ github.workspace }}/prisma/test.db"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          build: "true"
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run start
+          wait-on: "http://localhost:3000"
+          wait-on-timeout: 60
+
+      - name: Upload Cypress screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

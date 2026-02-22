@@ -29,6 +29,8 @@ lib/                      # Utilities (api, auth, prisma, types)
 prisma/                   # Schema and seed data with CTF flags
 uploads/                  # User-uploaded files (served via /api/uploads/)
 docs/                     # Astro documentation site (separate npm project)
+tests/                    # Jest unit and API exploitation tests
+cypress/                  # Cypress E2E exploitation workflow tests
 ```
 
 ## Key Commands
@@ -39,6 +41,9 @@ npm run lint         # ESLint
 npm run format       # Prettier
 npm run db:seed      # Seed database with flags
 npm run db:studio    # Prisma Studio
+npm run test:unit    # Jest unit tests
+npm run test:api     # Jest API exploitation tests
+npm run test:e2e     # Cypress E2E tests
 ```
 
 ## Coding Standards
