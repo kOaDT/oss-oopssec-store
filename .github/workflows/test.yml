@@ -1,0 +1,141 @@
+name: Exploitation Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Jest Unit & API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Setup database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Seed database
+        run: npm run db:seed
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+  api-tests:
+    name: Jest API Exploitation Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Setup database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Seed database
+        run: npm run db:seed
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Start server and run API tests
+        run: |
+          npm run start &
+          SERVER_PID=$!
+          npx wait-on http://localhost:3000 --timeout 60000
+          npm run test:api
+          kill $SERVER_PID
+        env:
+          DATABASE_URL: "file:./test.db"
+
+  e2e-tests:
+    name: Cypress E2E Exploitation Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Setup database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Seed database
+        run: npm run db:seed
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run start
+          wait-on: "http://localhost:3000"
+          wait-on-timeout: 60
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Upload Cypress screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

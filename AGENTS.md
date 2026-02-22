@@ -39,6 +39,14 @@ prisma/                     # Schema and seed.ts with CTF flags
 uploads/                    # User-uploaded files (served via /api/uploads/)
 docs/                       # Astro documentation site (separate npm project)
 hall-of-fame/data.json      # Hall of Fame entries (community-driven via PRs)
+tests/                      # Jest unit and API exploitation tests
+├── unit/                   # Unit tests (MD5, JWT, input filters)
+├── api/                    # API exploitation scenario tests
+├── helpers/api.ts          # Shared test helpers (login, auth, assertions)
+└── plans/                  # Per-vulnerability test plan markdown files
+cypress/                    # Cypress E2E exploitation workflow tests
+├── e2e/                    # E2E spec files
+└── support/commands.ts     # Custom commands (login, verifyFlag)
 ```
 
 ## Commands
@@ -64,6 +72,14 @@ npm run db:seed              # Seed database with flags
 
 # Setup
 npm run setup                # Full setup (env, deps, seed)
+
+# Testing
+npm run test                 # Run all Jest tests
+npm run test:unit            # Unit tests only
+npm run test:api             # API exploitation tests (requires running server)
+npm run test:e2e             # Cypress E2E tests (requires running server)
+npm run test:e2e:open        # Open Cypress interactive mode
+npm run test:ci              # All tests (Jest + Cypress)
 
 # Documentation (in docs/)
 npm run docs:dev             # Astro dev server
@@ -155,9 +171,20 @@ import { useAuth } from "@/hooks/useAuth";
 const { user, logout } = useAuth();
 ```
 
+## Testing
+
+Security regression tests validate that all vulnerability chains and flags remain exploitable. Tests deliberately assert insecure behaviors — they prevent accidental hardening.
+
+- **Jest unit tests** (`tests/unit/`): Test utility functions (MD5 hashing, JWT signing, input filters)
+- **Jest API tests** (`tests/api/`): Test exploitation scenarios against API endpoints
+- **Cypress E2E tests** (`cypress/e2e/`): Test full exploitation workflows through the UI
+- **Test plans** (`tests/plans/`): Per-vulnerability markdown files with detailed implementation instructions
+- **CI/CD** (`.github/workflows/test.yml`): Runs on PRs to `main` — 3 parallel jobs (unit, API, E2E)
+
 ## Notes
 
 - SQLite for simplicity (easy to reset/seed)
 - `docs/` is a separate Astro project - run `npm install` there separately
 - `docs/` has its own ESLint/Prettier config with Astro plugins
 - `create-oss-store` npm package available in `packages/`
+- `tests/` and `cypress/` are excluded from `tsconfig.json` and ESLint (they have their own configs)
