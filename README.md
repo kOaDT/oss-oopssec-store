@@ -38,20 +38,12 @@
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
 [![npm version](https://img.shields.io/npm/v/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
 [![npm downloads](https://img.shields.io/npm/dm/create-oss-store?style=flat-square)](https://www.npmjs.com/package/create-oss-store)
-
-</div>
-
-<div align="center">
-
+<br>
 [![GitHub issues](https://img.shields.io/github/issues/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/pulls)
 [![Good first issues](https://img.shields.io/badge/Good_first-issues-7057ff?style=flat-square)](https://github.com/users/kOaDT/projects/3/views/6)
 ![Intentionally Vulnerable](https://img.shields.io/badge/⚠️_Intentionally-Vulnerable-red?style=flat-square)
-
-</div>
-
-<div align="center">
-
+<br>
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers) [![GitHub forks](https://img.shields.io/github/forks/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/network)
 
 </div>
@@ -70,11 +62,14 @@
 - [Contributing](#contributing)
 - [Top contributors](#top-contributors)
 
+---
+
 OSS – OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors.
 
 Designed for penetration testers, security engineers, developers, and cybersecurity students, this project demonstrates how real-world vulnerabilities manifest in production-like single-page applications (SPA) with REST APIs.
 
-**Warning:** This application contains intentional security flaws and must never be deployed in a production environment.
+> [!WARNING]
+> This application contains intentional security flaws and must never be deployed in a production environment.
 
 ## Features
 
@@ -85,8 +80,6 @@ Designed for penetration testers, security engineers, developers, and cybersecur
 - Comprehensive vulnerability documentation for learning and training
 - Community-driven walkthroughs and writeups for each vulnerability
 - Suitable for security awareness training, penetration testing practice, and AppSec education
-
----
 
 ## Installation
 
@@ -112,13 +105,9 @@ npm run setup
 
 The setup script will create the `.env` file, install dependencies, initialize the SQLite database, seed it with CTF flags, and start the application on port 3000.
 
----
-
 ### Hall of Fame
 
 Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-fame/data.json)! Add your entry to `hall-of-fame/data.json`. Your profile will appear on the Hall of Fame page in the app (`/hall-of-fame`) alongside other players who completed the challenge.
-
----
 
 ## Project Structure
 
@@ -146,8 +135,6 @@ Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-
 | `tests/`                   | Jest unit and API tests validating exploitation scenarios                |
 | `cypress/`                 | Cypress E2E tests for full exploitation workflows through the UI         |
 
----
-
 ## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
 
 <div align="center">
@@ -159,8 +146,6 @@ Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-
 [![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls)
 
 </div>
-
----
 
 ## Testing
 
@@ -186,15 +171,11 @@ npm run test:e2e:open
 npm run test:ci
 ```
 
----
-
 ## Disclaimer
 
-This project is intended for educational and authorized security testing purposes only.
-
-It contains intentional security vulnerabilities and insecure configurations. The authors assume no responsibility for any misuse, damage, or unauthorized access resulting from the use of this software. Use responsibly and only in isolated environments.
-
----
+> [!CAUTION]
+> This project is intended for educational and authorized security testing purposes only.
+> It contains intentional security vulnerabilities and insecure configurations. The authors assume no responsibility for any misuse, damage, or unauthorized access resulting from the use of this software. Use responsibly and only in isolated environments.
 
 ## Contributing
 
@@ -228,7 +209,7 @@ For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <div align="center">
 
-Original author: [kOaDT](https://github.com/kOaDT)  
+Author: [kOaDT](https://github.com/kOaDT)  
 Project: [OopsSec Store](https://github.com/kOaDT/oss-oopssec-store)  
 Contact: koadt@proton.me
 
