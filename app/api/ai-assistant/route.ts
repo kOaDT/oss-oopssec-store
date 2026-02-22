@@ -29,7 +29,7 @@ const BLOCKED_PATTERNS = [
   /print.*system.*prompt/i,
 ];
 
-function containsBlockedPattern(message: string): boolean {
+export function containsBlockedPattern(message: string): boolean {
   return BLOCKED_PATTERNS.some((pattern) => pattern.test(message));
 }
 

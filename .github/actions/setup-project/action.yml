@@ -1,0 +1,38 @@
+name: "Setup Project"
+description: "Checkout, install dependencies, setup database and seed"
+
+inputs:
+  build:
+    description: "Whether to build the application"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Generate Prisma client
+      shell: bash
+      run: npx prisma generate
+
+    - name: Setup database
+      shell: bash
+      run: npx prisma db push
+
+    - name: Seed database
+      shell: bash
+      run: npm run db:seed
+
+    - name: Build application
+      if: inputs.build == 'true'
+      shell: bash
+      run: npm run build
