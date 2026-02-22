@@ -27,6 +27,19 @@ alwaysApply: true
    - Mitigation strategies
 
 3. **Ensure exploitability** - the vulnerability must be demonstrable
+4. **Add exploitation tests** - create a test plan in `tests/plans/` and implement Jest/Cypress tests to prevent accidental regression
+
+## Testing
+
+Security regression tests ensure all vulnerability chains remain exploitable:
+
+- **Test plans:** `tests/plans/` — one markdown file per vulnerability with detailed implementation instructions
+- **Jest unit tests:** `tests/unit/` — utility functions (MD5, JWT, input filters)
+- **Jest API tests:** `tests/api/` — exploitation scenarios against API endpoints
+- **Cypress E2E tests:** `cypress/e2e/` — full exploitation workflows through the UI
+- **CI/CD:** `.github/workflows/test.yml` — runs on PRs to `main`
+
+Any PR that accidentally hardens a vulnerability will fail CI.
 
 ## CTF Flag System
 

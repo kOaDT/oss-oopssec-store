@@ -131,6 +131,37 @@ The setup script will create the `.env` file, install dependencies, initialize t
 | `docs/`                    | Static documentation site with community walkthroughs                    |
 | `hall-of-fame/`            | Hall of Fame data file with player profiles who found all flags          |
 | `packages/`                | NPM package `create-oss-store` for quick project scaffolding             |
+| `tests/`                   | Jest unit and API tests validating exploitation scenarios                |
+| `cypress/`                 | Cypress E2E tests for full exploitation workflows through the UI         |
+
+---
+
+## Testing
+
+This project includes automated **security regression tests** that ensure all vulnerability chains and flags remain functional. These tests deliberately validate insecure behaviors. They act as "anti-hardening" checks that prevent accidental patching of the platform.
+
+### Running Tests
+
+```bash
+# Unit tests (utility functions: MD5 hashing, JWT, input filters)
+npm run test:unit
+
+# API exploitation tests (requires a running server)
+npm run test:api
+
+# E2E exploitation tests (requires a running server)
+npm run test:e2e
+
+# Open Cypress interactive mode
+npm run test:e2e:open
+
+# All tests
+npm run test:ci
+```
+
+### CI/CD
+
+Tests run automatically on pull requests. Any PR that accidentally patches or alters an exploit chain will fail CI.
 
 ---
 
