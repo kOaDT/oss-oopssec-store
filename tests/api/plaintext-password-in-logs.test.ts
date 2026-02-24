@@ -52,10 +52,8 @@ describe("Plaintext Password in Logs", () => {
       const logs = (data as LogsResponse).logs;
       expect(Array.isArray(logs)).toBe(true);
 
-      const loginLog = logs?.find(
-        (entry) =>
-          entry.message?.includes("iloveduck") ||
-          entry.message?.includes("[auth] login attempt")
+      const loginLog = logs?.find((entry) =>
+        entry.message?.includes("iloveduck")
       );
       expect(loginLog).toBeDefined();
       expect(loginLog?.message).toContain("iloveduck");
