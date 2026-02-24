@@ -17,8 +17,6 @@
 
 ## Checklist
 
-- [ ] Tests pass (`npm test`)
-- [ ] Lint passes (`npm run lint`)
 - [ ] Documentation updated (if applicable)
 
 ### If adding a new vulnerability

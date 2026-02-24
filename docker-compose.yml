@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+    volumes:
+      - oss-data:/app/data
+      - oss-uploads:/app/uploads
+      - oss-documents:/app/documents
+    restart: unless-stopped
+
+volumes:
+  oss-data:
+  oss-uploads:
+  oss-documents:
