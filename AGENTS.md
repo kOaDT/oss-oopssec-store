@@ -73,6 +73,13 @@ npm run db:seed              # Seed database with flags
 # Setup
 npm run setup                # Full setup (env, deps, seed)
 
+# Docker (no Node.js required)
+npm run docker:up            # Build image and start container (detached)
+npm run docker:down          # Stop and remove container
+npm run docker:build         # Rebuild Docker image
+npm run docker:logs          # Follow container logs
+npm run docker:reset         # Wipe volumes and restart (full reset)
+
 # Testing
 npm run test                 # Run all Jest tests
 npm run test:unit            # Unit tests only

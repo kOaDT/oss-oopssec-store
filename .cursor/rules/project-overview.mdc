@@ -44,7 +44,21 @@ npm run db:studio    # Prisma Studio
 npm run test:unit    # Jest unit tests
 npm run test:api     # Jest API exploitation tests
 npm run test:e2e     # Cypress E2E tests
+
+# Docker (no Node.js required)
+npm run docker:up    # Build and start (detached)
+npm run docker:down  # Stop container
+npm run docker:reset # Wipe data volumes and restart
+npm run docker:logs  # Follow container logs
 ```
+
+## Docker Setup
+
+- `Dockerfile`: Single-stage Alpine build (`node:20-alpine`)
+- `docker-compose.yml`: Defines service, port mapping, and named volumes
+- `docker-entrypoint.sh`: Initializes DB on first run, then starts `npm start`
+- SQLite database stored in named volume `oss-data` at `/app/data/dev.db`
+- Uploads and documents also persisted via named volumes
 
 ## Coding Standards
 

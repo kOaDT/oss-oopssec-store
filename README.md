@@ -54,6 +54,8 @@
 
 - [Features](#features)
 - [Installation](#installation)
+  - [Quick Start (npm)](#quick-start)
+  - [Docker](#docker)
 - [Hall of Fame](#hall-of-fame)
 - [Project Structure](#project-structure)
 - [Recent activity](#recent-activity)
@@ -104,6 +106,27 @@ npm run setup
 ```
 
 The setup script will create the `.env` file, install dependencies, initialize the SQLite database, seed it with CTF flags, and start the application on port 3000.
+
+### Docker
+
+No Node.js required. Make sure [Docker](https://docs.docker.com/get-docker/) is installed, then:
+
+```bash
+git clone https://github.com/kOaDT/oss-oopssec-store.git
+cd oss-oopssec-store
+docker compose up -d
+```
+
+Or using the npm helper scripts:
+
+```bash
+npm run docker:up       # Start in background (builds image on first run)
+npm run docker:logs     # Follow container logs
+npm run docker:down     # Stop the container
+npm run docker:reset    # Wipe data and restart fresh
+```
+
+The database is initialized automatically on first start. Data persists across restarts via Docker named volumes. To reset all data (flags progress, users, uploads), run `npm run docker:reset`.
 
 ### Hall of Fame
 
