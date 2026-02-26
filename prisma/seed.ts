@@ -215,6 +215,13 @@ const flags = [
     category: "INJECTION" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{1ns3cur3_p4ssw0rd_r3s3t}",
+    slug: "insecure-password-reset",
+    markdownFile: "insecure-password-reset.md",
+    category: "AUTHENTICATION" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -332,6 +339,11 @@ const flagHints: Record<string, string[]> = {
     "Legacy integrations sometimes speak in markup that trusts too much.",
     "The supplier import endpoint parses XML directly from user input. The parser resolves entity declarations, including those that reference external resources via the file:// protocol.",
     "First gain admin access (e.g., via JWT forgery or mass assignment). Then navigate to the supplier import page and submit XML with a DOCTYPE declaring an external entity pointing to a file on disk. The entity value will be reflected in the parsed response.",
+  ],
+  "insecure-password-reset": [
+    "Resetting your own password is fine, but what about resetting someone else's?",
+    "The reset token seems to depend on information you already have. Look closely at the API response when you request a reset, it tells you exactly when the token was created.",
+    "The token is MD5(email + unix_timestamp). Request a reset for any user, take the requestedAt from the response, convert it to a Unix timestamp, compute MD5(email + timestamp), and use that token to reset their password. The flag is returned upon a successful reset.",
   ],
 };
 
