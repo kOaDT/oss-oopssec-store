@@ -1,3 +1,5 @@
+import { execSync } from "child_process";
+
 export default async function globalSetup() {
   if (process.env.SKIP_SERVER_CHECK === "1") {
     return;
@@ -15,4 +17,6 @@ export default async function globalSetup() {
       `Test server is not running at ${baseUrl}. Start it with "npm run dev" before running tests.\n${error}`
     );
   }
+
+  execSync("npx tsx prisma/seed.ts", { stdio: "ignore" });
 }

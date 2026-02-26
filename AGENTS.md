@@ -185,7 +185,6 @@ Security regression tests validate that all vulnerability chains and flags remai
 - **Jest unit tests** (`tests/unit/`): Test utility functions (MD5 hashing, JWT signing, input filters)
 - **Jest API tests** (`tests/api/`): Test exploitation scenarios against API endpoints
 - **Cypress E2E tests** (`cypress/e2e/`): Test full exploitation workflows through the UI
-- **Test plans** (`tests/plans/`): Per-vulnerability markdown files with detailed implementation instructions
 - **CI/CD** (`.github/workflows/test.yml`): Runs on PRs to `main` — 3 parallel jobs (unit, API, E2E)
 
 ## Notes

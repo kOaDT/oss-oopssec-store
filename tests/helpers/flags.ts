@@ -21,4 +21,5 @@ export const FLAGS = {
   WEAK_MD5_HASHING: "OSS{w34k_md5_h4sh1ng}",
   X_FORWARDED_FOR_SQL_INJECTION: "OSS{x_f0rw4rd3d_f0r_sql1}",
   XML_EXTERNAL_ENTITY_INJECTION: "OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}",
+  INSECURE_PASSWORD_RESET: "OSS{1ns3cur3_p4ssw0rd_r3s3t}",
 } as const;

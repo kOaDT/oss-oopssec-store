@@ -241,6 +241,17 @@ model WishlistItem {
   @@map("wishlist_items")
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
 model SupplierOrder {
   id         String   @id @default(cuid())
   supplierId String
