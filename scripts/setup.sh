@@ -45,11 +45,18 @@ npm run build
 echo "Setup completed successfully!"
 
 echo "Launching Prisma Studio and application..."
-npm run db:studio &
+npx prisma studio -b none &
 PRISMA_PID=$!
 
 npm start &
 DEV_PID=$!
+
+sleep 3
+if command -v xdg-open > /dev/null; then
+  xdg-open http://localhost:3000
+elif command -v open > /dev/null; then
+  open http://localhost:3000
+fi
 
 cleanup() {
   echo ""
@@ -62,8 +69,8 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 echo "Prisma Studio and application are running..."
-echo "Prisma Studio PID: $PRISMA_PID"
-echo "Dev server PID: $DEV_PID"
+echo "Prisma Studio: http://localhost:5555"
+echo "Application:   http://localhost:3000 (opened in browser)"
 echo "Press Ctrl+C to stop both processes."
 
 wait
