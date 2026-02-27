@@ -10,16 +10,16 @@ tags:
   - writeup
   - brute-force
   - ctf
-description: Exploiting the absence of rate limiting on a login endpoint to brute force a user password using a common wordlist.
+description: Brute forcing a user password through an unprotected login endpoint using rockyou.txt.
 ---
 
-This writeup covers the exploitation of a missing rate limiting control on the login endpoint of OopsSec Store. The vulnerability allows an attacker to perform an unrestricted brute force attack against a known email address, recovering the account password from a standard wordlist and achieving full account takeover.
+The login endpoint on OopsSec Store has no rate limiting. No lockout either. You can point `rockyou.txt` at a known email and just wait.
 
 ## Table of contents
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory, run the following commands:
+The lab requires Node.js. From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -27,11 +27,11 @@ cd oss-store
 npm start
 ```
 
-Once Next.js has started, the application is accessible at `http://localhost:3000`.
+The app runs at `http://localhost:3000`.
 
 ## Reconnaissance
 
-The application's News page (`/news`) contains a section titled "Leaked Data Sample" that simulates a published data breach. This section exposes three user records:
+The News page (`/news`) has a "Leaked Data Sample" section simulating a published data breach. Three user records are exposed:
 
 | Email                   | Leaked data      |
 | ----------------------- | ---------------- |
@@ -41,11 +41,11 @@ The application's News page (`/news`) contains a section titled "Leaked Data Sam
 
 ![Leaked data sample on the News page](../../assets/images/brute-force-no-rate-limiting/leaked-data.png)
 
-The first two accounts have their password hashes exposed, which means they can be cracked offline. The third account, `vis.bruta@example.com`, has a confirmed valid email address but no associated hash. Since no hash is available, the only remaining attack vector is an online brute force against the login endpoint.
+The first two have their MD5 hashes exposed, so those can be cracked offline. The third, `vis.bruta@example.com`, only has a confirmed email. No hash. That leaves one option: brute force the login directly.
 
 ## Identifying the login endpoint
 
-Submitting any credentials through the login form at `/login` sends a POST request to `/api/auth/login` with a JSON body:
+Submitting credentials through the form at `/login` sends a POST to `/api/auth/login`:
 
 ```json
 {
@@ -54,7 +54,7 @@ Submitting any credentials through the login form at `/login` sends a POST reque
 }
 ```
 
-Every failed attempt returns a `401` status with `{"error": "Invalid password"}`. The response is consistent regardless of how many attempts are made, which indicates the absence of any rate limiting, account lockout, or progressive delay mechanism.
+Every failed attempt returns a `401` with `{"error": "Invalid password"}`. Send a hundred requests, send a thousand. Same response. No rate limiting, no lockout, no delay.
 
 ![Failed login attempt in browser DevTools](../../assets/images/brute-force-no-rate-limiting/failed-login-devtools.png)
 
@@ -62,11 +62,11 @@ Every failed attempt returns a `401` status with `{"error": "Invalid password"}`
 
 ### Preparing the wordlist
 
-The attack uses `rockyou.txt`, a widely available wordlist containing over 14 million passwords extracted from a real-world data breach. It is the standard wordlist for brute force exercises and covers most common passwords.
+`rockyou.txt` is the obvious choice here: over 14 million passwords from a real data breach. If the password is anything common, it's in there.
 
 ### Brute forcing with a bash loop
 
-The following script iterates through the wordlist and sends each password to the login endpoint until a successful authentication response is received:
+This script reads passwords from the wordlist and sends each one to the login endpoint until it gets a hit:
 
 ```bash
 while read password; do
@@ -82,7 +82,7 @@ while read password; do
 done < rockyou.txt
 ```
 
-The script checks each response for the presence of a `token` field, which only appears on successful authentication. Since the endpoint imposes no restrictions on request frequency, the script can send hundreds of requests per second.
+It checks for a `token` field in each response (only present on success). With nothing throttling requests, this runs through hundreds of passwords per second.
 
 ### Alternative: brute forcing with Python
 
@@ -110,22 +110,20 @@ with open("rockyou.txt", "r", encoding="latin-1") as f:
 
 ### Result
 
-After iterating through the wordlist, the script identifies the password:
-
 ```
 Password found: sunshine
 ```
 
-The password `sunshine` appears early in `rockyou.txt`, which means the attack completes within seconds.
+`sunshine` sits near the top of `rockyou.txt`. The whole thing finishes in seconds.
 
 ## Capturing the flag
 
-Navigate to `/login` in the browser and authenticate with the recovered credentials:
+Log in at `/login`:
 
 - Email: `vis.bruta@example.com`
 - Password: `sunshine`
 
-Upon successful login, a toast notification displays the flag:
+A toast notification pops up with the flag:
 
 ```
 OSS{brut3_f0rc3_n0_r4t3_l1m1t}
@@ -133,11 +131,11 @@ OSS{brut3_f0rc3_n0_r4t3_l1m1t}
 
 ![Flag displayed after successful login](../../assets/images/brute-force-no-rate-limiting/flag.png)
 
-The flag is also returned in the JSON response body from the login API, confirming the account takeover.
+The flag also comes back in the API's JSON response.
 
 ## Vulnerable code analysis
 
-The login handler in `/app/api/auth/login/route.ts` processes every incoming request without any form of throttling or abuse detection:
+Here's the login handler in `/app/api/auth/login/route.ts`:
 
 ```typescript
 export async function POST(request: Request) {
@@ -164,18 +162,13 @@ export async function POST(request: Request) {
 }
 ```
 
-Several factors compound the vulnerability:
-
-- **No request throttling**: The endpoint accepts an unlimited number of authentication attempts from any source, at any rate.
-- **No account lockout**: Failed attempts are not tracked. The account remains accessible regardless of how many incorrect passwords are submitted.
-- **MD5 password hashing**: The use of MD5, a fast hashing algorithm, means each attempt is processed with minimal computational cost on the server side.
-- **Uniform error responses**: While consistent error messages are generally a good practice to prevent username enumeration, they also mean the server provides no signal that it has detected abnormal activity.
+No throttling, no abuse detection. The endpoint accepts unlimited attempts from any source at any speed. Failed attempts aren't tracked, so the account never locks. MD5 is fast enough that each guess costs the server almost nothing. The uniform "Invalid password" error is fine for preventing username enumeration, but it also means the server gives no sign it's noticed anything unusual.
 
 ## Remediation
 
 ### Rate limiting
 
-The most direct mitigation is to restrict the number of authentication attempts allowed within a given time window. A common threshold is five attempts per 15-minute window, scoped per IP address or per account:
+Cap login attempts per time window. Five attempts per 15 minutes, scoped by IP or account, is a common threshold:
 
 ```typescript
 import rateLimit from "express-rate-limit";
@@ -189,11 +182,11 @@ const loginLimiter = rateLimit({
 });
 ```
 
-This control alone eliminates the viability of high-speed brute force attacks.
+That alone kills high-speed brute force.
 
 ### Account lockout
 
-Tracking failed authentication attempts per user account provides an additional layer of defense. After a configurable number of failures, the account enters a temporary lockout period:
+Track failed attempts per account and lock it temporarily after too many failures:
 
 ```typescript
 const MAX_FAILED_ATTEMPTS = 5;
@@ -212,13 +205,10 @@ if (user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
 }
 ```
 
-Account lockout protects against distributed attacks where requests originate from multiple IP addresses, bypassing IP-based rate limits.
+This handles distributed attacks where requests come from different IPs, which would slip past IP-based rate limits alone.
 
-### Adopting a computationally expensive hash function
+### Using a slower hash function
 
-MD5 is unsuitable for password hashing for two reasons:
+MD5 is a bad fit for passwords. It's fast by design, letting attackers compute billions of hashes per second on modern hardware. It also uses no salt, so identical passwords always produce identical hashes. Rainbow tables make short work of that.
 
-- First, it is designed for speed, which allows an attacker to compute billions of hashes per second on modern hardware.
-- Second, MD5 is a pure function with no salt: identical passwords always produce identical hashes, making the output vulnerable to rainbow table lookups and precomputed dictionary attacks.
-
-Replacing MD5 with bcrypt addresses both issues. Bcrypt incorporates a per-hash random salt, ensuring that two users with the same password produce different hashes, and its adjustable work factor significantly increases the computational cost of each verification attempt. This transforms brute force from a trivial operation into a computationally prohibitive one, even if rate limiting is somehow bypassed.
+bcrypt fixes both. Each hash gets its own random salt, so two users with the same password produce different outputs. The work factor is adjustable: you decide how expensive each verification should be. Even without rate limiting, the cost per guess makes brute force impractical.

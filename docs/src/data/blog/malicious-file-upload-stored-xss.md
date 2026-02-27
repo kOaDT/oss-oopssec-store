@@ -11,25 +11,25 @@ tags:
   - xss
   - file-upload
   - ctf
-description: Exploiting insufficient file upload validation to achieve stored cross-site scripting through malicious SVG files that execute JavaScript for every visitor.
+description: Upload a malicious SVG to the admin product image field and get stored XSS that fires for every visitor.
 ---
 
-This writeup demonstrates how to exploit a malicious file upload vulnerability in OopsSec Store's admin product image upload feature. By uploading an SVG file containing embedded JavaScript, the payload persists on the server and executes in the browser of every user who views the affected product page.
+The admin panel in OopsSec Store lets you upload product images, including SVGs. Since SVG is just XML, you can embed a `<script>` tag in one, upload it as a product image, and the JavaScript runs in the browser of anyone who views that product.
 
 ## Table of contents
 
 ## Prerequisites
 
-This vulnerability requires administrator access to the application. The following attack chains can be used to obtain admin credentials:
+You need admin access. Two attack chains can get you there:
 
 - [SQL injection to dump the admin password hash](/posts/sql-injection-writeup/)
 - [Weak MD5 hashing to crack the admin password](/posts/weak-md5-hashing-admin-compromise/)
 
-Complete those exploits before proceeding with this writeup.
+Do those first.
 
 ## Lab setup
 
-If a local instance of OopsSec Store is not already running, execute the following commands:
+If OopsSec Store isn't already running locally:
 
 ```bash
 npx create-oss-store oss-store
@@ -37,30 +37,30 @@ cd oss-store
 npm start
 ```
 
-Once Next.js has started, the application is accessible at `http://localhost:3000`. Log in using the admin credentials recovered from the prerequisite vulnerabilities.
+Once Next.js is up, go to `http://localhost:3000` and log in with the admin credentials you recovered.
 
 ## Vulnerability overview
 
-The admin panel includes a product management interface where administrators can upload images for products. The application accepts SVG files among the allowed image formats, which creates a significant security risk because SVG is an XML-based format that can contain embedded JavaScript.
+The admin panel has a product editor where you can upload images. SVG is in the list of allowed formats, and that's the whole problem: SVG files can contain JavaScript.
 
-The vulnerability stems from two implementation flaws:
+Two things make this exploitable:
 
-1. **Content-Type header validation only**: The server validates uploads based solely on the `Content-Type` header, which is fully controlled by the client and trivially spoofed
-2. **Unsafe SVG rendering**: The frontend renders uploaded SVG files using an `<object>` tag, which allows embedded scripts to execute
+1. The server only checks the `Content-Type` header, which the client controls entirely
+2. The frontend renders SVGs with an `<object>` tag, which executes embedded scripts (an `<img>` tag would not)
 
-When a malicious SVG is uploaded and associated with a product, the JavaScript payload executes for every user who views that product, whether on the product detail page or in the admin panel preview.
+Upload a malicious SVG as a product image, and the script runs for every user who loads that product page, the admin preview included.
 
 ## Exploitation
 
-### Locating the upload interface
+### Finding the upload
 
-Navigate to the admin product management page at `http://localhost:3000/admin/products`. The interface allows editing existing products and uploading new images.
+Go to `http://localhost:3000/admin/products`. You can edit any product and swap its image.
 
 ![Admin product management interface showing the product list](../../assets/images/malicious-file-upload-stored-xss/admin-products.png)
 
-### Creating the malicious SVG
+### Crafting the SVG
 
-Create a file named `xss.svg` with the following content:
+Create `xss.svg`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -72,38 +72,29 @@ Create a file named `xss.svg` with the following content:
 </svg>
 ```
 
-This payload is a simple `alert()` in the browser.
+Just a green square with an `alert()`.
 
-### Uploading the payload
+### Uploading it
 
-In the product management interface:
+1. Pick a product to edit
+2. Upload `xss.svg` as its image
+3. Save
 
-1. Select a product to edit
-2. Click the image upload field
-3. Select the `xss.svg` file
-4. Save the product
-
-The server accepts the file without inspecting its contents. The application returns the flag immediately upon successful upload to confirm the vulnerability has been exploited.
+The server doesn't inspect the file contents. You get the flag right after a successful upload.
 
 ![Flag displayed after successful malicious SVG upload](../../assets/images/malicious-file-upload-stored-xss/flag.webp)
 
-### Triggering the payload
+### Triggering execution
 
-The malicious script executes in multiple contexts:
-
-- **Product detail page**: Navigate to `http://localhost:3000/products/[product-id]` as any user
-- **Admin panel preview**: View the product in the admin interface
-- **Direct file access**: Access the uploaded file at `/api/uploads/[filename].svg`
-
-When the page loads, the browser parses the SVG and executes the embedded JavaScript, displaying the alert dialog.
+The script fires on the product page (`/products/[product-id]`), in the admin panel preview, and if you access the file directly at `/api/uploads/[filename].svg`. The browser parses the SVG, hits the `<script>`, and runs it.
 
 ![XSS alert dialog displayed on the product page](../../assets/images/malicious-file-upload-stored-xss/xss-product-page.webp)
 
 ## Vulnerable code analysis
 
-### Server-side validation bypass
+### Server-side: header-only validation
 
-The upload endpoint validates files using only the `Content-Type` header:
+The upload endpoint checks `file.type`, which is just the `Content-Type` header from the request. The client sets that, so it means nothing:
 
 ```typescript
 const ALLOWED_CONTENT_TYPES = [
@@ -119,11 +110,11 @@ if (!ALLOWED_CONTENT_TYPES.includes(file.type)) {
 }
 ```
 
-The `file.type` property reflects the `Content-Type` header sent by the client, which can be arbitrarily set. No inspection of the actual file content is performed.
+No magic byte inspection, no content scanning. Whatever the client says the file is, the server believes.
 
-### Unsafe frontend rendering
+### Frontend: `<object>` tag rendering
 
-The product detail page renders SVG images using an `<object>` tag:
+The product page uses `<object>` for SVGs:
 
 ```tsx
 {
@@ -141,13 +132,13 @@ The product detail page renders SVG images using an `<object>` tag:
 }
 ```
 
-The `<object>` element renders SVG content as a full document, including script execution. This differs from using an `<img>` tag, which would render the SVG but block script execution.
+`<object>` treats the SVG as a full document and runs scripts inside it. An `<img>` tag would render the SVG but block script execution.
 
 ## Remediation
 
-### Content-based file validation
+The fix has three parts, and you should apply all of them. Any one alone would stop this particular exploit, but defense in depth matters when you're handling user uploads.
 
-Validate the actual file content rather than trusting client-supplied headers:
+First, stop trusting the Content-Type header and inspect the actual bytes:
 
 ```typescript
 import { fileTypeFromBuffer } from "file-type";
@@ -162,11 +153,7 @@ if (!detectedType || !SAFE_MIME_TYPES.includes(detectedType.mime)) {
 }
 ```
 
-This approach uses magic bytes to detect the actual file type, preventing Content-Type spoofing. Excluding SVG from the allowed types eliminates the attack vector entirely.
-
-### SVG sanitization
-
-If SVG support is required, sanitize the content server-side before storage:
+SVG isn't on the safe list, so this blocks the upload entirely. If you actually need SVG support, sanitize it server-side with DOMPurify before saving:
 
 ```typescript
 import DOMPurify from "isomorphic-dompurify";
@@ -180,11 +167,9 @@ if (file.type === "image/svg+xml") {
 }
 ```
 
-DOMPurify removes script tags, event handlers, and other potentially dangerous elements from the SVG content.
+This strips `<script>` tags and event handlers from the SVG content.
 
-### Restrictive response headers
-
-Configure the server to serve uploaded files with security headers that prevent script execution:
+Finally, serve uploaded files with headers that prevent script execution regardless of what got through:
 
 ```javascript
 // next.config.js
@@ -199,6 +184,4 @@ headers: [
 ];
 ```
 
-The `Content-Security-Policy` header with `script-src 'none'` blocks all script execution, while `X-Content-Type-Options: nosniff` prevents browsers from MIME-sniffing the content type.
-
-Implementing multiple layers of defense provides protection even if one mechanism is bypassed.
+`script-src 'none'` blocks all script execution in the response. `nosniff` stops browsers from guessing a different content type.

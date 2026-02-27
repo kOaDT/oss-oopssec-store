@@ -10,16 +10,16 @@ tags:
   - writeup
   - idor
   - ctf
-description: Exploiting an insecure direct object reference vulnerability in OopsSec Store to access other customers' order details.
+description: How changing one number in the URL lets you read anyone's order on OopsSec Store.
 ---
 
-This writeup demonstrates the exploitation of an insecure direct object reference (IDOR) vulnerability in OopsSec Store's order confirmation feature. The vulnerability allows any authenticated user to access arbitrary order records by modifying the order identifier in the URL, exposing personal information belonging to other customers.
+OopsSec Store's order confirmation pages use sequential IDs like `/orders/ORD-004`. The app checks that you're logged in but never checks whether the order is yours. Change `ORD-004` to `ORD-001` and you're looking at someone else's name, email, delivery address, and full order details.
 
 ## Table of contents
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory, run the following commands:
+The lab requires Node.js. From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -27,86 +27,58 @@ cd oss-store
 npm start
 ```
 
-Once Next.js has started, the application is accessible at `http://localhost:3000`.
+The application runs at `http://localhost:3000`.
 
 ## Vulnerability overview
 
-After placing an order, users are redirected to an order confirmation page with a URL structure such as `/orders/ORD-004`. The order identifier is human-readable, sequential, and directly references the database record.
-
-The vulnerability arises from two compounding issues:
-
-1. **Missing authorization checks**: The backend retrieves orders by identifier without verifying ownership
-2. **Predictable identifiers**: Sequential order IDs enable trivial enumeration
-
-When combined, these flaws allow an attacker to access any order in the system by guessing or iterating through valid identifiers.
+After placing an order, you land on a confirmation page at something like `/orders/ORD-004`. The problem is twofold: the backend fetches orders by ID without checking who they belong to, and the IDs are sequential, so guessing valid ones is trivial. Any logged-in user can walk through `ORD-001`, `ORD-002`, `ORD-003`... and read every order in the database.
 
 ## Exploitation
 
-### Step 1: Authenticating as a standard user
+### Step 1: Log in
 
-Navigate to the login page and authenticate with the test credentials:
+Use the test credentials:
 
 - Email: `alice@example.com`
 - Password: `iloveduck`
 
 ![Homepage](../../assets/images/idor-order-privacy-breach/homepage.webp)
 
-### Step 2: Creating an order
+### Step 2: Place an order
 
-Browse the product catalog and add any item to the cart. Proceed through the checkout flow to completion.
-
-Upon successful order placement, the application redirects to the order confirmation page. The URL follows the pattern:
+Add something to your cart and check out. You'll land on a confirmation page:
 
 ```
 http://localhost:3000/orders/ORD-004
 ```
 
-The exact order number depends on existing database state, but the sequential pattern is consistent.
+Your order number will vary depending on what's already in the database, but it's always `ORD-` followed by a sequential number.
 
 ![Order confirmation page showing user's order](../../assets/images/idor-order-privacy-breach/order-confirmation.webp)
 
-### Step 3: Identifying the attack vector
+### Step 3: Access someone else's order
 
-The order identifier exhibits characteristics that indicate potential IDOR vulnerability:
-
-- **Human-readable format**: The `ORD-` prefix followed by a numeric sequence suggests internal record numbering
-- **Sequential allocation**: If the current order is `ORD-004`, previous orders (`ORD-001`, `ORD-002`, `ORD-003`) likely exist
-- **Direct URL exposure**: The identifier appears directly in the URL path, accessible to user modification
-
-### Step 4: Accessing unauthorized orders
-
-Modify the URL to reference a different order identifier:
+The IDs are sequential. If yours is `ORD-004`, earlier orders almost certainly exist. Change the URL to:
 
 ```
 http://localhost:3000/orders/ORD-001
 ```
 
-The page loads successfully, displaying order details that belong to a different user.
+It loads. You're now looking at another customer's name, email, delivery address, and what they bought.
 
 ![Order page showing another customer's data](../../assets/images/idor-order-privacy-breach/unauthorized-order-access.webp)
 
-The exposed information includes:
+### Step 4: Grab the flag
 
-- Customer name
-- Email address
-- Delivery address
-- Order contents and pricing
-
-### Step 5: Retrieving the flag
-
-The flag is displayed at the top of the order confirmation page:
+The flag sits at the top of the order confirmation page:
 
 ```
 OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}
 ```
 
-This confirms successful exploitation of the IDOR vulnerability.
-
 ## Vulnerable code analysis
 
-The vulnerability exists because the backend retrieves orders based solely on the provided identifier without validating ownership. The API endpoint accepts the order ID from the URL, queries the database, and returns the result regardless of which user made the request.
-
-The authorization logic is absent:
+Here's what the backend does:
 
 ```typescript
 const order = await prisma.order.findUnique({
@@ -117,13 +89,13 @@ const order = await prisma.order.findUnique({
 // The order is returned to any authenticated user
 ```
 
-Authentication verifies that a user is logged in, but authorization—confirming that the user has permission to access the specific resource—is not enforced.
+It finds the order by ID and returns it. No check that the logged-in user actually placed it. Authentication confirms you have an account; it says nothing about which orders you should see.
 
 ## Remediation
 
-### Enforcing ownership verification
+### Check ownership after fetching
 
-The API must verify that the authenticated user owns the requested resource before returning data:
+Fetch the order, then verify the current user owns it:
 
 ```typescript
 const order = await prisma.order.findUnique({
@@ -139,21 +111,15 @@ if (order.userId !== user.id) {
 }
 ```
 
-This check must execute on the server. Client-side routing or UI-level restrictions provide no security against direct API requests.
+This has to happen server-side. Hiding the link in the UI doesn't help when someone can just type a URL.
 
-### Reducing identifier predictability
+### Use non-sequential IDs
 
-While not a substitute for proper authorization, using non-sequential identifiers raises the difficulty of enumeration attacks:
+Sequential IDs make enumeration easy. Switching to UUIDs or random tokens doesn't fix the missing authorization check, but it stops people from guessing order IDs by incrementing a number.
 
-- **UUIDs**: Replace sequential IDs with universally unique identifiers (e.g., `550e8400-e29b-41d4-a716-446655440000`)
-- **Opaque tokens**: Generate random, unguessable strings for external references
-- **Indirect references**: Map user-facing identifiers to internal IDs through a separate lookup table
+### Filter by ownership in the query
 
-Identifier obfuscation adds defense in depth but does not address the root cause. Authorization checks remain the primary control.
-
-### Query-level ownership filtering
-
-An alternative approach incorporates ownership into the database query itself:
+You can also bake ownership into the query so the wrong user never sees the record at all:
 
 ```typescript
 const order = await prisma.order.findFirst({
@@ -168,4 +134,4 @@ if (!order) {
 }
 ```
 
-This pattern ensures that users can only retrieve records they own. The query returns `null` for orders belonging to other users, treating them identically to non-existent orders.
+If the order belongs to someone else, this returns `null`. The user gets a 404 and learns nothing about whether the order exists.

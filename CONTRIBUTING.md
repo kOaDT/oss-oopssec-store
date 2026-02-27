@@ -1,130 +1,119 @@
 # Contributing
 
-OSS – OopsSec Store is an open-source project. Contributions are welcome via pull requests.
+OSS -- OopsSec Store is open source. Contributions happen through pull requests.
 
 ---
 
 ## How to contribute
 
-1. **Fork the project** on GitHub
-2. **Create a branch** for your contribution
-3. **Make your changes** following the contribution guidelines below
-4. **Submit a Pull Request (PR)** with a clear description of your changes
-5. **Be patient**, maintainers will review your PR as soon as possible
+1. Fork the project on GitHub
+2. Create a branch for your changes
+3. Follow the guidelines below
+4. Open a pull request describing what you changed and why
+5. Wait for a review -- maintainers will get to it when they can
 
-We encourage **kind and respectful reviews** from both contributors and maintainers. Constructive feedback helps improve the project for everyone.
+Be respectful in reviews, whether you're contributing or reviewing.
 
 ---
 
-## Contribution guidelines
+## Guidelines
 
-Please ensure that:
+- Document new vulnerabilities
+- Keep vulnerable code intentionally vulnerable
+- Don't introduce real secrets
 
-- New vulnerabilities are documented
-- Code remains intentionally vulnerable when required
-- No real-world secrets are introduced
+## What you can work on
 
-## What you can contribute
+New here? Check [good first issues](https://github.com/users/kOaDT/projects/3/views/6).
 
-New to the project? Browse our [good first issues](https://github.com/users/kOaDT/projects/3/views/6) to find a task to get started.
+- New flags
+- Walkthroughs and writeups
+- E-commerce site development
+- Bug fixes
+- Documentation
+- Issue reports
 
-- Adding New Flags
-- Writing Walkthroughs and Writeups
-- Developing the E-commerce Site
-- Fixing Bugs
-- Improving Documentation
-- Reporting Issues
+### Adding a vulnerability
 
-### Adding a Vulnerability
+1. **Add the flag in `prisma/seed.ts`**
+   Create a `Flag` record with format `OSS{...}`. Set `slug`, `category`, `difficulty`, and `markdownFile` to match.
 
-To add a new vulnerability to the project, follow these steps:
+2. **Add hints in `prisma/seed.ts`**
+   Add three progressive hints in the `flagHints` map, keyed by slug. Level 1 is vague, level 2 more specific, level 3 near-solution.
 
-1. **Add the flag in `prisma/seed.ts`**  
-   Create a new `Flag` record with format `OSS{...}`, and set `slug`, `category`, `difficulty`, and `markdownFile` to match your vulnerability.
+3. **Implement the vulnerability**
+   Write the vulnerable code path (API route, page, feature) that lets an attacker get the flag. It needs to be actually exploitable.
 
-2. **Add the hints in `prisma/seed.ts`**  
-   Add three progressive hints in the `flagHints` map (keyed by the flag slug). Level 1 = vague, level 2 = more specific, level 3 = near-solution.
+4. **Document it**
+   Add a markdown file under `content/vulnerabilities/` (e.g. `your-vulnerability.md`) with an overview, vulnerable code examples, exploitation steps, and how to fix it.
 
-3. **Implement the vulnerability**  
-   Implement the vulnerable code path (e.g. API route, page, or feature) that allows an attacker to obtain the flag. The vulnerability must be exploitable and demonstrable.
+5. **Add regression tests**
+   Tests keep the vulnerability exploitable so nobody accidentally patches it:
+   - Unit tests in `tests/unit/` for helpers (hashing, filters, etc.)
+   - API tests in `tests/api/` for exploitation scenarios
+   - E2E tests in `cypress/e2e/` for full exploitation flows through the UI
 
-4. **Document the vulnerability**  
-   Add a markdown file under `content/vulnerabilities/` (e.g. `your-vulnerability.md`) with an overview, vulnerable code examples, exploitation steps, and mitigation strategies.
+6. **Optional: write a walkthrough**
+   See [Writing walkthroughs](#writing-walkthroughs) below.
 
-5. **Add regression tests**  
-   Add tests so the vulnerability stays exploitable and is not accidentally fixed:
-   - **Unit tests** in `tests/unit/` for helpers (e.g. hashing, filters).
-   - **API tests** in `tests/api/` for exploitation scenarios against endpoints.
-   - **E2E tests** in `cypress/e2e/` for full exploitation flows via the UI.
+### Writing walkthroughs
 
-6. **Optional: Write a walkthrough**  
-   Contribute a writeup to the [walkthroughs documentation site](https://kOaDT.github.io/oss-oopssec-store) (see [Writing Walkthroughs](#writing-walkthroughs) below).
+The [walkthroughs site](https://kOaDT.github.io/oss-oopssec-store) accepts community contributions.
 
-### Writing Walkthroughs
+To add one:
 
-We welcome community contributions to our [walkthroughs documentation site](https://kOaDT.github.io/oss-oopssec-store). Share your exploitation techniques and help others learn.
-
-**How to contribute a walkthrough:**
-
-1. Fork the repository and clone it locally:
+1. Fork and clone:
    ```bash
    git clone https://github.com/kOaDT/oss-oopssec-store.git
    cd oss-oopssec-store
    ```
-2. Install dependencies for the documentation site:
+2. Install docs dependencies:
    ```bash
    cd docs
    npm install
    ```
-3. Start the development server to preview your changes:
+3. Start the dev server:
    ```bash
    npm run dev
    # Or from the root: npm run docs:dev
    ```
-4. Navigate to `docs/src/data/blog/`
-5. Create a new Markdown file or edit an existing walkthrough (e.g., `sql-injection-writeup.md`)
-6. Write your walkthrough following this structure:
-   - **Title and metadata** (author, pubDatetime, modDatetime, featured, draft, tags, description)
-   - **Introduction** - Brief overview of the vulnerability
-   - **Discovery** - How you identified the vulnerability
-   - **Exploitation** - Step-by-step exploitation process with screenshots
-   - **Flag retrieval** - How to obtain the flag
-   - **Remediation** (optional) - How to fix the vulnerability
-7. Add relevant screenshots to `docs/src/assets/images/[vulnerability-name]/`
-8. Test your changes locally by visiting `http://localhost:4321` (default Astro port)
-9. Submit a Pull Request with your changes
+4. Go to `docs/src/data/blog/`
+5. Create a new markdown file or edit an existing one (e.g. `sql-injection-writeup.md`)
+6. Structure your walkthrough roughly like this:
+   - Title and metadata (frontmatter)
+   - Introduction -- what the vulnerability is
+   - Discovery -- how you found it
+   - Exploitation -- step-by-step, with screenshots
+   - Flag retrieval -- how to grab the flag
+   - Remediation (optional) -- how to fix it
+7. Put screenshots in `docs/src/assets/images/[vulnerability-name]/`
+8. Preview at `http://localhost:4321`
+9. Open a pull request
 
-**Walkthrough guidelines:**
-
-- Use clear, educational language suitable for learners
-- Include screenshots or code snippets to illustrate key steps
-- Focus on the "why" and "how" - explain your thought process
-- Test your walkthrough to ensure accuracy
-- Respect the community - be kind and constructive
-- Use markdown formatting for code blocks, images, and links
-
-Example frontmatter for a walkthrough:
+Example frontmatter:
 
 ```markdown
 ---
 author: Your Name
 pubDatetime: 2026-01-20T10:00:00Z
 modDatetime: 2026-01-20T10:00:00Z
-title: SQL Injection Vulnerability Walkthrough
+title: SQL injection walkthrough
 featured: true
 draft: false
 tags:
   - sql-injection
   - database
   - walkthrough
-description: A comprehensive guide to exploiting the SQL injection vulnerability in OopsSec Store
+description: Exploiting the SQL injection vulnerability in OopsSec Store
 ---
 ```
 
-If you need additional information on how to use AstroPaper, please refer to [this article](https://koadt.github.io/oss-oopssec-store/posts/adding-new-posts-in-astropaper-theme/).
+Write for someone learning. Explain your reasoning, not just the steps. Include screenshots or code snippets where they help. Test your walkthrough before submitting to make sure the steps actually work.
+
+For more on using AstroPaper, see [this article](https://koadt.github.io/oss-oopssec-store/posts/adding-new-posts-in-astropaper-theme/).
 
 ## Roadmap
 
-For a comprehensive list of planned features, security vulnerabilities, and improvement ideas, see our [Roadmap project](https://github.com/users/kOaDT/projects/3).
+Planned features and ideas live in the [Roadmap project](https://github.com/users/kOaDT/projects/3).
 
-Looking for a starter task? See our [good first issues](https://github.com/users/kOaDT/projects/3/views/6) view.
+Starter tasks are in the [good first issues](https://github.com/users/kOaDT/projects/3/views/6) view.

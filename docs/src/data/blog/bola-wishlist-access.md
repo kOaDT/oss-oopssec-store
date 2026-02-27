@@ -11,16 +11,16 @@ tags:
   - bola
   - authorization
   - ctf
-description: Exploiting a Broken Object Level Authorization vulnerability in OopsSec Store's wishlist feature to access other users' private wishlists and retrieve sensitive internal data.
+description: A BOLA vulnerability in OopsSec Store's wishlist API lets any logged-in user read anyone else's private wishlist, including an admin one that contains the flag.
 ---
 
-This writeup demonstrates the exploitation of a Broken Object Level Authorization (BOLA) vulnerability in OopsSec Store's wishlist feature. The API correctly authenticates users but fails to enforce object-level ownership checks, allowing any authenticated user to access arbitrary wishlists by manipulating the identifier in API requests.
+The wishlist API on OopsSec Store authenticates users but never checks whether they actually own the wishlist they're requesting. Any logged-in user can read any wishlist by changing the ID in the URL.
 
 ## Table of contents
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory, run the following commands:
+The lab requires Node.js. From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -28,60 +28,54 @@ cd oss-store
 npm start
 ```
 
-Once Next.js has started, the application is accessible at `http://localhost:3000`.
+The app runs at `http://localhost:3000`.
 
 ## Vulnerability overview
 
-The OopsSec Store allows users to create private wishlists to save products for later purchase. Each wishlist is scoped to the authenticated user in the UI: the frontend only displays the current user's wishlists.
+OopsSec Store lets users create private wishlists. The frontend only shows you your own, so from the UI everything looks correctly scoped.
 
-However, the backend API endpoint `GET /api/wishlists/[id]` accepts any wishlist identifier and returns its full contents without verifying that the requesting user owns the resource. This is a textbook BOLA vulnerability: the server trusts the client-supplied object identifier without performing an authorization check.
+`GET /api/wishlists/[id]` on the backend is a different story. It accepts any wishlist ID and returns the full contents. There's a 401 if you're not logged in, but no check that the wishlist is actually yours.
 
-The vulnerability is compounded by the existence of an internal admin wishlist (`wl-internal-001`) that contains a sensitive note with a flag value, representing business-critical information that should never be accessible to regular users.
+An admin wishlist (`wl-internal-001`) has a note field containing the flag. Since there's no ownership check, any authenticated user can read it.
 
 ## Exploitation
 
-### Step 1: Authenticating as a standard user
+### Step 1: Log in
 
-Navigate to the login page and authenticate with the test credentials:
+Go to the login page and use the test credentials:
 
 - Email: `alice@example.com`
 - Password: `iloveduck`
 
-### Step 2: Using the wishlist feature
+### Step 2: Use the wishlist feature normally
 
-Navigate to the Wishlists page via the header navigation. Create a new wishlist or browse an existing one. Observe normal functionality: the page displays only your own wishlists.
+Go to the Wishlists page from the header. Create a wishlist or look at an existing one. Nothing unusual -- you only see your own wishlists.
 
-### Step 3: Observing API behavior
+### Step 3: Watch the API calls
 
-Open the browser developer tools (Network tab) and click "View Wishlist" on one of your wishlists. Observe the API request:
+Open your browser dev tools (Network tab) and click "View Wishlist" on one of your wishlists. You'll see:
 
 ```
 GET /api/wishlists/wl-alice-001
 Cookie: authToken=<your-jwt-token>
 ```
 
-The response includes the full wishlist data: name, items, owner email, and notes.
+The response has the full wishlist: name, items, owner email, notes.
 
-### Step 4: Identifying the attack vector
+### Step 4: Spot the problem
 
-The wishlist identifier (`wl-alice-001`) appears directly in the API URL path. Key observations:
+The wishlist ID (`wl-alice-001`) is right there in the URL, and the naming convention is obvious: `wl-{username}-{number}`. Does the API verify you own the wishlist, or does it just hand back whatever you ask for?
 
-- The ID format suggests a naming convention: `wl-{username}-{number}`
-- The API accepts the ID as a user-controlled input
-- The response includes data that should be private (owner email, notes)
+### Step 5: Request someone else's wishlist
 
-The question becomes: does the API enforce ownership verification, or does it return any wishlist to any authenticated user?
-
-### Step 5: Accessing unauthorized wishlists
-
-Modify the API request to target a different wishlist. Using curl or the browser console:
+Try a different wishlist ID. With curl:
 
 ```bash
 curl -b "authToken=<your-jwt-token>" \
   http://localhost:3000/api/wishlists/wl-internal-001
 ```
 
-Or in the browser console:
+Or from the browser console:
 
 ```javascript
 const res = await fetch("/api/wishlists/wl-internal-001", {
@@ -91,11 +85,9 @@ const data = await res.json();
 console.log(data);
 ```
 
-The API returns the admin's internal wishlist, including all items, the owner email (`admin@oss.com`), and the `note` field containing the flag.
+It works. The API hands back the admin's internal wishlist -- items, owner email (`admin@oss.com`), and the note field with the flag.
 
-### Step 6: Retrieving the flag
-
-The flag is present in the API response:
+### Step 6: The flag
 
 ```
 OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}
@@ -103,11 +95,9 @@ OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}
 
 ![Postman](../../assets/images/bola-wishlist-access/postman.png)
 
-This confirms successful exploitation of the BOLA vulnerability.
-
 ## Vulnerable code analysis
 
-The vulnerability exists in the `GET` handler of `/api/wishlists/[id]/route.ts`. The code authenticates the user but does not verify ownership before returning the wishlist data:
+The bug is in the `GET` handler of `/api/wishlists/[id]/route.ts`:
 
 ```typescript
 const user = await getAuthenticatedUser(request);
@@ -125,15 +115,15 @@ const wishlist = await prisma.wishlist.findUnique({
 return NextResponse.json(wishlist);
 ```
 
-The endpoint correctly rejects unauthenticated requests (401), creating the illusion of security. But being authenticated does not mean being authorized to access a specific resource. The fundamental check `wishlist.userId !== user.id` is absent from the read path.
+The 401 on unauthenticated requests makes the endpoint look secured. But the code never compares `wishlist.userId` to `user.id`, so any logged-in user can fetch any wishlist.
 
-Notably, the `DELETE` handler on the same endpoint correctly implements the ownership check, making the inconsistency a realistic developer oversight.
+Worth noting: the `DELETE` handler on the same endpoint _does_ check ownership. Someone wrote the authorization logic for deletes and didn't add the same check on reads.
 
 ## Remediation
 
-### Enforcing ownership verification
+### Check ownership before returning data
 
-The API must verify that the authenticated user owns the requested wishlist before returning data:
+Add a comparison after fetching the wishlist:
 
 ```typescript
 const wishlist = await prisma.wishlist.findUnique({
@@ -149,9 +139,7 @@ if (wishlist.userId !== user.id) {
 }
 ```
 
-### Query-level ownership filtering
-
-An alternative approach incorporates the ownership constraint into the database query:
+You can also bake the constraint into the query, which has the added benefit of not leaking whether a wishlist ID exists:
 
 ```typescript
 const wishlist = await prisma.wishlist.findFirst({
@@ -166,8 +154,8 @@ if (!wishlist) {
 }
 ```
 
-This pattern prevents information leakage about the existence of other users' resources and eliminates the possibility of returning unauthorized data even if a logic error occurs downstream.
+If the ID is valid but belongs to someone else, the response is the same 404 as a nonexistent one.
 
-### Consistent authorization patterns
+### Apply authorization consistently
 
-The most common cause of BOLA vulnerabilities is inconsistent application of authorization checks across CRUD operations. A resource that enforces ownership for `DELETE` but not for `GET` represents a pattern that automated security tools may miss but attackers will find. Authorization logic should be centralized or applied uniformly to all operations on a resource.
+The root cause is that someone wrote the ownership check for `DELETE` but not for `GET`. This kind of inconsistency across CRUD operations is where most BOLA bugs live, and automated scanners are generally bad at catching it because they don't reason about which operations should share authorization logic. Centralize the check or make sure every handler on the resource includes it.

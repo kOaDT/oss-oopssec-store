@@ -13,55 +13,55 @@ tags:
 description: Exploiting a mass assignment vulnerability in OopsSec Store's signup endpoint to create an account with administrator privileges.
 ---
 
-This writeup demonstrates how to exploit a mass assignment vulnerability in OopsSec Store's user registration endpoint. By injecting an unauthorized field into the signup request, an attacker can create an account with administrator privileges and gain access to restricted functionality.
+The signup endpoint on OopsSec Store doesn't filter which fields it accepts. You can slip a `role` field into the registration request and create yourself an admin account.
 
 ## Table of contents
 
 ## Vulnerability overview
 
-OopsSec Store provides a standard signup form that accepts an email and password. When a user submits the form, the frontend sends a JSON payload to the backend, which creates a new user record in the database. The backend does not validate or restrict the fields it accepts, allowing attackers to inject additional properties that the application blindly persists.
+The signup form takes an email and password, sends them as JSON to the backend, and the backend creates a user record. But the backend spreads the entire request body into the database query, so whatever you send gets stored, including fields you're not supposed to control.
 
-The attack flow is as follows:
+The attack:
 
-1. An attacker intercepts the signup request using a proxy
-2. The attacker adds a `role` field with value `ADMIN` to the JSON payload
-3. The backend stores all received fields without validation
-4. The newly created account has administrator privileges
+1. Intercept the signup request with a proxy
+2. Add `"role": "ADMIN"` to the JSON body
+3. Forward the request
+4. You now have an admin account
 
 ## Locating the attack surface
 
-Navigate to the signup page at `/signup`. The form presents two input fields: email and password.
+Head to `/signup`. Standard form, two fields: email and password.
 
 ![Signup form with email and password fields](../../assets/images/mass-assignment-admin-privilege-escalation/signup-form.webp)
 
-When the form is submitted, the browser sends a POST request to `/api/auth/signup` with a JSON body containing the user-provided values. The backend processes this payload and creates a new user record.
+Submitting the form sends a POST to `/api/auth/signup` with a JSON body.
 
 ## Exploitation
 
 ### Setting up request interception
 
-Configure a proxy tool such as Burp Suite to intercept HTTP traffic:
+Set up Burp Suite (or any intercepting proxy) to catch HTTP traffic:
 
-1. Open Burp Suite and navigate to Proxy > Intercept
-2. Enable interception
-3. Configure the browser to route traffic through the proxy (typically `127.0.0.1:8080`)
+1. Open Burp Suite, go to Proxy > Intercept
+2. Turn interception on
+3. Point your browser at the proxy (usually `127.0.0.1:8080`)
 
-All subsequent requests from the browser will be captured before reaching the server.
+Every request from the browser now goes through Burp before hitting the server.
 
 ### Submitting the registration form
 
-Fill in the signup form with arbitrary values:
+Fill in the form with whatever you want:
 
 - Email: `evil@oopssec.local`
 - Password: `password123`
 
-Click the Sign up button. Burp Suite captures the request before it reaches the server.
+Hit Sign up. Burp catches the request.
 
 ![Intercepted signup request in Burp Suite](../../assets/images/mass-assignment-admin-privilege-escalation/intercepted-request.webp)
 
 ### Injecting the role field
 
-The original request body contains only the expected fields:
+The original body:
 
 ```json
 {
@@ -70,7 +70,7 @@ The original request body contains only the expected fields:
 }
 ```
 
-Modify the payload to include the `role` field:
+Add the `role` field:
 
 ```json
 {
@@ -80,19 +80,17 @@ Modify the payload to include the `role` field:
 }
 ```
 
-Forward the modified request. The server processes the payload and creates the user account with the injected role value.
+Forward it. The server accepts the payload without complaint.
 
 ### Verifying administrator access
 
-Upon successful registration, the application redirects to the admin dashboard at `/admin`. The presence of the admin interface confirms that the account was created with administrator privileges.
-
-The flag is displayed on the admin dashboard:
+After registration, the app redirects straight to `/admin`. The flag is on the dashboard.
 
 ![Admin dashboard displaying the flag](../../assets/images/mass-assignment-admin-privilege-escalation/admin-dashboard-flag.webp)
 
 ## Vulnerable code analysis
 
-The vulnerability exists because the backend passes the entire request body to the database layer without filtering.
+Here's why this works:
 
 ```typescript
 const user = await prisma.user.create({
@@ -103,13 +101,13 @@ const user = await prisma.user.create({
 });
 ```
 
-The spread operator (`...body`) copies every property from the request, including the `role` field. The database schema defines `role` as a valid column, so Prisma accepts and stores the value. There is no server-side logic to restrict which fields a client can provide.
+The spread operator (`...body`) dumps everything from the request into the database query. The schema has a `role` column, so Prisma stores whatever value you send. No server-side filtering at all.
 
 ## Remediation
 
 ### Explicit field extraction
 
-Extract only the expected fields from the request body and explicitly set authorization-sensitive fields on the server:
+Destructure only what you need and hardcode the role:
 
 ```typescript
 const { email, password } = req.body;
@@ -123,11 +121,11 @@ const user = await prisma.user.create({
 });
 ```
 
-This approach ignores any additional fields the client might send. The `role` field is always set to `CUSTOMER` regardless of request content.
+Anything extra in the request body gets ignored.
 
 ### Input validation with schema enforcement
 
-Use a validation library such as Zod to define and enforce the expected request structure:
+You can also use Zod to reject unexpected fields outright:
 
 ```typescript
 import { z } from "zod";
@@ -140,6 +138,4 @@ const signupSchema = z.object({
 const validatedData = signupSchema.parse(req.body);
 ```
 
-Schema validation rejects requests containing unexpected fields and ensures that only permitted data reaches the database layer.
-
-Authorization-sensitive fields must always be controlled by the server. User input should never determine privilege levels, roles, or access permissions.
+If someone sends a `role` field, the request fails before reaching the database. Either approach works. Just don't let request bodies decide who's an admin.

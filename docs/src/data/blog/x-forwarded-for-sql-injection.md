@@ -11,10 +11,10 @@ tags:
   - sql-injection
   - ctf
   - http-headers
-description: Exploiting a SQL injection vulnerability in OopsSec Store's visitor tracking by injecting malicious payloads through the X-Forwarded-For HTTP header.
+description: The app tracks visitor IPs via the X-Forwarded-For header and drops the raw value into a SQL query. Here's how to exploit it.
 ---
 
-This writeup covers the exploitation of a SQL injection vulnerability in OopsSec Store's visitor tracking feature. The vulnerability allows an attacker to inject malicious SQL through the X-Forwarded-For header, demonstrating the danger of trusting HTTP headers in database queries.
+OopsSec Store tracks visitor IPs on every page load using the `X-Forwarded-For` header. The value goes straight into a raw SQL query with no sanitization, so we can inject arbitrary SQL through a header that's entirely client-controlled.
 
 ## Table of contents
 
@@ -32,7 +32,7 @@ Once Next.js has started, the application is accessible at `http://localhost:300
 
 ## Target identification
 
-The application silently tracks visitor IP addresses on every page load for analytics purposes. This tracking:
+The application silently tracks visitor IP addresses on every page load. This tracking:
 
 - Runs automatically via a client-side component on all pages
 - Sends visitor data to `/api/tracking`
@@ -73,7 +73,7 @@ const query = `
 await prisma.$queryRawUnsafe(query);
 ```
 
-The `ip` variable (from the X-Forwarded-For header) is directly embedded in the SQL query, enabling SQL injection.
+The `ip` variable comes straight from the X-Forwarded-For header and lands in the SQL query with no sanitization.
 
 ## Exploitation
 
@@ -121,7 +121,7 @@ curl -X POST http://localhost:3000/api/tracking \
   -d '{"path": "/exploit"}'
 ```
 
-Then, go the analytics page. You'll see:
+Then, go to the analytics page. You'll see:
 
 ![Privacy Matters](../../assets/images/x-forwarded-for-sql-injection/privacy-matters.png)
 
@@ -145,7 +145,7 @@ OSS{x_f0rw4rd3d_f0r_sql1}
 
 ## Vulnerable code analysis
 
-The vulnerability exists because of two issues:
+Two things make this exploitable:
 
 ### 1. Trusting the X-Forwarded-For header
 
@@ -168,11 +168,11 @@ const query = `INSERT INTO ... VALUES (..., '${ip}', ...)`;
 await prisma.$queryRawUnsafe(query);
 ```
 
-Using `$queryRawUnsafe` with string concatenation is inherently dangerous. Any user-controlled input can break out of the intended SQL context.
+Passing user-controlled input to `$queryRawUnsafe` via string concatenation means any header value can escape the intended SQL string context.
 
 ## Bonus: Amplifying to Stored XSS
 
-This vulnerability can be chained with a Stored XSS attack. The admin analytics page renders IP addresses using `dangerouslySetInnerHTML`, allowing injected HTML/JavaScript to execute.
+This vulnerability also opens the door to Stored XSS. The admin analytics page renders IP addresses with `dangerouslySetInnerHTML`, so injected HTML and JavaScript execute when an admin loads the page.
 
 ### XSS Payload
 
@@ -194,7 +194,7 @@ curl -X POST http://localhost:3000/api/tracking \
 
 ![XSS](../../assets/images/x-forwarded-for-sql-injection/xss.png)
 
-This demonstrates how SQL Injection can chain with XSS to create a devastating attack vector that persists in the database and affects every admin who views the analytics page.
+Because the payload is stored in the database and rendered unsanitized, every admin who checks analytics will trigger the XSS.
 
 ## Remediation
 

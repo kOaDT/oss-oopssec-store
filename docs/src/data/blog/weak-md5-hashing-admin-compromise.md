@@ -10,16 +10,16 @@ tags:
   - writeup
   - weak-hashing
   - ctf
-description: Exploiting a database leak combined with weak MD5 password hashing to gain administrative access.
+description: Exploiting a database leak combined with weak MD5 password hashing to gain admin access.
 ---
 
-This writeup demonstrates how a SQL injection vulnerability can be chained with weak password hashing to achieve full administrative access. The attack leverages a [previously documented database dump](https://koadt.github.io/oss-oopssec-store/posts/sql-injection-writeup/) to extract password hashes, then exploits the use of unsalted MD5 to recover the admin credentials.
+This writeup chains a SQL injection with weak password hashing to get admin access. We use the [database dump from the SQL injection writeup](https://koadt.github.io/oss-oopssec-store/posts/sql-injection-writeup/) to grab password hashes, then crack the admin password thanks to unsalted MD5.
 
 ## Table of contents
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory, run the following commands:
+You need Node.js. From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -27,26 +27,23 @@ cd oss-store
 npm start
 ```
 
-Once Next.js has started, the application is accessible at `http://localhost:3000`.
+Once Next.js is running, the app is at `http://localhost:3000`.
 
 ## Target identification
 
-This attack chains two distinct vulnerabilities:
+The order search endpoint is vulnerable to SQL injection, which lets us dump the entire users table. The passwords in that table are hashed with unsalted MD5, so recovering the plaintext is almost instant.
 
-1. **SQL injection** in the order search endpoint, which allows extraction of the entire users table
-2. **Weak password hashing** using unsalted MD5, which allows rapid recovery of plaintext passwords
-
-The admin panel at `/admin` is protected by authentication. Obtaining valid admin credentials provides unrestricted access to administrative functionality.
+The admin panel at `/admin` sits behind authentication. If we can crack the admin password, we're in.
 
 ## Exploitation
 
 ### Step 1: Extracting the users table
 
-The first phase requires exploiting the SQL injection vulnerability documented in the [SQL Injection writeup](https://koadt.github.io/oss-oopssec-store/posts/sql-injection-writeup/). After successful exploitation, the response contains the complete users table, including email addresses, roles, and password hashes.
+First, exploit the SQL injection from the [SQL Injection writeup](https://koadt.github.io/oss-oopssec-store/posts/sql-injection-writeup/). The dumped response gives us the full users table: emails, roles, and password hashes.
 
 ### Step 2: Identifying the admin account
 
-Examining the extracted data reveals a user with the `ADMIN` role:
+In the extracted data, one user has the `ADMIN` role:
 
 | Field         | Value                              |
 | ------------- | ---------------------------------- |
@@ -54,21 +51,21 @@ Examining the extracted data reveals a user with the `ADMIN` role:
 | Role          | `ADMIN`                            |
 | Password hash | `21232f297a57a5a743894a0e4a801fc3` |
 
-The hash format is immediately recognizable: 32 hexadecimal characters with no additional encoding or salt prefix. This is characteristic of raw MD5.
+32 hex characters, no salt prefix, no encoding. That's raw MD5.
 
 ### Step 3: Cracking the MD5 hash
 
-MD5 is a cryptographically broken hash function that should never be used for password storage. The hash `21232f297a57a5a743894a0e4a801fc3` is one of the most commonly indexed hashes in rainbow tables.
+MD5 is fast and unsalted here, so cracking is trivial. The hash `21232f297a57a5a743894a0e4a801fc3` shows up in every rainbow table.
 
 **Option A: Online lookup**
 
-Submitting the hash to a rainbow table service such as CrackStation (`https://crackstation.net/`) returns the plaintext immediately: `admin`.
+Paste the hash into CrackStation (`https://crackstation.net/`). It returns `admin` immediately.
 
 ![CrackStation lookup result](../../assets/images/weak-md5-hashing/crackstation-result.webp)
 
 **Option B: Local dictionary attack**
 
-Using a hash cracking tool with a common password wordlist produces the same result. The weak password combined with the fast MD5 algorithm means cracking completes in milliseconds.
+Any hash cracking tool with a common wordlist finds this in milliseconds. The password is `admin` and the algorithm is MD5 - not much of a challenge.
 
 For example: https://github.com/kOaDT/crack-hash
 
@@ -76,18 +73,18 @@ For example: https://github.com/kOaDT/crack-hash
 
 ### Step 4: Authenticating as admin
 
-Navigate to `/login` and enter the recovered credentials:
+Go to `/login` and log in:
 
 - Email: `admin@oss.com`
 - Password: `admin`
 
 ![Admin login](../../assets/images/weak-md5-hashing/admin-login.webp)
 
-Upon successful authentication, the application redirects to the admin panel.
+We land on the admin panel.
 
 ### Step 5: Retrieving the flag
 
-The admin panel at `/admin` displays the flag at the top of the page:
+The flag is at the top of `/admin`:
 
 ```
 OSS{w34k_md5_h4sh1ng}
@@ -97,23 +94,19 @@ OSS{w34k_md5_h4sh1ng}
 
 ## Vulnerable code analysis
 
-The vulnerability exists because the application stores passwords using raw MD5 hashes without salting:
+The app hashes passwords with raw MD5, no salt:
 
 ```ts
 const hashedPassword = crypto.createHash("md5").update(password).digest("hex");
 ```
 
-This implementation has multiple security deficiencies:
+No salt means identical passwords produce identical hashes, so rainbow tables work out of the box. MD5 is also built for speed. Modern GPUs churn through billions of hashes per second, which is exactly what you don't want in a password hash. On top of that, MD5 has known collision vulnerabilities.
 
-1. **No salting**: Identical passwords produce identical hashes, enabling rainbow table attacks
-2. **Fast algorithm**: MD5 is designed for speed, allowing billions of hash computations per second
-3. **Cryptographically broken**: MD5 has known collision vulnerabilities and is considered obsolete for security purposes
-
-When combined with the SQL injection vulnerability, an attacker can extract hashes and recover passwords in seconds.
+Once you have the SQL injection giving you the hashes, going from hash to plaintext takes seconds.
 
 ## Remediation
 
-Password storage should use a slow, salted hashing algorithm specifically designed for this purpose. The bcrypt algorithm is a well-established choice:
+Use bcrypt instead:
 
 ```ts
 import bcrypt from "bcryptjs";
@@ -130,10 +123,6 @@ const verifyPassword = async (
 };
 ```
 
-Key properties of this implementation:
+bcrypt handles salting automatically - each password gets its own. The cost parameter (12 here) controls how slow hashing is, and you can bump it as hardware gets faster. It's also memory-hard, which limits what GPUs can do.
 
-- **Automatic salting**: bcrypt generates and stores a unique salt for each password
-- **Configurable work factor**: The cost parameter (12 in this example) controls computational expense
-- **Resistance to GPU attacks**: bcrypt's memory-hard properties limit parallel cracking efficiency
-
-Additionally, the SQL injection vulnerability must be eliminated using parameterized queries. Attack chains succeed because multiple defensive layers fail simultaneously.
+Fix the SQL injection too, obviously. Use parameterized queries. This attack worked because two defenses were missing at once.
