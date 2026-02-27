@@ -14,13 +14,13 @@ tags:
 description: Exploiting an insecure XML parser in the supplier order import feature to read arbitrary server-side files and retrieve a flag.
 ---
 
-This writeup covers the exploitation of an XXE (XML External Entity) injection vulnerability in OopsSec Store's supplier order import feature. The admin panel exposes an XML import endpoint that resolves external entities, allowing arbitrary file reads from the server.
+The OopsSec Store admin panel has a supplier order import page that parses XML. The parser resolves external entities, so we can use it to read arbitrary files off the server.
 
 ## Table of contents
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory, run the following commands:
+The lab requires Node.js. From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -28,21 +28,21 @@ cd oss-store
 npm start
 ```
 
-Once Next.js has started, the application is accessible at `http://localhost:3000`.
+Head to `http://localhost:3000`.
 
-## Prerequisites — gaining admin access
+## Prerequisites -- gaining admin access
 
-The supplier order import feature is restricted to administrators. Before exploiting the XXE vulnerability, admin access must be obtained through another vulnerability.
+The import feature is admin-only. You'll need to get admin access first through another vulnerability.
 
 ## Reconnaissance
 
-### Discovering the supplier import page
+### The supplier import page
 
-After gaining admin access, the admin dashboard at `/admin` displays navigation links to various management sections. Among them is "Supplier Orders," which links to `/admin/suppliers`.
+Once you have admin access, the dashboard at `/admin` has a "Supplier Orders" link pointing to `/admin/suppliers`.
 
 ![Import Supplier Order](../../assets/images/xxe-supplier-order-import/import-supplier-order.png)
 
-The page provides a textarea for pasting XML and an "Import Order" button. A sample XML template is pre-filled:
+The page has a textarea for pasting XML and an "Import Order" button. A sample template is already filled in:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -54,9 +54,9 @@ The page provides a textarea for pasting XML and an "Import Order" button. A sam
 </order>
 ```
 
-### Understanding the API
+### The API
 
-Submitting the form sends a POST request to `/api/admin/suppliers/import-order` with `Content-Type: application/xml`. The response includes the parsed fields:
+Submitting the form sends a POST to `/api/admin/suppliers/import-order` with `Content-Type: application/xml`. The response comes back with the parsed fields:
 
 ```json
 {
@@ -72,13 +72,13 @@ Submitting the form sends a POST request to `/api/admin/suppliers/import-order` 
 }
 ```
 
-The `notes` field is directly reflected from the XML input. This is the injection point.
+The `notes` field comes straight from the XML input. That's our injection point.
 
 ## Exploiting the XXE vulnerability
 
-### Identifying the target file
+### The target file
 
-Submitting malformed XML (e.g. missing required fields or an invalid structure) triggers verbose error responses. These include a `debug` object that leaks internal configuration, including the absolute path to a supplier registry file:
+Send malformed XML (missing required fields, bad structure) and the endpoint gives back verbose errors. The response includes a `debug` object that leaks the absolute path to a file:
 
 ```json
 {
@@ -90,11 +90,11 @@ Submitting malformed XML (e.g. missing required fields or an invalid structure) 
 }
 ```
 
-The file path points to `flag-xxe.txt` at the project root.
+That's `flag-xxe.txt` at the project root.
 
-### Crafting the payload
+### The payload
 
-XML supports Document Type Definitions (DTDs) that define entities. A `SYSTEM` entity declaration instructs the parser to load content from an external resource:
+XML supports Document Type Definitions (DTDs) that let you define entities. A `SYSTEM` entity tells the parser to load content from an external resource:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -109,11 +109,11 @@ XML supports Document Type Definitions (DTDs) that define entities. A `SYSTEM` e
 </order>
 ```
 
-When the parser encounters `&xxe;`, it resolves the entity by reading the file and substituting its contents into the `notes` element.
+When the parser hits `&xxe;`, it reads the file and drops its contents into `notes`.
 
-### Sending the payload
+### Send it
 
-Submit the crafted XML via the import form or directly via curl:
+Paste it into the import form, or fire it off with curl:
 
 ```bash
 curl -X POST http://localhost:3000/api/admin/suppliers/import-order \
@@ -124,9 +124,9 @@ curl -X POST http://localhost:3000/api/admin/suppliers/import-order \
 
 ![Flag](../../assets/images/xxe-supplier-order-import/flag-xxe.png)
 
-### Reading the flag
+### The flag
 
-The response includes the file contents in the `notes` field:
+The file contents come back in `notes`:
 
 ```json
 {
@@ -142,7 +142,7 @@ The response includes the file contents in the `notes` field:
 
 The flag is `OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}`.
 
-### Secure Implementation
+### Secure implementation
 
 ```typescript
 // VULNERABLE — resolves external entities from user input
@@ -159,17 +159,17 @@ After the fix:
 
 ## Vulnerability chain
 
-This exploit chains two vulnerabilities:
+This exploit chains two bugs:
 
-1. **Admin access** — obtained, for example, via JWT forgery (CWE-347) or mass assignment (CWE-915)
-2. **XXE injection (CWE-611)** — the XML parser resolves external entity declarations, allowing arbitrary file reads from the server
+1. Admin access, for example via JWT forgery (CWE-347) or mass assignment (CWE-915)
+2. XXE injection (CWE-611) -- the XML parser resolves external entity declarations, letting you read arbitrary files off the server
 
 ## Remediation
 
-In a real application:
+To fix this in a real app:
 
-- **Disable DTD processing** in all XML parsers. Most libraries offer flags to reject DOCTYPE declarations entirely.
-- **Disable external entity resolution.** Configure the parser to ignore `SYSTEM` and `PUBLIC` entity declarations.
-- **Use JSON** for data interchange where possible. JSON does not support entity expansion.
-- **Validate and sanitize input.** Strip DOCTYPE declarations from XML before parsing.
-- **Apply the principle of least privilege.** The application process should not have read access to sensitive configuration files.
+- Disable DTD processing in your XML parsers. Most libraries have flags to reject DOCTYPE declarations outright.
+- Disable external entity resolution. Tell the parser to ignore `SYSTEM` and `PUBLIC` entity declarations.
+- Use JSON for data exchange where you can. JSON doesn't have entity expansion.
+- Strip DOCTYPE declarations from XML before parsing.
+- Run the app process with minimal file system permissions. It shouldn't be able to read config files it doesn't need.

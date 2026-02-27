@@ -13,65 +13,63 @@ tags:
 description: Exploiting a server-side validation failure in OopsSec Store's checkout process to purchase products at arbitrary prices.
 ---
 
-This writeup demonstrates how to exploit a client-side price manipulation vulnerability in OopsSec Store's checkout flow. The server accepts the total amount sent by the browser without recalculating it from actual product prices, allowing attackers to pay whatever amount they specify.
+OopsSec Store's checkout sends the order total straight from the browser. The server saves whatever it receives without recalculating from actual product prices. Change it to a penny, the order goes through at a penny.
 
 ## Table of contents
 
 ## Vulnerability overview
 
-OopsSec Store processes checkout requests by accepting a total price field directly from the client. When a user completes a purchase, the browser sends a POST request to `/api/orders` containing the cart items and the calculated total. The server stores this client-provided total without verifying it against the actual product prices in the database.
+When you buy something on OopsSec Store, the browser sends a POST to `/api/orders` with the cart items and a `total` field. That total is calculated by frontend JavaScript. The server takes it at face value and creates the order.
 
-This represents a fundamental trust boundary violation: financial calculations that should occur server-side are instead delegated to client-controlled code.
+The product prices are in the database. The server could look them up and do the math itself. It doesn't.
 
 ## Locating the attack surface
 
-Navigate to the checkout page by adding products to your cart and proceeding through the checkout flow. The final payment page displays the order summary with the calculated total.
+Add some products to your cart and go through checkout. The payment page shows your order summary with the total.
 
 ![Checkout page displaying order summary and payment button](../../assets/images/client-side-price-manipulation/checkout-page.webp)
 
-When the "Complete Payment" button is clicked, the browser constructs a POST request containing the order details, including the total price calculated by the frontend JavaScript.
+Click "Complete Payment" and the browser fires off a POST with the order details, including the total the frontend calculated.
 
 ## Exploitation
 
 ### Configuring the proxy
 
-Configure Burp Suite as an intercepting proxy by setting your browser to route traffic through `127.0.0.1:8080`.
-
-In Burp Suite, navigate to the Proxy tab and disable interception temporarily while preparing the attack.
+Set up Burp Suite as an intercepting proxy (browser traffic through `127.0.0.1:8080`). Leave interception off for now.
 
 ### Preparing the order
 
-Add one or more products to your cart. Selecting higher-priced items makes the price manipulation more evident in the results. Proceed through the checkout flow until you reach the final payment confirmation page.
+Add products to your cart. Higher-priced items make the result more obvious. Go through checkout until you hit the payment page.
 
 ![Product page showing item to be added to cart](../../assets/images/client-side-price-manipulation/product-selection.webp)
 
 ### Intercepting the request
 
-Enable request interception in Burp Suite before clicking "Complete Payment". When you submit the order, Burp captures the POST request to `/api/orders` before it reaches the server.
+Turn on interception in Burp, then click "Complete Payment". Burp catches the POST to `/api/orders` before it hits the server.
 
 ![Burp Suite intercept toggle enabled](../../assets/images/client-side-price-manipulation/burp-intercept-enabled.webp)
 
-### Analyzing the request structure
+### Looking at the request
 
-The intercepted request body contains a JSON payload with the order details:
+The request body is JSON with the order details:
 
 ![Intercepted POST request showing order JSON with total field](../../assets/images/client-side-price-manipulation/intercepted-request.webp)
 
-The `total` field contains the price calculated by the frontend. This value is used directly by the server to create the order record.
+The `total` field is the price the frontend calculated. The server uses this number directly.
 
 ### Modifying the price
 
-Edit the `total` field in the request body to an arbitrary value. Setting it to `0.1` demonstrates that any price can be substituted:
+Change `total` to whatever you want. `0.1` works:
 
 ![Modified request with total changed to 0.1](../../assets/images/client-side-price-manipulation/modified-price.webp)
 
 ### Completing the attack
 
-Forward the modified request to the server and disable interception to allow the response to return. The server processes the order using the manipulated total.
+Forward the modified request and turn off interception. The server processes the order at your price.
 
 ### Capturing the flag
 
-The order confirmation page displays the successful purchase at the modified price. The server detects the price mismatch and returns the flag:
+The order confirmation shows the purchase at the modified total. The server notices the mismatch and returns the flag:
 
 ```
 OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}
@@ -81,11 +79,7 @@ OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}
 
 ## Vulnerable code analysis
 
-The vulnerability exists because the server trusts client-provided data for a security-critical calculation.
-
-### Server-side trust assumption
-
-The API endpoint extracts the total directly from the request body and uses it without validation:
+The checkout handler pulls `total` straight out of the request body and saves it:
 
 ```typescript
 const { total } = await request.json();
@@ -98,17 +92,15 @@ const order = await prisma.order.create({
 });
 ```
 
-The implementation assumes the client will send a correct total because the frontend performs the calculation accurately. However, any value transmitted from the client is under user control and can be modified using browser developer tools, proxy software, or direct API calls.
+The frontend does calculate the right number. But the server never checks it. Anyone with a proxy, devtools, or curl can send whatever total they want.
 
-### Missing server-side calculation
-
-The server has access to the authoritative data sources (product prices and cart quantities in the database) but fails to use them. The total should be derived server-side rather than accepted from an untrusted source.
+The product prices and cart quantities are right there in the database. The server just doesn't use them.
 
 ## Remediation
 
-### Implementing server-side price calculation
+### Recalculate the total server-side
 
-The server must recalculate the total from authoritative data sources:
+Pull the cart from the database and compute the total from actual prices:
 
 ```typescript
 const cart = await prisma.cart.findFirst({
@@ -133,9 +125,9 @@ const order = await prisma.order.create({
 });
 ```
 
-### Implementing validation checks
+### Detect tampering
 
-If the client-provided total is used for display purposes or logging, implement a validation check to detect tampering:
+If you still want the client total for logging or display, compare it against the server calculation:
 
 ```typescript
 const clientTotal = requestBody.total;
@@ -149,6 +141,4 @@ if (Math.abs(clientTotal - serverTotal) > 0.01) {
 }
 ```
 
-### General principle
-
-Client-side calculations can enhance user experience by providing immediate feedback, but they must never be trusted for business logic. All security-critical operations, including financial calculations, authorization decisions, and data validation, must be performed server-side using data sources controlled by the application.
+The frontend total is fine for UX. The backend should never trust it for the actual charge.

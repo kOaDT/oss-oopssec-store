@@ -15,7 +15,7 @@ description: How to exploit a vulnerability in a tiny search box to quietly expo
 
 ## Introduction
 
-This writeup documents the exploitation of a SQL injection vulnerability located in the product search functionality. The vulnerability allows direct manipulation of a backend SQL query through unsanitized user input, ultimately enabling unauthorized data extraction and triggering a flag disclosure within the lab environment.
+This writeup walks through a SQL injection in the product search feature. The search input gets dropped straight into a raw SQL query with no sanitization, so you can manipulate the query to pull data from other tables and grab the flag.
 
 ## Table of contents
 
@@ -30,7 +30,7 @@ This writeup documents the exploitation of a SQL injection vulnerability located
 
 ## Lab setup
 
-The vulnerable environment can be initialized locally using the provided CLI utility.
+Spin up the lab locally:
 
 ```bash
 npx create-oss-store oss-store
@@ -38,9 +38,9 @@ cd oss-store
 npm run dev
 ```
 
-The initialization process installs dependencies, creates and migrates the database schema, injects seed data, and starts the development server on port 3000.
+This installs dependencies, sets up the database with seed data, and starts the dev server on port 3000.
 
-After the server has started, access the application at:
+Once it's running, open:
 
 ```
 http://localhost:3000
@@ -50,53 +50,49 @@ http://localhost:3000
 
 ## Feature overview and attack surface
 
-The attack surface is the product search feature accessible through the navigation header. The interface provides a text input that allows users to search products by name or description.
-
-From a network perspective, the frontend issues requests to the following endpoint:
+The target here is the product search bar in the navigation header. It lets users search products by name or description, hitting this endpoint:
 
 ```
 /api/products/search?q=<search_term>
 ```
 
-The backend dynamically builds a SQL query using the value of the `q` parameter. Because the query string is constructed through direct interpolation, any characters supplied by the client become part of the executable SQL statement.
+On the backend, the `q` parameter gets interpolated directly into a SQL query. No escaping, no parameterization. Whatever you type becomes part of the SQL statement.
 
 ![Product search input field](../../assets/images/product-search-sql-injection/search-page-ui.png)
 
-This design creates a classical SQL injection vector where an attacker can terminate the intended query context and append additional clauses such as `UNION SELECT`.
+You can close the intended query context and tack on your own `UNION SELECT`.
 
 ## Exploitation procedure
 
 ### Initial behavior verification
 
-Navigate to the search page and submit a benign value such as `fresh`.
-
-The response should contain product results, confirming that the endpoint functions normally and that the parameter is actively processed.
+Start by searching for something normal, like `fresh`. You should get product results back, confirming the endpoint works and actually uses the `q` parameter.
 
 ### Injection probing
 
-Enter the following payload into the search field:
+Now try this payload:
 
 ```
 ' UNION SELECT 1,2,3,4,5--
 ```
 
-Submitting this request tests whether the application allows modification of the query structure. If the response renders without server-side validation errors, it indicates that the SQL syntax has been successfully altered.
+If the page renders without errors, you're in. The single quote broke out of the `LIKE` clause, and the `UNION SELECT` merged in.
 
 ![SQL injection payload submitted in search box](../../assets/images/product-search-sql-injection/sql-injection-test.png)
 
 ### UNION-based data extraction
 
-To retrieve data from another table, submit the following payload:
+Time to pull real data. Submit this:
 
 ```
 DELIVERED' UNION SELECT id, email, password, role, addressId FROM users--
 ```
 
-The injected statement merges rows from the `users` table into the product query result set. Because the application does not validate column origins, the backend returns data that was never intended to be exposed through this endpoint.
+This merges the `users` table into the product results. The app doesn't check where the columns came from, so it happily returns user credentials alongside product listings.
 
 ![Network response showing manipulated query results](../../assets/images/product-search-sql-injection/api-response-union-select.png)
 
-The same request can be reproduced via curl:
+Same thing via curl:
 
 ```bash
 curl "http://localhost:3000/api/products/search?q=DELIVERED%27%20UNION%20SELECT%20id%2C%20email%2C%20password%2C%20role%2C%20addressId%20FROM%20users--"
@@ -104,7 +100,7 @@ curl "http://localhost:3000/api/products/search?q=DELIVERED%27%20UNION%20SELECT%
 
 ## Vulnerable code analysis
 
-The root cause of the vulnerability is direct string concatenation within a raw SQL query.
+Here's the problem. The query is built with string concatenation:
 
 ```ts
 const sqlQuery = `
@@ -123,27 +119,21 @@ const sqlQuery = `
 const results = await prisma.$queryRawUnsafe(sqlQuery);
 ```
 
-Several issues are present:
+The `query` parameter is dropped directly into the SQL string, and `$queryRawUnsafe` does exactly what the name suggests — it skips Prisma’s parameterization entirely. No escaping either. Single quotes, comment delimiters, anything goes.
 
-1. The `query` parameter is interpolated directly into the SQL string.
-2. The use of `$queryRawUnsafe` bypasses Prisma’s parameterization safeguards.
-3. No escaping or validation is applied to special SQL characters such as single quotes or comment delimiters.
-
-When the payload contains:
+So when you send:
 
 ```
 DELIVERED' UNION SELECT ...
 ```
 
-the injected quote terminates the `LIKE` clause, and the subsequent UNION statement becomes part of the executable SQL instruction. Because the database user has read access to multiple tables, the attacker can retrieve unrelated records.
+the quote closes the `LIKE` clause, and everything after it runs as SQL. The database user can read other tables, so the `users` table comes back for free.
 
-This flaw corresponds to [CWE-89: Improper Neutralization of Special Elements used in an SQL Command](https://cwe.mitre.org/data/definitions/89.html).
+This is [CWE-89: Improper Neutralization of Special Elements used in an SQL Command](https://cwe.mitre.org/data/definitions/89.html).
 
 ## Remediation
 
-The primary remediation strategy is to avoid constructing SQL queries through string interpolation. Prisma provides a safe abstraction that automatically parameterizes user input.
-
-A secure implementation would resemble the following:
+Don't build SQL queries with string interpolation. Use Prisma's query builder instead:
 
 ```ts
 const results = await prisma.product.findMany({
@@ -156,18 +146,10 @@ const results = await prisma.product.findMany({
 });
 ```
 
-This approach ensures that user input is treated strictly as data rather than executable SQL syntax.
+User input stays data, never becomes executable SQL.
 
-Additional defensive measures include:
-
-- With Prisma, if you need to write raw SQL queries, use `queryRaw`. Never use `queryRawUnsafe`.
-- When using MySQL without an ORM, always rely on prepared statements to prevent SQL injection risks.
-- Applying least-privilege database permissions to reduce the blast radius of injection flaws.
-- Implementing centralized validation for query parameters to prevent malformed input from reaching database layers.
-- Logging anomalous query patterns to support detection of injection attempts.
-
-Even when using ORMs, any fallback to raw SQL should employ parameter placeholders rather than string concatenation to preserve query integrity.
+If you need raw SQL with Prisma, use `$queryRaw` (parameterized), not `$queryRawUnsafe`. With MySQL and no ORM, use prepared statements. You should also restrict the database user's permissions so that even if someone does find an injection, the damage is limited. Logging unusual query patterns helps too — you want to know when someone is poking at your search bar with `UNION SELECT`.
 
 ## Go further
 
-At this stage, the database leakage reveals additional sensitive records, including an administrator email address associated with an MD5 password hash. Although MD5 is considered cryptographically broken and unsuitable for password storage, its presence creates an opportunity for further privilege escalation attempts through offline hash cracking or credential reuse testing. Gaining administrative access would expand the attack surface and potentially expose additional restricted endpoints where other flags may be retrieved.
+The leaked data includes an admin email with an MD5 password hash. MD5 is trivially crackable at this point, so you can try recovering the password offline and logging in as admin. From there, you'd have access to restricted endpoints where other flags might be hiding.

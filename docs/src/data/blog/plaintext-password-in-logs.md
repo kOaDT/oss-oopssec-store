@@ -14,13 +14,13 @@ tags:
 description: Exploiting a forgotten debug statement that logs plaintext passwords and a hidden SIEM dashboard with hardcoded credentials to retrieve a flag.
 ---
 
-This writeup covers the exploitation of a multi-layer information disclosure vulnerability in OopsSec Store. A forgotten debug statement logs plaintext credentials to a file, and a hidden internal SIEM dashboard with hardcoded credentials exposes those logs.
+Someone left a `console.log` in the login route that dumps passwords in plaintext. Those logs end up on a hidden SIEM dashboard protected by default credentials. We'll find it, log in, and read everyone's passwords.
 
 ## Table of contents
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory, run the following commands:
+The lab requires Node.js. From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -32,9 +32,9 @@ Once Next.js has started, the application is accessible at `http://localhost:300
 
 ## Reconnaissance
 
-### Identifying the login mechanism
+### Login mechanism
 
-The application has a standard login form at `/login`. Submitting credentials sends a POST request to `/api/auth/login` with a JSON body:
+There's a login form at `/login`. Submitting credentials sends a POST to `/api/auth/login` with a JSON body:
 
 ```json
 {
@@ -43,35 +43,35 @@ The application has a standard login form at `/login`. Submitting credentials se
 }
 ```
 
-Nothing unusual is visible in the response, whether the login succeeds or fails.
+The response doesn't leak anything useful whether login succeeds or fails.
 
 ### Directory enumeration
 
-Using a standard directory enumeration tool against the application reveals a hidden path. For example, with gobuster:
+Run gobuster (or any directory brute-forcer) against the app:
 
 ```bash
 gobuster dir -u http://localhost:3000 -w /usr/share/seclists/Discovery/Web-Content/common.txt
 ```
 
-Among the results, `/monitoring` stands out as an unexpected path. Enumerating further:
+`/monitoring` shows up, which is worth poking at. Enumerate one level deeper:
 
 ```bash
 gobuster dir -u http://localhost:3000/monitoring -w /usr/share/seclists/Discovery/Web-Content/common.txt
 ```
 
-This reveals `/monitoring/siem`, a path that is not linked anywhere in the application's navigation or UI.
+This turns up `/monitoring/siem` -- not linked anywhere in the app.
 
-## Discovering the SIEM interface
+## The SIEM dashboard
 
-Navigating to `http://localhost:3000/monitoring/siem` displays a login form and the title "SIEM Console — Internal Monitoring System."
+Hit `http://localhost:3000/monitoring/siem` and you get a login form titled "SIEM Console -- Internal Monitoring System."
 
 ![Login Page SIEM](../../assets/images/plaintext-password-in-logs/login-siem.png)
 
-This is an internal log monitoring dashboard that was never intended to be public-facing.
+An internal log viewer sitting on a public port. Promising.
 
 ## Bypassing SIEM authentication
 
-The SIEM login form accepts a username and password. Since this appears to be a hastily deployed internal tool, common default credentials are worth trying:
+Internal tool, hastily deployed -- default credentials are always worth a shot:
 
 | Username | Password |
 | -------- | -------- |
@@ -80,11 +80,11 @@ The SIEM login form accepts a username and password. Since this appears to be a 
 | root     | root     |
 | admin    | password |
 
-The combination `root` / `admin` grants access to the dashboard.
+`root` / `admin` gets us in.
 
 ## Triggering the credential leak
 
-Before reading the logs, we need to generate a login event. Submit any login attempt on the main application at `/login`:
+The dashboard is empty until someone actually logs in. Fire off a login attempt on the main app:
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
@@ -94,9 +94,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ## Reading the logs
 
-After authenticating on the SIEM dashboard, the log table displays all server-side console output captured since the application started. Searching for `[auth]` or `login attempt` quickly narrows down the relevant entries.
-
-A typical log entry looks like:
+Back on the SIEM dashboard, the log table shows all captured `console.*` output. Search for `[auth]` or `login attempt` and you'll see something like:
 
 ```
 [auth] login attempt {"email":"alice@example.com","password":"iloveduck","flag":"OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}"}
@@ -108,19 +106,19 @@ The flag is `OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}`.
 
 ## Vulnerability chain
 
-This exploit combines four distinct weaknesses:
+Four things had to go wrong for this to work:
 
-1. **CWE-532** — A `console.log` statement in the login route outputs plaintext credentials (email, password, and a flag) on every login attempt.
-2. **CWE-312** — The global instrumentation layer (`instrumentation.ts`) captures all `console.*` output and persists it to `logs/app.log` in cleartext.
-3. **CWE-200** — The SIEM dashboard at `/monitoring/siem` is hidden but discoverable through standard directory enumeration.
-4. **CWE-798** — The SIEM interface is protected by trivially guessable default credentials (`root:admin`).
+1. CWE-532 -- A `console.log` in the login route dumps the email, password, and flag on every attempt.
+2. CWE-312 -- The instrumentation layer (`instrumentation.ts`) captures all `console.*` output and writes it to `logs/app.log` in cleartext.
+3. CWE-200 -- The SIEM dashboard at `/monitoring/siem` is unlisted but easy to find with directory enumeration.
+4. CWE-798 -- The SIEM login uses default credentials (`root:admin`).
 
 ## Remediation
 
-In a real application:
+Don't log request bodies. Use a structured logging library (pino, winston) with field redaction so passwords can't end up in output even if someone forgets.
 
-- **Never log request body fields.** Use structured logging libraries (pino, winston) with automatic redaction of sensitive fields.
-- **Treat logs as sensitive data.** Apply access controls, encrypt at rest, enforce retention policies, and audit access.
-- **Enforce strong credentials on internal tools.** Never use default or easily guessable passwords. Use a secrets manager and proper identity providers.
-- **Apply authentication and authorization to all interfaces**, including internal ones. Use SSO/OIDC and restrict access to private network segments.
-- **Audit `console.*` usage before deployment.** Use ESLint rules like `no-console` and pre-commit hooks to catch accidental debug statements.
+Treat logs as sensitive data. Access controls, encryption at rest, retention policies -- if logs contain anything that could identify a user, they need the same care as a database.
+
+Internal tools need real credentials. Default passwords on an internal dashboard are fine until the dashboard is reachable from the internet. Use a secrets manager or SSO; never ship `root:admin`.
+
+Catch stray `console.log` calls before they reach production. An ESLint `no-console` rule plus a pre-commit hook will flag them automatically.
