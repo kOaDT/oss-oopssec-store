@@ -156,6 +156,7 @@ const flags = [
     flag: "OSS{s3ss10n_f1x4t10n_4tt4ck}",
     slug: "session-fixation-weak-session-management",
     markdownFile: "session-fixation-weak-session-management.md",
+    walkthroughSlug: "session-fixation-weak-session-management",
     category: "AUTHENTICATION" as const,
     difficulty: "MEDIUM" as const,
   },
