@@ -219,8 +219,17 @@ const flags = [
     flag: "OSS{1ns3cur3_p4ssw0rd_r3s3t}",
     slug: "insecure-password-reset",
     markdownFile: "insecure-password-reset.md",
+    walkthroughSlug: "insecure-password-reset",
     category: "AUTHENTICATION" as const,
     difficulty: "MEDIUM" as const,
+  },
+  {
+    flag: "OSS{0p3n_r3d1r3ct_l0g1n_byp4ss}",
+    slug: "open-redirect",
+    markdownFile: "open-redirect.md",
+    walkthroughSlug: "open-redirect-login-bypass",
+    category: "INPUT_VALIDATION" as const,
+    difficulty: "EASY" as const,
   },
 ];
 
@@ -344,6 +353,11 @@ const flagHints: Record<string, string[]> = {
     "Resetting your own password is fine, but what about resetting someone else's?",
     "The reset token seems to depend on information you already have. Look closely at the API response when you request a reset, it tells you exactly when the token was created.",
     "The token is MD5(email + unix_timestamp). Request a reset for any user, take the requestedAt from the response, convert it to a Unix timestamp, compute MD5(email + timestamp), and use that token to reset their password. The flag is returned upon a successful reset.",
+  ],
+  "open-redirect": [
+    "After logging in, the app knows where to send you. But who decides where that is?",
+    "The login page accepts a query parameter that controls where you end up after authentication. The application does not validate whether the destination is safe or internal.",
+    "Visit /login?redirect=/internal/oauth/callback and log in. The redirect parameter is used as-is after authentication, and the target page is an internal OAuth debug endpoint that displays the flag when reached through the login redirect flow.",
   ],
 };
 

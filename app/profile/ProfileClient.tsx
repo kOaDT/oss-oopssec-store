@@ -56,7 +56,7 @@ export default function ProfileClient() {
 
   useEffect(() => {
     if (!user) {
-      router.push("/login");
+      router.push("/login?redirect=/profile");
       return;
     }
 
@@ -65,7 +65,7 @@ export default function ProfileClient() {
         const data = await api.get<UserProfile>("/api/user");
         setProfile(data);
       } catch {
-        router.push("/login");
+        router.push("/login?redirect=/profile");
       } finally {
         setIsLoading(false);
       }
@@ -129,7 +129,7 @@ export default function ProfileClient() {
 
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/login?redirect=/profile");
   };
 
   const fetchSupportToken = async () => {

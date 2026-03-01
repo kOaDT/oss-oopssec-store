@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import LoginForm from "./LoginForm";
@@ -23,7 +24,9 @@ export default function LoginPage() {
         <section className="container mx-auto px-4 py-16">
           <div className="mx-auto max-w-md">
             <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg dark:border-slate-800 dark:bg-slate-800">
-              <LoginForm />
+              <Suspense>
+                <LoginForm />
+              </Suspense>
             </div>
           </div>
         </section>

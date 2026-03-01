@@ -7,7 +7,7 @@ const LOGIN_FLAG = "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, redirect } = body;
 
     console.log("[auth] login attempt", { email, password, flag: LOGIN_FLAG });
 
@@ -71,6 +71,16 @@ export async function POST(request: Request) {
     });
 
     setAuthCookie(response, token);
+
+    if (redirect) {
+      response.cookies.set("oauth_callback", "1", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60,
+        path: "/internal/oauth/callback",
+      });
+    }
 
     return response;
   } catch (error) {
