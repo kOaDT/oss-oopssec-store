@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import CopyButton from "./CopyButton";
 import { api, ApiError } from "@/lib/api";
@@ -12,6 +12,8 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,7 +24,7 @@ export default function LoginForm() {
       const data = await api.post<{
         user: { id: string; email: string; role: string };
         flag?: string | null;
-      }>("/api/auth/login", { email, password });
+      }>("/api/auth/login", { email, password, redirect });
 
       localStorage.setItem("user", JSON.stringify(data.user));
       window.dispatchEvent(new Event("storage"));
@@ -31,7 +33,9 @@ export default function LoginForm() {
         localStorage.setItem("pendingFlag", data.flag);
       }
 
-      if (data.user?.role === "ADMIN") {
+      if (redirect) {
+        window.location.href = redirect;
+      } else if (data.user?.role === "ADMIN") {
         router.push("/admin");
       } else {
         router.push("/");
