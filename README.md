@@ -30,7 +30,8 @@
   <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md">Contributing</a> |
   <a href="https://github.com/users/kOaDT/projects/3">Roadmap</a> |
   <a href="https://github.com/users/kOaDT/projects/3/views/6">Good first issues</a> |
-  <a href="https://kOaDT.github.io/oss-oopssec-store">Walkthroughs</a>
+  <a href="https://kOaDT.github.io/oss-oopssec-store">Walkthroughs</a> |
+  <a href="https://hub.docker.com/r/leogra/oss-oopssec-store">Docker Hub</a>
 </p>
 
 <div align="center">
@@ -108,7 +109,21 @@ This creates the `.env` file, installs dependencies, sets up the SQLite database
 
 ### Docker
 
-No Node.js required. Just [Docker](https://docs.docker.com/get-docker/):
+No Node.js required. Just [Docker](https://docs.docker.com/get-docker/).
+
+#### From Docker Hub (quickest)
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
+To persist data across restarts:
+
+```bash
+docker run -p 3000:3000 -v oss-data:/app/data leogra/oss-oopssec-store
+```
+
+#### From source (Docker Compose)
 
 ```bash
 git clone https://github.com/kOaDT/oss-oopssec-store.git
