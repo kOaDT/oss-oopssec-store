@@ -23,4 +23,6 @@ export const FLAGS = {
   XML_EXTERNAL_ENTITY_INJECTION: "OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}",
   INSECURE_PASSWORD_RESET: "OSS{1ns3cur3_p4ssw0rd_r3s3t}",
   OPEN_REDIRECT: "OSS{0p3n_r3d1r3ct_l0g1n_byp4ss}",
+  SELF_XSS_PROFILE_INJECTION: "OSS{s3lf_xss_pr0f1l3_1nj3ct10n}",
+  CSRF_PROFILE_TAKEOVER_CHAIN: "OSS{csrf_pr0f1l3_t4k30v3r_ch41n}",
 } as const;

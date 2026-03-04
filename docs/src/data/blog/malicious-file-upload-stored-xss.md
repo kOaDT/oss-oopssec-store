@@ -37,7 +37,13 @@ cd oss-store
 npm start
 ```
 
-Once Next.js is up, go to `http://localhost:3000` and log in with the admin credentials you recovered.
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
+Once it's up, go to `http://localhost:3000` and log in with the admin credentials you recovered.
 
 ## Vulnerability overview
 

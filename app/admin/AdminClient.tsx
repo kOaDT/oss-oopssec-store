@@ -456,6 +456,13 @@ export default function AdminClient() {
             >
               Special Offer
             </a>
+            <a
+              href="/exploits/csrf-profile-takeover.html"
+              className="mt-2 inline-block text-primary-600 underline hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+              style={{ display: "none" }}
+            >
+              Profile Update
+            </a>
           </div>
         </div>
       </div>

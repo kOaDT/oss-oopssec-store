@@ -17,6 +17,24 @@ The product reviews feature in OopsSec Store doesn't sanitize input. At all. You
 
 ## Table of contents
 
+## Lab setup
+
+From an empty directory:
+
+```bash
+npx create-oss-store oss-store
+cd oss-store
+npm start
+```
+
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
+The app runs at `http://localhost:3000`.
+
 ## Vulnerability overview
 
 Users can submit reviews on product pages. Those reviews get stored in the database and displayed back when someone loads the page. The problem: the server saves whatever you type without sanitization, and the frontend renders it as raw HTML. If your "review" happens to be a script tag, the browser will execute it.

@@ -232,6 +232,22 @@ const flags = [
     category: "INPUT_VALIDATION" as const,
     difficulty: "EASY" as const,
   },
+  {
+    flag: "OSS{s3lf_xss_pr0f1l3_1nj3ct10n}",
+    slug: "self-xss-profile-injection",
+    markdownFile: "self-xss-profile-injection.md",
+    walkthroughSlug: "self-xss-csrf-profile-takeover",
+    category: "INJECTION" as const,
+    difficulty: "EASY" as const,
+  },
+  {
+    flag: "OSS{csrf_pr0f1l3_t4k30v3r_ch41n}",
+    slug: "csrf-profile-takeover-chain",
+    markdownFile: "csrf-profile-takeover-chain.md",
+    walkthroughSlug: "self-xss-csrf-profile-takeover",
+    category: "REQUEST_FORGERY" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -360,6 +376,16 @@ const flagHints: Record<string, string[]> = {
     "The login page accepts a query parameter that controls where you end up after authentication. The application does not validate whether the destination is safe or internal.",
     "Visit /login?redirect=/internal/oauth/callback and log in. The redirect parameter is used as-is after authentication, and the target page is an internal OAuth debug endpoint that displays the flag when reached through the login redirect flow.",
   ],
+  "self-xss-profile-injection": [
+    "Your profile speaks louder than you think. Try expressing yourself with more than plain text.",
+    "The bio field accepts and renders HTML without sanitization. The server notices when you save something unusual.",
+    "Save a bio containing an HTML tag (e.g., <img src=x onerror=alert(1)>). The profile update API detects the HTML and returns the flag in the response. The bio is then rendered via dangerouslySetInnerHTML, proving the XSS executes.",
+  ],
+  "csrf-profile-takeover-chain": [
+    "What if someone else could edit your profile for you, without your permission?",
+    "The profile update endpoint accepts POST data and has no CSRF protection. The exploit page is served from the same origin. Inspect the admin dashboard source for hidden links.",
+    "Find the hidden link to /exploits/csrf-profile-takeover.html in the admin page source. Visit it while logged in. The page sends a request to /api/user/profile that updates your bio with an XSS payload. The endpoint detects the off-page request and returns the flag.",
+  ],
 };
 
 config();
@@ -448,12 +474,16 @@ async function main() {
     update: {
       password: hashMD5("iloveduck"),
       addressId: aliceAddress.id,
+      displayName: "Alice",
+      bio: "I love ducks and online shopping!",
     },
     create: {
       email: "alice@example.com",
       password: hashMD5("iloveduck"),
       role: "CUSTOMER",
       addressId: aliceAddress.id,
+      displayName: "Alice",
+      bio: "I love ducks and online shopping!",
     },
   });
 
@@ -462,12 +492,16 @@ async function main() {
     update: {
       password: hashMD5("qwerty"),
       addressId: bobAddress.id,
+      displayName: "Bob",
+      bio: "Regular customer, security enthusiast.",
     },
     create: {
       email: "bob@example.com",
       password: hashMD5("qwerty"),
       role: "CUSTOMER",
       addressId: bobAddress.id,
+      displayName: "Bob",
+      bio: "Regular customer, security enthusiast.",
     },
   });
 

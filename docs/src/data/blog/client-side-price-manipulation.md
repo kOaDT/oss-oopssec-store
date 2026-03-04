@@ -17,6 +17,24 @@ OopsSec Store's checkout sends the order total straight from the browser. The se
 
 ## Table of contents
 
+## Lab setup
+
+From an empty directory:
+
+```bash
+npx create-oss-store oss-store
+cd oss-store
+npm start
+```
+
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
+The app runs at `http://localhost:3000`.
+
 ## Vulnerability overview
 
 When you buy something on OopsSec Store, the browser sends a POST to `/api/orders` with the cart items and a `total` field. That total is calculated by frontend JavaScript. The server takes it at face value and creates the order.
