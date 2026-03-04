@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
       id: dbUser.id,
       email: dbUser.email,
       role: dbUser.role,
+      displayName: dbUser.displayName,
+      bio: dbUser.bio,
       address: dbUser.address
         ? {
             street: dbUser.address.street,

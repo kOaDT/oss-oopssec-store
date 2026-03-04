@@ -13,6 +13,9 @@ model User {
   email               String               @unique
   password            String
   role                UserRole             @default(CUSTOMER)
+  displayName         String?
+  bio                 String?
+  csrfExploited       Boolean              @default(false)
   addressId           String?
   address             Address?             @relation(fields: [addressId], references: [id])
   carts               Cart[]

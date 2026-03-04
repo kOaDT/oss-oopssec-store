@@ -4,11 +4,14 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
+import FlagDisplay from "../components/FlagDisplay";
 
 interface UserProfile {
   id: string;
   email: string;
   role: string;
+  displayName: string | null;
+  bio: string | null;
   address: {
     street: string;
     city: string;
@@ -54,6 +57,18 @@ export default function ProfileClient() {
   const [supportSuccess, setSupportSuccess] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [profileUpdateSuccess, setProfileUpdateSuccess] = useState<
+    string | null
+  >(null);
+  const [profileUpdateError, setProfileUpdateError] = useState<string | null>(
+    null
+  );
+  const [profileFlag, setProfileFlag] = useState<string | null>(null);
+  const [csrfFlag, setCsrfFlag] = useState<string | null>(null);
+
   useEffect(() => {
     if (!user) {
       router.push("/login?redirect=/profile");
@@ -62,8 +77,13 @@ export default function ProfileClient() {
 
     const fetchProfile = async () => {
       try {
-        const data = await api.get<UserProfile>("/api/user");
+        const data = await api.get<UserProfile & { csrfFlag?: string }>(
+          "/api/user/profile"
+        );
         setProfile(data);
+        setDisplayName(data.displayName || "");
+        setBio(data.bio || "");
+        if (data.csrfFlag) setCsrfFlag(data.csrfFlag);
       } catch {
         router.push("/login?redirect=/profile");
       } finally {
@@ -130,6 +150,44 @@ export default function ProfileClient() {
   const handleLogout = () => {
     logout();
     router.push("/login?redirect=/profile");
+  };
+
+  const handleProfileUpdate = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsUpdatingProfile(true);
+    setProfileUpdateSuccess(null);
+    setProfileUpdateError(null);
+
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName, bio }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setProfileUpdateError(data.error || "Failed to update profile");
+        return;
+      }
+
+      setProfileUpdateSuccess("Profile updated successfully");
+      if (data.flag) setProfileFlag(data.flag);
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              displayName: data.user.displayName,
+              bio: data.user.bio,
+            }
+          : prev
+      );
+    } catch {
+      setProfileUpdateError("An unexpected error occurred");
+    } finally {
+      setIsUpdatingProfile(false);
+    }
   };
 
   const fetchSupportToken = async () => {
@@ -326,6 +384,101 @@ export default function ProfileClient() {
                   </p>
                 </div>
               )}
+
+              {profile.displayName && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Display Name
+                  </label>
+                  <p className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+                    {profile.displayName}
+                  </p>
+                </div>
+              )}
+
+              {profile.bio && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Bio
+                  </label>
+                  <div
+                    className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    dangerouslySetInnerHTML={{ __html: profile.bio }}
+                  />
+                </div>
+              )}
+
+              <div className="border-t border-slate-200 pt-6 dark:border-slate-700">
+                <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Edit Profile
+                </h3>
+                <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+                  Customize your profile. Bio supports basic HTML formatting for
+                  rich text display.
+                </p>
+
+                {profileFlag && (
+                  <FlagDisplay flag={profileFlag} variant="compact" />
+                )}
+                {csrfFlag && <FlagDisplay flag={csrfFlag} variant="compact" />}
+
+                {profileUpdateSuccess && (
+                  <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800/50 dark:bg-green-900/20">
+                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                      {profileUpdateSuccess}
+                    </p>
+                  </div>
+                )}
+                {profileUpdateError && (
+                  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800/50 dark:bg-red-900/20">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                      {profileUpdateError}
+                    </p>
+                  </div>
+                )}
+
+                <form onSubmit={handleProfileUpdate} className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="displayName"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Display Name
+                    </label>
+                    <input
+                      id="displayName"
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Enter your display name"
+                      className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="bio"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Bio
+                    </label>
+                    <textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell us about yourself..."
+                      rows={4}
+                      className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingProfile}
+                    className="cursor-pointer rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isUpdatingProfile ? "Saving..." : "Save Profile"}
+                  </button>
+                </form>
+              </div>
 
               <div className="pt-6">
                 <button
