@@ -19,7 +19,7 @@ This writeup chains a SQL injection with weak password hashing to get admin acce
 
 ## Lab setup
 
-You need Node.js. From an empty directory:
+From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
@@ -27,7 +27,13 @@ cd oss-store
 npm start
 ```
 
-Once Next.js is running, the app is at `http://localhost:3000`.
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
+The app runs at `http://localhost:3000`.
 
 ## Target identification
 

@@ -17,6 +17,24 @@ The signup endpoint on OopsSec Store doesn't filter which fields it accepts. You
 
 ## Table of contents
 
+## Lab setup
+
+From an empty directory:
+
+```bash
+npx create-oss-store oss-store
+cd oss-store
+npm start
+```
+
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
+The app runs at `http://localhost:3000`.
+
 ## Vulnerability overview
 
 The signup form takes an email and password, sends them as JSON to the backend, and the backend creates a user record. But the backend spreads the entire request body into the database query, so whatever you send gets stored, including fields you're not supposed to control.

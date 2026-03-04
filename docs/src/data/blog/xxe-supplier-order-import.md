@@ -20,12 +20,18 @@ The OopsSec Store admin panel has a supplier order import page that parses XML. 
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory:
+From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
 cd oss-store
 npm start
+```
+
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
 ```
 
 Head to `http://localhost:3000`.

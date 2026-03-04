@@ -10,10 +10,13 @@
  / /_/ /\ \ _\ \     / /_/ // _ \ / _ \(_-<_\ \  / -_)/ __/_\ \  / __// _ \ / __// -_)
  \____/___//___/     \____/ \___// .__/___/___/  \__/ \__//___/  \__/ \___//_/   \__/
                                 /_/
-  $ npx create-oss-store
-  $ cd my-oss-store && npm start
+  # With Node.js
+  $ npx create-oss-store && cd oss-oopssec-store && npm start
 
-  → Open http://localhost:3000 and start hunting flags
+  # With Docker
+  $ docker run -p 3000:3000 leogra/oss-oopssec-store
+
+  → Open http://localhost:3000 and start hacking
 ```
 
 </div>

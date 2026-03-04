@@ -38,13 +38,13 @@ cd oss-store
 npm run dev
 ```
 
-This installs dependencies, sets up the database with seed data, and starts the dev server on port 3000.
+Or with Docker (no Node.js required):
 
-Once it's running, open:
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
 
-```
-http://localhost:3000
-```
+The app runs at `http://localhost:3000`.
 
 ![OopsSec Store homepage interface](../../assets/images/product-search-sql-injection/homepage-interface.png)
 

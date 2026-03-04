@@ -20,12 +20,18 @@ The wishlist API on OopsSec Store authenticates users but never checks whether t
 
 ## Lab setup
 
-The lab requires Node.js. From an empty directory:
+From an empty directory:
 
 ```bash
 npx create-oss-store oss-store
 cd oss-store
 npm start
+```
+
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
 ```
 
 The app runs at `http://localhost:3000`.

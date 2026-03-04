@@ -29,6 +29,12 @@ cd oss-store
 npm start
 ```
 
+Or with Docker (no Node.js required):
+
+```bash
+docker run -p 3000:3000 leogra/oss-oopssec-store
+```
+
 The AI assistant lives at `http://localhost:3000/support/ai-assistant` and needs a Mistral AI API key.
 
 ### Obtaining a Mistral API key
