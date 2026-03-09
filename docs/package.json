@@ -18,7 +18,7 @@
     "@astrojs/sitemap": "^3.7.0",
     "@giscus/react": "^3.1.0",
     "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/vite": "^4.2.0",
+    "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.18.0",
@@ -28,26 +28,26 @@
     "react-dom": "^19.2.4",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
-    "satori": "^0.19.2",
+    "satori": "^0.25.0",
     "sharp": "^0.34.5",
     "slugify": "^1.6.6",
-    "tailwindcss": "^4.2.0"
+    "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
     "@pagefind/default-ui": "^1.4.0",
-    "@shikijs/transformers": "^3.22.0",
+    "@shikijs/transformers": "^4.0.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@typescript-eslint/parser": "^8.56.0",
-    "eslint": "^10.0.0",
+    "@typescript-eslint/parser": "^8.57.0",
+    "eslint": "^10.0.3",
     "eslint-plugin-astro": "^1.6.0",
-    "globals": "^17.3.0",
+    "globals": "^17.4.0",
     "pagefind": "^1.4.0",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0"
+    "typescript-eslint": "^8.57.0"
   }
 }
