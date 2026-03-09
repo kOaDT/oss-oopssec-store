@@ -71,7 +71,7 @@
     "next": "16.0.6",
     "pdf-lib": "^1.17.1",
     "prisma": "^6.19.1",
-    "react": "19.2.0",
+    "react": "19.2.4",
     "react-dom": "19.2.0",
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.3.0",
