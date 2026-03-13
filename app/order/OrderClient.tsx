@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import FlagDisplay from "../components/FlagDisplay";
+import ShareOrderButton from "./ShareOrderButton";
 import { api, ApiError } from "@/lib/api";
 import { getStoredUser } from "@/lib/client-auth";
 import type { Order } from "@/lib/types";
@@ -198,6 +199,7 @@ export default function OrderClient() {
             >
               View Cart
             </Link>
+            {orderId && <ShareOrderButton orderId={orderId} />}
           </div>
         </div>
       </div>

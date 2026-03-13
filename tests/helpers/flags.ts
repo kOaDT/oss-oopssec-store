@@ -17,7 +17,7 @@ export const FLAGS = {
   SERVER_SIDE_REQUEST_FORGERY: "OSS{s3rv3r_s1d3_r3qu3st_f0rg3ry}",
   SESSION_FIXATION: "OSS{s3ss10n_f1x4t10n_4tt4ck}",
   SQL_INJECTION: "OSS{sql_1nj3ct10n_vuln3r4b1l1ty}",
-  WEAK_JWT_SECRET: "OSS{w34k_jwt_s3cr3t}",
+  WEAK_JWT_SECRET: "OSS{w34k_jwt_s3cr3t_k3y}",
   WEAK_MD5_HASHING: "OSS{w34k_md5_h4sh1ng}",
   X_FORWARDED_FOR_SQL_INJECTION: "OSS{x_f0rw4rd3d_f0r_sql1}",
   XML_EXTERNAL_ENTITY_INJECTION: "OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}",
@@ -25,4 +25,5 @@ export const FLAGS = {
   OPEN_REDIRECT: "OSS{0p3n_r3d1r3ct_l0g1n_byp4ss}",
   SELF_XSS_PROFILE_INJECTION: "OSS{s3lf_xss_pr0f1l3_1nj3ct10n}",
   CSRF_PROFILE_TAKEOVER_CHAIN: "OSS{csrf_pr0f1l3_t4k30v3r_ch41n}",
+  AES_CBC_PADDING_ORACLE: "OSS{p4dd1ng_0r4cl3_f0rg3d_t0k3n}",
 } as const;

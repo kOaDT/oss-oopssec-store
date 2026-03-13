@@ -248,6 +248,14 @@ const flags = [
     category: "REQUEST_FORGERY" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{p4dd1ng_0r4cl3_f0rg3d_t0k3n}",
+    slug: "aes-cbc-padding-oracle",
+    markdownFile: "aes-cbc-padding-oracle.md",
+    walkthroughSlug: "aes-cbc-padding-oracle-forged-share-token",
+    category: "CRYPTOGRAPHIC" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -385,6 +393,11 @@ const flagHints: Record<string, string[]> = {
     "What if someone else could edit your profile for you, without your permission?",
     "The profile update endpoint accepts POST data and has no CSRF protection. The exploit page is served from the same origin. Inspect the admin dashboard source for hidden links.",
     "Find the hidden link to /exploits/csrf-profile-takeover.html in the admin page source. Visit it while logged in. The page sends a request to /api/user/profile that updates your bio with an XSS payload. The endpoint detects the off-page request and returns the flag.",
+  ],
+  "aes-cbc-padding-oracle": [
+    "Encryption without authentication is only half the battle. The share links hide their contents, but the server's reactions speak volumes.",
+    "Generate a share link and tamper with individual bytes of the token. Watch the HTTP status codes carefully: the server responds differently depending on whether decryption itself failed or whether the decrypted content simply doesn't match any known resource.",
+    "The endpoint returns 400 for invalid PKCS#7 padding but 404 when padding is valid. This is a classic padding oracle. Recover the intermediate state of the AES block by brute-forcing each IV byte (up to 256 x 16 = 4096 requests), then forge a new IV so the block decrypts to 'report:internal' instead of 'order:ORD-xxx'.",
   ],
 };
 
