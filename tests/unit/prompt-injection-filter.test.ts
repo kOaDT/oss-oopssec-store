@@ -1,4 +1,4 @@
-import { containsBlockedPattern } from "../../app/api/ai-assistant/route";
+import { containsBlockedPattern } from "../../lib/prompt-injection-filter";
 
 describe("containsBlockedPattern (prompt injection filter)", () => {
   it("matches 'ignore previous instructions'", () => {

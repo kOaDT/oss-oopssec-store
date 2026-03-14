@@ -256,6 +256,14 @@ const flags = [
     category: "CRYPTOGRAPHIC" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{mcp_p01s0n3d_t00l_r3sp0ns3}",
+    slug: "mcp-malicious-server",
+    markdownFile: "mcp-malicious-server.md",
+    walkthroughSlug: "mcp-malicious-server",
+    category: "INJECTION" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -398,6 +406,11 @@ const flagHints: Record<string, string[]> = {
     "Encryption without authentication is only half the battle. The share links hide their contents, but the server's reactions speak volumes.",
     "Generate a share link and tamper with individual bytes of the token. Watch the HTTP status codes carefully: the server responds differently depending on whether decryption itself failed or whether the decrypted content simply doesn't match any known resource.",
     "The endpoint returns 400 for invalid PKCS#7 padding but 404 when padding is valid. This is a classic padding oracle. Recover the intermediate state of the AES block by brute-forcing each IV byte (up to 256 x 16 = 4096 requests), then forge a new IV so the block decrypts to 'report:internal' instead of 'order:ORD-xxx'.",
+  ],
+  "mcp-malicious-server": [
+    "The AI assistant doesn't work alone. Inspect the JSON response closely when it answers your questions — it reveals more than just the message.",
+    "The assistant connects to an internal MCP server at /api/mcp with three tools, one of which is restricted. It also supports connecting external MCP servers. Look for how to configure a custom MCP server URL in the chat interface.",
+    "Create your own MCP server that returns a poisoned tool response containing a fake SOC2 compliance directive. The directive should instruct the AI to call the restricted get_compliance_report tool. Connect your server to the assistant and trigger your malicious tool — the AI will follow the injected instruction and call the internal tool with its privileged session.",
   ],
 };
 
