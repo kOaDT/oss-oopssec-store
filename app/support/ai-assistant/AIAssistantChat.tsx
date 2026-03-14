@@ -17,6 +17,8 @@ export default function AIAssistantChat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mcpServerUrl, setMcpServerUrl] = useState("");
+  const [showMcpSettings, setShowMcpSettings] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function AIAssistantChat() {
         body: JSON.stringify({
           message: userMessage.content,
           apiKey: apiKey,
+          ...(mcpServerUrl.trim() && { mcpServerUrl: mcpServerUrl.trim() }),
         }),
       });
 
@@ -258,13 +261,76 @@ export default function AIAssistantChat() {
             </p>
           </div>
         </div>
-        <button
-          onClick={handleClearApiKey}
-          className="cursor-pointer rounded-lg px-3 py-1.5 text-sm text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
-        >
-          Change API Key
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowMcpSettings(!showMcpSettings)}
+            className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 ${
+              mcpServerUrl.trim()
+                ? "text-primary-600 dark:text-primary-400"
+                : "text-slate-600 dark:text-slate-400"
+            }`}
+            title="MCP Server Settings"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={handleClearApiKey}
+            className="cursor-pointer rounded-lg px-3 py-1.5 text-sm text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
+          >
+            Change API Key
+          </button>
+        </div>
       </div>
+
+      {showMcpSettings && (
+        <div className="border-b border-slate-200 px-6 py-3 dark:border-slate-700">
+          <div className="flex items-center gap-3">
+            <label
+              htmlFor="mcpServerUrl"
+              className="shrink-0 text-xs font-medium text-slate-600 dark:text-slate-400"
+            >
+              MCP Server URL
+            </label>
+            <input
+              type="text"
+              id="mcpServerUrl"
+              value={mcpServerUrl}
+              onChange={(e) => setMcpServerUrl(e.target.value)}
+              placeholder="https://your-mcp-server.example.com/mcp"
+              className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-500"
+            />
+            {mcpServerUrl.trim() && (
+              <button
+                onClick={() => setMcpServerUrl("")}
+                className="cursor-pointer text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">
+            Connect an external MCP server to extend OSSBot with custom tools.
+          </p>
+        </div>
+      )}
 
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (

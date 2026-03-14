@@ -26,4 +26,5 @@ export const FLAGS = {
   SELF_XSS_PROFILE_INJECTION: "OSS{s3lf_xss_pr0f1l3_1nj3ct10n}",
   CSRF_PROFILE_TAKEOVER_CHAIN: "OSS{csrf_pr0f1l3_t4k30v3r_ch41n}",
   AES_CBC_PADDING_ORACLE: "OSS{p4dd1ng_0r4cl3_f0rg3d_t0k3n}",
+  MCP_MALICIOUS_SERVER: "OSS{mcp_p01s0n3d_t00l_r3sp0ns3}",
 } as const;
