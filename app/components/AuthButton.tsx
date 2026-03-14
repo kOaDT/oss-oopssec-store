@@ -3,16 +3,29 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function AuthButton() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const mounted = useMounted();
 
   const handleLogout = () => {
     logout();
     router.push("/");
     router.refresh();
   };
+
+  if (!mounted) {
+    return (
+      <Link
+        href="/login"
+        className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+      >
+        Login
+      </Link>
+    );
+  }
 
   if (user) {
     return (

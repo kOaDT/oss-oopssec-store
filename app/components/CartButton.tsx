@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getStoredUser } from "@/lib/client-auth";
 import { api } from "@/lib/api";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function CartButton() {
   const [cartCount, setCartCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const mounted = useMounted();
 
   useEffect(() => {
     const user = getStoredUser();
@@ -69,6 +71,10 @@ export default function CartButton() {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   const user = getStoredUser();
   if (!user) {
