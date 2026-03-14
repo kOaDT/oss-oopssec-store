@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function OrderSearchLink() {
   const { user } = useAuth();
+  const mounted = useMounted();
 
-  if (!user) {
+  if (!mounted || !user) {
     return null;
   }
 

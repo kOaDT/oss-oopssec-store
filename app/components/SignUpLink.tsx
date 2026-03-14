@@ -2,9 +2,22 @@
 
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function SignUpLink() {
   const { user } = useAuth();
+  const mounted = useMounted();
+
+  if (!mounted) {
+    return (
+      <Link
+        href="/signup"
+        className="text-sm font-medium text-slate-700 transition-colors hover:text-primary-600 dark:text-slate-300 dark:hover:text-primary-400"
+      >
+        Sign Up
+      </Link>
+    );
+  }
 
   if (user) {
     return null;
