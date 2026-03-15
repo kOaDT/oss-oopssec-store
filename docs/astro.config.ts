@@ -62,7 +62,6 @@ export default defineConfig({
     },
   },
   experimental: {
-    preserveScriptOrder: true,
     fonts: [
       {
         name: "Google Sans Code",
