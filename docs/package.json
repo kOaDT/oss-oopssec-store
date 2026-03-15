@@ -13,15 +13,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@astrojs/react": "^5.0.0",
-    "@astrojs/rss": "^4.0.17",
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
     "@giscus/react": "^3.1.0",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "astro": "^6.0.4",
+    "astro": "^5.18.0",
     "dayjs": "^1.11.19",
     "lodash.kebabcase": "^4.1.1",
     "react": "^19.2.4",
@@ -30,11 +30,11 @@
     "remark-toc": "^9.0.0",
     "satori": "^0.25.0",
     "sharp": "^0.34.5",
-    "slugify": "^1.6.8",
+    "slugify": "^1.6.6",
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.7",
+    "@astrojs/check": "^0.9.6",
     "@pagefind/default-ui": "^1.4.0",
     "@shikijs/transformers": "^4.0.2",
     "@tailwindcss/typography": "^0.5.19",
