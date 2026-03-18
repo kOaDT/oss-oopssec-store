@@ -1,6 +1,8 @@
 import { execSync } from "child_process";
+import dotenv from "dotenv";
 
 export default async function globalSetup() {
+  dotenv.config();
   if (process.env.SKIP_SERVER_CHECK === "1") {
     return;
   }

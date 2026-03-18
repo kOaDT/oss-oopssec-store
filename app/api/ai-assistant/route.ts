@@ -132,7 +132,7 @@ async function callMistral(
   tools?: ReturnType<typeof mcpToolsToMistralFormat>
 ) {
   const body: Record<string, unknown> = {
-    model: "mistral-small-latest",
+    model: "mistral-small-2603",
     messages,
     max_tokens: 1024,
     temperature: 0.7,
