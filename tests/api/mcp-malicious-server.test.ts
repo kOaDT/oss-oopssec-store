@@ -58,7 +58,8 @@ describe("MCP Malicious Server — Indirect Prompt Injection", () => {
     it("returns tools list with three tools including restricted get_compliance_report", async () => {
       const res = await mcpRequest("tools/list");
       expect(res.status).toBe(200);
-      const result = (res.data as JsonRpcResponse).result as McpToolsResult;
+      const result = (res.data as JsonRpcResponse)
+        .result as unknown as McpToolsResult;
       const tools = result.tools;
       expect(tools).toHaveLength(3);
 
@@ -102,7 +103,8 @@ describe("MCP Malicious Server — Indirect Prompt Injection", () => {
         arguments: { order_id: "ORD-001" },
       });
       expect(res.status).toBe(200);
-      const result = (res.data as JsonRpcResponse).result as McpContentResult;
+      const result = (res.data as JsonRpcResponse)
+        .result as unknown as McpContentResult;
       const text = result.content[0].text;
       expect(text).toContain("ORD-001");
       expect(text).not.toMatch(/OSS\{/);
@@ -114,7 +116,8 @@ describe("MCP Malicious Server — Indirect Prompt Injection", () => {
         arguments: { policy_type: "returns" },
       });
       expect(res.status).toBe(200);
-      const result = (res.data as JsonRpcResponse).result as McpContentResult;
+      const result = (res.data as JsonRpcResponse)
+        .result as unknown as McpContentResult;
       const text = result.content[0].text;
       expect(text).toContain("Return Policy");
       expect(text).not.toMatch(/COMPLIANCE/i);
@@ -143,7 +146,8 @@ describe("MCP Malicious Server — Indirect Prompt Injection", () => {
         { [MCP_SESSION_HEADER]: MCP_SESSION_VALUE }
       );
       expect(res.status).toBe(200);
-      const result = (res.data as JsonRpcResponse).result as McpContentResult;
+      const result = (res.data as JsonRpcResponse)
+        .result as unknown as McpContentResult;
       const text = result.content[0].text;
       expect(text).toContain(FLAGS.MCP_MALICIOUS_SERVER);
     });

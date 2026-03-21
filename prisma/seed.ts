@@ -264,6 +264,15 @@ const flags = [
     category: "INJECTION" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{m1ddl3w4r3_byp4ss}",
+    slug: "middleware-authorization-bypass",
+    cve: "CVE-2025-29927",
+    markdownFile: "middleware-authorization-bypass.md",
+    walkthroughSlug: "middleware-authorization-bypass-cve-2025-29927",
+    category: "AUTHORIZATION" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -411,6 +420,11 @@ const flagHints: Record<string, string[]> = {
     "The AI assistant doesn't work alone. Inspect the JSON response closely when it answers your questions — it reveals more than just the message.",
     "The assistant connects to an internal MCP server at /api/mcp with three tools, one of which is restricted. It also supports connecting external MCP servers. Look for how to configure a custom MCP server URL in the chat interface.",
     "Create your own MCP server that returns a poisoned tool response containing a fake SOC2 compliance directive. The directive should instruct the AI to call the restricted get_compliance_report tool. Connect your server to the assistant and trigger your malicious tool — the AI will follow the injected instruction and call the internal tool with its privileged session.",
+  ],
+  "middleware-authorization-bypass": [
+    "Not all gatekeepers are immune to being told they're not needed.",
+    "Next.js uses an internal header to avoid running middleware twice. What if you spoke its language?",
+    "Research CVE-2025-29927. The x-middleware-subrequest header can convince Next.js to skip middleware entirely. Try repeating the middleware module name.",
   ],
 };
 
