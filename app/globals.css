@@ -98,6 +98,35 @@ body {
   }
 }
 
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.animated-border {
+  --border-angle: 0deg;
+  border: 1px solid transparent;
+  background:
+    padding-box linear-gradient(var(--background), var(--background)),
+    border-box
+      conic-gradient(
+        from var(--border-angle),
+        transparent 40%,
+        #22c55e 50%,
+        #4ade80 55%,
+        #22c55e 60%,
+        transparent 70%
+      );
+  animation: border-spin 3s linear infinite;
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;

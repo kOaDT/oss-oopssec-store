@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import confetti from "canvas-confetti";
+import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
 
 function formatSlugToTitle(slug: string): string {
   return slug
@@ -24,6 +25,9 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [foundFlags, setFoundFlags] = useState<string[]>([]);
   const [isInitialAnimation, setIsInitialAnimation] = useState(true);
+  const [supportBannerSlug, setSupportBannerSlug] = useState<string | null>(
+    null
+  );
   const fetchProgress = useCallback(async () => {
     try {
       const response = await fetch("/api/flags/progress");
@@ -129,6 +133,10 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             setTimeout(() => {
               setMessage(null);
             }, 2000);
+          }
+
+          if (shouldShowSupportBanner(data.slug)) {
+            setTimeout(() => setSupportBannerSlug(data.slug), 1500);
           }
         }
         setFlagInput("");
@@ -241,6 +249,13 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
           </button>
         </div>
       </div>
+
+      {supportBannerSlug && (
+        <SupportBanner
+          flagSlug={supportBannerSlug}
+          onClose={() => setSupportBannerSlug(null)}
+        />
+      )}
 
       {isOpen && (
         <div
