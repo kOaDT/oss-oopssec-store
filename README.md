@@ -61,6 +61,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 - [Testing](#testing)
 - [Disclaimer](#disclaimer)
 - [Contributing](#contributing)
+- [Educator Kit](#-using-oopssec-store-in-a-course-or-ctf)
 - [Top contributors](#top-contributors)
 
 ---
@@ -226,6 +227,10 @@ Check the [Roadmap](https://github.com/users/kOaDT/projects/3) for planned work,
 Found all the flags? Share your walkthroughs on the [docs site](https://kOaDT.github.io/oss-oopssec-store).
 
 For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 🎓 Using OopsSec Store in a course or CTF?
+
+Check out the [Educator Kit](EDUCATORS.md) - a ready-to-use guide with OWASP coverage grids, syllabus templates, deployment FAQ, and a student report template.
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 
