@@ -57,7 +57,6 @@ const TOOLS = [
 // backend can attach it when calling privileged tools. Not in .env on purpose —
 // moving it there would not fix the vulnerability (the AI agent still holds the secret).
 import { MCP_SESSION_HEADER, MCP_SESSION_VALUE } from "@/lib/mcp-constants";
-export { MCP_SESSION_HEADER, MCP_SESSION_VALUE } from "@/lib/mcp-constants";
 
 function jsonRpcResponse(id: string | number | null, result: unknown) {
   return NextResponse.json({
