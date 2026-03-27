@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { total } = body;
+    const { total, couponCode } = body;
 
     if (!total || typeof total !== "number" || total <= 0) {
       return NextResponse.json(
@@ -77,22 +77,34 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    const allOrders = await prisma.order.findMany({
-      select: {
-        id: true,
-      },
-    });
+    let expectedTotal = calculatedTotal;
+    let couponRaceFlag: string | undefined;
 
-    const ordOrders = allOrders
-      .filter((order) => order.id.startsWith("ORD-"))
-      .map((order) => {
-        const number = parseInt(order.id.replace("ORD-", ""), 10);
-        return isNaN(number) ? 0 : number;
+    if (couponCode && typeof couponCode === "string") {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: couponCode.toUpperCase() },
       });
 
-    const maxOrderNumber = ordOrders.length > 0 ? Math.max(...ordOrders) : 0;
-    const nextOrderNumber = maxOrderNumber + 1;
-    const orderId = `ORD-${nextOrderNumber.toString().padStart(3, "0")}`;
+      if (
+        coupon &&
+        (!coupon.expiresAt || coupon.expiresAt >= new Date()) &&
+        coupon.usedCount < coupon.maxUses
+      ) {
+        // Simulate discount validation processing — this gap is the race window
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        const updated = await prisma.coupon.update({
+          where: { code: coupon.code },
+          data: { usedCount: { increment: 1 } },
+        });
+
+        expectedTotal = calculatedTotal * (1 - coupon.discount);
+
+        if (updated.usedCount > coupon.maxUses) {
+          couponRaceFlag = "OSS{r4c3_c0nd1t10n_c0up0n_4bus3}";
+        }
+      }
+    }
 
     const userWithAddress = await prisma.user.findUnique({
       where: { id: user.id },
@@ -106,15 +118,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const order = await prisma.order.create({
-      data: {
-        id: orderId,
-        userId: user.id,
-        addressId: userWithAddress.addressId,
-        total: total,
-        status: "PENDING",
-      },
-    });
+    let order: {
+      id: string;
+      total: number;
+      status: string;
+      createdAt: Date;
+    } | null = null;
+    // The race condition challenge fires ~30 concurrent requests here. All compute
+    // the same next ID, race to insert it, and the losers hit a unique-constraint
+    // violation. This retry loop re-scans to find the true numeric max on each
+    // collision so every request eventually succeeds and reaches the flag check.
+    let attempts = 0;
+    while (!order && attempts < 20) {
+      attempts++;
+      const allOrders = await prisma.order.findMany({
+        select: { id: true },
+      });
+      const maxNum = allOrders.reduce((max, o) => {
+        if (!o.id.startsWith("ORD-")) return max;
+        const n = parseInt(o.id.replace("ORD-", ""), 10);
+        return isNaN(n) ? max : Math.max(max, n);
+      }, 0);
+      const nextId = `ORD-${(maxNum + 1).toString().padStart(3, "0")}`;
+      try {
+        order = await prisma.order.create({
+          data: {
+            id: nextId,
+            userId: user.id,
+            addressId: userWithAddress.addressId,
+            total: total,
+            status: "PENDING",
+          },
+        });
+      } catch {
+        // Concurrent request claimed this ID — retry with a fresh read
+      }
+    }
+
+    if (!order) {
+      return NextResponse.json(
+        { error: "Failed to create order" },
+        { status: 500 }
+      );
+    }
 
     const orderItems = await Promise.all(
       cart.cartItems.map((item) =>
@@ -170,8 +216,12 @@ export async function POST(request: NextRequest) {
       status: order.status,
     };
 
-    if (Math.abs(total - calculatedTotal) > 0.01) {
+    if (Math.abs(total - expectedTotal) > 0.01) {
       response.flag = "OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}";
+    }
+
+    if (couponRaceFlag) {
+      response.flag = couponRaceFlag;
     }
 
     return NextResponse.json(response);

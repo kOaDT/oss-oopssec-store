@@ -265,3 +265,15 @@ model SupplierOrder {
 
   @@map("supplier_orders")
 }
+
+model Coupon {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  discount  Float
+  maxUses   Int
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("coupons")
+}

@@ -273,6 +273,14 @@ const flags = [
     category: "AUTHORIZATION" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{r4c3_c0nd1t10n_c0up0n_4bus3}",
+    slug: "race-condition-coupon-abuse",
+    markdownFile: "race-condition-coupon.md",
+    walkthroughSlug: "race-condition-coupon-abuse",
+    category: "INPUT_VALIDATION" as const,
+    difficulty: "HARD" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -425,6 +433,11 @@ const flagHints: Record<string, string[]> = {
     "Not all gatekeepers are immune to being told they're not needed.",
     "Next.js uses an internal header to avoid running middleware twice. What if you spoke its language?",
     "Research CVE-2025-29927. The x-middleware-subrequest header can convince Next.js to skip middleware entirely. Try repeating the middleware module name.",
+  ],
+  "race-condition-coupon-abuse": [
+    "The checkout page accepts promotional discount codes.",
+    "The coupon validation and usage tracking are two separate operations. What happens if multiple requests reach the server at the same time?",
+    "Send many concurrent POST requests to /api/coupon/apply with the same coupon code using Promise.all, curl --parallel, or Burp Intruder. Some requests will pass the check before any increments the counter.",
   ],
 };
 
@@ -1030,6 +1043,19 @@ async function main() {
   } else {
     console.log("Wishlists already exist, skipping wishlist creation");
   }
+
+  await prisma.coupon.upsert({
+    where: { code: "FLASHSALE" },
+    update: { usedCount: 0 },
+    create: {
+      code: "FLASHSALE",
+      discount: 0.5,
+      maxUses: 1,
+      usedCount: 0,
+    },
+  });
+
+  console.log("Created FLASHSALE coupon");
 
   console.log("Seeding completed!");
 }

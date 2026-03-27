@@ -53,19 +53,19 @@ Each vulnerability hides a flag in the format `OSS{...}`. Walkthroughs are avail
 
 OopsSec Store covers the full **OWASP Top 10 (2021)** plus advanced topics relevant to modern web stacks.
 
-| OWASP Category                          | Challenges covered                                                                                                                              |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A01 - Broken Access Control**         | IDOR (wishlist), BOLA (API), Open Redirect, Session Fixation, Mass Assignment, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927) |
-| **A02 - Cryptographic Failures**        | Weak MD5 Hashing, Padding Oracle (AES-CBC), Plaintext passwords in logs, Predictable reset token                                                |
-| **A03 - Injection**                     | SQL Injection (login), Product Search SQLi, Second-Order SQLi, X-Forwarded-For SQLi, XXE (supplier import), Prompt Injection (AI assistant)     |
-| **A04 - Insecure Design**               | Insecure password reset flow, Client-side price manipulation, Brute force (no rate limiting)                                                    |
-| **A05 - Security Misconfiguration**     | Public environment variable exposure, Exposed `.env` via path traversal, Information disclosure via API errors                                  |
-| **A06 - Vulnerable Components**         | React Server Components RCE (React2Shell / CVE-2025-55182)                                                                                      |
-| **A07 - Auth & Session Failures**       | Weak JWT secret, Session fixation, Brute force (no rate limiting), Weak session management                                                      |
-| **A08 - Software & Data Integrity**     | MCP server poisoning, Malicious tool responses, CSRF                                                                                            |
-| **A09 - Logging & Monitoring Failures** | Plaintext password logging, Information disclosure via API errors                                                                               |
-| **A10 - SSRF**                          | Server-Side Request Forgery via upload feature                                                                                                  |
-| **Beyond OWASP Top 10**                 | Self-XSS (profile injection), Self-XSS + CSRF chaining (profile takeover), Stored XSS (SVG upload), MCP agent manipulation                      |
+| OWASP Category                          | Challenges covered                                                                                                                                                                                                           |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A01 - Broken Access Control**         | IDOR (wishlist), BOLA (API), Open Redirect, Session Fixation, Mass Assignment, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927), Business logic bypass via concurrent requests (Race Condition Coupon Abuse) |
+| **A02 - Cryptographic Failures**        | Weak MD5 Hashing, Padding Oracle (AES-CBC), Plaintext passwords in logs, Predictable reset token                                                                                                                             |
+| **A03 - Injection**                     | SQL Injection (login), Product Search SQLi, Second-Order SQLi, X-Forwarded-For SQLi, XXE (supplier import), Prompt Injection (AI assistant)                                                                                  |
+| **A04 - Insecure Design**               | Insecure password reset flow, Client-side price manipulation, Brute force (no rate limiting), Race Condition Coupon Abuse                                                                                                    |
+| **A05 - Security Misconfiguration**     | Public environment variable exposure, Exposed `.env` via path traversal, Information disclosure via API errors                                                                                                               |
+| **A06 - Vulnerable Components**         | React Server Components RCE (React2Shell / CVE-2025-55182)                                                                                                                                                                   |
+| **A07 - Auth & Session Failures**       | Weak JWT secret, Session fixation, Brute force (no rate limiting), Weak session management                                                                                                                                   |
+| **A08 - Software & Data Integrity**     | MCP server poisoning, Malicious tool responses, CSRF                                                                                                                                                                         |
+| **A09 - Logging & Monitoring Failures** | Plaintext password logging, Information disclosure via API errors                                                                                                                                                            |
+| **A10 - SSRF**                          | Server-Side Request Forgery via upload feature                                                                                                                                                                               |
+| **Beyond OWASP Top 10**                 | Self-XSS (profile injection), Self-XSS + CSRF chaining (profile takeover), Stored XSS (SVG upload), MCP agent manipulation                                                                                                   |
 
 ---
 
@@ -105,8 +105,9 @@ Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 | 28  | Padding Oracle - AES-CBC Token Forgery           | Cryptographic          | 🔴         | 90–120 min |
 | 29  | MCP Server Poisoning - Agent Manipulation        | Injection              | 🔴         | 90–120 min |
 | 30  | React2Shell - RSC RCE (CVE-2025-55182)           | RCE                    | 🔴         | 120+ min   |
+| 31  | Race Condition — Coupon Abuse                    | Business Logic         | 🔴         | 45–90 min  |
 
-**Total estimated time:** 29–42 hours for the full curriculum depending on student level. You don't need to cover everything. Pick the challenges that match your course objectives and time constraints.
+**Total estimated time:** 31–45 hours for the full curriculum depending on student level. You don't need to cover everything. Pick the challenges that match your course objectives and time constraints.
 
 ---
 
@@ -122,7 +123,7 @@ Designed for a 5-day security bootcamp with 3–4 hours of lab time per day.
 | Day 2 | Client-side attacks            | Stored XSS (review), Self-XSS (profile), SVG Upload XSS, CSRF, CSRF + Self-XSS chain                                   |
 | Day 3 | Auth & access control          | IDOR, BOLA, Open Redirect, Weak JWT, Session Fixation, Brute Force, Password Reset, Middleware Bypass (CVE-2025-29927) |
 | Day 4 | Crypto, data & server-side     | Weak MD5, Padding Oracle, Plaintext Logs, Path Traversal, SSRF, Client-Side Price Manipulation, Mass Assignment        |
-| Day 5 | Advanced & AI security         | Second-Order SQLi, XXE, Prompt Injection, MCP Poisoning, React2Shell RCE                                               |
+| Day 5 | Advanced & AI security         | Second-Order SQLi, XXE, Prompt Injection, MCP Poisoning, React2Shell RCE, Race Condition Coupon Abuse                  |
 
 **Debrief format:** After each session, share the walkthrough URL for each challenge and run a 15-min group debrief. Encourage students to compare their approach with the official walkthrough.
 
@@ -132,16 +133,17 @@ Designed for a 5-day security bootcamp with 3–4 hours of lab time per day.
 
 Designed to complement a web security or application security course over 6–8 weeks, with one 2-hour lab session per week.
 
-| Week | Topic                             | Challenges                                                                                                    | Learning outcomes                                    |
-| ---- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| 1    | Lab setup & recon                 | Public Env Variable, Info Disclosure API                                                                      | Understand the app architecture and attack surface   |
-| 2    | SQL Injection                     | SQL Injection (login), Product Search SQLi, X-Forwarded-For SQLi                                              | Identify and exploit injection in modern ORMs        |
-| 3    | XSS & client-side attacks         | Stored XSS, Self-XSS (profile), SVG Upload XSS                                                                | Understand DOM context and stored payload execution  |
-| 4    | Access control & input validation | IDOR, BOLA, Open Redirect, Path Traversal, Client-Side Price Manipulation, Middleware Bypass (CVE-2025-29927) | Enumerate and exploit broken access controls         |
-| 5    | Auth & session management         | Weak JWT, Session Fixation, Brute Force, Password Reset, Mass Assignment                                      | Analyze authentication flaws in real flows           |
-| 6    | Cryptographic & logging failures  | Weak MD5, Padding Oracle, Plaintext Logs                                                                      | Exploit weak crypto implementations                  |
-| 7    | Request forgery & chaining        | CSRF, SSRF, CSRF + Self-XSS chain                                                                             | Chain low-severity bugs into critical exploits       |
-| 8    | Advanced injection & AI security  | Second-Order SQLi, XXE, Prompt Injection, MCP Poisoning                                                       | Understand advanced injection and AI attack surfaces |
+| Week | Topic                             | Challenges                                                                                                    | Learning outcomes                                     |
+| ---- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 1    | Lab setup & recon                 | Public Env Variable, Info Disclosure API                                                                      | Understand the app architecture and attack surface    |
+| 2    | SQL Injection                     | SQL Injection (login), Product Search SQLi, X-Forwarded-For SQLi                                              | Identify and exploit injection in modern ORMs         |
+| 3    | XSS & client-side attacks         | Stored XSS, Self-XSS (profile), SVG Upload XSS                                                                | Understand DOM context and stored payload execution   |
+| 4    | Access control & input validation | IDOR, BOLA, Open Redirect, Path Traversal, Client-Side Price Manipulation, Middleware Bypass (CVE-2025-29927) | Enumerate and exploit broken access controls          |
+| 5    | Auth & session management         | Weak JWT, Session Fixation, Brute Force, Password Reset, Mass Assignment                                      | Analyze authentication flaws in real flows            |
+| 6    | Cryptographic & logging failures  | Weak MD5, Padding Oracle, Plaintext Logs                                                                      | Exploit weak crypto implementations                   |
+| 7    | Request forgery & chaining        | CSRF, SSRF, CSRF + Self-XSS chain                                                                             | Chain low-severity bugs into critical exploits        |
+| 8    | Advanced injection & AI security  | Second-Order SQLi, XXE, Prompt Injection, MCP Poisoning                                                       | Understand advanced injection and AI attack surfaces  |
+| 9    | Business logic & race conditions  | Client-Side Price Manipulation, Race Condition Coupon Abuse                                                   | Exploit non-atomic state transitions and TOCTOU flaws |
 
 **Assessment:** Use the [Student Report Template](#student-report-template) as a graded deliverable for each challenge.
 
