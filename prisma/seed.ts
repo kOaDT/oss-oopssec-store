@@ -278,7 +278,7 @@ const flags = [
     slug: "race-condition-coupon-abuse",
     markdownFile: "race-condition-coupon.md",
     walkthroughSlug: "race-condition-coupon-abuse",
-    category: "INPUT_VALIDATION" as const,
+    category: "INSECURE_DESIGN" as const,
     difficulty: "HARD" as const,
   },
 ];

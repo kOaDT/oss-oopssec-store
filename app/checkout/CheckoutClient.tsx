@@ -76,7 +76,6 @@ export default function CheckoutClient() {
       const result = await api.post<{
         discountedTotal: number;
         discountPercent: number;
-        flag?: string;
       }>("/api/coupon/apply", {
         code: couponCode.trim(),
         cartTotal: cartData.total,
