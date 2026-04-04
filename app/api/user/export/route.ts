@@ -76,17 +76,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const requestedFields = fields
-      .split(",")
-      .map((f: string) => f.trim())
-      .filter((f: string) => f.length > 0);
-
-    if (requestedFields.length === 0) {
+    if (!Array.isArray(fields) || fields.length === 0) {
       return NextResponse.json(
-        { error: "No valid fields specified" },
+        { error: "Fields must be a non-empty array" },
         { status: 400 }
       );
     }
+
+    const requestedFields = fields
+      .map((f: string) => String(f).trim())
+      .filter((f: string) => f.length > 0);
 
     const invalidFields = requestedFields.filter(
       (f: string) => !ALLOWED_USER_FIELDS.includes(f)

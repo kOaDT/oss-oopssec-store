@@ -307,7 +307,7 @@ const flagHints: Record<string, string[]> = {
   "information-disclosure-api-error": [
     "Errors can be surprisingly chatty when you provoke them.",
     "Try sending unexpected or malformed data to API endpoints. Some error responses include verbose debug information that goes far beyond a simple error message.",
-    "Send a POST request to the user data export endpoint (/api/user/export) with an invalid field name. The error response includes system diagnostics containing feature flags, and the flag is right there.",
+    "The Data Export UI only offers checkboxes with valid fields, but the API doesn't enforce that. Send a POST request to /api/user/export with an invalid field name in the fields array. The error response includes system diagnostics containing feature flags.",
   ],
   "weak-jwt-secret": [
     "The token on your lips has a secret, and it's an open one.",

