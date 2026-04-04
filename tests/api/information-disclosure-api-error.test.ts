@@ -35,7 +35,7 @@ describe("Information Disclosure via API Error", () => {
         {
           method: "POST",
           headers: authHeaders(token),
-          body: JSON.stringify({ format: "json", fields: "invalid_field" }),
+          body: JSON.stringify({ format: "json", fields: ["invalid_field"] }),
         }
       );
 
@@ -65,7 +65,7 @@ describe("Information Disclosure via API Error", () => {
         {
           method: "POST",
           headers: authHeaders(token),
-          body: JSON.stringify({ format: "json", fields: "email,role" }),
+          body: JSON.stringify({ format: "json", fields: ["email", "role"] }),
         }
       );
 
@@ -88,7 +88,7 @@ describe("Information Disclosure via API Error", () => {
       const { status, headers } = await apiRequest("/api/user/export", {
         method: "POST",
         headers: authHeaders(token),
-        body: JSON.stringify({ format: "csv", fields: "email,role" }),
+        body: JSON.stringify({ format: "csv", fields: ["email", "role"] }),
       });
 
       expect(status).toBe(200);
@@ -119,11 +119,34 @@ describe("Information Disclosure via API Error", () => {
     });
   });
 
+  describe("Fields must be an array", () => {
+    it("POST /api/user/export with comma-separated string returns 400", async () => {
+      const token = await loginOrFail(
+        TEST_USERS.alice.email,
+        TEST_USERS.alice.password
+      );
+
+      const { status, data } = await apiRequest<{ error?: string }>(
+        "/api/user/export",
+        {
+          method: "POST",
+          headers: authHeaders(token),
+          body: JSON.stringify({ format: "json", fields: "email,role" }),
+        }
+      );
+
+      expect(status).toBe(400);
+      expect((data as { error?: string }).error).toMatch(
+        /fields must be a non-empty array/i
+      );
+    });
+  });
+
   describe("Unauthenticated request is rejected", () => {
     it("POST /api/user/export without auth returns 401", async () => {
       const { status } = await apiRequest("/api/user/export", {
         method: "POST",
-        body: JSON.stringify({ format: "json", fields: "email,role" }),
+        body: JSON.stringify({ format: "json", fields: ["email", "role"] }),
       });
 
       expect(status).toBe(401);

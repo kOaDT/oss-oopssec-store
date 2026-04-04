@@ -55,3 +55,6 @@ documents/invoices/*
 
 # logs
 logs/*
+
+# other
+docs/update-deps.sh

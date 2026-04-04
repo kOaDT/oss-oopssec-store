@@ -47,7 +47,11 @@ export default function ProfileClient() {
   >("profile");
 
   const [exportFormat, setExportFormat] = useState("json");
-  const [exportFields, setExportFields] = useState("id,email,role");
+  const [selectedFields, setSelectedFields] = useState<string[]>([
+    "id",
+    "email",
+    "role",
+  ]);
   const [exportResult, setExportResult] = useState<ExportResponse | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -108,7 +112,7 @@ export default function ProfileClient() {
         },
         body: JSON.stringify({
           format: exportFormat,
-          fields: exportFields,
+          fields: selectedFields,
         }),
       });
 
@@ -586,29 +590,48 @@ export default function ProfileClient() {
                   </select>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="exportFields"
-                    className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-                  >
+                <fieldset>
+                  <legend className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Fields to Export
-                  </label>
-                  <input
-                    id="exportFields"
-                    type="text"
-                    value={exportFields}
-                    onChange={(e) => setExportFields(e.target.value)}
-                    placeholder="id,email,role"
-                    className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
-                  />
-                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    Enter comma-separated field names (e.g., id,email,role)
-                  </p>
-                </div>
+                  </legend>
+                  <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      { value: "id", label: "User ID" },
+                      { value: "email", label: "Email" },
+                      { value: "role", label: "Role" },
+                      { value: "addressId", label: "Address ID" },
+                    ].map((field) => (
+                      <label
+                        key={field.value}
+                        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 transition-colors ${
+                          selectedFields.includes(field.value)
+                            ? "border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-400 dark:bg-primary-900/20 dark:text-primary-300"
+                            : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedFields.includes(field.value)}
+                          onChange={() =>
+                            setSelectedFields((prev) =>
+                              prev.includes(field.value)
+                                ? prev.filter((f) => f !== field.value)
+                                : [...prev, field.value]
+                            )
+                          }
+                          className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600"
+                        />
+                        <span className="text-sm font-medium">
+                          {field.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
 
                 <button
                   type="submit"
-                  disabled={isExporting}
+                  disabled={isExporting || selectedFields.length === 0}
                   className="cursor-pointer rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isExporting ? "Exporting..." : "Export Data"}
