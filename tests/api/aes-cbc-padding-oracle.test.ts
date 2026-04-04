@@ -132,7 +132,9 @@ describe("AES-CBC Padding Oracle", () => {
 
     it("returns 400 when ciphertext is tampered (bad padding)", async () => {
       const bytes = Buffer.from(shareToken, "hex");
-      bytes[bytes.length - 1] ^= 0x01;
+      for (let i = bytes.length - 16; i < bytes.length; i++) {
+        bytes[i] ^= 0xff;
+      }
       const tampered = bytes.toString("hex");
 
       const { status, data } = await apiRequest<{ error: string }>(
