@@ -9,26 +9,43 @@ globs:
 ## File Structure
 
 - Use Next.js App Router API route handlers (`route.ts`)
-- Export named functions: `GET`, `POST`, `PUT`, `DELETE`
+- Export named constants using `withAuth` or `withAdminAuth`: `export const GET = withAuth(...)`, `export const POST = withAdminAuth(...)`
 
 ## Imports
 
 ```typescript
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth, withAdminAuth } from "@/lib/server-auth";
 import { prisma } from "@/lib/prisma";
 ```
 
 ## Authentication Pattern
 
+Use `withAuth` for routes requiring authentication. The user is passed as the third argument:
+
 ```typescript
-export async function GET(request: NextRequest) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withAuth(async (request, _context, user) => {
+  // user is guaranteed to be authenticated
   // ... handler logic
-}
+});
+```
+
+For dynamic routes, use `context.params`:
+
+```typescript
+export const GET = withAuth(async (_request, context, user) => {
+  const { id } = await context.params;
+  // ... handler logic
+});
+```
+
+For admin-only routes, use `withAdminAuth`:
+
+```typescript
+export const GET = withAdminAuth(async (request, _context, user) => {
+  // user is guaranteed to be an authenticated admin
+  // ... handler logic
+});
 ```
 
 ## Response Pattern

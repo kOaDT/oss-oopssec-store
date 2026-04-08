@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth } from "@/lib/server-auth";
 import crypto from "crypto";
 
 const TOKEN_EXPIRY_DAYS = 365;
@@ -9,14 +9,8 @@ function generateSecureToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (_request, _context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const supportToken = await prisma.supportAccessToken.findFirst({
       where: {
         userId: user.id,
@@ -46,16 +40,10 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json().catch(() => ({}));
 
     const targetEmail = body.email || user.email;
@@ -99,16 +87,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAuth(async (_request, _context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     await prisma.supportAccessToken.updateMany({
       where: {
         userId: user.id,
@@ -129,4 +111,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

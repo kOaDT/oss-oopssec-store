@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth } from "@/lib/server-auth";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -30,14 +30,8 @@ const isSQLInjectionAttempt = (input: string): boolean => {
   return sqlKeywords.some((keyword) => upperInput.includes(keyword));
 };
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json();
     const { status } = body;
 
@@ -84,7 +78,7 @@ export async function POST(request: NextRequest) {
       status && typeof status === "string" ? `AND o.status = '${status}'` : "";
 
     const query = `
-      SELECT 
+      SELECT
         o.id,
         o.total,
         o.status,
@@ -149,4 +143,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

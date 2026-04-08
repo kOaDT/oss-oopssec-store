@@ -1,21 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { withAdminAuth } from "@/lib/server-auth";
 
-export async function GET(request: NextRequest) {
-  const user = await getAuthenticatedUser(request);
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+export const GET = withAdminAuth(async (_request, _context, _user) => {
   const orders = await prisma.supplierOrder.findMany({
     orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json(orders);
-}
+});

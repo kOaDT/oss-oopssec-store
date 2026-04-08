@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth, withAdminAuth } from "@/lib/server-auth";
 import { generateInvoice } from "@/lib/invoice";
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (_request, _context, _user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const orders = await prisma.order.findMany({
       include: {
         user: {
@@ -37,16 +27,10 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json();
     const { total, couponCode } = body;
 
@@ -232,4 +216,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

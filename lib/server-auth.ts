@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
-interface JWTPayload {
+export interface JWTPayload {
   id: string;
   email: string;
   role: string;
@@ -85,5 +85,36 @@ export function clearAuthCookie(response: NextResponse): void {
     sameSite: "lax",
     maxAge: 0,
     path: "/",
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RouteContext = { params: Promise<any> };
+
+type AuthenticatedHandler = (
+  request: NextRequest,
+  context: RouteContext,
+  user: JWTPayload
+) => Promise<NextResponse>;
+
+export function withAuth(handler: AuthenticatedHandler) {
+  return async (
+    request: NextRequest,
+    context: RouteContext
+  ): Promise<NextResponse> => {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return handler(request, context, user);
+  };
+}
+
+export function withAdminAuth(handler: AuthenticatedHandler) {
+  return withAuth(async (request, context, user) => {
+    if (user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return handler(request, context, user);
   });
 }

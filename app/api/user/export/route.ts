@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth } from "@/lib/server-auth";
 
 const ALLOWED_USER_FIELDS = ["id", "email", "role", "addressId", "password"];
 
@@ -58,14 +58,8 @@ async function getSystemDiagnostics() {
   return diagnostics;
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json();
     const { format, fields } = body;
 
@@ -157,4 +151,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
