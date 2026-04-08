@@ -1,19 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth } from "@/lib/server-auth";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
+export const GET = withAuth(async (_request, context, _user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { code } = await params;
+    const { code } = await context.params;
 
     const coupon = await prisma.coupon.findUnique({
       where: { code: code.toUpperCase() },
@@ -40,4 +31,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

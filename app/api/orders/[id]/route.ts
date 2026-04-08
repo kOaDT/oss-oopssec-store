@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/server-auth";
+import { withAuth, type JWTPayload } from "@/lib/server-auth";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (_request, context, user) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = await params;
+    const { id } = await context.params;
 
     const order = await prisma.order.findUnique({
       where: { id },
@@ -75,19 +66,14 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
 const updateOrderStatus = async (
   request: NextRequest,
-  orderId: string
+  orderId: string,
+  user: JWTPayload
 ): Promise<NextResponse> => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     if (user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -183,18 +169,12 @@ const updateOrderStatus = async (
   }
 };
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  return updateOrderStatus(request, id);
-}
+export const PATCH = withAuth(async (request: NextRequest, context, user) => {
+  const { id } = await context.params;
+  return updateOrderStatus(request, id, user);
+});
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  return updateOrderStatus(request, id);
-}
+export const POST = withAuth(async (request: NextRequest, context, user) => {
+  const { id } = await context.params;
+  return updateOrderStatus(request, id, user);
+});

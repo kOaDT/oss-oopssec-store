@@ -1,33 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { decodeWeakJWT } from "@/lib/server-auth";
+import { withAdminAuth } from "@/lib/server-auth";
 
-interface ExtendedJWTPayload {
-  id: string;
-  email: string;
-  role: string;
-  exp: number;
-  supportAccess?: boolean;
-}
-
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (_request, _context, user) => {
   try {
-    const token = request.cookies.get("authToken")?.value ?? null;
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = decodeWeakJWT(token) as ExtendedJWTPayload | null;
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: { id: true, email: true, role: true },
@@ -124,4 +100,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
