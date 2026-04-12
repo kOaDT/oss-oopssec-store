@@ -6,6 +6,7 @@ on:
 
 permissions:
   pull-requests: write
+  issues: write
 
 jobs:
   welcome:
@@ -17,20 +18,103 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const prNumber = context.payload.pull_request.number;
-            const author = context.payload.pull_request.user.login;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            const author = pr.user.login;
+
+            // Check if this is the author's first contribution
+            const { data: prs } = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} type:pr author:${author}`,
+            });
+            const isFirstContribution = prs.total_count === 1;
+
+            // PR stats
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const totalChanges = additions + deletions;
+            const changedFiles = pr.changed_files;
+
+            // Size label
+            let sizeLabel;
+            if (totalChanges <= 10) sizeLabel = 'XS';
+            else if (totalChanges <= 50) sizeLabel = 'S';
+            else if (totalChanges <= 200) sizeLabel = 'M';
+            else if (totalChanges <= 500) sizeLabel = 'L';
+            else sizeLabel = 'XL';
+
+            const sizeColors = { XS: '3CBF00', S: '5D9801', M: 'FBCA04', L: 'E97800', XL: 'D93F0B' };
+            const labelName = `size/${sizeLabel}`;
+
+            // Ensure the size label exists in the repo (create it if missing)
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: labelName });
+            } catch (e) {
+              if (e.status === 404) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: labelName,
+                    color: sizeColors[sizeLabel],
+                    description: `PR size: ${sizeLabel}`,
+                  });
+                } catch (createErr) {
+                  // 422 means the label was created by a concurrent run — safe to ignore
+                  if (createErr.status !== 422) throw createErr;
+                }
+              } else {
+                throw e;
+              }
+            }
+
+            // Apply size label to the PR
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [labelName],
+            });
+
+            const greeting = isFirstContribution
+              ? `Welcome @${author}, and thank you for your first contribution to the project! 🎉`
+              : `Thank you @${author} for contributing once again!`;
+
+            const repoUrl = `https://github.com/${owner}/${repo}`;
 
             const body = [
-              `Thank you @${author} for taking the time to contribute to this project!`,
+              greeting,
               '',
-              'A maintainer will review your changes as soon as possible.',
+              `### 📊 PR overview`,
               '',
-              'In the meantime, please make sure that:',
-              '- Your PR description clearly explains the purpose of the changes',
+              `| Files changed | Additions | Deletions | Size |`,
+              `|:---:|:---:|:---:|:---:|`,
+              `| ${changedFiles} | +${additions} | -${deletions} | \`${sizeLabel}\` |`,
+              '',
+              '### 📝 Before review',
+              '',
+              'To help maintainers review your changes efficiently, please ensure that:',
+              '- The PR description clearly explains **what** was changed and **why**',
+              `- The [PR checklist](${repoUrl}/blob/main/.github/PULL_REQUEST_TEMPLATE.md) has been filled out`,
               '- All existing tests continue to pass',
-              '- New tests have been added for any new functionality/flag',
+              '- New tests have been added for any new functionality',
               '',
-              'If you have any questions, feel free to ask in this thread.',
+              `> 📖 Please review our [Contributing Guidelines](${repoUrl}/blob/main/CONTRIBUTING.md) and [Code of Conduct](${repoUrl}/blob/main/CODE_OF_CONDUCT.md).`,
+              '',
+              '### ✅ Continuous Integration',
+              '',
+              `Two CI workflows will run automatically on this PR:`,
+              `- **Code Quality** — linting and formatting checks`,
+              `- **Exploitation Tests** — ensures vulnerabilities and flags work as expected`,
+              '',
+              `You can follow their progress in the [Checks tab](${repoUrl}/pull/${prNumber}/checks).`,
+              '',
+              '### 🤝 A note on collaboration',
+              '',
+              'We value respectful and constructive interactions. Whether you are a contributor or a reviewer, please be patient, kind, and open to feedback.',
+              '',
+              '---',
+              '',
+              'A maintainer will review your changes as soon as possible. If you have any questions, feel free to ask in this thread.',
               '',
               '[kOaDT](https://github.com/kOaDT)'
             ].join('\n');
