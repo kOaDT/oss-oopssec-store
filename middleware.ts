@@ -31,6 +31,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  console.log("test");
+
   return NextResponse.next();
 }
 
