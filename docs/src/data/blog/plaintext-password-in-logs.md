@@ -14,7 +14,7 @@ tags:
 description: Exploiting a forgotten debug statement that logs plaintext passwords and a hidden SIEM dashboard with hardcoded credentials to retrieve a flag.
 ---
 
-Someone left a `console.log` in the login route that dumps passwords in plaintext. Those logs end up on a hidden SIEM dashboard protected by default credentials. We'll find it, log in, and read everyone's passwords.
+Someone left a debug log in the login route that dumps passwords in plaintext. Those logs end up on a hidden SIEM dashboard protected by default credentials. We'll find it, log in, and read everyone's passwords.
 
 ## Table of contents
 
@@ -100,10 +100,10 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ## Reading the logs
 
-Back on the SIEM dashboard, the log table shows all captured `console.*` output. Search for `[auth]` or `login attempt` and you'll see something like:
+Back on the SIEM dashboard, the log table shows all captured log output. Search for `[auth]` or `login attempt` and you'll see something like:
 
 ```
-[auth] login attempt {"email":"alice@example.com","password":"iloveduck","flag":"OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}"}
+[auth] login attempt email=alice@example.com password=iloveduck flag=OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}
 ```
 
 The flag is `OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}`.
@@ -114,17 +114,17 @@ The flag is `OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}`.
 
 Four things had to go wrong for this to work:
 
-1. CWE-532 -- A `console.log` in the login route dumps the email, password, and flag on every attempt.
-2. CWE-312 -- The instrumentation layer (`instrumentation.ts`) captures all `console.*` output and writes it to `logs/app.log` in cleartext.
+1. CWE-532 -- A `logger.warn` call in the login route dumps the email, password, and flag in the log message on every attempt.
+2. CWE-312 -- The structured logger writes these entries to `logs/app.log` in cleartext.
 3. CWE-200 -- The SIEM dashboard at `/monitoring/siem` is unlisted but easy to find with directory enumeration.
 4. CWE-798 -- The SIEM login uses default credentials (`root:admin`).
 
 ## Remediation
 
-Don't log request bodies. Use a structured logging library (pino, winston) with field redaction so passwords can't end up in output even if someone forgets.
+Don't log request bodies or sensitive fields. Even with a structured logging library like Pino, use field redaction so passwords can't end up in output even if someone forgets.
 
 Treat logs as sensitive data. Access controls, encryption at rest, retention policies -- if logs contain anything that could identify a user, they need the same care as a database.
 
 Internal tools need real credentials. Default passwords on an internal dashboard are fine until the dashboard is reachable from the internet. Use a secrets manager or SSO; never ship `root:admin`.
 
-Catch stray `console.log` calls before they reach production. An ESLint `no-console` rule plus a pre-commit hook will flag them automatically.
+Review log messages for sensitive data during code review. A structured logger doesn't prevent developers from embedding credentials in the message string itself.
