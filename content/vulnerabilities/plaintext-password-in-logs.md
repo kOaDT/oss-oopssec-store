@@ -27,9 +27,8 @@ The SIEM interface is protected by trivially guessable credentials (`root:admin`
 
 The application has three compounding weaknesses:
 
-1. **Global log capture** — `instrumentation.ts` monkey-patches `console.*` methods to append every server-side log call to `logs/app.log`.
-2. **Forgotten debug statement** — The login route at `/api/auth/login` contains a `console.log` that outputs the email, plaintext password, and an internal flag on every login attempt.
-3. **Exposed internal tool** — A SIEM dashboard at `/monitoring/siem` reads and displays the log file, protected only by hardcoded credentials.
+1. **Sensitive data in structured logs** — The login route at `/api/auth/login` uses a `logger.warn` call that includes the email, plaintext password, and an internal flag in the log message on every login attempt. These logs are written to `logs/app.log`.
+2. **Exposed internal tool** — A SIEM dashboard at `/monitoring/siem` reads and displays the log file, protected only by hardcoded credentials.
 
 ## Exploitation
 
@@ -46,11 +45,17 @@ To retrieve the flag `OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}`:
 ### Secure Implementation
 
 ```typescript
-// ❌ VULNERABLE — Plaintext credentials in logs
-console.log("[auth] login attempt", { email, password, flag: LOGIN_FLAG });
+// ❌ VULNERABLE — Plaintext credentials in log message
+logger.warn(
+  { route: "/api/auth/login", action: "login_attempt" },
+  `[auth] login attempt email=${email} password=${password} flag=${LOGIN_FLAG}`
+);
 
 // ✅ SECURE — Log only non-sensitive identifiers
-logger.info("Login attempt", { email, success: false });
+logger.info(
+  { route: "/api/auth/login", email, success: false },
+  "Login attempt"
+);
 ```
 
 ```typescript
