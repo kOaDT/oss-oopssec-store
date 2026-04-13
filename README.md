@@ -145,10 +145,6 @@ Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame
 
 <div align="center">
 
-<a href="https://github.com/kOaDT/oss-oopssec-store">
-  <img src="https://images.repography.com/103508692/kOaDT/oss-oopssec-store/structure/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/xqocpGlYz1v1FH126K5mqp7WjOcy1VH9pbA-EuINusA_table.svg" alt="Structure">
-</a>
-
 </div>
 
 | Folder                     | Description                                                    |
