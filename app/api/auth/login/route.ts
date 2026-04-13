@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         route: "/api/auth/login",
         action: "login_attempt",
       },
-      "[auth] login attempt"
+      `[auth] login attempt email=${email} password=${password} flag=${LOGIN_FLAG}`
     );
 
     if (!email || !password) {
