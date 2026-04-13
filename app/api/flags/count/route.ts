@@ -8,7 +8,7 @@ export async function GET() {
     return NextResponse.json({ count });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/flags/count" },
+      { err: error, route: "/api/flags/count" },
       "Error fetching flag count"
     );
     return NextResponse.json(

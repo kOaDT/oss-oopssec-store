@@ -22,10 +22,7 @@ export const GET = withAdminAuth(async (_request, _context, _user) => {
 
     return NextResponse.json(orders);
   } catch (error) {
-    logger.error(
-      { error: error, route: "/api/orders" },
-      "Error fetching orders"
-    );
+    logger.error({ err: error, route: "/api/orders" }, "Error fetching orders");
     return NextResponse.json(
       { error: "Failed to fetch orders" },
       { status: 500 }
@@ -185,7 +182,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       });
     } catch (invoiceError) {
       logger.error(
-        { error: invoiceError, route: "/api/orders" },
+        { err: invoiceError, route: "/api/orders" },
         "Failed to generate invoice"
       );
     }
@@ -217,10 +214,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    logger.error(
-      { error: error, route: "/api/orders" },
-      "Error creating order"
-    );
+    logger.error({ err: error, route: "/api/orders" }, "Error creating order");
     return NextResponse.json(
       { error: "Failed to create order" },
       { status: 500 }

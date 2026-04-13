@@ -45,7 +45,7 @@ export const GET = withAuth(async (_request, _context, user) => {
       total,
     });
   } catch (error) {
-    logger.error({ error: error, route: "/api/cart" }, "Error fetching cart");
+    logger.error({ err: error, route: "/api/cart" }, "Error fetching cart");
     return NextResponse.json(
       { error: "Failed to fetch cart" },
       { status: 500 }

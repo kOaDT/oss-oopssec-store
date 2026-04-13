@@ -25,7 +25,7 @@ export const GET = withAuth(async (_request, _context, user) => {
     return NextResponse.json(wishlists);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/wishlists" },
+      { err: error, route: "/api/wishlists" },
       "Error fetching wishlists"
     );
     return NextResponse.json(
@@ -64,7 +64,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     return NextResponse.json(wishlist, { status: 201 });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/wishlists" },
+      { err: error, route: "/api/wishlists" },
       "Error creating wishlist"
     );
     return NextResponse.json(

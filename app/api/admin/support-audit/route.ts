@@ -47,7 +47,7 @@ export const GET = withAdminAuth(async (_request, _context, user) => {
     return NextResponse.json(auditData);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/admin/support-audit" },
+      { err: error, route: "/api/admin/support-audit" },
       "Error fetching support audit"
     );
     return NextResponse.json(

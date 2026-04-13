@@ -115,7 +115,7 @@ export const POST = withAdminAuth(
       });
     } catch (error) {
       logger.error(
-        { error: error, route: "/api/admin/products/[id]/image" },
+        { err: error, route: "/api/admin/products/[id]/image" },
         "Error uploading image"
       );
       return NextResponse.json(

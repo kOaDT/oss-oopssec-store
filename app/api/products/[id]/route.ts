@@ -20,7 +20,7 @@ export async function GET(
     return NextResponse.json(product);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/products/[id]" },
+      { err: error, route: "/api/products/[id]" },
       "Error fetching product"
     );
     return NextResponse.json(

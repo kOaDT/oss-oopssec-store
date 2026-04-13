@@ -45,7 +45,7 @@ export const GET = withAuth(async (_request, _context, user) => {
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/user/profile" },
+      { err: error, route: "/api/user/profile" },
       "Error fetching profile"
     );
     return NextResponse.json(
@@ -114,7 +114,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/user/profile" },
+      { err: error, route: "/api/user/profile" },
       "Error updating profile"
     );
     return NextResponse.json(

@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json(products);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/products" },
+      { err: error, route: "/api/products" },
       "Error fetching products"
     );
     return NextResponse.json(

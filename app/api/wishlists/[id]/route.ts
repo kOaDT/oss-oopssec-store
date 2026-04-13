@@ -81,7 +81,7 @@ export const GET = withAuth(async (_request, context, user) => {
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/wishlists/[id]" },
+      { err: error, route: "/api/wishlists/[id]" },
       "Error fetching wishlist"
     );
     return NextResponse.json(
@@ -117,7 +117,7 @@ export const DELETE = withAuth(async (_request, context, user) => {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/wishlists/[id]" },
+      { err: error, route: "/api/wishlists/[id]" },
       "Error deleting wishlist"
     );
     return NextResponse.json(

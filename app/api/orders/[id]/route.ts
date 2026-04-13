@@ -62,7 +62,7 @@ export const GET = withAuth(async (_request, context, user) => {
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/orders/[id]" },
+      { err: error, route: "/api/orders/[id]" },
       "Error fetching order"
     );
     return NextResponse.json(
@@ -166,7 +166,7 @@ const updateOrderStatus = async (
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/orders/[id]" },
+      { err: error, route: "/api/orders/[id]" },
       "Error updating order"
     );
     return NextResponse.json(

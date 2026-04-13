@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/auth/login" },
+      { err: error, route: "/api/auth/login" },
       "Error during login"
     );
     return NextResponse.json(

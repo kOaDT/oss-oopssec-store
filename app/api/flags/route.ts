@@ -12,7 +12,7 @@ export async function GET() {
 
     return NextResponse.json(flags);
   } catch (error) {
-    logger.error({ error: error, route: "/api/flags" }, "Error fetching flags");
+    logger.error({ err: error, route: "/api/flags" }, "Error fetching flags");
     return NextResponse.json(
       { error: "Failed to fetch flags" },
       { status: 500 }

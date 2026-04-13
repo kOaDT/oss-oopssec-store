@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/flags/verify" },
+      { err: error, route: "/api/flags/verify" },
       "Error verifying flag"
     );
     return NextResponse.json(

@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/auth/support-login" },
+      { err: error, route: "/api/auth/support-login" },
       "Error during support login"
     );
     return NextResponse.json(

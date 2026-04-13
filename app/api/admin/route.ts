@@ -96,7 +96,7 @@ export const GET = withAdminAuth(async (_request, _context, user) => {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/admin" },
+      { err: error, route: "/api/admin" },
       "Error in admin endpoint"
     );
     return NextResponse.json(

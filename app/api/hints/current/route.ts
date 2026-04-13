@@ -56,7 +56,7 @@ export async function GET() {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/hints/current" },
+      { err: error, route: "/api/hints/current" },
       "Error fetching current hint"
     );
     return NextResponse.json(

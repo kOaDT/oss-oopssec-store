@@ -32,7 +32,7 @@ export const DELETE = withAuth(async (_request, context, user) => {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/cart/items/[id]" },
+      { err: error, route: "/api/cart/items/[id]" },
       "Error deleting cart item"
     );
     return NextResponse.json(
@@ -81,7 +81,7 @@ export const PATCH = withAuth(async (request: NextRequest, context, user) => {
     return NextResponse.json({ success: true, cartItem: updatedCartItem });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/cart/items/[id]" },
+      { err: error, route: "/api/cart/items/[id]" },
       "Error updating cart item"
     );
     return NextResponse.json(

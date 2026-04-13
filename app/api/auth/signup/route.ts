@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/auth/signup" },
+      { err: error, route: "/api/auth/signup" },
       "Error during signup"
     );
     return NextResponse.json(

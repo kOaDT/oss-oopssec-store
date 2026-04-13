@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
         .filter((row) => Object.keys(row).length > 0);
     } catch (error) {
       logger.error(
-        { error: error, route: "/api/products/search" },
+        { err: error, route: "/api/products/search" },
         "Query error"
       );
       return NextResponse.json(
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/products/search" },
+      { err: error, route: "/api/products/search" },
       "Error searching products"
     );
     return NextResponse.json(
