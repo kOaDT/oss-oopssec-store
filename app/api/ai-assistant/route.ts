@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/ai-assistant" },
+      { err: error, route: "/api/ai-assistant" },
       "AI Assistant error"
     );
     return NextResponse.json(

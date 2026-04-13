@@ -61,7 +61,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/cart/add" },
+      { err: error, route: "/api/cart/add" },
       "Error adding to cart"
     );
     return NextResponse.json(

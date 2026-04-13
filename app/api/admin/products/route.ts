@@ -12,7 +12,7 @@ export const GET = withAdminAuth(async (_request, _context, _user) => {
     return NextResponse.json(products);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/admin/products" },
+      { err: error, route: "/api/admin/products" },
       "Error fetching products"
     );
     return NextResponse.json(

@@ -64,7 +64,7 @@ export async function POST() {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/hints/reveal" },
+      { err: error, route: "/api/hints/reveal" },
       "Error revealing hint"
     );
     return NextResponse.json(

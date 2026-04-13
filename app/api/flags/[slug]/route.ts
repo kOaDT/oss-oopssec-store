@@ -19,7 +19,7 @@ export async function GET(
     return NextResponse.json(flag);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/flags/[slug]" },
+      { err: error, route: "/api/flags/[slug]" },
       "Error fetching flag"
     );
     return NextResponse.json(

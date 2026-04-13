@@ -33,7 +33,7 @@ export const GET = withAuth(async (_request, _context, user) => {
         : null,
     });
   } catch (error) {
-    logger.error({ error: error, route: "/api/user" }, "Error fetching user");
+    logger.error({ err: error, route: "/api/user" }, "Error fetching user");
     return NextResponse.json(
       { error: "Failed to fetch user" },
       { status: 500 }

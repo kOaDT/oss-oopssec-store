@@ -74,7 +74,7 @@ export const POST = withAuth(async (request: NextRequest, context, user) => {
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/wishlists/[id]/items" },
+      { err: error, route: "/api/wishlists/[id]/items" },
       "Error adding item to wishlist"
     );
     return NextResponse.json(

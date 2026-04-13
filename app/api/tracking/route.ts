@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       // Log error but don't expose details
       logger.error(
-        { error: error, route: "/api/tracking" },
+        { err: error, route: "/api/tracking" },
         "Error executing tracking query"
       );
     }
@@ -123,10 +123,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    logger.error(
-      { error: error, route: "/api/tracking" },
-      "Error logging visit"
-    );
+    logger.error({ err: error, route: "/api/tracking" }, "Error logging visit");
     return NextResponse.json({ error: "Failed to log visit" }, { status: 500 });
   }
 }

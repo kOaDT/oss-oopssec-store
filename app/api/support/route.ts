@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         screenshotContent = await response.text();
       } catch (fetchError) {
         logger.error(
-          { error: fetchError, route: "/api/support" },
+          { err: fetchError, route: "/api/support" },
           "Error fetching screenshot URL"
         );
       }
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/support" },
+      { err: error, route: "/api/support" },
       "Error processing support request"
     );
     return NextResponse.json(

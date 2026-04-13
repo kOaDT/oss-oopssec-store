@@ -40,7 +40,7 @@ export const DELETE = withAuth(async (_request, context, user) => {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/wishlists/[id]/items/[itemId]" },
+      { err: error, route: "/api/wishlists/[id]/items/[itemId]" },
       "Error removing item from wishlist"
     );
     return NextResponse.json(

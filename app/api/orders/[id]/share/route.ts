@@ -25,7 +25,7 @@ export const POST = withAuth(async (request: NextRequest, context, user) => {
     return NextResponse.json({ shareUrl, token });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/orders/[id]/share" },
+      { err: error, route: "/api/orders/[id]/share" },
       "Error generating share link"
     );
     return NextResponse.json(

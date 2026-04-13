@@ -52,7 +52,7 @@ export const POST = withAuth(async (request: NextRequest, _context, _user) => {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/coupon/apply" },
+      { err: error, route: "/api/coupon/apply" },
       "Error applying coupon"
     );
     return NextResponse.json(

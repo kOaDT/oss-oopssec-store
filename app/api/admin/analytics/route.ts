@@ -53,7 +53,7 @@ export const GET = withAdminAuth(
       });
     } catch (error) {
       logger.error(
-        { error: error, route: "/api/admin/analytics" },
+        { err: error, route: "/api/admin/analytics" },
         "Error fetching analytics"
       );
       return NextResponse.json(

@@ -194,7 +194,7 @@ export const GET = withAdminAuth(
       return NextResponse.json(response);
     } catch (error) {
       logger.error(
-        { error: error, route: "/api/admin/reviews" },
+        { err: error, route: "/api/admin/reviews" },
         "Error fetching reviews"
       );
       return NextResponse.json(

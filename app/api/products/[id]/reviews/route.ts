@@ -26,7 +26,7 @@ export async function GET(
     return NextResponse.json(reviews);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/products/[id]/reviews" },
+      { err: error, route: "/api/products/[id]/reviews" },
       "Error fetching reviews"
     );
     return NextResponse.json(
@@ -83,7 +83,7 @@ export async function POST(
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/products/[id]/reviews" },
+      { err: error, route: "/api/products/[id]/reviews" },
       "Error creating review"
     );
     return NextResponse.json(

@@ -63,7 +63,7 @@ export async function GET() {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/flags/progress" },
+      { err: error, route: "/api/flags/progress" },
       "Error fetching progress"
     );
     return NextResponse.json(

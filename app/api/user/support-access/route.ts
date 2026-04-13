@@ -36,7 +36,7 @@ export const GET = withAuth(async (_request, _context, user) => {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/user/support-access" },
+      { err: error, route: "/api/user/support-access" },
       "Error fetching support token"
     );
     return NextResponse.json(
@@ -86,7 +86,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/user/support-access" },
+      { err: error, route: "/api/user/support-access" },
       "Error creating support token"
     );
     return NextResponse.json(
@@ -113,7 +113,7 @@ export const DELETE = withAuth(async (_request, _context, user) => {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/user/support-access" },
+      { err: error, route: "/api/user/support-access" },
       "Error revoking support token"
     );
     return NextResponse.json(

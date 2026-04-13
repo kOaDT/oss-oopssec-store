@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       content,
     });
   } catch (error) {
-    logger.error({ error: error, route: "/api/files" }, "Error reading file");
+    logger.error({ err: error, route: "/api/files" }, "Error reading file");
     return NextResponse.json({ error: "Failed to read file" }, { status: 500 });
   }
 }

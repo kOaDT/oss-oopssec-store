@@ -139,7 +139,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     return NextResponse.json(response);
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/orders/search" },
+      { err: error, route: "/api/orders/search" },
       "Error searching orders"
     );
     return NextResponse.json(

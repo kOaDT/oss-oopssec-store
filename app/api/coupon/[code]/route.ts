@@ -27,7 +27,7 @@ export const GET = withAuth(async (_request, context, _user) => {
     });
   } catch (error) {
     logger.error(
-      { error: error, route: "/api/coupon/[code]" },
+      { err: error, route: "/api/coupon/[code]" },
       "Error fetching coupon"
     );
     return NextResponse.json(
