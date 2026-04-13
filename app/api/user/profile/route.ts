@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -43,7 +44,10 @@ export const GET = withAuth(async (_request, _context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    logger.error(
+      { error: error, route: "/api/user/profile" },
+      "Error fetching profile"
+    );
     return NextResponse.json(
       { error: "Failed to fetch profile" },
       { status: 500 }
@@ -109,7 +113,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error updating profile:", error);
+    logger.error(
+      { error: error, route: "/api/user/profile" },
+      "Error updating profile"
+    );
     return NextResponse.json(
       { error: "Failed to update profile" },
       { status: 500 }

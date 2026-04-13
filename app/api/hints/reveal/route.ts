@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 const DIFFICULTY_ORDER = { EASY: 0, MEDIUM: 1, HARD: 2 } as const;
 
@@ -62,7 +63,10 @@ export async function POST() {
       nextHintLevel,
     });
   } catch (error) {
-    console.error("Error revealing hint:", error);
+    logger.error(
+      { error: error, route: "/api/hints/reveal" },
+      "Error revealing hint"
+    );
     return NextResponse.json(
       { error: "Failed to reveal hint" },
       { status: 500 }

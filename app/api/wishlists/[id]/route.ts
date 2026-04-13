@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, context, user) => {
   try {
@@ -79,7 +80,10 @@ export const GET = withAuth(async (_request, context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching wishlist:", error);
+    logger.error(
+      { error: error, route: "/api/wishlists/[id]" },
+      "Error fetching wishlist"
+    );
     return NextResponse.json(
       { error: "Failed to fetch wishlist" },
       { status: 500 }
@@ -112,7 +116,10 @@ export const DELETE = withAuth(async (_request, context, user) => {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting wishlist:", error);
+    logger.error(
+      { error: error, route: "/api/wishlists/[id]" },
+      "Error deleting wishlist"
+    );
     return NextResponse.json(
       { error: "Failed to delete wishlist" },
       { status: 500 }

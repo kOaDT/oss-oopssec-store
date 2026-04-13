@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAdminAuth(async (_request, _context, user) => {
   try {
@@ -94,7 +95,10 @@ export const GET = withAdminAuth(async (_request, _context, user) => {
       },
     });
   } catch (error) {
-    console.error("Error in admin endpoint:", error);
+    logger.error(
+      { error: error, route: "/api/admin" },
+      "Error in admin endpoint"
+    );
     return NextResponse.json(
       { error: "Failed to process request" },
       { status: 500 }

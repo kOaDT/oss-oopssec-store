@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const DELETE = withAuth(async (_request, context, user) => {
   try {
@@ -30,7 +31,10 @@ export const DELETE = withAuth(async (_request, context, user) => {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting cart item:", error);
+    logger.error(
+      { error: error, route: "/api/cart/items/[id]" },
+      "Error deleting cart item"
+    );
     return NextResponse.json(
       { error: "Failed to delete cart item" },
       { status: 500 }
@@ -76,7 +80,10 @@ export const PATCH = withAuth(async (request: NextRequest, context, user) => {
 
     return NextResponse.json({ success: true, cartItem: updatedCartItem });
   } catch (error) {
-    console.error("Error updating cart item:", error);
+    logger.error(
+      { error: error, route: "/api/cart/items/[id]" },
+      "Error updating cart item"
+    );
     return NextResponse.json(
       { error: "Failed to update cart item" },
       { status: 500 }

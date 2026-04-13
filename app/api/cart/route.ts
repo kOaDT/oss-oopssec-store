@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -44,7 +45,7 @@ export const GET = withAuth(async (_request, _context, user) => {
       total,
     });
   } catch (error) {
-    console.error("Error fetching cart:", error);
+    logger.error({ error: error, route: "/api/cart" }, "Error fetching cart");
     return NextResponse.json(
       { error: "Failed to fetch cart" },
       { status: 500 }

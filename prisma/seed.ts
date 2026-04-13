@@ -3,6 +3,7 @@ import { PrismaClient } from "../lib/generated/prisma/client";
 import { getDatabaseUrl } from "../lib/database";
 import crypto from "crypto";
 import { generateInvoice } from "../lib/invoice";
+import { logger } from "../lib/logger";
 
 /**
  * If you want to add a new flag, you can add it here.
@@ -458,16 +459,22 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  console.log("Seeding database...");
+  logger.info({ component: "seed", action: "start" }, "Seeding database");
 
   const existingProjectInit = await prisma.projectInit.findFirst();
   if (!existingProjectInit) {
     await prisma.projectInit.create({
       data: {},
     });
-    console.log("Created project initialization timestamp");
+    logger.info(
+      { component: "seed", action: "project_init_created" },
+      "Created project initialization timestamp"
+    );
   } else {
-    console.log("Project initialization already exists, skipping");
+    logger.info(
+      { component: "seed", action: "project_init_skipped" },
+      "Project initialization already exists, skipping"
+    );
   }
 
   const aliceAddress = await prisma.address.upsert({
@@ -584,12 +591,19 @@ async function main() {
     },
   });
 
-  console.log("Created users:", {
-    alice: alice.email,
-    admin: admin.email,
-    bob: bob.email,
-    visBruta: visBruta.email,
-  });
+  logger.info(
+    {
+      component: "seed",
+      action: "users_upserted",
+      users: {
+        alice: alice.email,
+        admin: admin.email,
+        bob: bob.email,
+        visBruta: visBruta.email,
+      },
+    },
+    "Created users"
+  );
 
   const products = [
     {
@@ -736,10 +750,20 @@ async function main() {
       data: products,
     });
   } else {
-    console.log("Products already exist, skipping product creation");
+    logger.info(
+      { component: "seed", action: "products_skipped" },
+      "Products already exist, skipping product creation"
+    );
   }
 
-  console.log(`Created ${products.length} products`);
+  logger.info(
+    {
+      component: "seed",
+      action: "products_processed",
+      productsCount: products.length,
+    },
+    "Created products"
+  );
 
   const allProducts = await prisma.product.findMany();
   const existingReviews = await prisma.review.findMany();
@@ -789,9 +813,15 @@ async function main() {
         },
       ],
     });
-    console.log("Created sample reviews");
+    logger.info(
+      { component: "seed", action: "reviews_created" },
+      "Created sample reviews"
+    );
   } else {
-    console.log("Reviews already exist, skipping review creation");
+    logger.info(
+      { component: "seed", action: "reviews_skipped" },
+      "Reviews already exist, skipping review creation"
+    );
   }
 
   for (const flag of flags) {
@@ -802,7 +832,10 @@ async function main() {
     });
   }
 
-  console.log(`Created ${flags.length} flags`);
+  logger.info(
+    { component: "seed", action: "flags_upserted", flagsCount: flags.length },
+    "Created flags"
+  );
 
   for (const [slug, hints] of Object.entries(flagHints)) {
     const flag = await prisma.flag.findUnique({ where: { slug } });
@@ -819,7 +852,14 @@ async function main() {
     }
   }
 
-  console.log(`Created hints for ${Object.keys(flagHints).length} flags`);
+  logger.info(
+    {
+      component: "seed",
+      action: "hints_upserted",
+      flagsWithHintsCount: Object.keys(flagHints).length,
+    },
+    "Created hints"
+  );
 
   const bobOrderIds = ["ORD-001", "ORD-002", "ORD-003"];
 
@@ -914,10 +954,25 @@ async function main() {
       total: order.total,
     });
 
-    console.log(`Created order ${order.id} with invoice`);
+    logger.info(
+      {
+        component: "seed",
+        action: "order_created_with_invoice",
+        orderId: order.id,
+      },
+      "Created order with invoice"
+    );
   }
 
-  console.log(`Created ${bobOrderIds.length} orders for Bob with invoices`);
+  logger.info(
+    {
+      component: "seed",
+      action: "orders_created_for_bob",
+      ordersCount: bobOrderIds.length,
+      userId: bob.id,
+    },
+    "Created orders for Bob with invoices"
+  );
 
   // Seed visitor logs for analytics
   const existingVisitorLogs = await prisma.visitorLog.findFirst();
@@ -973,9 +1028,19 @@ async function main() {
       data: visitorLogs,
     });
 
-    console.log(`Created ${visitorLogs.length} visitor logs`);
+    logger.info(
+      {
+        component: "seed",
+        action: "visitor_logs_created",
+        visitorLogsCount: visitorLogs.length,
+      },
+      "Created visitor logs"
+    );
   } else {
-    console.log("Visitor logs already exist, skipping visitor log creation");
+    logger.info(
+      { component: "seed", action: "visitor_logs_skipped" },
+      "Visitor logs already exist, skipping visitor log creation"
+    );
   }
 
   const existingWishlists = await prisma.wishlist.findFirst();
@@ -1039,9 +1104,15 @@ async function main() {
       ],
     });
 
-    console.log("Created wishlists for Alice, Bob, and admin");
+    logger.info(
+      { component: "seed", action: "wishlists_created" },
+      "Created wishlists for Alice, Bob, and admin"
+    );
   } else {
-    console.log("Wishlists already exist, skipping wishlist creation");
+    logger.info(
+      { component: "seed", action: "wishlists_skipped" },
+      "Wishlists already exist, skipping wishlist creation"
+    );
   }
 
   await prisma.coupon.upsert({
@@ -1055,14 +1126,20 @@ async function main() {
     },
   });
 
-  console.log("Created FLASHSALE coupon");
+  logger.info(
+    { component: "seed", action: "coupon_upserted", code: "FLASHSALE" },
+    "Created FLASHSALE coupon"
+  );
 
-  console.log("Seeding completed!");
+  logger.info({ component: "seed", action: "completed" }, "Seeding completed");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    logger.error(
+      { component: "seed", action: "failed", error: e },
+      "Seeding failed"
+    );
     process.exit(1);
   })
   .finally(async () => {

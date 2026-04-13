@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -61,7 +62,10 @@ export async function GET() {
       statsByDifficulty,
     });
   } catch (error) {
-    console.error("Error fetching progress:", error);
+    logger.error(
+      { error: error, route: "/api/flags/progress" },
+      "Error fetching progress"
+    );
     return NextResponse.json(
       { error: "Failed to fetch progress" },
       { status: 500 }

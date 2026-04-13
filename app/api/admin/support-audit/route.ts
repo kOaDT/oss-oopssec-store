@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAdminAuth(async (_request, _context, user) => {
   try {
@@ -45,7 +46,10 @@ export const GET = withAdminAuth(async (_request, _context, user) => {
 
     return NextResponse.json(auditData);
   } catch (error) {
-    console.error("Error fetching support audit:", error);
+    logger.error(
+      { error: error, route: "/api/admin/support-audit" },
+      "Error fetching support audit"
+    );
     return NextResponse.json(
       { error: "Failed to fetch support audit data" },
       { status: 500 }

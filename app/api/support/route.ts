@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,10 @@ export async function POST(request: NextRequest) {
         });
         screenshotContent = await response.text();
       } catch (fetchError) {
-        console.error("Error fetching screenshot URL:", fetchError);
+        logger.error(
+          { error: fetchError, route: "/api/support" },
+          "Error fetching screenshot URL"
+        );
       }
     }
 
@@ -36,7 +40,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error processing support request:", error);
+    logger.error(
+      { error: error, route: "/api/support" },
+      "Error processing support request"
+    );
     return NextResponse.json(
       { error: "Failed to process support request" },
       { status: 500 }

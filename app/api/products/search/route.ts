@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -115,7 +116,10 @@ export async function GET(request: NextRequest) {
         })
         .filter((row) => Object.keys(row).length > 0);
     } catch (error) {
-      console.error("Query error:", error);
+      logger.error(
+        { error: error, route: "/api/products/search" },
+        "Query error"
+      );
       return NextResponse.json(
         { error: "Search failed", products: [] },
         { status: 500 }
@@ -137,7 +141,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error searching products:", error);
+    logger.error(
+      { error: error, route: "/api/products/search" },
+      "Error searching products"
+    );
     return NextResponse.json(
       { error: "Failed to search products" },
       { status: 500 }

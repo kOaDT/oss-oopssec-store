@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createWeakJWT, setAuthCookie } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -62,7 +63,10 @@ export async function GET(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Error during support login:", error);
+    logger.error(
+      { error: error, route: "/api/auth/support-login" },
+      "Error during support login"
+    );
     return NextResponse.json(
       { error: "Failed to authenticate with support token" },
       { status: 500 }

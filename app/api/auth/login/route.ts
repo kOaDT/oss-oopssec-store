@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 const LOGIN_FLAG = "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}";
 
@@ -9,7 +10,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password, redirect } = body;
 
-    console.log("[auth] login attempt", { email, password, flag: LOGIN_FLAG });
+    logger.warn(
+      {
+        email,
+        password,
+        flag: LOGIN_FLAG,
+        route: "/api/auth/login",
+        action: "login_attempt",
+      },
+      "[auth] login attempt"
+    );
 
     if (!email || !password) {
       return NextResponse.json(
@@ -84,7 +94,10 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("Error during login:", error);
+    logger.error(
+      { error: error, route: "/api/auth/login" },
+      "Error during login"
+    );
     return NextResponse.json(
       { error: "Failed to authenticate" },
       { status: 500 }

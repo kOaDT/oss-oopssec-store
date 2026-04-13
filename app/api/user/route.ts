@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -32,7 +33,7 @@ export const GET = withAuth(async (_request, _context, user) => {
         : null,
     });
   } catch (error) {
-    console.error("Error fetching user:", error);
+    logger.error({ error: error, route: "/api/user" }, "Error fetching user");
     return NextResponse.json(
       { error: "Failed to fetch user" },
       { status: 500 }

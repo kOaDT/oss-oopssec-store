@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -99,7 +100,10 @@ export async function POST(request: NextRequest) {
       await prisma.$queryRawUnsafe(query);
     } catch (error) {
       // Log error but don't expose details
-      console.error("Error executing tracking query:", error);
+      logger.error(
+        { error: error, route: "/api/tracking" },
+        "Error executing tracking query"
+      );
     }
 
     // Build response
@@ -119,7 +123,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error logging visit:", error);
+    logger.error(
+      { error: error, route: "/api/tracking" },
+      "Error logging visit"
+    );
     return NextResponse.json({ error: "Failed to log visit" }, { status: 500 });
   }
 }

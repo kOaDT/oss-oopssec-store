@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, readdir, stat } from "fs/promises";
 import { join, extname } from "path";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
       content,
     });
   } catch (error) {
-    console.error("Error reading file:", error);
+    logger.error({ error: error, route: "/api/files" }, "Error reading file");
     return NextResponse.json({ error: "Failed to read file" }, { status: 500 });
   }
 }

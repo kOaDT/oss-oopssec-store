@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const POST = withAuth(async (request: NextRequest, _context, _user) => {
   try {
@@ -50,7 +51,10 @@ export const POST = withAuth(async (request: NextRequest, _context, _user) => {
       discountPercent: coupon.discount * 100,
     });
   } catch (error) {
-    console.error("Error applying coupon:", error);
+    logger.error(
+      { error: error, route: "/api/coupon/apply" },
+      "Error applying coupon"
+    );
     return NextResponse.json(
       { error: "Failed to apply coupon" },
       { status: 500 }

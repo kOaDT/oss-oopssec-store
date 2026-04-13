@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const POST = withAuth(async (request: NextRequest, context, user) => {
   try {
@@ -72,7 +73,10 @@ export const POST = withAuth(async (request: NextRequest, context, user) => {
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
-    console.error("Error adding item to wishlist:", error);
+    logger.error(
+      { error: error, route: "/api/wishlists/[id]/items" },
+      "Error adding item to wishlist"
+    );
     return NextResponse.json(
       { error: "Failed to add item to wishlist" },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const DELETE = withAuth(async (_request, context, user) => {
   try {
@@ -38,7 +39,10 @@ export const DELETE = withAuth(async (_request, context, user) => {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error removing item from wishlist:", error);
+    logger.error(
+      { error: error, route: "/api/wishlists/[id]/items/[itemId]" },
+      "Error removing item from wishlist"
+    );
     return NextResponse.json(
       { error: "Failed to remove item from wishlist" },
       { status: 500 }

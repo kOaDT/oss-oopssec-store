@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth, type JWTPayload } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, context, user) => {
   try {
@@ -60,7 +61,10 @@ export const GET = withAuth(async (_request, context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching order:", error);
+    logger.error(
+      { error: error, route: "/api/orders/[id]" },
+      "Error fetching order"
+    );
     return NextResponse.json(
       { error: "Failed to fetch order" },
       { status: 500 }
@@ -161,7 +165,10 @@ const updateOrderStatus = async (
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error updating order:", error);
+    logger.error(
+      { error: error, route: "/api/orders/[id]" },
+      "Error updating order"
+    );
     return NextResponse.json(
       { error: "Failed to update order" },
       { status: 500 }
