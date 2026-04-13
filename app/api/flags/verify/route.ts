@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -50,7 +51,10 @@ export async function POST(request: Request) {
       foundAt: newFoundFlag.foundAt.toISOString(),
     });
   } catch (error) {
-    console.error("Error verifying flag:", error);
+    logger.error(
+      { error: error, route: "/api/flags/verify" },
+      "Error verifying flag"
+    );
     return NextResponse.json(
       { error: "Failed to verify flag", valid: false },
       { status: 500 }

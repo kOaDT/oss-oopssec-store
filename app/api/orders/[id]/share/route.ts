@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { encryptShareToken } from "@/lib/share-crypto";
+import { logger } from "@/lib/logger";
 
 export const POST = withAuth(async (request: NextRequest, context, user) => {
   try {
@@ -23,7 +24,10 @@ export const POST = withAuth(async (request: NextRequest, context, user) => {
 
     return NextResponse.json({ shareUrl, token });
   } catch (error) {
-    console.error("Error generating share link:", error);
+    logger.error(
+      { error: error, route: "/api/orders/[id]/share" },
+      "Error generating share link"
+    );
     return NextResponse.json(
       { error: "Failed to generate share link" },
       { status: 500 }

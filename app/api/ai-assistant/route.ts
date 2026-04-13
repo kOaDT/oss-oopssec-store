@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MCP_SESSION_HEADER, MCP_SESSION_VALUE } from "@/lib/mcp-constants";
 import { containsBlockedPattern } from "@/lib/prompt-injection-filter";
+import { logger } from "@/lib/logger";
 
 const SYSTEM_PROMPT = `You are OSSBot, a helpful customer support assistant for OopsSec Store, an online grocery and gourmet food marketplace.
 
@@ -335,7 +336,10 @@ export async function POST(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error("AI Assistant error:", error);
+    logger.error(
+      { error: error, route: "/api/ai-assistant" },
+      "AI Assistant error"
+    );
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },
       { status: 500 }

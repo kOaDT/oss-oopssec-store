@@ -4,6 +4,7 @@ import { withAdminAuth } from "@/lib/server-auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import { logger } from "@/lib/logger";
 
 const ALLOWED_CONTENT_TYPES = [
   "image/jpeg",
@@ -113,7 +114,10 @@ export const POST = withAdminAuth(
         productName: product.name,
       });
     } catch (error) {
-      console.error("Error uploading image:", error);
+      logger.error(
+        { error: error, route: "/api/admin/products/[id]/image" },
+        "Error uploading image"
+      );
       return NextResponse.json(
         { error: "Failed to upload image" },
         { status: 500 }

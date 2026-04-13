@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   request: Request,
@@ -17,7 +18,10 @@ export async function GET(
 
     return NextResponse.json(flag);
   } catch (error) {
-    console.error("Error fetching flag:", error);
+    logger.error(
+      { error: error, route: "/api/flags/[slug]" },
+      "Error fetching flag"
+    );
     return NextResponse.json(
       { error: "Failed to fetch flag" },
       { status: 500 }

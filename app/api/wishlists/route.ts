@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -23,7 +24,10 @@ export const GET = withAuth(async (_request, _context, user) => {
 
     return NextResponse.json(wishlists);
   } catch (error) {
-    console.error("Error fetching wishlists:", error);
+    logger.error(
+      { error: error, route: "/api/wishlists" },
+      "Error fetching wishlists"
+    );
     return NextResponse.json(
       { error: "Failed to fetch wishlists" },
       { status: 500 }
@@ -59,7 +63,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     return NextResponse.json(wishlist, { status: 201 });
   } catch (error) {
-    console.error("Error creating wishlist:", error);
+    logger.error(
+      { error: error, route: "/api/wishlists" },
+      "Error creating wishlist"
+    );
     return NextResponse.json(
       { error: "Failed to create wishlist" },
       { status: 500 }

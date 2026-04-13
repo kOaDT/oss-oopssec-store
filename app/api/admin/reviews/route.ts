@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/server-auth";
 import Database from "better-sqlite3";
 import { getDatabaseUrl } from "@/lib/database";
+import { logger } from "@/lib/logger";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -192,7 +193,10 @@ export const GET = withAdminAuth(
 
       return NextResponse.json(response);
     } catch (error) {
-      console.error("Error fetching reviews:", error);
+      logger.error(
+        { error: error, route: "/api/admin/reviews" },
+        "Error fetching reviews"
+      );
       return NextResponse.json(
         { error: "Failed to fetch reviews" },
         { status: 500 }

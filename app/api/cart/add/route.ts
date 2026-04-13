@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
@@ -59,7 +60,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error adding to cart:", error);
+    logger.error(
+      { error: error, route: "/api/cart/add" },
+      "Error adding to cart"
+    );
     return NextResponse.json(
       { error: "Failed to add item to cart" },
       { status: 500 }

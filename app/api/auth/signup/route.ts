@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/lib/generated/prisma/enums";
 import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 const DEFAULT_ADDRESS_ID = "addr-default-001";
 
@@ -91,7 +92,10 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("Error during signup:", error);
+    logger.error(
+      { error: error, route: "/api/auth/signup" },
+      "Error during signup"
+    );
     return NextResponse.json(
       { error: "Failed to create account" },
       { status: 500 }

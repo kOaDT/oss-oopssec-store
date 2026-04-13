@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   request: Request,
@@ -24,7 +25,10 @@ export async function GET(
 
     return NextResponse.json(reviews);
   } catch (error) {
-    console.error("Error fetching reviews:", error);
+    logger.error(
+      { error: error, route: "/api/products/[id]/reviews" },
+      "Error fetching reviews"
+    );
     return NextResponse.json(
       { error: "Failed to fetch reviews" },
       { status: 500 }
@@ -78,7 +82,10 @@ export async function POST(
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
-    console.error("Error creating review:", error);
+    logger.error(
+      { error: error, route: "/api/products/[id]/reviews" },
+      "Error creating review"
+    );
     return NextResponse.json(
       { error: "Failed to create review" },
       { status: 500 }

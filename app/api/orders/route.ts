@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth, withAdminAuth } from "@/lib/server-auth";
 import { generateInvoice } from "@/lib/invoice";
+import { logger } from "@/lib/logger";
 
 export const GET = withAdminAuth(async (_request, _context, _user) => {
   try {
@@ -21,7 +22,10 @@ export const GET = withAdminAuth(async (_request, _context, _user) => {
 
     return NextResponse.json(orders);
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error(
+      { error: error, route: "/api/orders" },
+      "Error fetching orders"
+    );
     return NextResponse.json(
       { error: "Failed to fetch orders" },
       { status: 500 }
@@ -180,7 +184,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
         total: order.total,
       });
     } catch (invoiceError) {
-      console.error("Failed to generate invoice:", invoiceError);
+      logger.error(
+        { error: invoiceError, route: "/api/orders" },
+        "Failed to generate invoice"
+      );
     }
 
     await prisma.cartItem.deleteMany({
@@ -210,7 +217,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error creating order:", error);
+    logger.error(
+      { error: error, route: "/api/orders" },
+      "Error creating order"
+    );
     return NextResponse.json(
       { error: "Failed to create order" },
       { status: 500 }

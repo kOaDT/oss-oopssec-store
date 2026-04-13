@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import crypto from "crypto";
+import { logger } from "@/lib/logger";
 
 const TOKEN_EXPIRY_DAYS = 365;
 
@@ -34,7 +35,10 @@ export const GET = withAuth(async (_request, _context, user) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching support token:", error);
+    logger.error(
+      { error: error, route: "/api/user/support-access" },
+      "Error fetching support token"
+    );
     return NextResponse.json(
       { error: "Failed to fetch support access token" },
       { status: 500 }
@@ -81,7 +85,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       supportLoginUrl: `/support-login?token=${supportToken.token}`,
     });
   } catch (error) {
-    console.error("Error creating support token:", error);
+    logger.error(
+      { error: error, route: "/api/user/support-access" },
+      "Error creating support token"
+    );
     return NextResponse.json(
       { error: "Failed to create support access token" },
       { status: 500 }
@@ -105,7 +112,10 @@ export const DELETE = withAuth(async (_request, _context, user) => {
       message: "Support access revoked successfully",
     });
   } catch (error) {
-    console.error("Error revoking support token:", error);
+    logger.error(
+      { error: error, route: "/api/user/support-access" },
+      "Error revoking support token"
+    );
     return NextResponse.json(
       { error: "Failed to revoke support access" },
       { status: 500 }

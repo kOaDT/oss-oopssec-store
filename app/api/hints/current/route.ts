@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 const DIFFICULTY_ORDER = { EASY: 0, MEDIUM: 1, HARD: 2 } as const;
 
@@ -54,7 +55,10 @@ export async function GET() {
       allFlagsFound: false,
     });
   } catch (error) {
-    console.error("Error fetching current hint:", error);
+    logger.error(
+      { error: error, route: "/api/hints/current" },
+      "Error fetching current hint"
+    );
     return NextResponse.json(
       { error: "Failed to fetch hints" },
       { status: 500 }

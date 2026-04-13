@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAuth(async (_request, context, _user) => {
   try {
@@ -25,7 +26,10 @@ export const GET = withAuth(async (_request, context, _user) => {
       expiresAt: coupon.expiresAt,
     });
   } catch (error) {
-    console.error("Error fetching coupon:", error);
+    logger.error(
+      { error: error, route: "/api/coupon/[code]" },
+      "Error fetching coupon"
+    );
     return NextResponse.json(
       { error: "Failed to fetch coupon" },
       { status: 500 }

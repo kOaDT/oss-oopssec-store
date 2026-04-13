@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const GET = withAdminAuth(
   async (request: NextRequest, _context, _user) => {
@@ -51,7 +52,10 @@ export const GET = withAdminAuth(
         visits: filteredVisits,
       });
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      logger.error(
+        { error: error, route: "/api/admin/analytics" },
+        "Error fetching analytics"
+      );
       return NextResponse.json(
         { error: "Failed to fetch analytics" },
         { status: 500 }

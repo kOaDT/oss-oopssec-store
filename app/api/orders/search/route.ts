@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -137,7 +138,10 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error searching orders:", error);
+    logger.error(
+      { error: error, route: "/api/orders/search" },
+      "Error searching orders"
+    );
     return NextResponse.json(
       { error: "Failed to search orders" },
       { status: 500 }
