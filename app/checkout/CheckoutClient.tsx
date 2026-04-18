@@ -116,12 +116,7 @@ export default function CheckoutClient() {
       return;
     }
 
-    const paymentSecret = process.env.NEXT_PUBLIC_PAYMENT_SECRET;
-
-    if (paymentSecret !== "T1NTe3B1YmxpY18zbnZpcjBubWVudF92NHJpNGJsM30=") {
-      alert("Payment failed: Payment method is not properly configured.");
-      return;
-    }
+    const paymentSecret = process.env.NEXT_PUBLIC_PAYMENT_SECRET ?? "";
 
     setIsProcessing(true);
     try {
@@ -135,10 +130,16 @@ export default function CheckoutClient() {
         total: number;
         status: string;
         flag?: string;
-      }>("/api/orders", {
-        total: discountedTotal ?? cartData.total,
-        ...(appliedCouponCode ? { couponCode: appliedCouponCode } : {}),
-      });
+      }>(
+        "/api/orders",
+        {
+          total: discountedTotal ?? cartData.total,
+          ...(appliedCouponCode ? { couponCode: appliedCouponCode } : {}),
+        },
+        {
+          headers: { "X-Payment-Auth": paymentSecret },
+        }
+      );
       localStorage.removeItem("checkout_coupon");
       const url = order.flag
         ? `/order?id=${order.id}&flag=${encodeURIComponent(order.flag)}`
