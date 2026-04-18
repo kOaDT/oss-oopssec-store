@@ -19,4 +19,31 @@ describe("Public Environment Variable (E2E)", () => {
   it("decoded secret is valid flag via flags API", () => {
     cy.verifyFlag(FLAG);
   });
+
+  it("checkout page leaks the secret in the X-Payment-Auth header on order creation", () => {
+    cy.request("GET", "/api/products").then((response) => {
+      expect(response.status).to.eq(200);
+      const productId = response.body[0].id;
+
+      cy.visit("/login");
+      cy.get("input#email").type("alice@example.com");
+      cy.get("input#password").type("iloveduck");
+      cy.get("form").submit();
+
+      cy.url({ timeout: 10000 }).should("not.include", "/login");
+      cy.visit(`/products/${productId}`);
+      cy.contains("button", "Add to Cart").click();
+
+      cy.intercept("POST", "/api/orders").as("createOrder");
+      cy.visit("/checkout");
+      cy.contains("button", "Complete Payment").click();
+
+      cy.wait("@createOrder").then((interception) => {
+        expect(interception.request.headers).to.have.property(
+          "x-payment-auth",
+          BASE64_SECRET
+        );
+      });
+    });
+  });
 });
