@@ -29,4 +29,5 @@ export const FLAGS = {
   MCP_MALICIOUS_SERVER: "OSS{mcp_p01s0n3d_t00l_r3sp0ns3}",
   MIDDLEWARE_AUTHORIZATION_BYPASS: "OSS{m1ddl3w4r3_byp4ss}",
   RACE_CONDITION_COUPON_ABUSE: "OSS{r4c3_c0nd1t10n_c0up0n_4bus3}",
+  INSECURE_RANDOMNESS_GIFT_CARD: "OSS{1ns3cur3_r4nd0mn3ss_g1ft_c4rd}",
 } as const;

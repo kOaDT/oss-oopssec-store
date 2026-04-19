@@ -6,6 +6,7 @@ import OrderSearchLink from "./OrderSearchLink";
 import ProfileLink from "./ProfileLink";
 import WishlistLink from "./WishlistLink";
 import ProductSearchLink from "./ProductSearchLink";
+import GiftCardsLink from "./GiftCardsLink";
 
 export default function Header() {
   return (
@@ -38,6 +39,7 @@ export default function Header() {
             Contact
           </Link>
           <ProductSearchLink />
+          <GiftCardsLink />
           <WishlistLink />
           <OrderSearchLink />
           <ProfileLink />

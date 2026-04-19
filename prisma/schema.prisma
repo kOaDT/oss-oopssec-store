@@ -16,12 +16,14 @@ model User {
   displayName         String?
   bio                 String?
   csrfExploited       Boolean              @default(false)
+  creditBalance       Float                @default(0)
   addressId           String?
   address             Address?             @relation(fields: [addressId], references: [id])
   carts               Cart[]
   orders              Order[]
   supportAccessTokens SupportAccessToken[]
   wishlists           Wishlist[]
+  giftCards           GiftCard[]
 
   @@map("users")
 }
@@ -277,4 +279,25 @@ model Coupon {
   createdAt DateTime  @default(now())
 
   @@map("coupons")
+}
+
+model GiftCard {
+  id             String         @id @default(cuid())
+  code           String         @unique
+  amount         Float
+  recipientEmail String
+  message        String?
+  status         GiftCardStatus @default(PENDING)
+  buyerId        String
+  buyer          User           @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  createdAt      DateTime       @default(now())
+  redeemedAt     DateTime?
+  redeemedById   String?
+
+  @@map("gift_cards")
+}
+
+enum GiftCardStatus {
+  PENDING
+  REDEEMED
 }
