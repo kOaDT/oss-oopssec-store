@@ -3,6 +3,7 @@ import { PrismaClient } from "../lib/generated/prisma/client";
 import { getDatabaseUrl } from "../lib/database";
 import crypto from "crypto";
 import { generateInvoice } from "../lib/invoice";
+import { generateGiftCardCode } from "../lib/gift-card";
 
 /**
  * If you want to add a new flag, you can add it here.
@@ -284,6 +285,14 @@ const flags = [
     category: "INSECURE_DESIGN" as const,
     difficulty: "HARD" as const,
   },
+  {
+    flag: "OSS{1ns3cur3_r4nd0mn3ss_g1ft_c4rd}",
+    slug: "insecure-randomness-gift-card",
+    markdownFile: "insecure-randomness-gift-card.md",
+    walkthroughSlug: "insecure-randomness-gift-card",
+    category: "CRYPTOGRAPHIC" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -442,6 +451,11 @@ const flagHints: Record<string, string[]> = {
     "The coupon validation and usage tracking are two separate operations. What happens if multiple requests reach the server at the same time?",
     "Send many concurrent POST requests to /api/coupon/apply with the same coupon code using Promise.all, curl --parallel, or Burp Intruder. Some requests will pass the check before any increments the counter.",
   ],
+  "insecure-randomness-gift-card": [
+    "Random codes aren't always random. What does the gift card history reveal about each card?",
+    "The redemption code is derived from the card's creation timestamp, which is displayed down to the millisecond on your /profile/gift-cards page. Buy a cheap card yourself and compare its timestamp to the issued code to recover the algorithm.",
+    "The server uses a Linear Congruential Generator seeded with Date.now() (Numerical Recipes constants: multiplier 1103515245, increment 12345, mod 2^31). Reproduce the LCG in a script, feed it the seeded $500 card's createdAt timestamp in milliseconds, and submit the resulting XXXX-XXXX-XXXX code at /checkout/redeem.",
+  ],
 };
 
 config();
@@ -532,6 +546,7 @@ async function main() {
       addressId: aliceAddress.id,
       displayName: "Alice",
       bio: "I love ducks and online shopping!",
+      creditBalance: 0,
     },
     create: {
       email: "alice@example.com",
@@ -1059,6 +1074,40 @@ async function main() {
   });
 
   console.log("Created FLASHSALE coupon");
+
+  const seededGiftCardCreatedAt = new Date("2025-01-15T10:42:33.456Z");
+  const seededGiftCardCode = generateGiftCardCode(
+    seededGiftCardCreatedAt.getTime()
+  );
+
+  await prisma.giftCard.upsert({
+    where: { id: "gc-seeded-001" },
+    update: {
+      code: seededGiftCardCode,
+      amount: 500,
+      recipientEmail: "forgotten-friend@oopssec.store",
+      message: "Happy birthday! Treat yourself to something nice. — Alice",
+      status: "PENDING",
+      buyerId: alice.id,
+      createdAt: seededGiftCardCreatedAt,
+      redeemedAt: null,
+      redeemedById: null,
+    },
+    create: {
+      id: "gc-seeded-001",
+      code: seededGiftCardCode,
+      amount: 500,
+      recipientEmail: "forgotten-friend@oopssec.store",
+      message: "Happy birthday! Treat yourself to something nice. — Alice",
+      status: "PENDING",
+      buyerId: alice.id,
+      createdAt: seededGiftCardCreatedAt,
+    },
+  });
+
+  console.log(
+    `Created seeded $500 gift card (recipient forgotten-friend@oopssec.store)`
+  );
 
   console.log("Seeding completed!");
 }

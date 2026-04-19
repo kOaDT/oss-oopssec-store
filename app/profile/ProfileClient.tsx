@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
@@ -482,6 +483,31 @@ export default function ProfileClient() {
                     {isUpdatingProfile ? "Saving..." : "Save Profile"}
                   </button>
                 </form>
+              </div>
+
+              <div className="border-t border-slate-200 pt-6 dark:border-slate-700">
+                <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Your Activity
+                </h3>
+                <Link
+                  href="/profile/gift-cards"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-primary-300 hover:text-primary-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-primary-500 dark:hover:text-primary-400"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                    />
+                  </svg>
+                  View sent gift cards
+                </Link>
               </div>
 
               <div className="pt-6">
