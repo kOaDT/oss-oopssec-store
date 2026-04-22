@@ -111,6 +111,7 @@ const flags = [
     flag: "OSS{p4th_tr4v3rs4l_4tt4ck}",
     slug: "path-traversal",
     markdownFile: "path-traversal.md",
+    walkthroughSlug: "path-traversal-documents-api",
     category: "INPUT_VALIDATION" as const,
     difficulty: "MEDIUM" as const,
   },
