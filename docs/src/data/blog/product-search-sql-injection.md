@@ -22,7 +22,6 @@ This writeup walks through a SQL injection in the product search feature. The se
 - [Lab setup](#lab-setup)
 - [Feature overview and attack surface](#feature-overview-and-attack-surface)
 - [Exploitation procedure](#exploitation-procedure)
-- [Flag retrieval](#flag-retrieval)
 - [Vulnerable code analysis](#vulnerable-code-analysis)
 - [Remediation](#remediation)
 
