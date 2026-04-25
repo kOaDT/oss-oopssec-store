@@ -6,6 +6,34 @@ import type { Flag, FlagDifficulty } from "@/lib/types";
 
 interface FlagsClientProps {
   flags: Flag[];
+  foundFlagIds: string[];
+}
+
+function LockIcon() {
+  return (
+    <svg
+      className="h-3.5 w-3.5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75M6.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+      />
+    </svg>
+  );
+}
+
+function LockedFlag() {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-500 dark:bg-slate-700/50 dark:text-slate-400">
+      <LockIcon />
+      Locked — solve to reveal
+    </span>
+  );
 }
 
 const DIFFICULTY_CONFIG: Record<
@@ -125,7 +153,28 @@ function ListIcon({ active }: { active: boolean }) {
   );
 }
 
-function FlagCardGrid({ flag }: { flag: Flag }) {
+function FoundBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+      <svg
+        className="h-3 w-3"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={3}
+          d="M5 13l4 4L19 7"
+        />
+      </svg>
+      Found
+    </span>
+  );
+}
+
+function FlagCardGrid({ flag, found }: { flag: Flag; found: boolean }) {
   return (
     <Link
       href={`/vulnerabilities/${flag.slug}`}
@@ -133,20 +182,29 @@ function FlagCardGrid({ flag }: { flag: Flag }) {
     >
       <div className="mb-3 flex items-start justify-between gap-2">
         <DifficultyBadge difficulty={flag.difficulty} />
-        {flag.cve && (
-          <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
-            {flag.cve}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {found && <FoundBadge />}
+          {flag.cve && (
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              {flag.cve}
+            </span>
+          )}
+        </div>
       </div>
 
-      <h3 className="mb-2 font-mono text-sm font-bold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400">
-        {flag.flag}
+      <h3 className="mb-2 text-base font-bold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400">
+        {formatSlug(flag.slug)}
       </h3>
 
-      <p className="mb-4 text-sm font-medium text-slate-600 dark:text-slate-400">
-        {formatSlug(flag.slug)}
-      </p>
+      <div className="mb-4">
+        {found ? (
+          <p className="break-all font-mono text-sm text-slate-600 dark:text-slate-400">
+            {flag.flag}
+          </p>
+        ) : (
+          <LockedFlag />
+        )}
+      </div>
 
       <div className="mt-auto">
         <CategoryBadge category={flag.category} />
@@ -155,7 +213,7 @@ function FlagCardGrid({ flag }: { flag: Flag }) {
   );
 }
 
-function FlagCardList({ flag }: { flag: Flag }) {
+function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
   return (
     <Link
       href={`/vulnerabilities/${flag.slug}`}
@@ -169,15 +227,22 @@ function FlagCardList({ flag }: { flag: Flag }) {
         <div className="mb-1 flex items-center gap-2 sm:hidden">
           <DifficultyBadge difficulty={flag.difficulty} />
         </div>
-        <h3 className="truncate font-mono text-sm font-bold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400 sm:text-base">
-          {flag.flag}
-        </h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400 sm:text-base">
           {formatSlug(flag.slug)}
-        </p>
+        </h3>
+        {found ? (
+          <p className="truncate font-mono text-sm text-slate-600 dark:text-slate-400">
+            {flag.flag}
+          </p>
+        ) : (
+          <div className="mt-1">
+            <LockedFlag />
+          </div>
+        )}
       </div>
 
       <div className="hidden items-center gap-3 md:flex">
+        {found && <FoundBadge />}
         <CategoryBadge category={flag.category} />
         {flag.cve && (
           <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
@@ -203,18 +268,22 @@ function FlagCardList({ flag }: { flag: Flag }) {
   );
 }
 
-export default function FlagsClient({ flags }: FlagsClientProps) {
+export default function FlagsClient({ flags, foundFlagIds }: FlagsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<
     FlagDifficulty | "ALL"
   >("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  const foundSet = useMemo(() => new Set(foundFlagIds), [foundFlagIds]);
+
   const filteredFlags = useMemo(() => {
     return flags.filter((flag) => {
+      const isFound = foundSet.has(flag.id);
       const matchesSearch =
         searchQuery === "" ||
-        flag.flag.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (isFound &&
+          flag.flag.toLowerCase().includes(searchQuery.toLowerCase())) ||
         flag.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (flag.cve?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
 
@@ -223,7 +292,7 @@ export default function FlagsClient({ flags }: FlagsClientProps) {
 
       return matchesSearch && matchesDifficulty;
     });
-  }, [flags, searchQuery, difficultyFilter]);
+  }, [flags, searchQuery, difficultyFilter, foundSet]);
 
   const stats = useMemo(() => {
     const byDifficulty = {
@@ -345,13 +414,21 @@ export default function FlagsClient({ flags }: FlagsClientProps) {
       ) : viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredFlags.map((flag) => (
-            <FlagCardGrid key={flag.id} flag={flag} />
+            <FlagCardGrid
+              key={flag.id}
+              flag={flag}
+              found={foundSet.has(flag.id)}
+            />
           ))}
         </div>
       ) : (
         <div className="space-y-3">
           {filteredFlags.map((flag) => (
-            <FlagCardList key={flag.id} flag={flag} />
+            <FlagCardList
+              key={flag.id}
+              flag={flag}
+              found={foundSet.has(flag.id)}
+            />
           ))}
         </div>
       )}

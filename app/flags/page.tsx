@@ -1,6 +1,7 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { getBaseUrl } from "@/lib/config";
+import { prisma } from "@/lib/prisma";
 import type { Flag } from "@/lib/types";
 import FlagsClient from "./FlagsClient";
 
@@ -22,8 +23,23 @@ async function getFlags(): Promise<Flag[]> {
   }
 }
 
+async function getFoundFlagIds(): Promise<string[]> {
+  try {
+    const found = await prisma.foundFlag.findMany({
+      select: { flagId: true },
+    });
+    return found.map((f) => f.flagId);
+  } catch (error) {
+    console.error("Error fetching found flags:", error);
+    return [];
+  }
+}
+
 export default async function Flags() {
-  const flags = await getFlags();
+  const [flags, foundFlagIds] = await Promise.all([
+    getFlags(),
+    getFoundFlagIds(),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
@@ -44,11 +60,11 @@ export default async function Flags() {
 
         <section className="container mx-auto px-4 py-8 md:py-12">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
+            <div className="mb-8 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
               <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
                   <svg
-                    className="h-4 w-4 text-amber-600 dark:text-amber-400"
+                    className="h-4 w-4 text-slate-600 dark:text-slate-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -57,19 +73,19 @@ export default async function Flags() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
                 </div>
-                <p className="text-sm text-amber-800 dark:text-amber-300">
-                  <strong className="font-semibold">Spoiler warning:</strong>{" "}
-                  This page lists all flags hidden throughout the site. Avoid
-                  consulting this page if you wish to find them on your own.
+                <p className="text-sm text-slate-700 dark:text-slate-300">
+                  Flag values are revealed only after you submit the correct
+                  flag for each challenge. Use the flag checker (bottom right)
+                  to validate your discoveries.
                 </p>
               </div>
             </div>
 
-            <FlagsClient flags={flags} />
+            <FlagsClient flags={flags} foundFlagIds={foundFlagIds} />
           </div>
         </section>
       </main>
