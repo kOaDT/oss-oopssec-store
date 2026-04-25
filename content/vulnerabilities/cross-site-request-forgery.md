@@ -2,208 +2,87 @@
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw where the application performs state-changing operations (like updating order statuses) without proper CSRF protection. This allows attackers to trick authenticated users into executing unwanted actions on the application by making requests from a malicious website.
+CSRF abuses the fact that browsers automatically attach cookies to outbound requests. If a state-changing endpoint relies only on the auth cookie to identify the caller, any page the victim visits can issue a request to that endpoint while logged in, and the server cannot tell the forged request from a legitimate one.
 
-The application uses HTTP-only cookies with `sameSite: "lax"` for authentication. While this protects against some cross-site scenarios, the `lax` policy still allows cookies to be sent on same-origin requests and on top-level navigations from external sites. Combined with the lack of CSRF tokens or origin validation, this makes the application vulnerable to CSRF attacks.
+In this challenge, the order status endpoint (`PATCH/POST /api/orders/[id]`) accepts admin-only state changes with no anti-CSRF token, no origin check, and a `sameSite: "lax"` auth cookie that is permissive enough for the attack to land.
 
 ## Why This Is Dangerous
 
-### CSRF Attack Vector
+- **Privileged state changes** — an admin who visits a malicious page silently mutates business data (order status, configuration, etc.).
+- **No credential theft required** — the browser supplies the cookie automatically; the attacker never sees the token.
+- **Victim never notices** — the request fires in the background and returns to the attacker, not the victim.
+- **Chains with other bugs** — combined with XSS, open redirects, or weak email filtering, CSRF reaches deep into the application.
 
-When an application accepts state-changing requests without CSRF protection, it creates a serious security vulnerability:
+## Vulnerable Code
 
-1. **Unauthorized actions** - Attackers can force users to perform actions they didn't intend
-2. **Cookie-based authentication** - Browsers automatically include cookies with requests, so the attacker doesn't need access to the token
-3. **User unawareness** - Victims may not realize an attack occurred until it's too late
-4. **Privilege abuse** - Attackers can exploit elevated privileges of authenticated users
-5. **Business impact** - Can lead to data modification, unauthorized transactions, or system compromise
-
-### What This Means
-
-**Never trust that a request comes from your own application.** The server must always:
-
-- Verify the origin of state-changing requests
-- Use CSRF tokens to validate request authenticity
-- Implement SameSite cookie attributes (`strict` for sensitive operations)
-- Validate Referer/Origin headers for sensitive operations
-
-## The Vulnerability
-
-In this application, the order status update endpoint (`PATCH /api/orders/[id]`) is vulnerable to CSRF attacks because:
-
-1. **No CSRF token validation** - The endpoint accepts requests without verifying CSRF tokens
-2. **No origin verification** - The server doesn't check the request origin or referer
-3. **State-changing operation** - The endpoint modifies critical business data (order status)
-4. **Weak cookie policy** - The authentication cookie uses `sameSite: "lax"` instead of `"strict"`
-
-### Vulnerable Code
-
-**Cookie Configuration:**
-
-The application sets the authentication cookie with `sameSite: "lax"`:
+The auth cookie is configured with `sameSite: "lax"`:
 
 ```typescript
 response.cookies.set("authToken", token, {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax", // ❌ Should be "strict" for sensitive operations
+  sameSite: "lax",
   maxAge: 60 * 60 * 24 * 7,
   path: "/",
 });
 ```
 
-While `httpOnly: true` prevents JavaScript from reading the cookie (protecting against XSS-based token theft), the `sameSite: "lax"` policy allows the cookie to be sent on same-origin requests, making CSRF attacks possible from the same domain.
+`lax` blocks cookies on cross-site `fetch`/`XHR`, but allows them on top-level navigations and on same-origin requests, which is all the exploit needs once the attacker can host content under the same origin (or convince the browser to navigate).
 
-**Order Update Endpoint (No CSRF Protection):**
+The order status handler accepts the request body with no anti-forgery verification:
 
 ```typescript
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const user = await getAuthenticatedUser(request);
-  // ❌ No CSRF token validation
-  // ❌ No origin/referer verification
-  // The cookie is automatically included by the browser
+const updateOrderStatus = async (request, orderId, user) => {
+  if (user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // No CSRF token check, no Origin/Referer enforcement.
+  // The browser attached the auth cookie automatically.
   const { status } = await request.json();
-  await prisma.order.update({ where: { id }, data: { status } });
-}
+
+  await prisma.order.update({ where: { id: orderId }, data: { status } });
+  return NextResponse.json({ success: true });
+};
 ```
 
-### Understanding `sameSite` Values
-
-| Value    | Behavior                                                                    | CSRF Protection |
-| -------- | --------------------------------------------------------------------------- | --------------- |
-| `strict` | Cookie never sent on cross-site requests                                    | Strong          |
-| `lax`    | Cookie sent on top-level navigations (GET) but not on cross-site POST/fetch | Moderate        |
-| `none`   | Cookie always sent (requires `secure: true`)                                | None            |
-
-In this lab, the exploit page is served from the same origin, so `lax` does not block the request. In a real-world scenario, `lax` would block cross-origin `fetch` with `credentials: "include"`, but would still allow form-based GET requests that could be exploited depending on the endpoint design.
-
-## Exploitation
-
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}`, you need to exploit the CSRF vulnerability:
-
-**Prerequisites:**
-
-1. You must find the way to be logged in as an administrator
-2. There must be at least one order in the system (check `/admin` to see orders)
-
-**Exploitation Steps:**
-
-1. **Log in as admin:**
-
-2. **Find the exploit file:**
-   - Inspect the HTML source of the admin dashboard page
-   - Look for hidden links or comments in the page source
-   - You should find a link to `/exploits/csrf-attack.html`
-
-3. **Open the malicious website (simulated attacker's site):**
-   - Navigate to the exploit file URL or open it directly
-   - You can access it via: `http://localhost:3000/exploits/csrf-attack.html`
-   - The page is designed to look like a phishing email from PayPal
-
-4. **Trigger the CSRF attack:**
-   - Click the "Secure My Account Now" button in the phishing email
-   - The page sends a `POST` request to `/api/orders/ORD-003` with `credentials: "include"`
-   - The browser automatically attaches your `authToken` cookie to the request
-   - No JavaScript access to the token is needed — the browser handles cookie inclusion automatically
-
-5. **Retrieve the flag:**
-   - After the attack, check the admin dashboard again
-   - The order status should have changed
-   - The flag `OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}` will be returned in the API response
-
-**Alternative: Manual Exploitation**
-
-You can also trigger the CSRF attack manually from the browser console while logged in:
-
-```javascript
-fetch("/api/orders/ORD-003", {
-  method: "POST",
-  credentials: "include",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ status: "DELIVERED" }),
-})
-  .then((r) => r.json())
-  .then(console.log);
-```
-
-The key insight is that `credentials: "include"` tells the browser to send cookies along with the request. Since the `authToken` cookie has `sameSite: "lax"`, it is included in same-origin requests automatically.
+| `sameSite` | Behavior on cross-site requests                   | CSRF protection |
+| ---------- | ------------------------------------------------- | --------------- |
+| `strict`   | Cookie never sent cross-site                      | Strong          |
+| `lax`      | Sent on top-level GET; not on cross-site POST/XHR | Partial         |
+| `none`     | Always sent (requires `secure: true`)             | None            |
 
 ## Secure Implementation
 
-### 1. CSRF Tokens
+Use defense in depth — no single control is enough on its own.
+
+**Synchronizer / double-submit token.** Issue an unguessable token bound to the session and require it on every state-changing request:
 
 ```typescript
-import { randomBytes } from "crypto";
+const cookieToken = request.cookies.get("csrfToken")?.value;
+const headerToken = request.headers.get("X-CSRF-Token");
 
-const generateCSRFToken = () => {
-  return randomBytes(32).toString("hex");
-};
-
-// Store token in session or return it to client
-const csrfToken = generateCSRFToken();
-response.cookies.set("csrfToken", csrfToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "strict",
-});
-
-// Validate token on state-changing requests
-const tokenFromCookie = request.cookies.get("csrfToken")?.value;
-const tokenFromHeader = request.headers.get("X-CSRF-Token");
-if (tokenFromCookie !== tokenFromHeader) {
+if (!cookieToken || cookieToken !== headerToken) {
   return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
 }
 ```
 
-### 2. SameSite Cookie Attribute
+**Tighten the cookie.** Use `sameSite: "strict"` for cookies that authenticate sensitive operations, or split sessions into a `lax` cookie for navigation and a `strict` cookie for mutations.
 
-```typescript
-response.cookies.set("authToken", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "strict", // ✅ Prevents cross-site cookie sending
-  maxAge: 60 * 60 * 24 * 7,
-  path: "/",
-});
-```
-
-### 3. Origin/Referer Verification
+**Verify Origin / Referer.** Reject state-changing requests whose `Origin` does not match an allowlist of trusted origins:
 
 ```typescript
 const origin = request.headers.get("origin");
-const referer = request.headers.get("referer");
-const allowedOrigins = ["https://yourdomain.com"];
-
-if (!allowedOrigins.includes(origin || "")) {
+if (!ALLOWED_ORIGINS.includes(origin ?? "")) {
   return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
 }
 ```
 
-### 4. Double Submit Cookie Pattern
-
-```typescript
-// Client sends token in both cookie and custom header
-// Server verifies they match
-const cookieToken = request.cookies.get("csrfToken")?.value;
-const headerToken = request.headers.get("X-CSRF-Token");
-
-if (cookieToken !== headerToken) {
-  return NextResponse.json(
-    { error: "CSRF validation failed" },
-    { status: 403 }
-  );
-}
-```
+**Use safe HTTP methods correctly.** `GET` must never change state; that alone closes a class of trivial exploits.
 
 ## References
 
-- [OWASP Top 10 - Cross-Site Request Forgery (CSRF)](https://owasp.org/www-community/attacks/csrf)
+- [OWASP — Cross-Site Request Forgery](https://owasp.org/www-community/attacks/csrf)
 - [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
 - [CWE-352: Cross-Site Request Forgery (CSRF)](https://cwe.mitre.org/data/definitions/352.html)
-- [MDN - SameSite Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite)
-- [MDN - CSRF Protection](https://developer.mozilla.org/en-US/docs/Glossary/CSRF)
+- [MDN — SameSite cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite)

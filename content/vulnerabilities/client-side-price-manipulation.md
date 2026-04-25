@@ -2,91 +2,74 @@
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw in e-commerce applications where the total order price is calculated and validated on the client side rather than being recalculated and verified on the server. This allows attackers to manipulate the price they pay by modifying the request payload before it reaches the server.
+The order creation endpoint accepts the cart total from the client and persists it without recomputing it from the authoritative product prices. Anything sent from the browser is under the user's control, so trusting a client-supplied total turns checkout into a self-service discount mechanism.
+
+In this challenge, `POST /api/orders` reads `total` from the request body, validates only that it is a positive number, and writes that value straight into the new order.
 
 ## Why This Is Dangerous
 
-### Trusting Client-Side Data
+- **Direct financial loss** — the buyer pays whatever total they choose to send.
+- **Discount and tax bypass** — server-side promotions, taxes, and shipping rules are silently overridden.
+- **Inventory and accounting drift** — orders ship with totals that do not match the product prices on file.
+- **Cascading abuse** — manipulated totals can corrupt revenue reports, fraud detection, and loyalty programs that read from order data.
 
-When an application accepts price calculations from the client without server-side verification, it creates a fundamental security vulnerability:
-
-1. **Client-side code is under user control** - Users can modify JavaScript, intercept network requests, or use browser developer tools
-2. **No server-side validation** - The server blindly trusts the total sent by the client
-3. **Direct financial impact** - Attackers can pay less than the actual price of their order
-4. **Business logic bypass** - Price calculations, discounts, and taxes can be circumvented
-
-### What This Means
-
-**Never trust client-side calculations for critical business logic.** The server must always:
-
-- Recalculate prices from authoritative sources (database)
-- Verify all financial transactions server-side
-- Validate that the client's data matches server calculations
-- Reject any discrepancies
-
-## The Vulnerability
-
-In this application, the order creation endpoint (`/api/orders`) accepts a `total` value directly from the client without recalculating it from the actual cart contents. The server:
-
-1. Receives the `total` from the client request body
-2. Validates only that it's a positive number
-3. Creates the order with the client-provided total
-4. Does not verify the total against actual product prices
-
-## Root Cause
-
-The vulnerability occurs in `app/api/orders/route.ts`:
-
-- The total is extracted directly from the request body
-- The total is used to create the order without server-side recalculation
-
-## Exploitation
-
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}`, you need to exploit the price manipulation vulnerability:
-
-**Exploitation Steps:**
-
-1. Add items to cart and go to checkout
-2. Open DevTools → Network tab
-3. Click "Complete Payment"
-4. Find the POST request to `/api/orders`
-5. Right-click → Edit and Resend (or use a proxy like Burp Suite)
-6. Modify the `total` value in the request body
-7. Send the request
-8. Check the response - it will contain the flag if the manipulation is detected
-
-**Note:** The server detects the manipulation by comparing the client-provided total with the server-calculated total. If they differ, the flag is returned in the response.
-
-### Secure Implementation
+## Vulnerable Code
 
 ```typescript
-// ❌ VULNERABLE - Trusts client total
-const { total } = await request.json();
-const order = await prisma.order.create({
-  data: { userId: user.id, total: total },
-});
+export const POST = withAuth(async (request: NextRequest, _context, user) => {
+  const body = await request.json();
+  const { total } = body;
 
-// ✅ SECURE - Recalculates server-side
+  if (!total || typeof total !== "number" || total <= 0) {
+    return NextResponse.json(
+      { error: "Valid total is required" },
+      { status: 400 }
+    );
+  }
+
+  // ... cart loaded, but `total` from the request is what gets stored
+  const order = await prisma.order.create({
+    data: {
+      userId: user.id,
+      addressId: userWithAddress.addressId,
+      total: total,
+      status: "PENDING",
+    },
+  });
+});
+```
+
+The endpoint loads the user's cart, but uses the client-supplied `total` rather than the value computed from the cart's products.
+
+## Secure Implementation
+
+Recompute the total on the server from the authoritative source — the user's cart and the current product prices — and ignore whatever the client sent:
+
+```typescript
 const cart = await prisma.cart.findFirst({
   where: { userId: user.id },
   include: { cartItems: { include: { product: true } } },
 });
 
-const calculatedTotal = cart.cartItems.reduce(
+if (!cart || cart.cartItems.length === 0) {
+  return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+}
+
+const total = cart.cartItems.reduce(
   (sum, item) => sum + item.product.price * item.quantity,
   0
 );
 
 const order = await prisma.order.create({
-  data: { userId: user.id, total: calculatedTotal },
+  data: { userId: user.id, addressId, total, status: "PENDING" },
 });
 ```
 
+Coupons, taxes, and shipping must be applied on the server too, against trusted rules. Anything financial that comes from the client is a hint at most — never an instruction.
+
 ## References
 
-- [OWASP API Security Top 10 - Broken Object Level Authorization](https://owasp.org/www-project-api-security/)
-- [OWASP Top 10 - Broken Access Control](https://owasp.org/www-project-top-ten/)
+- [OWASP API Security Top 10 — API6:2023 Unrestricted Access to Sensitive Business Flows](https://owasp.org/API-Security/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/)
+- [OWASP Top 10 — A04:2021 Insecure Design](https://owasp.org/Top10/A04_2021-Insecure_Design/)
 - [CWE-602: Client-Side Enforcement of Server-Side Security](https://cwe.mitre.org/data/definitions/602.html)
-- [OWASP Cheat Sheet Series - Input Validation](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
+- [OWASP Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)

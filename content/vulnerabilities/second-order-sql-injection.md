@@ -2,53 +2,38 @@
 
 ## Overview
 
-This vulnerability demonstrates a second-order (stored) SQL injection attack. Unlike traditional SQL injection where the malicious payload is executed immediately upon submission, second-order injection occurs when a payload is first safely stored in the database and then later used unsafely in a different context. In this case, a malicious author name submitted via a product review is stored safely through Prisma ORM, but is later interpolated directly into a raw SQL query when an admin filters reviews by author on the moderation panel.
+Second-order SQL injection happens in two acts. First, a payload is stored safely — typically through an ORM or a parameterized query, which escapes it correctly at insert time. Then, somewhere else in the application, a different code path reads that stored value and concatenates it into a raw SQL statement, where it finally executes as code. Input validation on the original write does not help; the problem is on the read path.
+
+In this challenge, the product review endpoint stores a user-supplied author name through Prisma (safe), and the admin reviews dashboard later interpolates that author name into a raw `better-sqlite3` query (unsafe). Worse, the unsafe query is dispatched via `Database.exec()`, which runs multi-statement SQL — so an injected `; DROP TABLE …` actually executes.
 
 ## Why This Is Dangerous
 
-### The False Sense of Security
+- **Bypasses input-side defenses** — the malicious value looks identical to legitimate data when first stored.
+- **Trust-by-origin fallacy** — developers assume "data from our own DB is safe", which is precisely the assumption the attack relies on.
+- **Multi-statement execution** — `exec()` allows `;`-separated statements, turning what could have been a select into a destructive write.
+- **Hard to test** — automated scanners that match request inputs to response outputs in a single round trip miss it entirely.
 
-Second-order SQL injection is particularly insidious because:
+## Vulnerable Code
 
-1. **Deferred execution** - The payload is stored safely during insertion, making it invisible to input-level defenses
-2. **Different context** - The vulnerability exists in a completely different part of the application from where the data was entered
-3. **Trusted data assumption** - Developers often assume data from their own database is safe and does not need sanitization
-4. **Difficult to detect** - Automated scanners that test input/output pairs in a single request often miss second-order vulnerabilities
-5. **Destructive potential** - A stored `DROP TABLE` payload could wipe out entire tables when triggered by an admin action
-
-## The Vulnerability
-
-In this application, the attack chain involves two separate operations:
-
-### Step 1: Safe Storage (Review Submission)
-
-The review API accepts a custom author field and stores it via Prisma ORM (which uses parameterized queries internally):
+The write path is safe:
 
 ```typescript
-// /api/products/[id]/reviews - SAFE insertion
 const review = await prisma.review.create({
   data: {
     productId: id,
     content: content.trim(),
-    author, // User-controlled, but stored safely via parameterized query
+    author,
   },
 });
 ```
 
-### Step 2: Unsafe Retrieval (Admin Filter)
-
-The admin reviews API fetches reviews filtered by author using raw SQL with string interpolation:
+The read path concatenates a stored value into raw SQL and executes it via `exec()`:
 
 ```typescript
-// /api/admin/reviews - VULNERABLE query using raw SQLite driver
 const db = new Database(getDbPath());
 const query = `
   SELECT
-    r.id,
-    r."productId",
-    r.content,
-    r.author,
-    r."createdAt",
+    r.id, r."productId", r.content, r.author, r."createdAt",
     p.name as "productName"
   FROM reviews r
   INNER JOIN products p ON r."productId" = p.id
@@ -56,62 +41,44 @@ const query = `
   ORDER BY r."createdAt" DESC
 `;
 
-db.exec(query); // exec() supports multi-statement execution
+db.exec(query);
 ```
 
-The `authorFilter` value comes from the dropdown, which is populated from the database. The developer assumed these values were safe because they originated from the application's own database. The use of `better-sqlite3`'s `exec()` method is particularly dangerous because it supports multi-statement queries, meaning a `DROP TABLE` or `DELETE FROM` statement injected via a semicolon will actually execute.
+`authorFilter` comes from a dropdown fed by the database itself, but the value originally came from a user-controlled review submission. Once interpolated into the SQL string, it is parsed as code; once handed to `exec()`, any number of statements parsed from that string will run.
 
-## Exploitation
+## Secure Implementation
 
-### How to Retrieve the Flag
-
-**Step 1: Submit a review with a destructive SQL payload as the display name**
-
-Log in or use any account. Submit a review on any product, setting the "Display name" field to a destructive SQL payload:
-
-```
-'; DROP TABLE reviews; --
-```
-
-The review is stored safely — no SQL execution happens at this point.
-
-**Step 2: Gain admin access**
-
-Use an existing vulnerability (mass assignment during signup or JWT forgery with the weak secret) to obtain admin privileges.
-
-**Step 3: Trigger the injection**
-
-Navigate to `/admin/reviews`. The malicious author name appears in the "Filter by author" dropdown. Select it. The backend interpolates this stored value into raw SQL and executes it via `better-sqlite3`'s `exec()`, which supports multi-statement queries. The `DROP TABLE reviews` statement actually executes, destroying the reviews table.
-
-The backend detects the SQL injection attempt and returns the flag in the response, which is displayed on the page.
-
-### Secure Implementation
+Treat _every_ value as untrusted, regardless of origin, and never let stored data become SQL syntax.
 
 ```typescript
-// VULNERABLE - Interpolating stored values into raw SQL with multi-statement support
-const db = new Database(getDbPath());
-const query = `SELECT ... FROM reviews WHERE author = '${authorFilter}'`;
-db.exec(query);
-
-// SECURE - Use Prisma's parameterized queries
 const reviews = await prisma.review.findMany({
-  where: {
-    author: authorFilter,
-  },
-  include: {
-    product: {
-      select: { name: true },
-    },
-  },
+  where: { author: authorFilter },
+  include: { product: { select: { name: true } } },
   orderBy: { createdAt: "desc" },
 });
 ```
 
-**Key lesson:** Never assume data from your own database is safe for use in raw SQL queries. Always use parameterized queries regardless of the data source.
+If the use case forces raw SQL, parameterize and use a single-statement API:
+
+```typescript
+const stmt = db.prepare(`
+  SELECT r.id, r.author, r.content, p.name AS "productName"
+  FROM reviews r
+  INNER JOIN products p ON r."productId" = p.id
+  WHERE r.author = ?
+  ORDER BY r."createdAt" DESC
+`);
+const reviews = stmt.all(authorFilter);
+```
+
+Two further hardening steps for the same class of bug:
+
+- Avoid multi-statement APIs (`exec`, `executeMany`) on user-touched paths. Use prepared single-statement primitives.
+- Sanitize at output, not input. Even if it costs a layer of defense at write time, treat reads as adversarial — that is the only assumption that survives an unrelated insert path being added later.
 
 ## References
 
-- [OWASP - Second Order SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection#second-order-sql-injection)
-- [CWE-89: Improper Neutralization of Special Elements used in an SQL Command](https://cwe.mitre.org/data/definitions/89.html)
-- [PortSwigger - Second-Order SQL Injection](https://portswigger.net/kb/issues/00100210_sql-injection-second-order)
+- [OWASP — Second-Order SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection#second-order-sql-injection)
 - [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
+- [CWE-89: Improper Neutralization of Special Elements used in an SQL Command](https://cwe.mitre.org/data/definitions/89.html)
+- [PortSwigger — Second-Order SQL Injection](https://portswigger.net/kb/issues/00100210_sql-injection-second-order)

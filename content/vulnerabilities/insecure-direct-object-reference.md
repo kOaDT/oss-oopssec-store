@@ -2,99 +2,79 @@
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw where the application does not properly verify that a user has authorization to access a specific resource. In this case, users can access order details belonging to other users by simply modifying the order ID in the URL, without any proper authorization checks.
+IDOR is the close cousin of BOLA: an authenticated endpoint exposes objects keyed by an identifier from the request, and the application does not verify that the caller is allowed to reach that specific object. Predictable identifiers (sequential IDs, dates, slugs derived from public data) make exploitation a matter of incrementing a number.
+
+In this challenge, the order detail endpoint (`GET /api/orders/[id]`) loads an order purely by its public ID, returning customer name, email, delivery address, and order status to whoever asks. Order IDs follow the `ORD-001`, `ORD-002`, ... pattern, so enumeration is trivial.
 
 ## Why This Is Dangerous
 
-### Missing Authorization Checks
+- **Cross-user data exposure** — any logged-in user reads any order, including PII like names, emails, and shipping addresses.
+- **Compliance impact** — GDPR/CCPA-protected data leaves the trust boundary unintended.
+- **Predictable IDs amplify reach** — a single attacker can dump every order in seconds.
+- **UI-only enforcement is illusory** — hiding orders in the dashboard does not restrict the API behind it.
 
-When an application allows direct access to resources based on predictable or guessable identifiers without verifying ownership, it creates a fundamental security vulnerability:
-
-1. **Predictable resource identifiers** - Order IDs follow a sequential pattern (ORD-001, ORD-002, etc.) making them easy to guess
-2. **No ownership verification** - The API returns order details regardless of who owns the order
-3. **Information disclosure** - Attackers can access sensitive information like customer names, emails, and delivery addresses
-4. **Privacy violation** - Users can view other users' personal information and order history
-
-### What This Means
-
-**Always verify resource ownership before returning data.** The server must:
-
-- Check that the authenticated user owns the requested resource
-- Return 403 Forbidden if the user tries to access resources they don't own
-- Use unpredictable, non-sequential identifiers when possible
-- Implement proper access control at the API level, not just the UI level
-
-## The Vulnerability
-
-In this application, the order details endpoint (`/api/orders/[id]`) retrieves order information without properly verifying that the authenticated user owns the requested order. The server:
-
-1. Authenticates the user (checks if they're logged in)
-2. Retrieves the order by ID
-3. Returns order details including customer information and delivery address
-4. Does not verify that `order.userId` matches the authenticated user's ID
-
-Additionally, order IDs use a predictable sequential format (ORD-001, ORD-002, ORD-003), making it trivial to enumerate and access other users' orders.
-
-## Exploitation
-
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}`, you need to exploit the IDOR vulnerability:
-
-**Exploitation Steps:**
-
-1. Log in as Alice (alice@example.com / iloveduck)
-2. Navigate to the order confirmation page with your own order ID (if you have one)
-3. Observe the order ID format (e.g., ORD-004)
-4. Modify the URL to access Bob's orders by changing the order ID:
-   - Try `ORD-001`, `ORD-002`, or `ORD-003`
-5. The page will display Bob's order details including:
-   - Customer name and email
-   - Delivery address
-   - Order total and status
-6. The flag `OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}` will be displayed at the top of the page
-
-### Secure Implementation
+## Vulnerable Code
 
 ```typescript
-// ❌ VULNERABLE - No ownership check
-const order = await prisma.order.findUnique({
-  where: { id },
-});
+export const GET = withAuth(async (_request, context, user) => {
+  const { id } = await context.params;
 
-if (!order) {
-  return NextResponse.json({ error: "Order not found" }, { status: 404 });
-}
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      user: { include: { address: true } },
+      address: true,
+    },
+  });
 
-return NextResponse.json({
-  id: order.id,
-  total: order.total,
-  status: order.status,
-});
+  if (!order) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
 
-// ✅ SECURE - Verifies ownership
-const order = await prisma.order.findUnique({
-  where: { id },
-});
-
-if (!order) {
-  return NextResponse.json({ error: "Order not found" }, { status: 404 });
-}
-
-if (order.userId !== user.id) {
-  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-}
-
-return NextResponse.json({
-  id: order.id,
-  total: order.total,
-  status: order.status,
+  return NextResponse.json({
+    id: order.id,
+    total: order.total,
+    status: order.status,
+    customerName: ...,
+    customerEmail: order.user.email,
+    deliveryAddress: { ...order.address },
+  });
 });
 ```
 
+`withAuth` proves the caller is logged in. The query keys only on `id`, so any valid order ID resolves regardless of `order.userId`.
+
+## Secure Implementation
+
+Filter by ownership at the query layer so non-owners look identical to non-existent records:
+
+```typescript
+const order = await prisma.order.findFirst({
+  where: { id, userId: user.id },
+  include: { address: true },
+});
+
+if (!order) {
+  return NextResponse.json({ error: "Order not found" }, { status: 404 });
+}
+```
+
+For admin views or other legitimate cross-user reads, branch the query on `user.role`:
+
+```typescript
+const order = await prisma.order.findFirst({
+  where: user.role === "ADMIN" ? { id } : { id, userId: user.id },
+});
+```
+
+Two further hardening steps:
+
+- Use unguessable identifiers (UUIDv4, random nanoid) so even an authorization bug cannot be amplified by trivial enumeration.
+- Return 404 instead of 403 for unauthorized access — distinct status codes leak which IDs exist.
+
 ## References
 
-- [OWASP API Security Top 10 - Broken Object Level Authorization](https://owasp.org/www-project-api-security/)
-- [OWASP Top 10 - Broken Access Control](https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/)
+- [OWASP API Security Top 10 — API1:2023 Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/)
+- [OWASP Top 10 — A01:2021 Broken Access Control](https://owasp.org/Top10/A01_2021-Broken_Access_Control/)
 - [CWE-639: Authorization Bypass Through User-Controlled Key](https://cwe.mitre.org/data/definitions/639.html)
-- [OWASP Cheat Sheet Series - Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
+- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)

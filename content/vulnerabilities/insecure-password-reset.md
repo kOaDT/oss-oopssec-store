@@ -2,109 +2,80 @@
 
 ## Overview
 
-This vulnerability demonstrates a critical flaw in the password reset mechanism. The application uses a predictable token generation algorithm, allowing attackers to forge valid reset tokens for any user account, including administrators.
+Password reset tokens must be unguessable — anything less, and the entire reset flow becomes a public-facing account takeover endpoint. Building tokens from values an attacker can predict (email, current time, sequential counters) means the token can be derived without ever owning the victim's mailbox.
 
-## Feature Description
+In this challenge, the forgot-password endpoint computes the reset token as `MD5(email + unix_timestamp)` and even returns the exact `requestedAt` ISO timestamp in the response, handing the attacker every input they need to forge the token themselves.
 
-The "Forgot Password" feature is accessible from the login page. It allows users to:
+## Why This Is Dangerous
 
-1. Enter their email address to request a password reset
-2. Receive a reset link (simulated — the token is generated server-side)
-3. Use the reset link to set a new password
+- **Account takeover without email access** — knowing only a target email is enough to forge a valid reset token.
+- **Privilege escalation** — admin accounts can be hijacked the same way, with no extra steps.
+- **No rate limiting** — unlimited reset requests let attackers grind timestamps, fingerprint accounts, or drown logs.
+- **Generic appearance** — the API response looks innocuous, so the leak is easy to overlook in code review.
 
-This is a standard feature found in virtually every web application that supports email-based authentication.
-
-## Vulnerability Summary
-
-The vulnerability stems from the use of a weak, predictable token generation algorithm:
-
-1. **Predictable Token Generation**: The reset token is computed as `MD5(email + unix_timestamp)`, using only two inputs that are both knowable by an attacker.
-
-2. **Timestamp Disclosure**: The API response includes a `requestedAt` field containing the exact ISO timestamp of the request, which directly reveals the Unix timestamp used in token generation.
-
-3. **No Rate Limiting**: Attackers can request unlimited password resets for any email address.
-
-### Vulnerable Code
-
-**Token Generation (app/api/auth/forgot-password/route.ts):**
+## Vulnerable Code
 
 ```typescript
 const now = new Date();
 const requestedAt = now.toISOString();
 const timestamp = Math.floor(now.getTime() / 1000);
 
-const token = hashMD5(email + timestamp);
+const user = await prisma.user.findUnique({ where: { email } });
+
+if (user) {
+  const token = hashMD5(email + timestamp);
+  const expiresAt = new Date(now.getTime() + 60 * 60 * 1000);
+
+  await prisma.passwordResetToken.deleteMany({ where: { email } });
+  await prisma.passwordResetToken.create({
+    data: { token, email, expiresAt },
+  });
+}
 
 return NextResponse.json({
-  message:
-    "If an account with that email exists, a password reset link has been sent.",
-  requestedAt, // Leaks the exact timestamp used in token generation
+  message: "If an account with that email exists, ...",
+  requestedAt,
 });
 ```
 
-## Impact
+Two compounding bugs:
 
-This vulnerability allows attackers to:
+1. The token is fully determined by `email` and `timestamp`. MD5 is fast and the search space — at most one Unix second — is tiny.
+2. The response leaks `requestedAt`, eliminating even that one-second guess.
 
-- **Account Takeover**: Reset the password of any user account, including administrators
-- **Privilege Escalation**: Gain admin access by resetting the admin password
-- **No Email Access Required**: The attack doesn't require access to the victim's email inbox
+## Secure Implementation
 
-## Exploitation
+Generate tokens with a cryptographically secure RNG, store only their hash, and stop leaking timing data:
 
-### How to Retrieve the Flag
+```typescript
+import crypto from "crypto";
 
-To retrieve the flag `OSS{1ns3cur3_p4ssw0rd_r3s3t}`, follow these steps:
+const rawToken = crypto.randomBytes(32).toString("hex");
+const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
-1. **Navigate to Forgot Password**: Go to `/login/forgot-password`
-2. **Request a Reset**: Enter any existing user's email (e.g., `alice@example.com`) and submit the form
-3. **Note the Timestamp**: The success response includes a `requestedAt` field — note this value
-4. **Compute the Token**: Convert the `requestedAt` ISO string to a Unix timestamp (seconds), then compute `MD5(email + timestamp)`
-5. **Use the Forged Token**: Navigate to `/login/reset-password?token=<computed_token>`
-6. **Reset the Password**: Enter a new password — the flag is returned in the API response and displayed via the flag notification
+await prisma.passwordResetToken.deleteMany({ where: { email } });
+await prisma.passwordResetToken.create({
+  data: { token: tokenHash, email, expiresAt },
+});
 
-### Example Using curl
+// `rawToken` is what goes in the email link; the DB only ever holds the hash.
 
-```bash
-# Step 1: Request password reset for any user
-curl -X POST http://localhost:3000/api/auth/forgot-password \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com"}'
-# Response: { "message": "...", "requestedAt": "2025-01-15T10:30:00.000Z" }
-
-# Step 2: Compute the token
-# Convert "2025-01-15T10:30:00.000Z" to Unix timestamp: 1736936400
-# Compute: MD5("alice@example.com1736936400")
-# Use any MD5 tool: echo -n "alice@example.com1736936400" | md5sum
-
-# Step 3: Reset the password with the forged token
-curl -X POST http://localhost:3000/api/auth/reset-password \
-  -H "Content-Type: application/json" \
-  -d '{"token":"<computed_md5_hash>","password":"newpassword123"}'
-# Response includes the flag
+return NextResponse.json({
+  message: "If an account with that email exists, ...",
+});
 ```
 
-## Remediation
+Additional controls that should be in place before the reset flow ships:
 
-### Immediate Actions
-
-1. **Use Cryptographically Secure Tokens**: Generate tokens using a CSPRNG instead of derived values:
-
-   ```typescript
-   import crypto from "crypto";
-   const token = crypto.randomBytes(32).toString("hex");
-   ```
-
-2. **Remove Timestamp from Response**: Don't leak timing information in API responses.
-
-3. **Add Rate Limiting**: Limit password reset requests per email and per IP.
-
-4. **Token Expiry**: Use short-lived tokens (15-30 minutes).
-
-5. **Single Use**: Invalidate tokens after first use (already implemented).
+- **Short-lived tokens** — 15–30 minutes, single-use, invalidated on any password change.
+- **Rate limiting** — per-email and per-IP, with exponential backoff.
+- **Constant-shape responses** — return the same body whether or not the email exists, with no timing or content side channels.
+- **Re-authentication on success** — invalidate all existing sessions when a reset succeeds.
 
 ## References
 
 - [OWASP Forgot Password Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html)
 - [CWE-640: Weak Password Recovery Mechanism for Forgotten Password](https://cwe.mitre.org/data/definitions/640.html)
 - [CWE-330: Use of Insufficiently Random Values](https://cwe.mitre.org/data/definitions/330.html)
+- [CWE-209: Generation of Error Message Containing Sensitive Information](https://cwe.mitre.org/data/definitions/209.html)

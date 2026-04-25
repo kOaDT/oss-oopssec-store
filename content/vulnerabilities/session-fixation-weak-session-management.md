@@ -1,174 +1,98 @@
-# Session Fixation & Weak Session Management Vulnerability
+# Session Fixation & Weak Support-Session Management
 
 ## Overview
 
-This vulnerability demonstrates critical flaws in session management, specifically a session fixation attack combined with weak JWT token lifecycle management. The application allows users to generate "support access tokens" to grant customer support temporary access to their accounts, but a mass assignment flaw allows attackers to generate tokens for arbitrary users.
+This vulnerability is a session-fixation flaw built on top of a mass-assignment bug in a "support access" feature. The endpoint that mints support tokens for the authenticated user also accepts an `email` field in the request body and uses it as the target account, so any logged-in user can issue a long-lived support token for any other account — including the admin's. The token, once issued, is then accepted by a separate login endpoint that promotes its bearer to a full authenticated session.
 
-## Feature Description
+A long token lifetime (365 days) and ineffective revocation (the validator does not check the `revoked` flag) compound the impact.
 
-The "Support Access" feature is accessible from the user profile page. It allows users to:
+## Why This Is Dangerous
 
-1. Generate a support access token for their account
-2. Share the token URL with customer support
-3. Revoke the token when support is no longer needed
+- **Cross-account session fixation** — anyone with a regular account can mint a session token for anyone else.
+- **Privilege escalation** — the admin account is reachable as long as its email is known.
+- **Persistent access** — 365-day tokens survive password changes; "revoke" only flips a database column the validator ignores.
+- **Audit gaps** — these tokens look like legitimate support sessions in logs.
 
-This is a legitimate feature commonly found in SaaS applications to allow support teams to troubleshoot user issues.
+## Vulnerable Code
 
-## Vulnerability Summary
-
-The vulnerability stems from multiple security weaknesses:
-
-1. **Session Fixation via Mass Assignment**: The token generation endpoint accepts an `email` parameter in the request body. If provided, it generates a token for that email instead of the authenticated user's email.
-
-2. **Excessive Token Lifetime**: Support tokens are valid for 365 days, far exceeding what would be needed for a support session.
-
-3. **Ineffective Token Revocation**: The "revoke" functionality only marks the token as revoked in the database but doesn't actually prevent its use (no blacklist check during authentication).
-
-4. **No Rate Limiting**: Attackers can generate unlimited tokens for any user.
-
-### Vulnerable Code
-
-**Token Generation Endpoint (app/api/user/support-access/route.ts):**
+The token-creation endpoint reads the target account from the request body, not the session:
 
 ```typescript
-export async function POST(request: NextRequest) {
-  const user = await getAuthenticatedUser(request);
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export const POST = withAuth(async (request, _context, user) => {
   const body = await request.json().catch(() => ({}));
 
-  // VULNERABILITY: Accepts email from request body without validation
   const targetEmail = body.email || user.email;
 
   const targetUser = await prisma.user.findUnique({
     where: { email: targetEmail },
-    // ...
+    select: { id: true, email: true, role: true },
   });
 
-  // Creates token for targetUser, not necessarily the authenticated user
-  const supportToken = await prisma.supportAccessToken.create({
+  if (!targetUser) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const token = generateSecureToken();
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 365);
+
+  await prisma.supportAccessToken.create({
     data: {
       token,
       userId: targetUser.id,
       email: targetUser.email,
-      expiresAt, // 365 days from now
+      expiresAt,
     },
   });
-}
+});
 ```
 
-**Support Login Endpoint (app/api/auth/support-login/route.ts):**
+The validator that exchanges the support token for a session does not check `revoked`:
 
 ```typescript
-export async function GET(request: NextRequest) {
-  const token = searchParams.get("token");
+const supportToken = await prisma.supportAccessToken.findUnique({
+  where: { token },
+});
 
-  const supportToken = await prisma.supportAccessToken.findUnique({
-    where: { token },
-    // Note: Does NOT check if token is revoked!
-  });
+if (supportToken.expiresAt < new Date()) {
+  return NextResponse.json({ error: "Token expired" }, { status: 401 });
+}
 
-  if (supportToken.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Token expired" }, { status: 401 });
-  }
+const authToken = createWeakJWT({
+  id: supportToken.user.id,
+  email: supportToken.user.email,
+  role: supportToken.user.role,
+  supportAccess: true,
+});
+```
 
-  // Creates a full session for the user
-  const authToken = createWeakJWT({
-    id: supportToken.user.id,
-    email: supportToken.user.email,
-    role: supportToken.user.role,
-    supportAccess: true, // Marks this as a support access session
-  });
+## Secure Implementation
+
+Three independent fixes; apply all of them.
+
+**Bind the operation to the authenticated user.** Stop reading the target email from the body — derive it from the session, full stop:
+
+```typescript
+const targetEmail = user.email;
+```
+
+Sensitive fields like `email`, `userId`, or `role` should never be writable through a generic JSON body. If admins legitimately need to issue tokens on behalf of others, that is a separate, authorization-checked, audited endpoint.
+
+**Make tokens short-lived and revocable.** Cap lifetime in hours, and check `revoked` on every validation. Any token issued for an admin or any role-elevation context should require step-up auth (password or MFA confirmation):
+
+```typescript
+expiresAt.setHours(expiresAt.getHours() + 12);
+
+if (supportToken.revoked) {
+  return NextResponse.json({ error: "Token revoked" }, { status: 401 });
 }
 ```
 
-## Impact
-
-This vulnerability allows attackers to:
-
-- **Account Takeover**: Generate support tokens for any user, including administrators
-- **Privilege Escalation**: Access admin functionality by generating a token for admin accounts
-- **Persistent Access**: Maintain access for up to 365 days
-- **Bypass Revocation**: Continue using tokens even after they are "revoked"
-
-## Exploitation
-
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{s3ss10n_f1x4t10n_4tt4ck}`, follow these steps:
-
-1. **Create a Regular Account**: Sign up for a normal user account
-2. **Navigate to Support Access**: Go to Profile → Support Access tab
-3. **Intercept the Token Generation Request**: When clicking "Generate Support Access Token", intercept the POST request to `/api/user/support-access`
-4. **Modify the Request Body**: Add the admin email to the request:
-   ```json
-   {
-     "email": "admin@oss.com"
-   }
-   ```
-5. **Use the Generated Token**: The response will contain a support token for the admin account
-6. **Access the Support Login URL**: Navigate to `/support-login?token=<generated_token>`
-7. **Access Admin Resources**: You are now logged in as admin via support access
-8. **View the Flag**: Navigate to `/admin` - the flag will be displayed on the admin dashboard because the system detects unauthorized support access to the admin account
-
-### Alternative Exploitation Path
-
-You can also exploit this using curl:
-
-```bash
-# Login as regular user first to get the auth cookie
-curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"iloveduck"}'
-
-# Generate support token for admin (session fixation)
-curl -b cookies.txt -X POST http://localhost:3000/api/user/support-access \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@oss.com"}'
-
-# Use the support token to access admin
-# Navigate to the returned supportLoginUrl in browser
-
-# Then navigate to /admin - the flag will be displayed on the dashboard
-```
-
-## Remediation
-
-### Immediate Actions
-
-1. **Remove Mass Assignment**: Never accept user-controlled input for determining which account to act upon:
-
-   ```typescript
-   const targetEmail = user.email; // Always use authenticated user's email
-   ```
-
-2. **Reduce Token Lifetime**: Use short-lived tokens (hours, not days):
-
-   ```typescript
-   const TOKEN_EXPIRY_HOURS = 12;
-   expiresAt.setHours(expiresAt.getHours() + TOKEN_EXPIRY_HOURS);
-   ```
-
-3. **Implement Proper Revocation**: Check revocation status during token validation:
-
-   ```typescript
-   if (supportToken.revoked) {
-     return NextResponse.json({ error: "Token revoked" }, { status: 401 });
-   }
-   ```
-
-4. **Add Rate Limiting**: Limit token generation to prevent abuse
-
-5. **Require Re-authentication**: For sensitive actions like generating support tokens, require password confirmation
-
-6. **Audit Logging**: Log all support access token usage for security monitoring
+**Rate-limit and audit.** Throttle the token-creation endpoint per user and per IP, and emit an audit event on every issuance and use, indexed by both the issuer and the target account.
 
 ## References
 
-- [OWASP Top 10 - Broken Access Control](https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/)
 - [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
 - [CWE-384: Session Fixation](https://cwe.mitre.org/data/definitions/384.html)
 - [CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes](https://cwe.mitre.org/data/definitions/915.html)
+- [OWASP Top 10 — A01:2021 Broken Access Control](https://owasp.org/Top10/A01_2021-Broken_Access_Control/)
