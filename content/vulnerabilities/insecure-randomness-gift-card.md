@@ -4,7 +4,7 @@
 
 The store sells digital gift cards in fixed denominations and emails the recipient a redemption code in the form `XXXX-XXXX-XXXX`. The code is the only thing protecting the value stored on the card; whoever knows it can redeem it.
 
-The vulnerability is that the code is not random. It is derived from the card's creation timestamp using a classic Numerical-Recipes-style linear congruential generator (LCG). Anyone who can read the card's `createdAt` value — and the public `GET /api/gift-cards` endpoint serves it with millisecond precision — can reproduce the code without ever seeing the email.
+The vulnerability is that the code is not random. It is derived from the card's creation timestamp using a classic Numerical-Recipes-style linear congruential generator (LCG). Anyone who can read the card's `createdAt` value — and the buyer-facing `GET /api/gift-cards` endpoint serves it back to the buyer with millisecond precision — can reproduce the code without ever seeing the email.
 
 ## Why This Is Dangerous
 
@@ -39,7 +39,7 @@ export function generateGiftCardCode(seed: number): string {
 Two compounding issues:
 
 1. The LCG constants `(1103515245, 12345, 2^31)` are public, so the sequence is fully recoverable from the seed.
-2. The seed is `createdAt.getTime()`, and `GET /api/gift-cards` returns `createdAt` to anyone authenticated as the buyer (or the recipient) — the seed is effectively published.
+2. The seed is `createdAt.getTime()`, and `GET /api/gift-cards` returns `createdAt` to whoever is authenticated as the buyer of the card — so any compromise of (or known credentials for) the buyer account hands the seed to the attacker.
 
 ## Secure Implementation
 
@@ -68,7 +68,7 @@ A 12-character draw from a 32-character alphabet carries ~60 bits of entropy —
 
 Two more controls worth applying together:
 
-- **Trim the metadata you expose.** Do not return `createdAt` at millisecond precision (or at all) on a public endpoint. Internal state should not leak through "harmless" timestamps.
+- **Trim the metadata you expose.** Do not return `createdAt` at millisecond precision (or at all) to any client that could correlate it with redeemable codes. Internal state should not leak through "harmless" timestamps, even on authenticated endpoints.
 - **Compare in constant time, redeem atomically.** Use `crypto.timingSafeEqual` for the hash comparison and `UPDATE ... WHERE status = 'PENDING'` for redemption to defeat timing side channels and double-spend races.
 
 ## References

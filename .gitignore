@@ -58,3 +58,4 @@ logs/*
 
 # other
 docs/update-deps.sh
+.claude/
