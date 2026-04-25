@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { DOCS_BASE_URL } from "@/lib/config";
 
-const DOCS_BASE_URL = "https://koadt.github.io/oss-oopssec-store/posts";
 const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 
 interface FoundFlag {
