@@ -5,11 +5,53 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { getBaseUrl } from "@/lib/config";
+import { getBaseUrl, DOCS_BASE_URL } from "@/lib/config";
 import type { Flag } from "@/lib/types";
 
 interface VulnerabilityPageProps {
   params: Promise<{ slug: string }>;
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  INJECTION: "Injection",
+  AUTHENTICATION: "Authentication",
+  AUTHORIZATION: "Authorization",
+  REQUEST_FORGERY: "Request Forgery",
+  INFORMATION_DISCLOSURE: "Information Disclosure",
+  INPUT_VALIDATION: "Input Validation",
+  CRYPTOGRAPHIC: "Cryptographic",
+  REMOTE_CODE_EXECUTION: "Remote Code Execution",
+  OTHER: "Other",
+};
+
+const TITLE_OVERRIDES: Record<string, string> = {
+  CVE: "CVE",
+  SQL: "SQL",
+  XSS: "XSS",
+  CSRF: "CSRF",
+  SSRF: "SSRF",
+  XXE: "XXE",
+  IDOR: "IDOR",
+  BOLA: "BOLA",
+  JWT: "JWT",
+  MD5: "MD5",
+  AES: "AES",
+  CBC: "CBC",
+  AI: "AI",
+  MCP: "MCP",
+  API: "API",
+  ENV: "ENV",
+};
+
+function humanizeSlug(slug: string): string {
+  return slug
+    .split("-")
+    .map((word) => {
+      const upper = word.toUpperCase();
+      if (TITLE_OVERRIDES[upper]) return TITLE_OVERRIDES[upper];
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 }
 
 async function getFlagBySlug(slug: string): Promise<Flag | null> {
@@ -83,9 +125,12 @@ export default async function VulnerabilityPage({
         <section className="border-b border-slate-200 bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 dark:border-slate-800">
           <div className="container mx-auto px-4 py-16 md:py-24">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-4 flex items-center justify-center gap-3">
+              <p className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
+                {CATEGORY_LABELS[flag.category] || flag.category}
+              </p>
+              <div className="flex items-center justify-center gap-3">
                 <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-                  {flag.flag}
+                  {humanizeSlug(flag.slug)}
                 </h1>
                 {flag.cve && (
                   <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
@@ -99,6 +144,37 @@ export default async function VulnerabilityPage({
 
         <section className="container mx-auto px-4 py-16">
           <div className="mx-auto max-w-4xl">
+            {flag.walkthroughSlug && (
+              <a
+                href={`${DOCS_BASE_URL}/${flag.walkthroughSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mb-8 flex items-center justify-between gap-4 rounded-lg border border-primary-200 bg-primary-50 px-5 py-4 transition-colors hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-950/40 dark:hover:bg-primary-900/40"
+              >
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Want to see the exploit in action?
+                  </p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                    Full writeup with payloads and screenshots on the
+                    walkthrough site.
+                  </p>
+                </div>
+                <svg
+                  className="h-5 w-5 shrink-0 text-primary-600 dark:text-primary-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </a>
+            )}
             <article className="p-8">
               <div className="markdown-content">
                 <ReactMarkdown

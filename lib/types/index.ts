@@ -78,6 +78,7 @@ export interface Flag {
   slug: string;
   cve?: string | null;
   markdownFile: string;
+  walkthroughSlug?: string | null;
   category: FlagCategory;
   difficulty: FlagDifficulty;
 }
