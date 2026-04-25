@@ -97,6 +97,7 @@ const flags = [
     flag: "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}",
     slug: "cross-site-request-forgery",
     markdownFile: "cross-site-request-forgery.md",
+    walkthroughSlug: "csrf-admin-order-update",
     category: "REQUEST_FORGERY" as const,
     difficulty: "MEDIUM" as const,
   },
