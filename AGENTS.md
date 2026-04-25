@@ -33,11 +33,11 @@ app/
 ├── hall-of-fame/           # Hall of Fame page
 └── [pages]/                # Next.js pages
 
-content/vulnerabilities/    # Markdown files for each vulnerability
+content/vulnerabilities/    # In-app reference docs (concept + fix, no exploit details)
 lib/                        # Utilities (api, auth, prisma, types)
 prisma/                     # Schema and seed.ts with CTF flags
 uploads/                    # User-uploaded files (served via /api/uploads/)
-docs/                       # Astro documentation site (separate npm project)
+docs/                       # Astro walkthrough site (step-by-step exploits, screenshots)
 hall-of-fame/data.json      # Hall of Fame entries (community-driven via PRs)
 tests/                      # Jest unit and API exploitation tests
 ├── unit/                   # Unit tests (MD5, JWT, input filters)
@@ -119,16 +119,16 @@ npm run docs:build           # Build Astro site
 
 ### Adding New Vulnerabilities
 
-1. Add flag to `prisma/seed.ts` in `OSS{...}` format
+1. Add flag to `prisma/seed.ts` in `OSS{...}` format (set `walkthroughSlug` if a writeup exists)
 2. Add 3 hints in the `flagHints` map in `prisma/seed.ts` (keyed by slug, levels 1→3 from vague to near-solution)
-3. Create documentation in `content/vulnerabilities/`
-4. Document: overview, vulnerable code, exploitation, mitigation
+3. Create the in-app reference doc in `content/vulnerabilities/` — overview, why dangerous, vulnerable code, secure implementation, references. **No exploitation steps, payloads, or flag value** (those go in the walkthrough).
+4. Optional: add a step-by-step walkthrough in `docs/src/data/blog/` (Astro site) — this is where exploit details, payloads, and screenshots belong.
 5. Test exploitability
 
 ### CTF Flag System
 
 - Format: `OSS{...}`
-- Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`
+- Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`, `walkthroughSlug` (optional)
 - Categories: INJECTION, AUTHENTICATION, AUTHORIZATION, XSS, CSRF, etc.
 - Difficulty: EASY, MEDIUM, HARD
 - Each flag has 3 progressive hints (stored in `Hint` model, tracked by `RevealedHint`)

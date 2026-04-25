@@ -6,52 +6,11 @@ import remarkGfm from "remark-gfm";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { getBaseUrl, DOCS_BASE_URL } from "@/lib/config";
+import { formatSlug, CATEGORY_LABELS } from "@/lib/format";
 import type { Flag } from "@/lib/types";
 
 interface VulnerabilityPageProps {
   params: Promise<{ slug: string }>;
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  INJECTION: "Injection",
-  AUTHENTICATION: "Authentication",
-  AUTHORIZATION: "Authorization",
-  REQUEST_FORGERY: "Request Forgery",
-  INFORMATION_DISCLOSURE: "Information Disclosure",
-  INPUT_VALIDATION: "Input Validation",
-  CRYPTOGRAPHIC: "Cryptographic",
-  REMOTE_CODE_EXECUTION: "Remote Code Execution",
-  OTHER: "Other",
-};
-
-const TITLE_OVERRIDES: Record<string, string> = {
-  CVE: "CVE",
-  SQL: "SQL",
-  XSS: "XSS",
-  CSRF: "CSRF",
-  SSRF: "SSRF",
-  XXE: "XXE",
-  IDOR: "IDOR",
-  BOLA: "BOLA",
-  JWT: "JWT",
-  MD5: "MD5",
-  AES: "AES",
-  CBC: "CBC",
-  AI: "AI",
-  MCP: "MCP",
-  API: "API",
-  ENV: "ENV",
-};
-
-function humanizeSlug(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => {
-      const upper = word.toUpperCase();
-      if (TITLE_OVERRIDES[upper]) return TITLE_OVERRIDES[upper];
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ");
 }
 
 async function getFlagBySlug(slug: string): Promise<Flag | null> {
@@ -126,11 +85,11 @@ export default async function VulnerabilityPage({
           <div className="container mx-auto px-4 py-16 md:py-24">
             <div className="mx-auto max-w-3xl text-center">
               <p className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
-                {CATEGORY_LABELS[flag.category] || flag.category}
+                {CATEGORY_LABELS[flag.category]}
               </p>
               <div className="flex items-center justify-center gap-3">
                 <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-                  {humanizeSlug(flag.slug)}
+                  {formatSlug(flag.slug)}
                 </h1>
                 {flag.cve && (
                   <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">

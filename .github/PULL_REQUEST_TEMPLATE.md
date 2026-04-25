@@ -24,6 +24,7 @@
 - [ ] Flag added in `prisma/seed.ts` with format `OSS{...}`
 - [ ] Three progressive hints added in `prisma/seed.ts`
 - [ ] Vulnerable code path is exploitable and demonstrable
-- [ ] Markdown documentation added under `content/vulnerabilities/`
+- [ ] Reference doc added under `content/vulnerabilities/` (concept + fix only — no exploit steps, payloads, or flag value)
 - [ ] Regression tests added (unit, API, and/or E2E)
 - [ ] No real-world secrets introduced
+- [ ] If a walkthrough was also added under `docs/src/data/blog/`, `walkthroughSlug` is set on the flag in `prisma/seed.ts`

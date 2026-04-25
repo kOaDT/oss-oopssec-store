@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import type { Flag, FlagDifficulty } from "@/lib/types";
+import type { Flag, FlagCategory, FlagDifficulty } from "@/lib/types";
+import { formatSlug, CATEGORY_LABELS } from "@/lib/format";
 
 interface FlagsClientProps {
   flags: Flag[];
@@ -60,25 +61,6 @@ const DIFFICULTY_CONFIG: Record<
   },
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  INJECTION: "Injection",
-  AUTHENTICATION: "Authentication",
-  AUTHORIZATION: "Authorization",
-  REQUEST_FORGERY: "Request Forgery",
-  INFORMATION_DISCLOSURE: "Information Disclosure",
-  INPUT_VALIDATION: "Input Validation",
-  CRYPTOGRAPHIC: "Cryptographic",
-  REMOTE_CODE_EXECUTION: "Remote Code Execution",
-  OTHER: "Other",
-};
-
-function formatSlug(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 function DifficultyBadge({ difficulty }: { difficulty: FlagDifficulty }) {
   const config = DIFFICULTY_CONFIG[difficulty];
   return (
@@ -91,10 +73,10 @@ function DifficultyBadge({ difficulty }: { difficulty: FlagDifficulty }) {
   );
 }
 
-function CategoryBadge({ category }: { category: string }) {
+function CategoryBadge({ category }: { category: FlagCategory }) {
   return (
     <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-      {CATEGORY_LABELS[category] || category}
+      {CATEGORY_LABELS[category]}
     </span>
   );
 }

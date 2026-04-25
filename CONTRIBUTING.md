@@ -36,7 +36,7 @@ New here? Check [good first issues](https://github.com/users/kOaDT/projects/3/vi
 ### Adding a vulnerability
 
 1. **Add the flag in `prisma/seed.ts`**
-   Create a `Flag` record with format `OSS{...}`. Set `slug`, `category`, `difficulty`, and `markdownFile` to match.
+   Create a `Flag` record with format `OSS{...}`. Set `slug`, `category`, `difficulty`, and `markdownFile` to match. Set `walkthroughSlug` if a walkthrough exists on the docs site (see step 6).
 
 2. **Add hints in `prisma/seed.ts`**
    Add three progressive hints in the `flagHints` map, keyed by slug. Level 1 is vague, level 2 more specific, level 3 near-solution.
@@ -44,8 +44,15 @@ New here? Check [good first issues](https://github.com/users/kOaDT/projects/3/vi
 3. **Implement the vulnerability**
    Write the vulnerable code path (API route, page, feature) that lets an attacker get the flag. It needs to be actually exploitable.
 
-4. **Document it**
-   Add a markdown file under `content/vulnerabilities/` (e.g. `your-vulnerability.md`) with an overview, vulnerable code examples, exploitation steps, and how to fix it.
+4. **Document it (reference doc)**
+   Add a markdown file under `content/vulnerabilities/` (e.g. `your-vulnerability.md`). This is the **in-app reference** rendered at `/vulnerabilities/<slug>` after a player finds the flag. It should focus on:
+   - Overview — what the vulnerability is
+   - Why it is dangerous
+   - Vulnerable code (the snippet from the codebase)
+   - Secure implementation (how to fix it)
+   - References (OWASP, CWE, etc.)
+
+   Do **not** include step-by-step exploitation, payloads, screenshots, or the flag value here. Those belong in the walkthrough (step 6). The in-app doc is meant to explain the concept and the fix, not to re-teach the exploit the player just executed.
 
 5. **Add regression tests**
    Tests keep the vulnerability exploitable so nobody accidentally patches it:
@@ -53,8 +60,8 @@ New here? Check [good first issues](https://github.com/users/kOaDT/projects/3/vi
    - API tests in `tests/api/` for exploitation scenarios
    - E2E tests in `cypress/e2e/` for full exploitation flows through the UI
 
-6. **Optional: write a walkthrough**
-   See [Writing walkthroughs](#writing-walkthroughs) below.
+6. **Optional: write a walkthrough (the exploit playbook)**
+   The walkthrough lives on the docs site (`docs/src/data/blog/`) and is where the step-by-step exploitation belongs: payloads, request examples, screenshots, narrative voice. See [Writing walkthroughs](#writing-walkthroughs) below. If you add one, set `walkthroughSlug` on the flag in `prisma/seed.ts` so the in-app reference page links to it.
 
 ### Writing walkthroughs
 

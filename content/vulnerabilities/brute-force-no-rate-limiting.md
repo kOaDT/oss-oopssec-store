@@ -41,16 +41,30 @@ There is no per-IP, per-account, or global throttling. The two distinct error me
 
 Apply layered defenses; no single control is sufficient.
 
-```typescript
-import rateLimit from "express-rate-limit";
+In a Next.js Route Handler, throttle each (IP, email) pair through a shared store — Redis with `@upstash/ratelimit`, or a `LoginAttempt` table when a database is already in the request path:
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { error: "Too many login attempts. Please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
+```typescript
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const loginLimiter = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "15 m"),
 });
+
+export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  const { email } = await request.json();
+  const { success } = await loginLimiter.limit(`login:${ip}:${email}`);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again later." },
+      { status: 429 }
+    );
+  }
+  // ... continue with credential check
+}
 ```
 
 Combine with:
