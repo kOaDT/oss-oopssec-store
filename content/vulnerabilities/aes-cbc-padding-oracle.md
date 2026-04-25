@@ -1,28 +1,23 @@
-# AES-CBC Padding Oracle Vulnerability
+# AES-CBC Padding Oracle
 
 ## Overview
 
-This vulnerability demonstrates a padding oracle attack against AES-CBC encrypted share tokens. The application encrypts resource identifiers using AES-256-CBC to generate shareable document links, but fails to authenticate the ciphertext with an HMAC. Combined with distinguishable error responses for padding failures versus resource-not-found conditions, this creates a classic padding oracle that allows attackers to decrypt tokens and forge new ones pointing to arbitrary internal resources.
+A padding oracle is created when a server uses AES-CBC without authenticating the ciphertext and exposes a way to distinguish "padding invalid" from "padding valid but content rejected". With that single bit of feedback per request, an attacker can decrypt any ciphertext byte by byte and forge new ciphertexts that decrypt to arbitrary plaintexts of their choice.
 
-The padding oracle attack was first described by Serge Vaudenay in 2002 and has since affected many real-world systems including ASP.NET, Ruby on Rails, and various banking applications.
+In this challenge, the share-link feature encrypts resource identifiers (e.g. `order:ORD-001`) with AES-256-CBC and serves them through a public share endpoint. The endpoint returns different status codes depending on whether PKCS#7 padding validation failed (400) or whether decryption succeeded but the resource was unknown (404), turning the endpoint into a textbook padding oracle.
 
-## Vulnerability Summary
+## Why This Is Dangerous
 
-The document sharing system encrypts resource paths (e.g., `order:ORD-001`) using AES-256-CBC and serves them via a public share endpoint. When the endpoint receives a token, it attempts to decrypt it and then resolves the referenced resource. The problem is that the server returns different HTTP status codes depending on the failure mode:
+- **Token decryption** — every share token can be decrypted without knowing the key.
+- **Token forgery** — attackers can craft tokens that decrypt to arbitrary internal resource paths.
+- **Access-control bypass** — internal resources never intended for external sharing become reachable.
+- **Resource enumeration** — error messages on forged tokens leak the set of supported resource types.
 
-1. **400 Bad Request** — When PKCS#7 padding validation fails during AES-CBC decryption
-2. **404 Not Found** — When padding is valid but the decrypted resource path doesn't match any known resource
-3. **200 OK** — When padding is valid and the resource exists
+## Vulnerable Code
 
-This three-way distinction leaks a single bit of information per request: whether the padding was valid or not. That single bit is enough to decrypt any ciphertext and forge new ones.
-
-### Vulnerable Code
-
-The encryption utility uses AES-256-CBC without any integrity check:
+The crypto helper uses unauthenticated AES-CBC:
 
 ```typescript
-import crypto from "crypto";
-
 const ALGORITHM = "aes-256-cbc";
 
 export function encryptShareToken(plaintext: string): string {
@@ -44,105 +39,33 @@ export function decryptShareToken(tokenHex: string): string {
     decipher.update(ciphertext),
     decipher.final(),
   ]).toString("utf8");
-  // No HMAC verification — ciphertext integrity is not checked
 }
 ```
 
-The share endpoint catches the decryption error separately from the resource lookup:
+There is no MAC over the ciphertext, so any modification to the IV or cipher block goes undetected until PKCS#7 padding is checked at the end of `decipher.final()`. The share endpoint then handles the two failure modes with distinct status codes:
 
 ```typescript
 let resourcePath: string;
 try {
   resourcePath = decryptShareToken(token);
 } catch {
-  // Padding error → 400
   return NextResponse.json(
     { error: "Invalid share token format" },
     { status: 400 }
   );
 }
-
-// If we get here, padding was valid
-// ... lookup resource ...
-return NextResponse.json(
-  { error: "Shared resource not found" },
-  { status: 404 }
-);
+// padding was valid — resource lookup happens here, returns 404 on miss
 ```
 
-## Impact
+The 400-vs-404 split is the oracle: it tells the attacker, on every request, whether their tampered ciphertext produced valid PKCS#7 padding.
 
-An attacker who can observe the server's responses can:
+## Secure Implementation
 
-- **Decrypt any share token** to learn the plaintext resource path format
-- **Forge tokens for arbitrary resources**, including internal reports not meant to be shared
-- **Access confidential data** without authentication, bypassing the intended access control
-- **Enumerate internal resource types** by forging tokens for different paths
-
-## Exploitation
-
-### How AES-CBC and PKCS#7 Padding Work
-
-AES-CBC encrypts data in 16-byte blocks. Each plaintext block is XORed with the previous ciphertext block (or the IV for the first block) before encryption. During decryption, the process is reversed: each ciphertext block is decrypted, then XORed with the previous ciphertext block to recover the plaintext.
-
-PKCS#7 padding fills the last block to exactly 16 bytes. If 3 bytes of padding are needed, the padding is `\x03\x03\x03`. If 1 byte is needed, it's `\x01`. A full block of padding (`\x10` repeated 16 times) is added when the plaintext is already a multiple of 16.
-
-The server validates this padding during decryption. If the padding bytes don't follow the PKCS#7 pattern, `decipher.final()` throws an error. The attacker can detect this because the server returns 400 instead of 404.
-
-### The Attack
-
-For a single-block ciphertext (token = IV + 1 cipher block), the attacker:
-
-1. Keeps the cipher block unchanged and modifies the IV
-2. For each byte position (from byte 15 down to byte 0), brute-forces all 256 possible values
-3. When the server returns non-400 (meaning valid padding), the attacker learns the intermediate decryption value for that byte
-4. After recovering all 16 intermediate bytes, computes a new IV that produces any desired plaintext
-
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{p4dd1ng_0r4cl3_f0rg3d_t0k3n}`:
-
-**Step 1:** Log in and place an order. On the order confirmation page, click "Share Order" to generate a share token.
-
-**Step 2:** Visit the share URL to confirm it works (200 response with order data).
-
-**Step 3:** Modify a byte in the token and observe the response. You should see either 400 (bad padding) or 404 (valid padding, unknown resource).
-
-**Step 4:** Once you can forge arbitrary plaintexts, try an unknown resource type. The server responds with an error message listing the supported types (`order`, `report`), revealing the `report` type.
-
-**Step 5:** Use a padding oracle script to recover the 16 intermediate bytes of the cipher block. This requires up to 4096 requests.
-
-**Step 6:** Compute a new IV so the block decrypts to `report:internal` (with PKCS#7 padding: `report:internal\x01`):
-
-```
-new_iv[i] = intermediate[i] XOR target_plaintext_with_padding[i]
-```
-
-**Step 7:** Send the forged token (new IV + original cipher block) to the share endpoint. The server decrypts it to `report:internal` and returns the flag.
-
-### Code Fixes
-
-**Before (Vulnerable) — Encrypt-only with distinguishable errors:**
+Use authenticated encryption so that any tampering is rejected before padding is even consulted. AES-GCM is the standard choice in Node:
 
 ```typescript
-try {
-  resourcePath = decryptShareToken(token);
-} catch {
-  return NextResponse.json(
-    { error: "Invalid share token format" },
-    { status: 400 }
-  );
-}
-// ... resource lookup returns 404 ...
-```
-
-**After (Secure) — Use AES-GCM (authenticated encryption):**
-
-```typescript
-import crypto from "crypto";
-
 export function encryptShareToken(plaintext: string): string {
-  const iv = crypto.randomBytes(12); // GCM uses 12-byte nonces
+  const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", KEY, iv);
   const encrypted = Buffer.concat([
     cipher.update(plaintext, "utf8"),
@@ -166,9 +89,9 @@ export function decryptShareToken(tokenHex: string): string {
 }
 ```
 
-Alternatively, use Encrypt-then-HMAC: compute `HMAC-SHA256(IV + ciphertext)` after encryption and verify it before decryption. If the HMAC doesn't match, reject the token with a generic error before any decryption occurs.
+If AES-CBC must be kept, use Encrypt-then-MAC: compute `HMAC-SHA256(IV ‖ ciphertext)` with a separate key, prepend it to the token, and verify it in constant time before any decryption attempt.
 
-In both cases, return the same error (e.g., 400) regardless of whether the failure was in authentication, padding, or resource lookup.
+In both designs, the endpoint must return the same generic error for every failure (bad MAC, bad padding, unknown resource). Distinguishable error codes are what made this trivially exploitable.
 
 ## References
 

@@ -2,52 +2,53 @@
 
 ## Overview
 
-This vulnerability demonstrates the critical security risk of exposing sensitive environment variables to client-side code. In Next.js applications, any environment variable prefixed with `NEXT_PUBLIC_` is embedded directly into the JavaScript bundle that runs in the user's browser, making it accessible to anyone.
+In Next.js, any environment variable whose name starts with `NEXT_PUBLIC_` is inlined into the client JavaScript bundle at build time. The value is no longer "in the environment" by the time a browser fetches the page — it is plain text inside a static asset that anyone can download. Treating these variables as a place to keep secrets is a category error.
+
+In this challenge, the checkout client reads `NEXT_PUBLIC_PAYMENT_SECRET` and sends it as the `X-Payment-Auth` header on every order request. The "secret" travels both inside the bundle and on every outbound checkout request.
 
 ## Why This Is Dangerous
 
-### Client-Side Code Is Always Public
+- **Compile-time inlining is non-reversible** — the value is part of the deployed bundle; rotating it requires a rebuild and redeploy.
+- **Visible in two places** — both the static chunks served from `/_next/static/chunks/` and the network tab of any user's browser.
+- **Minification removes the variable name** — the string survives even when the binding does, so grep-by-name searches miss it; attackers grep for the value shape.
+- **Misleading naming** — `process.env.*` _looks_ like a runtime environment lookup; in client code it is a build-time string substitution.
 
-When you use `NEXT_PUBLIC_*` environment variables in Next.js, these values are:
+## Vulnerable Code
 
-1. **Embedded at build time** into the JavaScript bundle files
-2. **Downloaded by every user** who visits your website
-3. **Accessible in the browser** through the developer console
-4. **Visible in the source code** by viewing page source or inspecting network requests
+```typescript
+const paymentSecret = process.env.NEXT_PUBLIC_PAYMENT_SECRET ?? "";
 
-### What This Means
+await fetch("/api/orders", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-Payment-Auth": paymentSecret,
+  },
+  body: JSON.stringify(payload),
+});
+```
 
-**Anything stored in a `NEXT_PUBLIC_*` variable is not secret.** It's as public as the HTML, CSS, and JavaScript files served to users. Anyone can:
+At build time, SWC replaces `process.env.NEXT_PUBLIC_PAYMENT_SECRET` with the literal string. The compiled chunk that ships to browsers contains the value directly, with the surrounding identifier minified to a one-letter local. The browser then attaches the value to every checkout request, where any user can copy it from DevTools.
 
-- Open the browser's developer console (F12)
-- Search the downloaded JavaScript chunks in the Sources tab
-- Inspect outgoing requests in the Network tab to see the value leaking in headers or request bodies
-- View the raw bundle files served from `/_next/static/chunks/`
+## Secure Implementation
 
-Note: `process.env` is not a runtime object in the browser. Next.js inlines `NEXT_PUBLIC_*` values directly into the compiled chunks at build time, so you find them by searching the bundle or by inspecting outgoing requests — not by typing `process.env` in the console.
+Anything secret stays server-side; only non-sensitive configuration crosses to the client.
 
-## The Fundamental Problem
+**Use a server-only environment variable.** Drop the `NEXT_PUBLIC_` prefix so the value is never exposed to the browser, and use it inside a server-only path (a Route Handler, a Server Component, a server action). For the checkout flow specifically, the payment authentication header should be added inside the route handler that proxies the call to the payment processor — not in the React component that runs in the browser:
 
-**Client-side code cannot keep secrets.** This is a fundamental principle of web security:
+```typescript
+// app/api/orders/route.ts (server-only)
+const paymentSecret = process.env.PAYMENT_SECRET;
+// add the header here, where the value never leaves the server
+```
 
-- All JavaScript sent to the browser is readable by the user
-- Build-time embedding means secrets become part of the code
-- No amount of obfuscation can truly hide values in client-side code
-- "Security through obscurity" does not work for client-side secrets
+**Treat any `NEXT_PUBLIC_*` value as published.** Use it for things that are inherently public: feature flags, public API URLs, analytics IDs. Anything secret — payment tokens, signing keys, third-party API credentials — never gets that prefix.
 
-## How to Retrieve the Flag
+**Audit and rotate after the fact.** If a secret has appeared in a `NEXT_PUBLIC_*` variable, assume it is leaked: rotate it at the source (payment provider, auth provider) and rebuild. Removing the variable from the next deployment does not revoke the value already in clients' caches.
 
-The flag `OSS{public_3nvir0nment_v4ri4bl3}` is leaked through a `NEXT_PUBLIC_*` variable that the checkout page sends as an HTTP header when placing an order.
+## References
 
-### A word about what to search for
-
-In a production build, SWC replaces `process.env.NEXT_PUBLIC_PAYMENT_SECRET` with the literal string at compile time and then minifies local identifiers. As a result, the bundle no longer contains the name `NEXT_PUBLIC_PAYMENT_SECRET` — only the leaked value itself remains. Don't search for the variable name, search for value-shaped patterns (long base64 strings, `sk_live_`, `pk_`, JWT, etc.) or watch outgoing requests.
-
-### Steps
-
-1. Navigate to the checkout page (`/checkout`) after adding at least one item to your cart
-2. Open DevTools (F12) and go to the **Network** tab
-3. Click **Complete Payment** — inspect the outgoing `POST /api/orders` request and look at the request headers. The base64 value `T1NTe3B1YmxpY18zbnZpcjBubWVudF92NHJpNGJsM30=` is sent in the `X-Payment-Auth` header
-4. Alternatively, in the **Sources** tab, use global search (`Ctrl+Shift+F` or `Cmd+Option+F` on macOS) and search for the literal value — you'll find it inlined in the compiled chunk for the checkout client component
-5. Decode the base64 value in the console: `atob("T1NTe3B1YmxpY18zbnZpcjBubWVudF92NHJpNGJsM30=")`
-6. The flag is: **OSS{public_3nvir0nment_v4ri4bl3}**
+- [Next.js — Environment Variables (`NEXT_PUBLIC_`)](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser)
+- [CWE-200: Exposure of Sensitive Information to an Unauthorized Actor](https://cwe.mitre.org/data/definitions/200.html)
+- [CWE-540: Inclusion of Sensitive Information in Source Code](https://cwe.mitre.org/data/definitions/540.html)
+- [OWASP Top 10 — A05:2021 Security Misconfiguration](https://owasp.org/Top10/A05_2021-Security_Misconfiguration/)

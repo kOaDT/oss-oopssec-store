@@ -1,36 +1,21 @@
-# Malicious File Upload - Stored XSS via SVG
+# Malicious File Upload — Stored XSS via SVG
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw where the application allows file uploads with insufficient validation. By relying solely on the `Content-Type` header to validate uploaded files, attackers can upload malicious SVG files containing JavaScript code that executes when the file is viewed by **any user**, including regular customers viewing product details.
+The product image upload endpoint accepts files from administrators, validates them only by their reported `Content-Type`, and stores the bytes verbatim. The allowlist includes `image/svg+xml`, which is not a passive image format — SVG is XML, and browsers execute `<script>` and DOM event handlers inside it when the file is rendered as a document.
+
+The vulnerability is amplified on the product detail page: SVG product images are rendered inside an `<object data="…" type="image/svg+xml">` tag, which loads them as full documents and runs any embedded scripts in the user's session.
 
 ## Why This Is Dangerous
 
-### Unrestricted File Upload Attack Vector
+- **Stored XSS reaches every shopper** — the malicious payload runs for every customer who views the product, not just admins.
+- **Trust laundering through "image" upload** — SVG bypasses the mental model that "file upload = static image".
+- **`Content-Type` is client-supplied** — header-only checks are spoof-trivial; even genuine image MIME types do not guarantee benign content.
+- **Long-lived persistence** — once stored, the file lives on disk and re-runs on every page load until removed.
 
-When an application validates file uploads based only on client-supplied metadata (like Content-Type headers), it creates a dangerous attack vector:
+## Vulnerable Code
 
-1. **Content-Type spoofing** - Attackers can easily manipulate the Content-Type header to bypass validation
-2. **SVG-based XSS** - SVG files can contain embedded JavaScript that executes in the browser
-3. **Persistent attack** - Uploaded malicious files remain on the server and can be triggered multiple times
-4. **Wide exposure** - The malicious content executes for **every user** who views the product, not just admins
-5. **Session hijacking** - Malicious scripts can steal authentication tokens and cookies from customers
-6. **Privilege escalation** - Scripts can perform actions on behalf of authenticated users
-7. **Data theft** - Customer data, order history, and personal information can be exfiltrated
-8. **Credential harvesting** - Fake login forms can be injected to capture customer credentials
-
-## The Vulnerability
-
-In this application, the admin product image upload feature is vulnerable to malicious file uploads. The vulnerability exists because:
-
-1. **Content-Type validation only** - The server only checks the `Content-Type` header, which can be spoofed
-2. **No content inspection** - The actual file contents are not validated
-3. **SVG files allowed** - SVG files can contain `<script>` tags and event handlers
-4. **Direct file serving** - Uploaded files are served directly without sanitization
-
-### Vulnerable Code
-
-**API Endpoint (Weak Validation):**
+The upload handler validates only the `Content-Type` header and writes the bytes to disk:
 
 ```typescript
 const ALLOWED_CONTENT_TYPES = [
@@ -38,150 +23,80 @@ const ALLOWED_CONTENT_TYPES = [
   "image/png",
   "image/gif",
   "image/webp",
-  "image/svg+xml", // ❌ SVG can contain JavaScript
+  "image/svg+xml",
 ];
 
-// Only checking Content-Type header - easily spoofed
 if (!ALLOWED_CONTENT_TYPES.includes(file.type)) {
   return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
 }
 
-// ❌ No content inspection - file is saved as-is
 const buffer = Buffer.from(await file.arrayBuffer());
+const filepath = join(uploadsDir, filename);
 await writeFile(filepath, buffer);
 ```
 
-**Frontend Rendering (Executing SVG JavaScript):**
+`file.type` is the value the client claims, not a property of the bytes. Even if it were honest, allowing SVG keeps the door open for `<script>` tags and `onload=` handlers inside the document.
 
-The vulnerability is amplified because the product detail page renders SVG images unsafely:
+The product detail page renders SVG product images as embedded documents:
+
+```tsx
+{
+  product.imageUrl.endsWith(".svg") ? (
+    <object data={product.imageUrl} type="image/svg+xml">
+      <img src={product.imageUrl} alt={product.name} />
+    </object>
+  ) : (
+    <Image src={product.imageUrl} alt={product.name} />
+  );
+}
+```
+
+`<object>` (like `<iframe>` or direct navigation) runs scripts contained in the SVG. `<img src=…>` does not — the same file is "safe" as an image and "executable" as a document.
+
+## Secure Implementation
+
+Three independent controls; apply all of them.
+
+**Inspect the bytes, not the headers.** Detect the format from the file content and only allow strictly passive image types:
 
 ```typescript
-// Using <object> tag renders SVG with JavaScript execution in user browsers
-{product.imageUrl.startsWith("/api/uploads/") &&
-product.imageUrl.endsWith(".svg") ? (
-  <object
-    data={product.imageUrl}
-    type="image/svg+xml"
-    className="h-full w-full object-cover"
-  >
-    {/* Fallback */}
-    <img src={product.imageUrl} alt={product.name} />
-  </object>
-) : (
-  <Image src={product.imageUrl} alt={product.name} />
-)}
-```
-
-This means **any regular user viewing the product page will trigger the malicious JavaScript**, making this a Stored XSS vulnerability that affects all customers.
-
-## Exploitation
-
-### Prerequisites
-
-Before exploiting this vulnerability, you need administrator access. This can be obtained through:
-
-- Weak JWT None Algorithm vulnerability
-- Mass Assignment vulnerability
-- Credential cracking via weak MD5 hashing
-- Etc
-
-### How to Retrieve the Flag
-
-To retrieve the flag, you need to:
-
-1. **Gain admin access** using one of the prerequisite vulnerabilities
-2. **Navigate to Product Management** at `/admin/products`
-3. **Create a malicious SVG file** containing JavaScript:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#4ade80"/>
-  <script type="text/javascript">
-    alert('XSS executed!');
-  </script>
-</svg>
-```
-
-4. **Upload the malicious SVG** as a product image
-5. The flag will be displayed immediately after the upload succeeds
-
-### Alternative Payloads
-
-**Event Handler Payload:**
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" onload="alert('XSS')">
-  <rect width="100" height="100" fill="#22c55e"/>
-</svg>
-```
-
-**Minimal Payload:**
-
-```xml
-<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>
-```
-
-### XSS Execution
-
-After uploading, the malicious SVG is stored on the server and will be triggered whenever the product is viewed:
-
-- **Product Detail Page:** Any user visiting `/products/[product-id]` will trigger the XSS
-- **Direct URL Access:** Visit `/api/uploads/[product-id]-[timestamp]-malicious.svg` directly
-- **Admin Panel Preview:** Click on the product image in the admin panel
-- **Product Catalog:** Users browsing the homepage or product listings will see the compromised product
-
-The JavaScript in the SVG will execute in every visitor's browser context with their authentication credentials and session data, making this a **critical Stored XSS vulnerability**.
-
-### Secure Implementation
-
-```typescript
-// ✅ SECURE - Validate actual file content, not just Content-Type
 import { fileTypeFromBuffer } from "file-type";
 
 const buffer = Buffer.from(await file.arrayBuffer());
-const detectedType = await fileTypeFromBuffer(buffer);
+const detected = await fileTypeFromBuffer(buffer);
 
-// Only allow safe image formats (no SVG)
 const SAFE_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
-if (!detectedType || !SAFE_MIME_TYPES.includes(detectedType.mime)) {
+if (!detected || !SAFE_MIME_TYPES.includes(detected.mime)) {
   return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
 }
 ```
 
-```typescript
-// ✅ SECURE - Sanitize SVG content if SVG must be supported
-import { sanitize } from "dompurify";
+If SVG support is genuinely required, sanitize on the server with a hardened SVG-aware sanitizer before storing, and re-render through `<img>`, never `<object>`/`<iframe>`:
 
-if (file.type === "image/svg+xml") {
-  const svgContent = buffer.toString("utf-8");
-  const sanitizedSvg = sanitize(svgContent, {
-    USE_PROFILES: { svg: true, svgFilters: true },
-  });
-  buffer = Buffer.from(sanitizedSvg);
-}
+```typescript
+import DOMPurify from "isomorphic-dompurify";
+
+const safeSvg = DOMPurify.sanitize(buffer.toString("utf-8"), {
+  USE_PROFILES: { svg: true, svgFilters: true },
+});
 ```
 
+**Serve uploads from a sandboxed origin.** Either host them on a separate cookie-less domain, or set strict response headers so an XSS in an uploaded file cannot reach the main app's session:
+
 ```typescript
-// ✅ SECURE - Serve uploaded files with proper headers
-// In next.config.js or server configuration
 headers: [
-  {
-    source: "/api/uploads/:path*",
-    headers: [
-      { key: "Content-Security-Policy", value: "script-src 'none'" },
-      { key: "X-Content-Type-Options", value: "nosniff" },
-    ],
-  },
+  { key: "Content-Security-Policy", value: "default-src 'none'" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Content-Disposition", value: "attachment" },
 ];
 ```
+
+Keep file names random and divorced from user input; never trust the upload's claimed extension.
 
 ## References
 
 - [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
 - [CWE-434: Unrestricted Upload of File with Dangerous Type](https://cwe.mitre.org/data/definitions/434.html)
-- [SVG XSS Attacks](https://owasp.org/www-community/xss-filter-evasion-cheatsheet)
-- [Content-Type Spoofing](https://portswigger.net/web-security/file-upload)
-- [File Type Validation Best Practices](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
+- [PortSwigger — File upload vulnerabilities](https://portswigger.net/web-security/file-upload)
+- [OWASP — XSS Filter Evasion / SVG vectors](https://owasp.org/www-community/xss-filter-evasion-cheatsheet)

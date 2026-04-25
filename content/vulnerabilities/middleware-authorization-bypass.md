@@ -2,77 +2,53 @@
 
 ## Overview
 
-This vulnerability allows attackers to completely bypass Next.js middleware-based authentication and authorization by sending a specially crafted HTTP header. The `x-middleware-subrequest` header is used internally by Next.js to prevent infinite middleware recursion, but versions prior to 15.2.3 do not validate that this header originates from an internal request.
+CVE-2025-29927 lets an external request skip Next.js middleware entirely by setting the `x-middleware-subrequest` header. The header is part of an internal mechanism Next.js uses to prevent middleware recursion when one middleware invokes another, but versions before 15.2.3 do not check that the header originated from an internal subrequest. Any client can send it.
 
-## Root Cause
+In this challenge, an internal diagnostics page (`/monitoring/internal-status`) is protected solely by middleware. Bypassing the middleware exposes the page to anyone, with no authentication.
 
-The vulnerability stems from:
+**CVSS Score:** 9.1 (Critical)
 
-1. **Trusted Internal Header**: Next.js uses `x-middleware-subrequest` to track middleware execution and prevent recursive loops
-2. **No Origin Validation**: The framework does not verify that this header comes from an internal subrequest rather than an external client
-3. **Middleware Skip Logic**: When the header value matches the middleware module name repeated to satisfy the recursion depth threshold, Next.js skips middleware execution entirely
-4. **Single Layer of Defense**: Applications that rely solely on middleware for access control have no fallback when middleware is bypassed
+## Affected Versions
 
-## Impact
+- Next.js 11.1.4 through 15.2.2 (patched in 15.2.3, with backports for 14.x, 13.x and 12.x)
 
-This vulnerability allows attackers to:
+## Why This Is Dangerous
 
-- Bypass all middleware-based authentication checks
-- Access protected routes without valid credentials
-- Reach internal dashboards, admin panels, and sensitive endpoints
-- Circumvent rate limiting, geo-blocking, or any other middleware-enforced policy
+- **Single-layer auth collapses** — apps that rely on middleware as the only access-control gate fall open instantly.
+- **Trivial exploit** — a single HTTP header, no credentials, no setup.
+- **Wide reach** — every middleware-enforced policy is affected: auth, rate limiting, geo-blocking, A/B routing.
+- **Pre-auth on every protected route** — internal dashboards, admin panels, draft content, signed-URL endpoints all become reachable.
 
-## Exploitation
+## Vulnerable Pattern
 
-### How to Retrieve the Flag
-
-To retrieve the flag `OSS{m1ddl3w4r3_byp4ss}`, you need to:
-
-1. **Discover the protected route**: The `/monitoring/internal-status` page is an internal diagnostics dashboard protected by middleware
-2. **Identify the Next.js version**: Check response headers or `/_next/` assets to confirm the application runs Next.js <= 15.2.2
-3. **Research CVE-2025-29927**: Understand how the `x-middleware-subrequest` header bypasses middleware
-4. **Craft the exploit request**: Send a request with the header `x-middleware-subrequest: middleware:middleware:middleware:middleware:middleware`
-5. **Access the page**: The middleware is skipped, and the internal status page renders with the flag
-
-### Exploit Command
-
-```bash
-curl -H "x-middleware-subrequest: middleware:middleware:middleware:middleware:middleware" \
-  http://localhost:3000/monitoring/internal-status
-```
-
-The header value must contain the middleware module name (`middleware` for root-level middleware, or `src/middleware` if using a `src/` directory) repeated 5 times, separated by colons.
-
-## Remediation
-
-### Immediate Actions
-
-1. **Upgrade Next.js**: Update to version 15.2.3 or later, which patches the vulnerability
-2. **Defense in Depth**: Never rely solely on middleware for access control. Implement server-side authentication checks in route handlers and page components
-3. **WAF Rules**: Block requests containing the `x-middleware-subrequest` header from external sources
-
-### Code Fixes
-
-**Before (Vulnerable Pattern):**
+A typical Next.js auth middleware that is the sole layer of protection looks like this:
 
 ```typescript
-// middleware.ts - sole layer of protection
+// middleware.ts
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("authToken")?.value;
   if (!token) return NextResponse.redirect(new URL("/login", request.url));
   return NextResponse.next();
 }
 
-// app/admin/page.tsx - trusts middleware entirely
+// app/admin/page.tsx — trusts middleware entirely
 export default function AdminPage() {
   return <AdminDashboard />;
 }
 ```
 
-**After (Defense in Depth):**
+When a request includes `x-middleware-subrequest: middleware:middleware:middleware:middleware:middleware` (or `src/middleware:…` for `src/`-layout projects), affected versions short-circuit the middleware execution and serve the underlying route directly. The page handler then renders without ever consulting the auth cookie.
+
+## Secure Implementation
+
+This bug lives in the framework, so the fix is primarily an upgrade — but the underlying lesson is that middleware alone is not access control.
+
+**Upgrade Next.js** to 15.2.3 or later. For older majors, take the corresponding patched release in the 14.x / 13.x / 12.x lines.
+
+**Authorize inside route handlers and server components.** Middleware is fine for redirects and cosmetic gating, but every protected route must independently verify the user's identity and role:
 
 ```typescript
-// app/admin/page.tsx - validates auth independently
+import { redirect } from "next/navigation";
 import { getAuthenticatedUser } from "@/lib/server-auth";
 
 export default async function AdminPage() {
@@ -82,14 +58,11 @@ export default async function AdminPage() {
 }
 ```
 
-## OWASP Classification
-
-- **A01:2021 - Broken Access Control**: The middleware bypass allows unauthorized access to protected resources
-- **A04:2021 - Insecure Design**: Relying on a single middleware layer without defense in depth
+**Strip the bypass header at the edge.** Configure a WAF, reverse proxy, or CDN rule to drop incoming `x-middleware-subrequest` headers from external clients. This is a belt-and-braces measure for any request that reaches the application from outside the trust boundary.
 
 ## References
 
 - [CVE-2025-29927](https://nvd.nist.gov/vuln/detail/CVE-2025-29927)
-- [Next.js Security Advisory](https://github.com/advisories/GHSA-f82v-jwr5-mffw)
+- [Next.js Security Advisory — GHSA-f82v-jwr5-mffw](https://github.com/advisories/GHSA-f82v-jwr5-mffw)
 - [CWE-285: Improper Authorization](https://cwe.mitre.org/data/definitions/285.html)
 - [CWE-290: Authentication Bypass by Spoofing](https://cwe.mitre.org/data/definitions/290.html)

