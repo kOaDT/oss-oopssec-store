@@ -6,7 +6,13 @@ import remarkGfm from "remark-gfm";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { getBaseUrl, DOCS_BASE_URL } from "@/lib/config";
-import { formatSlug, CATEGORY_LABELS } from "@/lib/format";
+import {
+  formatSlug,
+  CATEGORY_LABELS,
+  getCveUrl,
+  getCweUrl,
+  getOwaspUrl,
+} from "@/lib/format";
 import type { Flag } from "@/lib/types";
 
 interface VulnerabilityPageProps {
@@ -92,20 +98,54 @@ export default async function VulnerabilityPage({
                   {formatSlug(flag.slug)}
                 </h1>
                 {flag.cve && (
-                  <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                  <a
+                    href={getCveUrl(flag.cve)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`View ${flag.cve} details on NVD (opens in new tab)`}
+                    className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 transition-colors hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                  >
                     {flag.cve}
-                  </span>
+                  </a>
                 )}
-                {flag.cwe && (
-                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                    {flag.cwe}
-                  </span>
-                )}
-                {flag.owasp && (
-                  <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
-                    OWASP {flag.owasp}
-                  </span>
-                )}
+                {flag.cwe &&
+                  (() => {
+                    const cweUrl = getCweUrl(flag.cwe);
+                    const className =
+                      "rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
+                    return cweUrl ? (
+                      <a
+                        href={cweUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`View ${flag.cwe} on MITRE (opens in new tab)`}
+                        className={`${className} transition-colors hover:bg-amber-200 dark:hover:bg-amber-900/50`}
+                      >
+                        {flag.cwe}
+                      </a>
+                    ) : (
+                      <span className={className}>{flag.cwe}</span>
+                    );
+                  })()}
+                {flag.owasp &&
+                  (() => {
+                    const owaspUrl = getOwaspUrl(flag.owasp);
+                    const className =
+                      "rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300";
+                    return owaspUrl ? (
+                      <a
+                        href={owaspUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`View OWASP ${flag.owasp} on owasp.org (opens in new tab)`}
+                        className={`${className} transition-colors hover:bg-indigo-200 dark:hover:bg-indigo-900/50`}
+                      >
+                        OWASP {flag.owasp}
+                      </a>
+                    ) : (
+                      <span className={className}>OWASP {flag.owasp}</span>
+                    );
+                  })()}
               </div>
             </div>
           </div>

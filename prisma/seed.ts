@@ -123,7 +123,7 @@ const flags = [
     flag: "OSS{m4ss_4ss1gnm3nt_vuln3r4b1l1ty}",
     slug: "mass-assignment",
     cwe: "CWE-915",
-    owasp: "A04:2021",
+    owasp: "A08:2021",
     markdownFile: "mass-assignment.md",
     walkthroughSlug: "mass-assignment-admin-privilege-escalation",
     category: "INPUT_VALIDATION" as const,
@@ -312,7 +312,7 @@ const flags = [
   {
     flag: "OSS{p4dd1ng_0r4cl3_f0rg3d_t0k3n}",
     slug: "aes-cbc-padding-oracle",
-    cwe: "CWE-310",
+    cwe: "CWE-327",
     owasp: "A02:2021",
     markdownFile: "aes-cbc-padding-oracle.md",
     walkthroughSlug: "aes-cbc-padding-oracle-forged-share-token",

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { DOCS_BASE_URL } from "@/lib/config";
+import { getCveUrl, getCweUrl, getOwaspUrl } from "@/lib/format";
 
 const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 
@@ -420,20 +421,54 @@ export default function PlayerDashboardClient() {
                             {formatSlug(flag.slug)}
                           </span>
                           {flag.cve && (
-                            <span className="ml-2 rounded bg-rose-950 px-1.5 py-0.5 text-xs text-rose-400">
+                            <a
+                              href={getCveUrl(flag.cve)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`View ${flag.cve} details on NVD (opens in new tab)`}
+                              className="ml-2 rounded bg-rose-950 px-1.5 py-0.5 text-xs text-rose-400 transition-colors hover:bg-rose-900"
+                            >
                               {flag.cve}
-                            </span>
+                            </a>
                           )}
-                          {flag.cwe && (
-                            <span className="ml-2 rounded bg-amber-950 px-1.5 py-0.5 text-xs text-amber-400">
-                              {flag.cwe}
-                            </span>
-                          )}
-                          {flag.owasp && (
-                            <span className="ml-2 rounded bg-indigo-950 px-1.5 py-0.5 text-xs text-indigo-400">
-                              {flag.owasp}
-                            </span>
-                          )}
+                          {flag.cwe &&
+                            (() => {
+                              const cweUrl = getCweUrl(flag.cwe);
+                              const baseClass =
+                                "ml-2 rounded bg-amber-950 px-1.5 py-0.5 text-xs text-amber-400";
+                              return cweUrl ? (
+                                <a
+                                  href={cweUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`View ${flag.cwe} on MITRE (opens in new tab)`}
+                                  className={`${baseClass} transition-colors hover:bg-amber-900`}
+                                >
+                                  {flag.cwe}
+                                </a>
+                              ) : (
+                                <span className={baseClass}>{flag.cwe}</span>
+                              );
+                            })()}
+                          {flag.owasp &&
+                            (() => {
+                              const owaspUrl = getOwaspUrl(flag.owasp);
+                              const baseClass =
+                                "ml-2 rounded bg-indigo-950 px-1.5 py-0.5 text-xs text-indigo-400";
+                              return owaspUrl ? (
+                                <a
+                                  href={owaspUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`View OWASP ${flag.owasp} on owasp.org (opens in new tab)`}
+                                  className={`${baseClass} transition-colors hover:bg-indigo-900`}
+                                >
+                                  {flag.owasp}
+                                </a>
+                              ) : (
+                                <span className={baseClass}>{flag.owasp}</span>
+                              );
+                            })()}
                         </div>
                       </td>
                       <td className="hidden py-3 pr-4 sm:table-cell">

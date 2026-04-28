@@ -42,3 +42,34 @@ export const CATEGORY_LABELS: Record<FlagCategory, string> = {
   INSECURE_DESIGN: "Insecure Design",
   OTHER: "Other",
 };
+
+const OWASP_2021_SLUGS: Record<string, string> = {
+  A01: "A01_2021-Broken_Access_Control",
+  A02: "A02_2021-Cryptographic_Failures",
+  A03: "A03_2021-Injection",
+  A04: "A04_2021-Insecure_Design",
+  A05: "A05_2021-Security_Misconfiguration",
+  A06: "A06_2021-Vulnerable_and_Outdated_Components",
+  A07: "A07_2021-Identification_and_Authentication_Failures",
+  A08: "A08_2021-Software_and_Data_Integrity_Failures",
+  A09: "A09_2021-Security_Logging_and_Monitoring_Failures",
+  A10: "A10_2021-Server-Side_Request_Forgery_%28SSRF%29",
+};
+
+export function getCveUrl(cve: string): string {
+  return `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(cve)}`;
+}
+
+export function getCweUrl(cwe: string): string | null {
+  const match = cwe.match(/^CWE-(\d+)$/i);
+  if (!match) return null;
+  return `https://cwe.mitre.org/data/definitions/${match[1]}.html`;
+}
+
+export function getOwaspUrl(owasp: string): string | null {
+  const match = owasp.match(/^(A\d{2}):2021$/);
+  if (!match) return null;
+  const slug = OWASP_2021_SLUGS[match[1]];
+  if (!slug) return null;
+  return `https://owasp.org/Top10/${slug}/`;
+}
