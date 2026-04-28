@@ -68,6 +68,7 @@ export type FlagCategory =
   | "INPUT_VALIDATION"
   | "CRYPTOGRAPHIC"
   | "REMOTE_CODE_EXECUTION"
+  | "INSECURE_DESIGN"
   | "OTHER";
 
 export type FlagDifficulty = "EASY" | "MEDIUM" | "HARD";
@@ -77,6 +78,8 @@ export interface Flag {
   flag: string;
   slug: string;
   cve?: string | null;
+  cwe?: string | null;
+  owasp?: string | null;
   markdownFile: string;
   walkthroughSlug?: string | null;
   category: FlagCategory;

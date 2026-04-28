@@ -8,7 +8,9 @@ import { generateGiftCardCode } from "../lib/gift-card";
 /**
  * If you want to add a new flag, you can add it here.
  * The flag should be in the format of "OSS{flag}"
- * The cve is optional
+ * The cve is optional (e.g. "CVE-2025-29927")
+ * The cwe is optional (e.g. "CWE-89")
+ * The owasp is optional (OWASP Top 10 2021 category, e.g. "A03:2021")
  * The walkthroughSlug is optional (from https://koadt.github.io/oss-oopssec-store/)
  *
  * The markdown file should be in the content/vulnerabilities folder
@@ -40,6 +42,8 @@ const flags = [
     flag: "OSS{r3act2sh3ll}",
     slug: "react2shell",
     cve: "CVE-2025-55182",
+    cwe: "CWE-502",
+    owasp: "A08:2021",
     markdownFile: "react2shell.md",
     walkthroughSlug: "react2shell-cve-2025-55182",
     category: "REMOTE_CODE_EXECUTION" as const,
@@ -48,6 +52,8 @@ const flags = [
   {
     flag: "OSS{public_3nvir0nment_v4ri4bl3}",
     slug: "public-env-variable",
+    cwe: "CWE-200",
+    owasp: "A05:2021",
     markdownFile: "public-env-variable.md",
     walkthroughSlug: "next-public-env-variable-leak",
     category: "INFORMATION_DISCLOSURE" as const,
@@ -56,6 +62,8 @@ const flags = [
   {
     flag: "OSS{w34k_jwt_s3cr3t_k3y}",
     slug: "weak-jwt-secret",
+    cwe: "CWE-347",
+    owasp: "A02:2021",
     markdownFile: "weak-jwt-secret.md",
     walkthroughSlug: "jwt-weak-secret-admin-bypass",
     category: "AUTHENTICATION" as const,
@@ -64,6 +72,8 @@ const flags = [
   {
     flag: "OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}",
     slug: "client-side-price-manipulation",
+    cwe: "CWE-602",
+    owasp: "A04:2021",
     markdownFile: "client-side-price-manipulation.md",
     walkthroughSlug: "client-side-price-manipulation",
     category: "INPUT_VALIDATION" as const,
@@ -72,6 +82,8 @@ const flags = [
   {
     flag: "OSS{w34k_md5_h4sh1ng}",
     slug: "weak-md5-hashing",
+    cwe: "CWE-328",
+    owasp: "A02:2021",
     markdownFile: "weak-md5-hashing.md",
     walkthroughSlug: "weak-md5-hashing-admin-compromise",
     category: "CRYPTOGRAPHIC" as const,
@@ -80,6 +92,8 @@ const flags = [
   {
     flag: "OSS{1ns3cur3_d1r3ct_0bj3ct_r3f3r3nc3}",
     slug: "insecure-direct-object-reference",
+    cwe: "CWE-639",
+    owasp: "A01:2021",
     markdownFile: "insecure-direct-object-reference.md",
     walkthroughSlug: "idor-order-privacy-breach",
     category: "AUTHORIZATION" as const,
@@ -88,6 +102,8 @@ const flags = [
   {
     flag: "OSS{cr0ss_s1t3_scr1pt1ng_xss}",
     slug: "cross-site-scripting-xss",
+    cwe: "CWE-79",
+    owasp: "A03:2021",
     markdownFile: "cross-site-scripting-xss.md",
     walkthroughSlug: "stored-xss-product-reviews",
     category: "INJECTION" as const,
@@ -96,6 +112,8 @@ const flags = [
   {
     flag: "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}",
     slug: "cross-site-request-forgery",
+    cwe: "CWE-352",
+    owasp: "A01:2021",
     markdownFile: "cross-site-request-forgery.md",
     walkthroughSlug: "csrf-admin-order-update",
     category: "REQUEST_FORGERY" as const,
@@ -104,6 +122,8 @@ const flags = [
   {
     flag: "OSS{m4ss_4ss1gnm3nt_vuln3r4b1l1ty}",
     slug: "mass-assignment",
+    cwe: "CWE-915",
+    owasp: "A04:2021",
     markdownFile: "mass-assignment.md",
     walkthroughSlug: "mass-assignment-admin-privilege-escalation",
     category: "INPUT_VALIDATION" as const,
@@ -112,6 +132,8 @@ const flags = [
   {
     flag: "OSS{p4th_tr4v3rs4l_4tt4ck}",
     slug: "path-traversal",
+    cwe: "CWE-22",
+    owasp: "A01:2021",
     markdownFile: "path-traversal.md",
     walkthroughSlug: "path-traversal-documents-api",
     category: "INPUT_VALIDATION" as const,
@@ -120,6 +142,8 @@ const flags = [
   {
     flag: "OSS{s3rv3r_s1d3_r3qu3st_f0rg3ry}",
     slug: "server-side-request-forgery",
+    cwe: "CWE-918",
+    owasp: "A10:2021",
     markdownFile: "server-side-request-forgery.md",
     walkthroughSlug: "ssrf-internal-page-access",
     category: "REQUEST_FORGERY" as const,
@@ -128,6 +152,8 @@ const flags = [
   {
     flag: "OSS{sql_1nj3ct10n_vuln3r4b1l1ty}",
     slug: "sql-injection",
+    cwe: "CWE-89",
+    owasp: "A03:2021",
     markdownFile: "sql-injection.md",
     walkthroughSlug: "sql-injection-writeup",
     category: "INJECTION" as const,
@@ -136,6 +162,8 @@ const flags = [
   {
     flag: "OSS{1nf0_d1scl0sur3_4p1_3rr0r}",
     slug: "information-disclosure-api-error",
+    cwe: "CWE-209",
+    owasp: "A05:2021",
     markdownFile: "information-disclosure-api-error.md",
     walkthroughSlug: "information-disclosure-api-error",
     category: "INFORMATION_DISCLOSURE" as const,
@@ -144,6 +172,8 @@ const flags = [
   {
     flag: "OSS{m4l1c10us_f1l3_upl04d_xss}",
     slug: "malicious-file-upload",
+    cwe: "CWE-434",
+    owasp: "A04:2021",
     walkthroughSlug: "malicious-file-upload-stored-xss",
     markdownFile: "malicious-file-upload.md",
     category: "INJECTION" as const,
@@ -152,6 +182,8 @@ const flags = [
   {
     flag: "OSS{pr0duct_s34rch_sql_1nj3ct10n}",
     slug: "product-search-sql-injection",
+    cwe: "CWE-89",
+    owasp: "A03:2021",
     walkthroughSlug: "product-search-sql-injection",
     markdownFile: "product-search-sql-injection.md",
     category: "INJECTION" as const,
@@ -160,6 +192,8 @@ const flags = [
   {
     flag: "OSS{s3ss10n_f1x4t10n_4tt4ck}",
     slug: "session-fixation-weak-session-management",
+    cwe: "CWE-384",
+    owasp: "A07:2021",
     markdownFile: "session-fixation-weak-session-management.md",
     walkthroughSlug: "session-fixation-weak-session-management",
     category: "AUTHENTICATION" as const,
@@ -168,6 +202,8 @@ const flags = [
   {
     flag: "OSS{brut3_f0rc3_n0_r4t3_l1m1t}",
     slug: "brute-force-no-rate-limiting",
+    cwe: "CWE-307",
+    owasp: "A07:2021",
     markdownFile: "brute-force-no-rate-limiting.md",
     walkthroughSlug: "brute-force-no-rate-limiting",
     category: "AUTHENTICATION" as const,
@@ -176,6 +212,8 @@ const flags = [
   {
     flag: "OSS{x_f0rw4rd3d_f0r_sql1}",
     slug: "x-forwarded-for-sql-injection",
+    cwe: "CWE-89",
+    owasp: "A03:2021",
     markdownFile: "x-forwarded-for-sql-injection.md",
     walkthroughSlug: "x-forwarded-for-sql-injection",
     category: "INJECTION" as const,
@@ -184,6 +222,8 @@ const flags = [
   {
     flag: "OSS{pr0mpt_1nj3ct10n_41_4ss1st4nt}",
     slug: "prompt-injection-ai-assistant",
+    cwe: "CWE-77",
+    owasp: "A03:2021",
     markdownFile: "prompt-injection-ai-assistant.md",
     walkthroughSlug: "prompt-injection-ai-assistant",
     category: "INJECTION" as const,
@@ -192,6 +232,8 @@ const flags = [
   {
     flag: "OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}",
     slug: "broken-object-level-authorization",
+    cwe: "CWE-639",
+    owasp: "A01:2021",
     walkthroughSlug: "bola-wishlist-access",
     markdownFile: "broken-object-level-authorization.md",
     category: "AUTHORIZATION" as const,
@@ -200,6 +242,8 @@ const flags = [
   {
     flag: "OSS{s3c0nd_0rd3r_sql_1nj3ct10n}",
     slug: "second-order-sql-injection",
+    cwe: "CWE-89",
+    owasp: "A03:2021",
     markdownFile: "second-order-sql-injection.md",
     walkthroughSlug: "second-order-sql-injection",
     category: "INJECTION" as const,
@@ -208,6 +252,8 @@ const flags = [
   {
     flag: "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}",
     slug: "plaintext-password-in-logs",
+    cwe: "CWE-532",
+    owasp: "A09:2021",
     markdownFile: "plaintext-password-in-logs.md",
     walkthroughSlug: "plaintext-password-in-logs",
     category: "INFORMATION_DISCLOSURE" as const,
@@ -216,6 +262,8 @@ const flags = [
   {
     flag: "OSS{xml_3xt3rn4l_3nt1ty_1nj3ct10n}",
     slug: "xxe-supplier-order-import",
+    cwe: "CWE-611",
+    owasp: "A05:2021",
     markdownFile: "xxe-supplier-order-import.md",
     walkthroughSlug: "xxe-supplier-order-import",
     category: "INJECTION" as const,
@@ -224,6 +272,8 @@ const flags = [
   {
     flag: "OSS{1ns3cur3_p4ssw0rd_r3s3t}",
     slug: "insecure-password-reset",
+    cwe: "CWE-640",
+    owasp: "A07:2021",
     markdownFile: "insecure-password-reset.md",
     walkthroughSlug: "insecure-password-reset",
     category: "AUTHENTICATION" as const,
@@ -232,6 +282,8 @@ const flags = [
   {
     flag: "OSS{0p3n_r3d1r3ct_l0g1n_byp4ss}",
     slug: "open-redirect",
+    cwe: "CWE-601",
+    owasp: "A01:2021",
     markdownFile: "open-redirect.md",
     walkthroughSlug: "open-redirect-login-bypass",
     category: "INPUT_VALIDATION" as const,
@@ -240,6 +292,8 @@ const flags = [
   {
     flag: "OSS{s3lf_xss_pr0f1l3_1nj3ct10n}",
     slug: "self-xss-profile-injection",
+    cwe: "CWE-79",
+    owasp: "A03:2021",
     markdownFile: "self-xss-profile-injection.md",
     walkthroughSlug: "self-xss-csrf-profile-takeover",
     category: "INJECTION" as const,
@@ -248,6 +302,8 @@ const flags = [
   {
     flag: "OSS{csrf_pr0f1l3_t4k30v3r_ch41n}",
     slug: "csrf-profile-takeover-chain",
+    cwe: "CWE-352",
+    owasp: "A01:2021",
     markdownFile: "csrf-profile-takeover-chain.md",
     walkthroughSlug: "self-xss-csrf-profile-takeover",
     category: "REQUEST_FORGERY" as const,
@@ -256,6 +312,8 @@ const flags = [
   {
     flag: "OSS{p4dd1ng_0r4cl3_f0rg3d_t0k3n}",
     slug: "aes-cbc-padding-oracle",
+    cwe: "CWE-310",
+    owasp: "A02:2021",
     markdownFile: "aes-cbc-padding-oracle.md",
     walkthroughSlug: "aes-cbc-padding-oracle-forged-share-token",
     category: "CRYPTOGRAPHIC" as const,
@@ -264,6 +322,8 @@ const flags = [
   {
     flag: "OSS{mcp_p01s0n3d_t00l_r3sp0ns3}",
     slug: "mcp-malicious-server",
+    cwe: "CWE-77",
+    owasp: "A03:2021",
     markdownFile: "mcp-malicious-server.md",
     walkthroughSlug: "mcp-malicious-server",
     category: "INJECTION" as const,
@@ -273,6 +333,8 @@ const flags = [
     flag: "OSS{m1ddl3w4r3_byp4ss}",
     slug: "middleware-authorization-bypass",
     cve: "CVE-2025-29927",
+    cwe: "CWE-285",
+    owasp: "A01:2021",
     markdownFile: "middleware-authorization-bypass.md",
     walkthroughSlug: "middleware-authorization-bypass-cve-2025-29927",
     category: "AUTHORIZATION" as const,
@@ -281,6 +343,8 @@ const flags = [
   {
     flag: "OSS{r4c3_c0nd1t10n_c0up0n_4bus3}",
     slug: "race-condition-coupon-abuse",
+    cwe: "CWE-362",
+    owasp: "A04:2021",
     markdownFile: "race-condition-coupon.md",
     walkthroughSlug: "race-condition-coupon-abuse",
     category: "INSECURE_DESIGN" as const,
@@ -289,6 +353,8 @@ const flags = [
   {
     flag: "OSS{1ns3cur3_r4nd0mn3ss_g1ft_c4rd}",
     slug: "insecure-randomness-gift-card",
+    cwe: "CWE-338",
+    owasp: "A02:2021",
     markdownFile: "insecure-randomness-gift-card.md",
     walkthroughSlug: "insecure-randomness-gift-card",
     category: "CRYPTOGRAPHIC" as const,

@@ -164,11 +164,21 @@ function FlagCardGrid({ flag, found }: { flag: Flag; found: boolean }) {
     >
       <div className="mb-3 flex items-start justify-between gap-2">
         <DifficultyBadge difficulty={flag.difficulty} />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
           {found && <FoundBadge />}
           {flag.cve && (
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
               {flag.cve}
+            </span>
+          )}
+          {flag.cwe && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+              {flag.cwe}
+            </span>
+          )}
+          {flag.owasp && (
+            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+              OWASP {flag.owasp}
             </span>
           )}
         </div>
@@ -223,12 +233,22 @@ function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
         )}
       </div>
 
-      <div className="hidden items-center gap-3 md:flex">
+      <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
         {found && <FoundBadge />}
         <CategoryBadge category={flag.category} />
         {flag.cve && (
           <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
             {flag.cve}
+          </span>
+        )}
+        {flag.cwe && (
+          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+            {flag.cwe}
+          </span>
+        )}
+        {flag.owasp && (
+          <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+            OWASP {flag.owasp}
           </span>
         )}
       </div>
@@ -262,12 +282,14 @@ export default function FlagsClient({ flags, foundFlagIds }: FlagsClientProps) {
   const filteredFlags = useMemo(() => {
     return flags.filter((flag) => {
       const isFound = foundSet.has(flag.id);
+      const query = searchQuery.toLowerCase();
       const matchesSearch =
         searchQuery === "" ||
-        (isFound &&
-          flag.flag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        flag.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (flag.cve?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+        (isFound && flag.flag.toLowerCase().includes(query)) ||
+        flag.slug.toLowerCase().includes(query) ||
+        (flag.cve?.toLowerCase().includes(query) ?? false) ||
+        (flag.cwe?.toLowerCase().includes(query) ?? false) ||
+        (flag.owasp?.toLowerCase().includes(query) ?? false);
 
       const matchesDifficulty =
         difficultyFilter === "ALL" || flag.difficulty === difficultyFilter;
@@ -314,7 +336,7 @@ export default function FlagsClient({ flags, foundFlagIds }: FlagsClientProps) {
           </div>
           <input
             type="text"
-            placeholder="Search flags, vulnerabilities, or CVEs..."
+            placeholder="Search flags, vulnerabilities, CVEs, CWEs, or OWASP..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-primary-400"

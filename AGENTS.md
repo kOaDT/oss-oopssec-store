@@ -128,7 +128,7 @@ npm run docs:build           # Build Astro site
 ### CTF Flag System
 
 - Format: `OSS{...}`
-- Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`, `walkthroughSlug` (optional)
+- Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`, `walkthroughSlug` (optional), `cve` (optional), `cwe` (optional), `owasp` (optional)
 - Categories: INJECTION, AUTHENTICATION, AUTHORIZATION, XSS, CSRF, etc.
 - Difficulty: EASY, MEDIUM, HARD
 - Each flag has 3 progressive hints (stored in `Hint` model, tracked by `RevealedHint`)

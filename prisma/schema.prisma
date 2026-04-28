@@ -106,6 +106,8 @@ model Flag {
   flag            String
   slug            String         @unique
   cve             String?
+  cwe             String?
+  owasp           String?
   markdownFile    String
   walkthroughSlug String?
   category        FlagCategory   @default(OTHER)

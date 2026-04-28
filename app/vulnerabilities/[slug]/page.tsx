@@ -87,13 +87,23 @@ export default async function VulnerabilityPage({
               <p className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
                 {CATEGORY_LABELS[flag.category]}
               </p>
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
                 <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
                   {formatSlug(flag.slug)}
                 </h1>
                 {flag.cve && (
                   <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
                     {flag.cve}
+                  </span>
+                )}
+                {flag.cwe && (
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                    {flag.cwe}
+                  </span>
+                )}
+                {flag.owasp && (
+                  <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+                    OWASP {flag.owasp}
                   </span>
                 )}
               </div>
