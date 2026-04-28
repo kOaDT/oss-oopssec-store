@@ -5,6 +5,7 @@ const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
 const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
 const GITHUB_ROADMAP = "https://github.com/users/kOaDT/projects/3";
+const DEV_TO_URL = "https://dev.to/oopssec-store";
 
 export default function Footer() {
   return (
@@ -28,7 +29,7 @@ export default function Footer() {
                 aria-label="GitHub Repository"
               >
                 <svg
-                  className="h-5 w-5"
+                  className="h-6 w-6"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -37,6 +38,21 @@ export default function Footer() {
                     d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
                     clipRule="evenodd"
                   />
+                </svg>
+              </a>
+              <a
+                href={DEV_TO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+                aria-label="DEV Community Profile"
+              >
+                <svg
+                  className="h-6 w-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M7.826 10.083a.784.784 0 0 0-.468-.175h-.701v4.198h.701a.786.786 0 0 0 .469-.175c.155-.117.233-.292.233-.525v-2.798c.001-.233-.079-.408-.234-.525zM19.236 3H4.764C3.79 3 3.001 3.787 3 4.76v14.48c.001.973.79 1.76 1.764 1.76h14.473c.974 0 1.762-.787 1.763-1.76V4.76A1.765 1.765 0 0 0 19.236 3zM9.195 13.414c0 .755-.466 1.901-1.942 1.898H5.389V8.665h1.903c1.424 0 1.902 1.144 1.903 1.899v2.85zm4.045-3.562H11.1v1.544h1.309v1.188H11.1v1.543h2.142v1.188h-2.498a.813.813 0 0 1-.833-.792V9.497a.813.813 0 0 1 .792-.832h2.539l-.002 1.187zm4.165 4.632c-.531 1.235-1.481.99-1.906 0l-1.548-5.818h1.309l1.193 4.569 1.188-4.569h1.31l-1.546 5.818z" />
                 </svg>
               </a>
             </div>
