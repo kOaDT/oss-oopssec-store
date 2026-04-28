@@ -97,5 +97,5 @@ In both designs, the endpoint must return the same generic error for every failu
 
 - [CWE-649: Reliance on Obfuscation or Protection Mechanism that is Not Trusted](https://cwe.mitre.org/data/definitions/649.html)
 - [OWASP — Testing for Padding Oracle](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle)
-- [OWASP Top 10 — A02:2021 Cryptographic Failures](https://owasp.org/Top10/A02_2021-Cryptographic_Failures/)
+- [OWASP Top 10 — A04:2025 Cryptographic Failures](https://owasp.org/Top10/2025/A04_2025-Cryptographic_Failures/)
 - [Microsoft — Timing vulnerabilities with CBC-mode symmetric decryption using padding](https://learn.microsoft.com/en-us/dotnet/standard/security/vulnerabilities-cbc-mode)

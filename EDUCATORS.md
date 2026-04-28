@@ -51,20 +51,22 @@ Each vulnerability hides a flag in the format `OSS{...}`. Walkthroughs are avail
 
 ## OWASP Coverage Grid
 
-OopsSec Store covers the full **OWASP Top 10 (2021)** plus advanced topics relevant to modern web stacks.
+OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relevant to modern web stacks.
 
-| OWASP Category                          | Challenges covered                                                                                                                                                                      |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A01 - Broken Access Control**         | IDOR (wishlist), BOLA (API), Open Redirect, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927), CSRF, CSRF + Self-XSS chain (profile takeover)                            |
-| **A02 - Cryptographic Failures**        | Weak JWT secret, Weak MD5 Hashing, Padding Oracle (AES-CBC), Insecure Randomness (gift card code generation)                                                                            |
-| **A03 - Injection**                     | Stored XSS (product reviews), Self-XSS (profile injection), SQL Injection (login), Product Search SQLi, Second-Order SQLi, X-Forwarded-For SQLi, Prompt Injection, MCP Server Poisoning |
-| **A04 - Insecure Design**               | Client-side price manipulation, Stored XSS via SVG upload, Race Condition Coupon Abuse                                                                                                  |
-| **A05 - Security Misconfiguration**     | Public environment variable exposure, Information disclosure via API errors, XXE (supplier import)                                                                                      |
-| **A06 - Vulnerable Components**         | _No challenge currently maps directly to A06 — contributions welcome._                                                                                                                  |
-| **A07 - Auth & Session Failures**       | Session fixation & weak session management, Brute force (no rate limiting), Insecure password reset                                                                                     |
-| **A08 - Software & Data Integrity**     | React2Shell - RSC RCE (CVE-2025-55182), Mass Assignment / Parameter Pollution                                                                                                           |
-| **A09 - Logging & Monitoring Failures** | Plaintext password logging                                                                                                                                                              |
-| **A10 - SSRF**                          | Server-Side Request Forgery via upload feature                                                                                                                                          |
+| OWASP Category                                  | Challenges covered                                                                                                                                                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A01 - Broken Access Control**                 | IDOR (wishlist), BOLA (API), Open Redirect, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927), CSRF, CSRF + Self-XSS chain (profile takeover)                            |
+| **A02 - Security Misconfiguration**             | Public environment variable exposure, Information disclosure via API errors, XXE (supplier import)                                                                                      |
+| **A03 - Software Supply Chain Failures**        | _No challenge currently maps directly to A03 — contributions welcome._                                                                                                                  |
+| **A04 - Cryptographic Failures**                | Weak JWT secret, Weak MD5 Hashing, Padding Oracle (AES-CBC), Insecure Randomness (gift card code generation)                                                                            |
+| **A05 - Injection**                             | Stored XSS (product reviews), Self-XSS (profile injection), SQL Injection (login), Product Search SQLi, Second-Order SQLi, X-Forwarded-For SQLi, Prompt Injection, MCP Server Poisoning |
+| **A06 - Insecure Design**                       | Client-side price manipulation, Stored XSS via SVG upload, Race Condition Coupon Abuse                                                                                                  |
+| **A07 - Authentication Failures**               | Session fixation & weak session management, Brute force (no rate limiting), Insecure password reset                                                                                     |
+| **A08 - Software or Data Integrity Failures**   | React2Shell - RSC RCE (CVE-2025-55182), Mass Assignment / Parameter Pollution                                                                                                           |
+| **A09 - Security Logging & Alerting Failures**  | Plaintext password logging                                                                                                                                                              |
+| **A10 - Mishandling of Exceptional Conditions** | _No challenge currently maps directly to A10 — contributions welcome._                                                                                                                  |
+
+> **Note on SSRF:** The Server-Side Request Forgery challenge is tagged `A10:2021` since SSRF was removed as a standalone category in the 2025 release — it is now implicitly covered under A01 Broken Access Control.
 
 ---
 

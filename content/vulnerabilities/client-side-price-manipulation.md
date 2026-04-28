@@ -70,6 +70,6 @@ Coupons, taxes, and shipping must be applied on the server too, against trusted 
 ## References
 
 - [OWASP API Security Top 10 — API6:2023 Unrestricted Access to Sensitive Business Flows](https://owasp.org/API-Security/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/)
-- [OWASP Top 10 — A04:2021 Insecure Design](https://owasp.org/Top10/A04_2021-Insecure_Design/)
+- [OWASP Top 10 — A06:2025 Insecure Design](https://owasp.org/Top10/2025/A06_2025-Insecure_Design/)
 - [CWE-602: Client-Side Enforcement of Server-Side Security](https://cwe.mitre.org/data/definitions/602.html)
 - [OWASP Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)

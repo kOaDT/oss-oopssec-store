@@ -67,7 +67,7 @@ Input validation and escaping are not a substitute. Parameterized queries are th
 
 ## References
 
-- [OWASP Top 10 — A03:2021 Injection](https://owasp.org/Top10/A03_2021-Injection/)
+- [OWASP Top 10 — A05:2025 Injection](https://owasp.org/Top10/2025/A05_2025-Injection/)
 - [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
 - [CWE-89: Improper Neutralization of Special Elements used in an SQL Command](https://cwe.mitre.org/data/definitions/89.html)
 - [PortSwigger Web Security Academy - SQL Injection](https://portswigger.net/web-security/sql-injection)
