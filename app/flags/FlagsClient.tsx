@@ -3,7 +3,13 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { Flag, FlagCategory, FlagDifficulty } from "@/lib/types";
-import { formatSlug, CATEGORY_LABELS } from "@/lib/format";
+import {
+  formatSlug,
+  CATEGORY_LABELS,
+  getCveUrl,
+  getCweUrl,
+  getOwaspUrl,
+} from "@/lib/format";
 
 interface FlagsClientProps {
   flags: Flag[];
@@ -156,36 +162,86 @@ function FoundBadge() {
   );
 }
 
+const BADGE_SIZE_COMPACT = "px-2 py-0.5 text-[10px]";
+const BADGE_SIZE_REGULAR = "px-2.5 py-1 text-xs";
+
+function CveBadge({ cve, compact }: { cve: string; compact: boolean }) {
+  return (
+    <a
+      href={getCveUrl(cve)}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      aria-label={`View ${cve} details on NVD (opens in new tab)`}
+      className={`relative z-10 rounded-full bg-red-100 font-semibold text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 ${compact ? BADGE_SIZE_COMPACT : BADGE_SIZE_REGULAR}`}
+    >
+      {cve}
+    </a>
+  );
+}
+
+function CweBadge({ cwe, compact }: { cwe: string; compact: boolean }) {
+  const url = getCweUrl(cwe);
+  const sizeClass = compact ? BADGE_SIZE_COMPACT : BADGE_SIZE_REGULAR;
+  const baseClass = `rounded-full bg-amber-100 font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 ${sizeClass}`;
+  if (!url) {
+    return <span className={baseClass}>{cwe}</span>;
+  }
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      aria-label={`View ${cwe} on MITRE (opens in new tab)`}
+      className={`relative z-10 transition-colors hover:bg-amber-200 dark:hover:bg-amber-900/50 ${baseClass}`}
+    >
+      {cwe}
+    </a>
+  );
+}
+
+function OwaspBadge({ owasp, compact }: { owasp: string; compact: boolean }) {
+  const url = getOwaspUrl(owasp);
+  const sizeClass = compact ? BADGE_SIZE_COMPACT : BADGE_SIZE_REGULAR;
+  const baseClass = `rounded-full bg-indigo-100 font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 ${sizeClass}`;
+  if (!url) {
+    return <span className={baseClass}>OWASP {owasp}</span>;
+  }
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      aria-label={`View OWASP ${owasp} on owasp.org (opens in new tab)`}
+      className={`relative z-10 transition-colors hover:bg-indigo-200 dark:hover:bg-indigo-900/50 ${baseClass}`}
+    >
+      OWASP {owasp}
+    </a>
+  );
+}
+
 function FlagCardGrid({ flag, found }: { flag: Flag; found: boolean }) {
   return (
-    <Link
-      href={`/vulnerabilities/${flag.slug}`}
-      className="group flex flex-col rounded-xl border border-slate-200 bg-white p-5 transition-all duration-200 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-primary-600"
-    >
+    <div className="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 transition-all duration-200 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-primary-600">
       <div className="mb-3 flex items-start justify-between gap-2">
         <DifficultyBadge difficulty={flag.difficulty} />
         <div className="flex flex-wrap items-center justify-end gap-1.5">
           {found && <FoundBadge />}
-          {flag.cve && (
-            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
-              {flag.cve}
-            </span>
-          )}
-          {flag.cwe && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-              {flag.cwe}
-            </span>
-          )}
-          {flag.owasp && (
-            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
-              OWASP {flag.owasp}
-            </span>
-          )}
+          {flag.cve && <CveBadge cve={flag.cve} compact />}
+          {flag.cwe && <CweBadge cwe={flag.cwe} compact />}
+          {flag.owasp && <OwaspBadge owasp={flag.owasp} compact />}
         </div>
       </div>
 
       <h3 className="mb-2 text-base font-bold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400">
-        {formatSlug(flag.slug)}
+        <Link
+          href={`/vulnerabilities/${flag.slug}`}
+          className="after:absolute after:inset-0 after:content-['']"
+        >
+          {formatSlug(flag.slug)}
+        </Link>
       </h3>
 
       <div className="mb-4">
@@ -201,16 +257,13 @@ function FlagCardGrid({ flag, found }: { flag: Flag; found: boolean }) {
       <div className="mt-auto">
         <CategoryBadge category={flag.category} />
       </div>
-    </Link>
+    </div>
   );
 }
 
 function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
   return (
-    <Link
-      href={`/vulnerabilities/${flag.slug}`}
-      className="group flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-primary-600 sm:gap-6 sm:p-5"
-    >
+    <div className="group relative flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-primary-600 sm:gap-6 sm:p-5">
       <div className="hidden shrink-0 sm:block">
         <DifficultyBadge difficulty={flag.difficulty} />
       </div>
@@ -220,7 +273,12 @@ function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
           <DifficultyBadge difficulty={flag.difficulty} />
         </div>
         <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-400 sm:text-base">
-          {formatSlug(flag.slug)}
+          <Link
+            href={`/vulnerabilities/${flag.slug}`}
+            className="after:absolute after:inset-0 after:content-['']"
+          >
+            {formatSlug(flag.slug)}
+          </Link>
         </h3>
         {found ? (
           <p className="truncate font-mono text-sm text-slate-600 dark:text-slate-400">
@@ -236,21 +294,9 @@ function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
       <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
         {found && <FoundBadge />}
         <CategoryBadge category={flag.category} />
-        {flag.cve && (
-          <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
-            {flag.cve}
-          </span>
-        )}
-        {flag.cwe && (
-          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-            {flag.cwe}
-          </span>
-        )}
-        {flag.owasp && (
-          <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
-            OWASP {flag.owasp}
-          </span>
-        )}
+        {flag.cve && <CveBadge cve={flag.cve} compact={false} />}
+        {flag.cwe && <CweBadge cwe={flag.cwe} compact={false} />}
+        {flag.owasp && <OwaspBadge owasp={flag.owasp} compact={false} />}
       </div>
 
       <svg
@@ -266,7 +312,7 @@ function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
           d="M9 5l7 7-7 7"
         />
       </svg>
-    </Link>
+    </div>
   );
 }
 
