@@ -11,6 +11,8 @@ interface FoundFlag {
   category: string;
   difficulty: string;
   cve: string | null;
+  cwe: string | null;
+  owasp: string | null;
   walkthroughSlug: string | null;
   foundAt: string;
 }
@@ -53,6 +55,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   INPUT_VALIDATION: "INPUT_VAL",
   CRYPTOGRAPHIC: "CRYPTO",
   REMOTE_CODE_EXECUTION: "RCE",
+  INSECURE_DESIGN: "DESIGN",
   OTHER: "OTHER",
 };
 
@@ -419,6 +422,16 @@ export default function PlayerDashboardClient() {
                           {flag.cve && (
                             <span className="ml-2 rounded bg-rose-950 px-1.5 py-0.5 text-xs text-rose-400">
                               {flag.cve}
+                            </span>
+                          )}
+                          {flag.cwe && (
+                            <span className="ml-2 rounded bg-amber-950 px-1.5 py-0.5 text-xs text-amber-400">
+                              {flag.cwe}
+                            </span>
+                          )}
+                          {flag.owasp && (
+                            <span className="ml-2 rounded bg-indigo-950 px-1.5 py-0.5 text-xs text-indigo-400">
+                              {flag.owasp}
                             </span>
                           )}
                         </div>

@@ -39,5 +39,6 @@ export const CATEGORY_LABELS: Record<FlagCategory, string> = {
   INPUT_VALIDATION: "Input Validation",
   CRYPTOGRAPHIC: "Cryptographic",
   REMOTE_CODE_EXECUTION: "Remote Code Execution",
+  INSECURE_DESIGN: "Insecure Design",
   OTHER: "Other",
 };

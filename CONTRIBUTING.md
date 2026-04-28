@@ -36,7 +36,7 @@ New here? Check [good first issues](https://github.com/users/kOaDT/projects/3/vi
 ### Adding a vulnerability
 
 1. **Add the flag in `prisma/seed.ts`**
-   Create a `Flag` record with format `OSS{...}`. Set `slug`, `category`, `difficulty`, and `markdownFile` to match. Set `walkthroughSlug` if a walkthrough exists on the docs site (see step 6).
+   Create a `Flag` record with format `OSS{...}`. Set `slug`, `category`, `difficulty`, and `markdownFile` to match. Set `walkthroughSlug` if a walkthrough exists on the docs site (see step 6). Optionally set `cve` (e.g. `CVE-2025-29927`), `cwe` (e.g. `CWE-89`), and `owasp` (OWASP Top 10 2021 category, e.g. `A03:2021`) — they are surfaced as badges in the UI.
 
 2. **Add hints in `prisma/seed.ts`**
    Add three progressive hints in the `flagHints` map, keyed by slug. Level 1 is vague, level 2 more specific, level 3 near-solution.
