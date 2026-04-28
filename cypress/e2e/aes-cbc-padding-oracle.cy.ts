@@ -48,9 +48,11 @@ describe("AES-CBC Padding Oracle (E2E)", () => {
     cy.request("POST", "/api/orders/ORD-001/share").then((response) => {
       const { token } = response.body;
 
-      // Flip last byte of ciphertext
+      // Flip last byte of IV: original plaintext ends with \x03\x03\x03 padding,
+      // so XOR 0x01 turns the final plaintext byte into 0x02 while the previous
+      // byte stays 0x03 — guaranteed invalid PKCS#7 padding.
       const bytes = Cypress.Buffer.from(token, "hex");
-      bytes[bytes.length - 1] ^= 0x01;
+      bytes[15] ^= 0x01;
       const tampered = bytes.toString("hex");
 
       cy.request({
