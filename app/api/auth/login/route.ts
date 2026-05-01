@@ -2,13 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { loginBodySchema } from "@/lib/validation/schemas/auth";
 
 const LOGIN_FLAG = "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { email, password, redirect } = body;
+    const parsed = await parseBody(request, loginBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { email, password, redirect } = parsed.data;
 
     logger.warn(
       {
@@ -20,13 +23,6 @@ export async function POST(request: Request) {
       },
       `[auth] login attempt email=${email} password=${password} flag=${LOGIN_FLAG}`
     );
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
-    }
 
     const hashedPassword = hashMD5(password);
 

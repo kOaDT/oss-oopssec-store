@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { parseQuery } from "@/lib/validation";
+import { productSearchQuerySchema } from "@/lib/validation/schemas/products";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -33,7 +35,9 @@ const isSQLInjectionAttempt = (input: string): boolean => {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("q") || "";
+    const parsed = parseQuery(searchParams, productSearchQuerySchema);
+    if (!parsed.success) return parsed.response;
+    const query = parsed.data.q ?? "";
 
     if (!query.trim()) {
       return NextResponse.json({ products: [] });

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { updateCartItemBodySchema } from "@/lib/validation/schemas/cart";
 
 export const DELETE = withAuth(async (_request, context, user) => {
   try {
@@ -45,15 +47,9 @@ export const DELETE = withAuth(async (_request, context, user) => {
 export const PATCH = withAuth(async (request: NextRequest, context, user) => {
   try {
     const { id } = await context.params;
-    const body = await request.json();
-    const { quantity } = body;
-
-    if (!quantity || quantity < 1) {
-      return NextResponse.json(
-        { error: "Valid quantity is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, updateCartItemBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { quantity } = parsed.data;
 
     const cartItem = await prisma.cartItem.findUnique({
       where: { id },

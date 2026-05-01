@@ -3,6 +3,7 @@ import {
   loginOrFail,
   authHeaders,
   TEST_USERS,
+  expectValidationMessage,
 } from "../helpers/api";
 import { FLAGS } from "../helpers/flags";
 
@@ -113,9 +114,7 @@ describe("Information Disclosure via API Error", () => {
       );
 
       expect(status).toBe(400);
-      expect((data as { error?: string }).error).toMatch(
-        /Missing required fields/i
-      );
+      expectValidationMessage(data, /Missing required fields/i);
     });
   });
 
@@ -136,9 +135,7 @@ describe("Information Disclosure via API Error", () => {
       );
 
       expect(status).toBe(400);
-      expect((data as { error?: string }).error).toMatch(
-        /fields must be a non-empty array/i
-      );
+      expectValidationMessage(data, /fields must be a non-empty array/i);
     });
   });
 

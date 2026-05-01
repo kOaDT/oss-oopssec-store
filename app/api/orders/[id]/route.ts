@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth, type JWTPayload } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody, parseFormData } from "@/lib/validation";
+import { updateOrderStatusBodySchema } from "@/lib/validation/schemas/orders";
 
 export const GET = withAuth(async (_request, context, user) => {
   try {
@@ -82,16 +84,12 @@ const updateOrderStatus = async (
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    let status: string;
-
     const contentType = request.headers.get("content-type");
-    if (contentType?.includes("application/x-www-form-urlencoded")) {
-      const formData = await request.formData();
-      status = formData.get("status") as string;
-    } else {
-      const body = await request.json();
-      status = body.status;
-    }
+    const parsed = contentType?.includes("application/x-www-form-urlencoded")
+      ? await parseFormData(request, updateOrderStatusBodySchema)
+      : await parseBody(request, updateOrderStatusBodySchema);
+    if (!parsed.success) return parsed.response;
+    const status = parsed.data.status;
 
     const validStatuses: Array<
       "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"

@@ -79,6 +79,33 @@ export function expectFlag(data: unknown, expectedFlag: string): void {
   expect(data).toHaveProperty("flag", expectedFlag);
 }
 
+export function expectValidationMessage(
+  data: unknown,
+  pattern: RegExp | string
+): void {
+  const top = (data as { error?: unknown })?.error;
+  const details = (data as { details?: Array<{ message?: unknown }> })?.details;
+  const messages = [
+    typeof top === "string" ? top : undefined,
+    ...(Array.isArray(details)
+      ? details.map((d) =>
+          typeof d?.message === "string" ? d.message : undefined
+        )
+      : []),
+  ].filter((m): m is string => typeof m === "string");
+
+  const matches =
+    typeof pattern === "string"
+      ? messages.some((m) => m.includes(pattern))
+      : messages.some((m) => pattern.test(m));
+
+  if (!matches) {
+    throw new Error(
+      `Expected one of [${messages.join(" | ")}] to match ${pattern}`
+    );
+  }
+}
+
 export { BASE_URL };
 
 export async function getFirstProductId(): Promise<string> {

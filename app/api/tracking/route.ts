@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { trackingBodySchema } from "@/lib/validation/schemas/tracking";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -49,8 +51,9 @@ const isAccessingFlagsTable = (input: string): boolean => {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { path, sessionId } = body;
+    const parsed = await parseBody(request, trackingBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { path, sessionId } = parsed.data;
 
     const forwardedFor = request.headers.get("x-forwarded-for");
     const ip = forwardedFor || request.headers.get("x-real-ip") || "unknown";

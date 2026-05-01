@@ -2,18 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { addCartItemBodySchema } from "@/lib/validation/schemas/cart";
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const { productId, quantity } = body;
-
-    if (!productId || !quantity || quantity < 1) {
-      return NextResponse.json(
-        { error: "Product ID and valid quantity are required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, addCartItemBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { productId, quantity } = parsed.data;
 
     const product = await prisma.product.findUnique({
       where: { id: productId },

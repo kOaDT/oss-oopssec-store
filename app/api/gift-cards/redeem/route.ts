@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { redeemGiftCardBodySchema } from "@/lib/validation/schemas/gift-cards";
 
 const SEEDED_GIFT_CARD_ID = "gc-seeded-001";
 const INSECURE_RANDOMNESS_FLAG = "OSS{1ns3cur3_r4nd0mn3ss_g1ft_c4rd}";
@@ -21,15 +23,9 @@ function timingSafeEqualStrings(a: string, b: string): boolean {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const rawCode = body?.code;
-
-    if (!rawCode || typeof rawCode !== "string") {
-      return NextResponse.json(
-        { error: INVALID_CODE_MESSAGE },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, redeemGiftCardBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { code: rawCode } = parsed.data;
 
     const normalized = rawCode.trim().toUpperCase();
 

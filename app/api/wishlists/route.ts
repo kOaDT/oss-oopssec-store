@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { createWishlistBodySchema } from "@/lib/validation/schemas/wishlists";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -37,15 +39,9 @@ export const GET = withAuth(async (_request, _context, user) => {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Wishlist name is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, createWishlistBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { name } = parsed.data;
 
     const wishlist = await prisma.wishlist.create({
       data: {

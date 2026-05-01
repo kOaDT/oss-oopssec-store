@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { createSupportAccessBodySchema } from "@/lib/validation/schemas/user";
 
 const TOKEN_EXPIRY_DAYS = 365;
 
@@ -48,9 +50,12 @@ export const GET = withAuth(async (_request, _context, user) => {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json().catch(() => ({}));
+    const parsed = await parseBody(request, createSupportAccessBodySchema, {
+      allowEmptyBody: true,
+    });
+    if (!parsed.success) return parsed.response;
 
-    const targetEmail = body.email || user.email;
+    const targetEmail = parsed.data?.email || user.email;
 
     const targetUser = await prisma.user.findUnique({
       where: { email: targetEmail },

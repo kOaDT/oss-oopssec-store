@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { withAuth, withAdminAuth } from "@/lib/server-auth";
 import { generateInvoice } from "@/lib/invoice";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { createOrderBodySchema } from "@/lib/validation/schemas/orders";
 
 export const GET = withAdminAuth(async (_request, _context, _user) => {
   try {
@@ -32,15 +34,9 @@ export const GET = withAdminAuth(async (_request, _context, _user) => {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const { total, couponCode } = body;
-
-    if (!total || typeof total !== "number" || total <= 0) {
-      return NextResponse.json(
-        { error: "Valid total is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, createOrderBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { total, couponCode } = parsed.data;
 
     const cart = await prisma.cart.findFirst({
       where: { userId: user.id },
@@ -65,7 +61,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     let expectedTotal = calculatedTotal;
     let couponRaceFlag: string | undefined;
 
-    if (couponCode && typeof couponCode === "string") {
+    if (couponCode) {
       const coupon = await prisma.coupon.findUnique({
         where: { code: couponCode.toUpperCase() },
       });

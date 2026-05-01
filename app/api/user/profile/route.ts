@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody, parseFormData } from "@/lib/validation";
+import { updateProfileBodySchema } from "@/lib/validation/schemas/user";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -57,20 +59,12 @@ export const GET = withAuth(async (_request, _context, user) => {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    let displayName: string | undefined;
-    let bio: string | undefined;
     const contentType = request.headers.get("content-type") || "";
-
-    if (contentType.includes("application/x-www-form-urlencoded")) {
-      const formData = await request.text();
-      const params = new URLSearchParams(formData);
-      displayName = params.get("displayName") ?? undefined;
-      bio = params.get("bio") ?? undefined;
-    } else {
-      const body = await request.json();
-      displayName = body.displayName;
-      bio = body.bio;
-    }
+    const parsed = contentType.includes("application/x-www-form-urlencoded")
+      ? await parseFormData(request, updateProfileBodySchema)
+      : await parseBody(request, updateProfileBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { displayName, bio } = parsed.data;
 
     const updatedUser = await prisma.user.update({
       where: { id: user.id },

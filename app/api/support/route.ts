@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { supportRequestBodySchema } from "@/lib/validation/schemas/support";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, title, description, screenshotUrl } = await request.json();
-
-    if (!email || !title || !description) {
-      return NextResponse.json(
-        { error: "Email, title, and description are required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, supportRequestBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { email, title, description, screenshotUrl } = parsed.data;
 
     let screenshotContent = null;
 

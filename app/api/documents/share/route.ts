@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decryptShareToken } from "@/lib/share-crypto";
+import { parseQuery } from "@/lib/validation";
+import { shareTokenQuerySchema } from "@/lib/validation/schemas/documents";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const token = searchParams.get("token");
-
-  if (!token || !/^[0-9a-f]+$/i.test(token) || token.length < 64) {
-    return NextResponse.json({ error: "Missing share token" }, { status: 400 });
-  }
+  const parsed = parseQuery(searchParams, shareTokenQuerySchema);
+  if (!parsed.success) return parsed.response;
+  const { token } = parsed.data;
 
   let resourcePath: string;
   try {

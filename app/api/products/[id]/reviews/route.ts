@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { createReviewBodySchema } from "@/lib/validation/schemas/products";
 
 export async function GET(
   request: Request,
@@ -42,19 +44,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const { content, author: requestAuthor } = body;
-
-    if (
-      !content ||
-      typeof content !== "string" ||
-      content.trim().length === 0
-    ) {
-      return NextResponse.json(
-        { error: "Content is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, createReviewBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { content, author: requestAuthor } = parsed.data;
 
     const product = await prisma.product.findUnique({
       where: { id },
@@ -66,9 +58,7 @@ export async function POST(
 
     const user = await getAuthenticatedUser(request);
     const author =
-      requestAuthor &&
-      typeof requestAuthor === "string" &&
-      requestAuthor.trim().length > 0
+      requestAuthor && requestAuthor.trim().length > 0
         ? requestAuthor.trim()
         : user?.email || "anonymous";
 

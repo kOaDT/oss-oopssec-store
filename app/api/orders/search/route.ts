@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { orderSearchBodySchema } from "@/lib/validation/schemas/orders";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -33,13 +35,14 @@ const isSQLInjectionAttempt = (input: string): boolean => {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const { status } = body;
+    const parsed = await parseBody(request, orderSearchBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { status } = parsed.data;
 
     let flag: string | null = null;
     let sqlInjectionDetected = false;
 
-    if (status && typeof status === "string") {
+    if (status) {
       sqlInjectionDetected = isSQLInjectionAttempt(status);
       const upperStatus = status.toUpperCase();
       const normalizedStatus = upperStatus.replace(/\s+/g, " ");
@@ -75,8 +78,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       }
     }
 
-    const statusFilter =
-      status && typeof status === "string" ? `AND o.status = '${status}'` : "";
+    const statusFilter = status ? `AND o.status = '${status}'` : "";
 
     const query = `
       SELECT

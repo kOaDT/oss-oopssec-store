@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { addWishlistItemBodySchema } from "@/lib/validation/schemas/wishlists";
 
 export const POST = withAuth(async (request: NextRequest, context, user) => {
   try {
@@ -22,15 +24,9 @@ export const POST = withAuth(async (request: NextRequest, context, user) => {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { productId } = body;
-
-    if (!productId) {
-      return NextResponse.json(
-        { error: "Product ID is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, addWishlistItemBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { productId } = parsed.data;
 
     const product = await prisma.product.findUnique({
       where: { id: productId },
