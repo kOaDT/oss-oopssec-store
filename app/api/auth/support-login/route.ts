@@ -2,18 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseQuery } from "@/lib/validation";
+import { supportLoginQuerySchema } from "@/lib/validation/schemas/auth";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const token = searchParams.get("token");
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Support access token is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = parseQuery(searchParams, supportLoginQuerySchema);
+    if (!parsed.success) return parsed.response;
+    const { token } = parsed.data;
 
     const supportToken = await prisma.supportAccessToken.findUnique({
       where: { token },

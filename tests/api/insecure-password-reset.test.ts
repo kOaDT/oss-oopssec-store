@@ -1,5 +1,10 @@
 import crypto from "crypto";
-import { apiRequest, TEST_USERS, expectFlag } from "../helpers/api";
+import {
+  apiRequest,
+  TEST_USERS,
+  expectFlag,
+  expectValidationMessage,
+} from "../helpers/api";
 import { FLAGS } from "../helpers/flags";
 
 function hashMD5(text: string): string {
@@ -76,7 +81,7 @@ describe("Insecure Password Reset", () => {
       );
 
       expect(status).toBe(400);
-      expect(data.error).toContain("at least 6 characters");
+      expectValidationMessage(data, "at least 6 characters");
     });
   });
 

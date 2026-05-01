@@ -4,6 +4,8 @@ import { withAdminAuth } from "@/lib/server-auth";
 import Database from "better-sqlite3";
 import { getDatabaseUrl } from "@/lib/database";
 import { logger } from "@/lib/logger";
+import { parseQuery } from "@/lib/validation";
+import { reviewsAuditQuerySchema } from "@/lib/validation/schemas/admin";
 
 const isSQLInjectionAttempt = (input: string): boolean => {
   const sqlKeywords = [
@@ -42,7 +44,9 @@ export const GET = withAdminAuth(
   async (request: NextRequest, _context, _user) => {
     try {
       const { searchParams } = new URL(request.url);
-      const authorFilter = searchParams.get("author");
+      const parsed = parseQuery(searchParams, reviewsAuditQuerySchema);
+      if (!parsed.success) return parsed.response;
+      const authorFilter = parsed.data.author ?? null;
 
       const authors = await prisma.review.findMany({
         select: { author: true },

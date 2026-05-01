@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { MCP_SESSION_HEADER, MCP_SESSION_VALUE } from "@/lib/mcp-constants";
 import { containsBlockedPattern } from "@/lib/prompt-injection-filter";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { aiAssistantBodySchema } from "@/lib/validation/schemas/ai-assistant";
 
 const SYSTEM_PROMPT = `You are OSSBot, a helpful customer support assistant for OopsSec Store, an online grocery and gourmet food marketplace.
 
@@ -158,28 +160,9 @@ async function callMistral(
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, apiKey, mcpServerUrl } = await request.json();
-
-    if (!message || typeof message !== "string") {
-      return NextResponse.json(
-        { error: "Message is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!apiKey || typeof apiKey !== "string") {
-      return NextResponse.json(
-        { error: "Mistral API key is required" },
-        { status: 400 }
-      );
-    }
-
-    if (message.length > 2000) {
-      return NextResponse.json(
-        { error: "Message too long. Maximum 2000 characters allowed." },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, aiAssistantBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { message, apiKey, mcpServerUrl } = parsed.data;
 
     if (containsBlockedPattern(message)) {
       return NextResponse.json(
@@ -214,7 +197,7 @@ export async function POST(request: NextRequest) {
     // VULNERABLE BY DESIGN: No URL validation — accepts arbitrary user-provided
     // URLs, enabling SSRF (the backend acts as a proxy to internal networks) and
     // indirect prompt injection via malicious tool responses.
-    if (mcpServerUrl && typeof mcpServerUrl === "string") {
+    if (mcpServerUrl) {
       try {
         const externalTools = await discoverTools(mcpServerUrl);
         for (const tool of externalTools) {

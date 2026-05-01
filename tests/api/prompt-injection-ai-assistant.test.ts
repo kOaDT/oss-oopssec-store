@@ -1,4 +1,4 @@
-import { apiRequest } from "../helpers/api";
+import { apiRequest, expectValidationMessage } from "../helpers/api";
 
 const BLOCKING_MESSAGE =
   "I'm sorry, but I can't process that request. I'm here to help with OopsSec Store products and services. How can I assist you today?";
@@ -79,6 +79,6 @@ describe("Prompt Injection (AI Assistant)", () => {
       }),
     });
     expect(res.status).toBe(400);
-    expect((res.data as AiAssistantError).error).toMatch(/Message too long/i);
+    expectValidationMessage(res.data, /Message too long/i);
   });
 });

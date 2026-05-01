@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { parseQuery } from "@/lib/validation";
+import { logsQuerySchema } from "@/lib/validation/schemas/monitoring";
 
 const SIEM_USER = "root";
 const SIEM_PASS = "admin";
@@ -48,13 +50,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(
-      200,
-      Math.max(1, parseInt(searchParams.get("limit") || "100", 10))
-    );
-    const level = searchParams.get("level") || "";
-    const search = searchParams.get("search") || "";
+    const parsedQuery = parseQuery(searchParams, logsQuerySchema);
+    if (!parsedQuery.success) return parsedQuery.response;
+    const page = parsedQuery.data.page ?? 1;
+    const limit = parsedQuery.data.limit ?? 100;
+    const level = parsedQuery.data.level ?? "";
+    const search = parsedQuery.data.search ?? "";
 
     const content = fs.readFileSync(logFile, "utf-8");
     const lines = content.trim().split("\n").filter(Boolean);

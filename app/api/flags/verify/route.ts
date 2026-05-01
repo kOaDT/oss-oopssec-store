@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { verifyFlagBodySchema } from "@/lib/validation/schemas/flags";
 
 export async function POST(request: Request) {
   try {
-    const { flag } = await request.json();
-
-    if (!flag || typeof flag !== "string") {
-      return NextResponse.json(
-        { error: "Flag is required", valid: false },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, verifyFlagBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { flag } = parsed.data;
 
     const matchedFlag = await prisma.flag.findFirst({
       where: {

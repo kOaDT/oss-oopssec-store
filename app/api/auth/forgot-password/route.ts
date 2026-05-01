@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashMD5 } from "@/lib/server-auth";
+import { parseBody } from "@/lib/validation";
+import { forgotPasswordBodySchema } from "@/lib/validation/schemas/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
-
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
+    const parsed = await parseBody(request, forgotPasswordBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { email } = parsed.data;
 
     const now = new Date();
     const requestedAt = now.toISOString();

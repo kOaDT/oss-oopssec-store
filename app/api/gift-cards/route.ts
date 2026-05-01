@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 import { generateGiftCardCode, isValidDenomination } from "@/lib/gift-card";
+import { parseBody } from "@/lib/validation";
+import { createGiftCardBodySchema } from "@/lib/validation/schemas/gift-cards";
 
 export const GET = withAuth(async (_request, _context, user) => {
   try {
@@ -35,37 +37,13 @@ export const GET = withAuth(async (_request, _context, user) => {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const { amount, recipientEmail, message } = body;
+    const parsed = await parseBody(request, createGiftCardBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { amount, recipientEmail, message } = parsed.data;
 
-    if (typeof amount !== "number" || !isValidDenomination(amount)) {
+    if (!isValidDenomination(amount)) {
       return NextResponse.json(
         { error: "Select a valid denomination ($25, $50, $100, or $500)" },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !recipientEmail ||
-      typeof recipientEmail !== "string" ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)
-    ) {
-      return NextResponse.json(
-        { error: "A valid recipient email is required" },
-        { status: 400 }
-      );
-    }
-
-    if (message !== undefined && typeof message !== "string") {
-      return NextResponse.json(
-        { error: "Message must be a string" },
-        { status: 400 }
-      );
-    }
-
-    if (typeof message === "string" && message.length > 500) {
-      return NextResponse.json(
-        { error: "Message must be 500 characters or fewer" },
         { status: 400 }
       );
     }

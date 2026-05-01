@@ -1,24 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashMD5 } from "@/lib/server-auth";
+import { parseBody } from "@/lib/validation";
+import { resetPasswordBodySchema } from "@/lib/validation/schemas/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { token, password } = await request.json();
-
-    if (!token || !password) {
-      return NextResponse.json(
-        { error: "Token and password are required" },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, resetPasswordBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { token, password } = parsed.data;
 
     const resetToken = await prisma.passwordResetToken.findUnique({
       where: { token },

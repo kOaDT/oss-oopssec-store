@@ -2,25 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { applyCouponBodySchema } from "@/lib/validation/schemas/coupons";
 
 export const POST = withAuth(async (request: NextRequest, _context, _user) => {
   try {
-    const body = await request.json();
-    const { code, cartTotal } = body;
-
-    if (!code || typeof code !== "string") {
-      return NextResponse.json(
-        { error: "Coupon code is required" },
-        { status: 400 }
-      );
-    }
-
-    if (typeof cartTotal !== "number" || cartTotal <= 0) {
-      return NextResponse.json(
-        { error: "Valid cart total is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, applyCouponBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { code, cartTotal } = parsed.data;
 
     const coupon = await prisma.coupon.findUnique({
       where: { code: code.toUpperCase() },

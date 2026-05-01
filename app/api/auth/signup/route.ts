@@ -3,20 +3,17 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/lib/generated/prisma/enums";
 import { hashMD5, createWeakJWT, setAuthCookie } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseBody } from "@/lib/validation";
+import { signupBodySchema } from "@/lib/validation/schemas/auth";
 
 const DEFAULT_ADDRESS_ID = "addr-default-001";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const parsed = await parseBody(request, signupBodySchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
     const { email, password } = body;
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
-    }
 
     const existingUser = await prisma.user.findUnique({
       where: { email },

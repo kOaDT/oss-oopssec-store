@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
+import { parseBody } from "@/lib/validation";
+import { exportUserDataBodySchema } from "@/lib/validation/schemas/user";
 
 const ALLOWED_USER_FIELDS = ["id", "email", "role", "addressId", "password"];
 
@@ -60,26 +62,13 @@ async function getSystemDiagnostics() {
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
-    const body = await request.json();
-    const { format, fields } = body;
-
-    if (!format || !fields) {
-      return NextResponse.json(
-        { error: "Missing required fields: format and fields" },
-        { status: 400 }
-      );
-    }
-
-    if (!Array.isArray(fields) || fields.length === 0) {
-      return NextResponse.json(
-        { error: "Fields must be a non-empty array" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, exportUserDataBodySchema);
+    if (!parsed.success) return parsed.response;
+    const { format, fields } = parsed.data;
 
     const requestedFields = fields
-      .map((f: string) => String(f).trim())
-      .filter((f: string) => f.length > 0);
+      .map((f) => String(f).trim())
+      .filter((f) => f.length > 0);
 
     const invalidFields = requestedFields.filter(
       (f: string) => !ALLOWED_USER_FIELDS.includes(f)

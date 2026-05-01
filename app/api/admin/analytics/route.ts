@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { parseQuery } from "@/lib/validation";
+import { analyticsQuerySchema } from "@/lib/validation/schemas/admin";
 
 export const GET = withAdminAuth(
   async (request: NextRequest, _context, _user) => {
     try {
       const { searchParams } = new URL(request.url);
-      const filterIp = searchParams.get("ip");
+      const parsed = parseQuery(searchParams, analyticsQuerySchema);
+      if (!parsed.success) return parsed.response;
+      const filterIp = parsed.data.ip ?? null;
 
       const totalVisits = await prisma.visitorLog.count();
       const uniqueIps = await prisma.visitorLog.groupBy({

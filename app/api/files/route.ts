@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile, readdir, stat } from "fs/promises";
 import { join, extname } from "path";
 import { logger } from "@/lib/logger";
+import { parseQuery } from "@/lib/validation";
+import { filesQuerySchema } from "@/lib/validation/schemas/files";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const file = searchParams.get("file");
-    const listDir = searchParams.get("list");
-    const dirPath = searchParams.get("path") || "";
+    const parsed = parseQuery(searchParams, filesQuerySchema);
+    if (!parsed.success) return parsed.response;
+    const file = parsed.data.file ?? null;
+    const listDir = parsed.data.list ?? null;
+    const dirPath = parsed.data.path ?? "";
 
     const baseDir = join(process.cwd(), "documents");
 

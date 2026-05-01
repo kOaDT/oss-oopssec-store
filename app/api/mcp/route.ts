@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { jsonRpcRequestSchema } from "@/lib/validation/schemas/mcp";
 
 const SERVER_INFO = {
   name: "oopssec-product-catalog",
@@ -166,8 +167,12 @@ async function handleToolsCall(
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { jsonrpc, method, id, params } = body;
+    const raw = await request.json();
+    const parsed = jsonRpcRequestSchema.safeParse(raw);
+    if (!parsed.success) {
+      return jsonRpcError(null, -32600, "Invalid JSON-RPC request");
+    }
+    const { jsonrpc, method, id, params } = parsed.data;
 
     if (jsonrpc !== "2.0") {
       return jsonRpcError(id ?? null, -32600, "Invalid JSON-RPC version");
@@ -176,18 +181,27 @@ export async function POST(request: NextRequest) {
     const hasSession =
       request.headers.get(MCP_SESSION_HEADER) === MCP_SESSION_VALUE;
 
+    const requestId = id ?? null;
+
     switch (method) {
       case "initialize":
-        return handleInitialize(id);
+        return handleInitialize(requestId);
       case "tools/list":
-        return handleToolsList(id);
+        return handleToolsList(requestId);
       case "tools/call":
-        if (!params?.name) {
-          return jsonRpcError(id, -32602, "Missing tool name");
+        if (!params?.name || typeof params.name !== "string") {
+          return jsonRpcError(requestId, -32602, "Missing tool name");
         }
-        return await handleToolsCall(id, params, hasSession);
+        return await handleToolsCall(
+          requestId,
+          {
+            name: params.name,
+            arguments: params.arguments as Record<string, unknown> | undefined,
+          },
+          hasSession
+        );
       default:
-        return jsonRpcError(id, -32601, `Method not found: ${method}`);
+        return jsonRpcError(requestId, -32601, `Method not found: ${method}`);
     }
   } catch {
     return jsonRpcError(null, -32700, "Parse error");
