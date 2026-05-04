@@ -30,5 +30,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "docs", "tests", "cypress"]
+  "exclude": [
+    "node_modules",
+    "docs",
+    "tests",
+    "cypress",
+    "packages/react-toastfy",
+    "lab"
+  ]
 }

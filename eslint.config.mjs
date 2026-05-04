@@ -27,6 +27,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "docs/**",
     "lib/generated/**",
+    "packages/react-toastfy/**",
+    "lab/**",
   ]),
   {
     files: ["tests/**/*.ts", "cypress/**/*.ts"],

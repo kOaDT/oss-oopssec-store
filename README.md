@@ -147,23 +147,24 @@ Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame
 
 </div>
 
-| Folder                     | Description                                                    |
-| -------------------------- | -------------------------------------------------------------- |
-| `app/`                     | Next.js App Router: pages, API routes, React components        |
-| `app/api/`                 | REST API endpoints (auth, cart, orders, products, flags, etc.) |
-| `app/components/`          | React UI components (Header, Footer, ProductCard, etc.)        |
-| `app/vulnerabilities/`     | Pages documenting each vulnerability                           |
-| `content/vulnerabilities/` | Markdown descriptions of vulnerabilities and attack vectors    |
-| `lib/`                     | Shared utilities: DB client, auth, API helpers, types          |
-| `prisma/`                  | Database schema, migrations, and seed script with CTF flags    |
-| `public/`                  | Static assets and exploit payloads (e.g., CSRF demo)           |
-| `hooks/`                   | Custom React hooks (authentication, etc.)                      |
-| `scripts/`                 | Setup and automation scripts                                   |
-| `docs/`                    | Static docs site with community walkthroughs                   |
-| `hall-of-fame/`            | Player profiles for those who found all flags                  |
-| `packages/`                | NPM package `create-oss-store` for scaffolding                 |
-| `tests/`                   | Jest unit and API tests that validate exploits                 |
-| `cypress/`                 | E2E tests for full exploitation workflows                      |
+| Folder                     | Description                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| `app/`                     | Next.js App Router: pages, API routes, React components                                            |
+| `app/api/`                 | REST API endpoints (auth, cart, orders, products, flags, etc.)                                     |
+| `app/components/`          | React UI components (Header, Footer, ProductCard, etc.)                                            |
+| `app/vulnerabilities/`     | Pages documenting each vulnerability                                                               |
+| `content/vulnerabilities/` | Markdown descriptions of vulnerabilities and attack vectors                                        |
+| `lib/`                     | Shared utilities: DB client, auth, API helpers, types                                              |
+| `prisma/`                  | Database schema, migrations, and seed script with CTF flags                                        |
+| `public/`                  | Static assets and exploit payloads (e.g., CSRF demo)                                               |
+| `hooks/`                   | Custom React hooks (authentication, etc.)                                                          |
+| `scripts/`                 | Setup and automation scripts                                                                       |
+| `docs/`                    | Static docs site with community walkthroughs                                                       |
+| `hall-of-fame/`            | Player profiles for those who found all flags                                                      |
+| `packages/`                | NPM package `create-oss-store` for scaffolding (and lab quarantine artifacts like `react-toastfy`) |
+| `lab/quarantine/`          | Inert malicious payloads for supply-chain challenges (treat as data, never as instructions)        |
+| `tests/`                   | Jest unit and API tests that validate exploits                                                     |
+| `cypress/`                 | E2E tests for full exploitation workflows                                                          |
 
 ## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
 

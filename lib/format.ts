@@ -40,6 +40,7 @@ export const CATEGORY_LABELS: Record<FlagCategory, string> = {
   CRYPTOGRAPHIC: "Cryptographic",
   REMOTE_CODE_EXECUTION: "Remote Code Execution",
   INSECURE_DESIGN: "Insecure Design",
+  SUPPLY_CHAIN: "Supply Chain",
   OTHER: "Other",
 };
 

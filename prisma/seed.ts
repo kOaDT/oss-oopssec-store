@@ -360,6 +360,26 @@ const flags = [
     category: "CRYPTOGRAPHIC" as const,
     difficulty: "MEDIUM" as const,
   },
+  {
+    flag: "OSS{npm_typ0sqv4tt1ng_dr0p_4i_rul3s}",
+    slug: "npm-supply-chain-typosquat",
+    cwe: "CWE-829",
+    owasp: "A03:2025",
+    markdownFile: "npm-supply-chain-typosquat.md",
+    walkthroughSlug: "supply-chain-poisoned-rules-chain",
+    category: "SUPPLY_CHAIN" as const,
+    difficulty: "HARD" as const,
+  },
+  {
+    flag: "OSS{rul3s_f1l3_b4ckd00r_3xpl01t3d}",
+    slug: "ai-rules-file-backdoor",
+    cwe: "CWE-798",
+    owasp: "A07:2025",
+    markdownFile: "ai-rules-file-backdoor.md",
+    walkthroughSlug: "supply-chain-poisoned-rules-chain",
+    category: "SUPPLY_CHAIN" as const,
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 const flagHints: Record<string, string[]> = {
@@ -522,6 +542,16 @@ const flagHints: Record<string, string[]> = {
     "Random codes aren't always random. What does the gift card history reveal about each card?",
     "The redemption code is derived from the card's creation timestamp, which is displayed down to the millisecond on your /profile/gift-cards page. Buy a cheap card yourself and compare its timestamp to the issued code to recover the algorithm.",
     "The server uses a Linear Congruential Generator seeded with Date.now() (Numerical Recipes constants: multiplier 1103515245, increment 12345, mod 2^31). Reproduce the LCG in a script, feed it the seeded $500 card's createdAt timestamp in milliseconds, and submit the resulting XXXX-XXXX-XXXX code at /checkout/redeem.",
+  ],
+  "npm-supply-chain-typosquat": [
+    "Even with a vulnerability you already know how to exploit, sometimes the most useful clue is hiding in plain sight, in the page itself.",
+    "View the source of the documents page. A developer left a comment naming a recently-added dependency. Combine that name with what you already know about reading files outside the documents directory.",
+    "Use the path-traversal endpoint to read `../package.json`-adjacent files. Spot the typosquatted dependency under `packages/`, then walk the chain: read its own `package.json`, then `scripts/postinstall.js`, then the artifact path it references in `lab/quarantine/`. Each file points to the next.",
+  ],
+  "ai-rules-file-backdoor": [
+    "Markdown looks innocent when it's rendered. The raw file sometimes tells a different story.",
+    "The artifact dropped by the malicious postinstall is a Cursor-style rules file. Markdown previewers hide HTML comment blocks, read the raw bytes and look for a section that addresses an AI agent, not a human.",
+    "The hidden block names a diagnostic endpoint and a magic header. Send a `GET` to `/api/admin/diag` with `X-Debug-Auth` set to the token from the comment block. The flag is returned in JSON.",
   ],
 };
 

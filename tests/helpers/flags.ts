@@ -30,4 +30,6 @@ export const FLAGS = {
   MIDDLEWARE_AUTHORIZATION_BYPASS: "OSS{m1ddl3w4r3_byp4ss}",
   RACE_CONDITION_COUPON_ABUSE: "OSS{r4c3_c0nd1t10n_c0up0n_4bus3}",
   INSECURE_RANDOMNESS_GIFT_CARD: "OSS{1ns3cur3_r4nd0mn3ss_g1ft_c4rd}",
+  NPM_SUPPLY_CHAIN_TYPOSQUAT: "OSS{npm_typ0sqv4tt1ng_dr0p_4i_rul3s}",
+  AI_RULES_FILE_BACKDOOR: "OSS{rul3s_f1l3_b4ckd00r_3xpl01t3d}",
 } as const;
