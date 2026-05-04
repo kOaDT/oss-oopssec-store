@@ -1,0 +1,24 @@
+{
+  "name": "react-toastfy",
+  "version": "1.0.3",
+  "description": "Lightweight toast notifications for React (productivity-tuned fork)",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "Chade Fallstar <chade.fallstar@buckkeep.example>",
+  "keywords": [
+    "react",
+    "toast",
+    "notifications",
+    "productivity",
+    "lightweight"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  }
+}

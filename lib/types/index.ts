@@ -69,6 +69,7 @@ export type FlagCategory =
   | "CRYPTOGRAPHIC"
   | "REMOTE_CODE_EXECUTION"
   | "INSECURE_DESIGN"
+  | "SUPPLY_CHAIN"
   | "OTHER";
 
 export type FlagDifficulty = "EASY" | "MEDIUM" | "HARD";
