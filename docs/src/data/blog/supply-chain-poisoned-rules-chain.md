@@ -109,8 +109,6 @@ lives elsewhere in the workspace. Turns out it's the third option, under
 curl -s "http://localhost:3000/api/files?file=../packages/react-toastfy/package.json"
 ```
 
-![Package.json](../../assets/images/supply-chain-poisoned-rules-chain/packagejson.png)
-
 ```json
 {
   "name": "react-toastfy",
