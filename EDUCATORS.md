@@ -55,7 +55,7 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 
 | OWASP Category                                  | Challenges covered                                                                                                                                                                       |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A01 - Broken Access Control**                 | IDOR (wishlist), BOLA (API), Open Redirect, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927), CSRF, CSRF + Self-XSS chain (profile takeover)                             |
+| **A01 - Broken Access Control**                 | IDOR (orders), BOLA (wishlist), Open Redirect, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927), CSRF, CSRF + Self-XSS chain (profile takeover)                          |
 | **A02 - Security Misconfiguration**             | Public environment variable exposure, Information disclosure via API errors, XXE (supplier import)                                                                                       |
 | **A03 - Software Supply Chain Failures**        | npm Typosquat → AI Rules File Backdoor chain (typosquatted package drops a malicious Cursor/Claude rules file with a hidden prompt-injection payload that steers the dev's AI agent)     |
 | **A04 - Cryptographic Failures**                | Weak JWT secret, Weak MD5 Hashing, Padding Oracle (AES-CBC), Insecure Randomness (gift card code generation)                                                                             |
@@ -78,7 +78,7 @@ Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 | --- | ------------------------------------------------ | ---------------------- | ---------- | ---------- |
 | 1   | Public Environment Variable Exposure             | Information Disclosure | 🟢         | 15–20 min  |
 | 2   | Information Disclosure via API Errors            | Information Disclosure | 🟢         | 15–20 min  |
-| 3   | IDOR - Private Wishlist Access                   | Broken Access Control  | 🟢         | 20–30 min  |
+| 3   | IDOR - Private Orders Access                     | Broken Access Control  | 🟢         | 20–30 min  |
 | 4   | Open Redirect via Login Page                     | Input Validation       | 🟢         | 20–30 min  |
 | 5   | Stored XSS via Product Review                    | Injection              | 🟢         | 30–45 min  |
 | 6   | Self-XSS - Profile Bio Injection                 | Injection              | 🟢         | 20–30 min  |
@@ -111,7 +111,8 @@ Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 | 33  | Race Condition — Coupon Abuse                    | Business Logic         | 🔴         | 45–90 min  |
 | 34  | npm Supply Chain Typosquat                       | Supply Chain           | 🔴         | 60–90 min  |
 
-**Total estimated time:** 33–48 hours for the full curriculum depending on student level. Challenges 33 and 34 are chained — once the chain is started for flag #33, flag #34 follows in a few minutes. You don't need to cover everything. Pick the challenges that match your course objectives and time constraints.
+**Total estimated time:** 33–48 hours for the full curriculum depending on student level. Challenges 24 and 34 are chained — once the chain is started for flag #34, flag #24 follows in a few minutes.
+You don't need to cover everything. Pick the challenges that match your course objectives and time constraints.
 
 ---
 
