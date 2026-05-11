@@ -33,6 +33,6 @@
   "dependencies": {
     "chalk": "5.6.2",
     "degit": "2.8.4",
-    "ora": "9.3.0"
+    "ora": "9.4.0"
   }
 }
