@@ -16,6 +16,8 @@ Or with Docker (no Node.js required):
 docker run -p 3000:3000 leogra/oss-oopssec-store
 ```
 
+Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) as their entry point. It lays out all 34 challenges in a visual learning path, with chapters ordered from easy to hard, and recommends a self-guided approach (try the challenge first, then read the walkthrough).
+
 ---
 
 ## Table of Contents
@@ -71,6 +73,8 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 ---
 
 ## Challenge Catalog & Time Estimates
+
+A visual version of this catalog is available as the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) on the docs site, grouped into 11 thematic chapters.
 
 Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 

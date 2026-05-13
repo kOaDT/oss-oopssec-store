@@ -1,10 +1,10 @@
 import Link from "next/link";
 import packageJson from "../../package.json";
+import { DOCS_ROADMAP_URL } from "@/lib/config";
 
 const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
 const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
-const GITHUB_ROADMAP = "https://github.com/users/kOaDT/projects/3";
 const DEV_TO_URL = "https://dev.to/oopssec-store";
 
 export default function Footer() {
@@ -142,18 +142,18 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <Link
+                <a
                   href="https://koadt.github.io/oss-oopssec-store/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
                 >
                   Walkthroughs
-                </Link>
+                </a>
               </li>
               <li>
                 <a
-                  href={GITHUB_ROADMAP}
+                  href={DOCS_ROADMAP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"

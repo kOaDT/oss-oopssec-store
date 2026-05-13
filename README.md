@@ -15,7 +15,8 @@ Hunt for flags, exploit vulnerabilities, and level up your security skills.
 <p>
 <a href="https://hub.docker.com/r/leogra/oss-oopssec-store">Docker Hub</a> ·
 <a href="https://www.npmjs.com/package/create-oss-store">npm</a> ·
-<a href="https://kOaDT.github.io/oss-oopssec-store">Walkthroughs</a> ·
+<a href="https://koadt.github.io/oss-oopssec-store/roadmap">Roadmap</a> ·
+<a href="https://koadt.github.io/oss-oopssec-store">Walkthroughs</a> ·
 <a href="https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md">Contributing</a> ·
 <a href="https://github.com/users/kOaDT/projects/3/views/6">Good first issues</a>
 </p>
@@ -74,7 +75,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 - Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
 - Built with Next.js, React, Prisma, and SQLite
 - REST API with documented attack vectors
-- CTF challenges with hidden flags
+- 34 CTF challenges across 12 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
 
@@ -221,7 +222,7 @@ Ways to contribute:
 
 Check the [Roadmap](https://github.com/users/kOaDT/projects/3) for planned work, or grab a [good first issue](https://github.com/users/kOaDT/projects/3/views/6).
 
-Found all the flags? Share your walkthroughs on the [docs site](https://kOaDT.github.io/oss-oopssec-store).
+Found all the flags? Share your walkthroughs on the [docs site](https://koadt.github.io/oss-oopssec-store).
 
 For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
