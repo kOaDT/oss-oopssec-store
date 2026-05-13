@@ -1,0 +1,1018 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import BackToTopButton from "@/components/BackToTopButton.astro";
+import { SITE } from "@/config";
+import {
+  CURRICULUM,
+  TOTAL_CHALLENGES,
+  CHALLENGES_BY_DIFFICULTY,
+  type Difficulty,
+} from "@/data/roadmap";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const DIFFICULTY_LABEL: Record<Difficulty, string> = {
+  EASY: "Easy",
+  MEDIUM: "Medium",
+  HARD: "Hard",
+};
+const DIFFICULTY_CHIP: Record<Difficulty, string> = {
+  EASY: "EASY",
+  MEDIUM: "MED",
+  HARD: "HARD",
+};
+
+/* ─── Section geometry ─────────────────────────────────────────
+   roadmap.sh layout: chapter centered on the spine, its challenges
+   stacked vertically on one side (alternating per chapter). Curves
+   go from the chapter edge to each challenge edge.
+
+   All dimensions in CSS pixels. The SVG inside each section uses a
+   viewBox of "0 0 100 sectionHeight" with preserveAspectRatio="none",
+   so X is a % across the section and Y is real pixels.
+
+   Layout columns (≥ 1024px):
+     col-1 (35%) | col-2 (30% — chapter) | col-3 (35%)
+   The challenges group occupies col-1 or col-3, sized to 75% of that
+   column and justified to the outer edge of the section. */
+const CHALLENGE_H = 88;
+const CHALLENGE_GAP = 14;
+/* Extra vertical space inserted below a challenge that has a
+ * "Builds on" hint, so the hint can breathe between the card and
+ * the next one. Combined with CHALLENGE_GAP this gives ~32px of
+ * total inter-card space. */
+const PREREQS_EXTRA_GAP = 18;
+const CHAPTER_H_MIN = 140;
+const SECTION_PAD_Y = 28;
+
+/* X anchor points in viewBox % (constant because grid uses % widths) */
+const CHAPTER_EDGE_R = 65;
+const CHAPTER_EDGE_L = 35;
+const CHALLENGE_EDGE_R = 73.75;
+const CHALLENGE_EDGE_L = 26.25;
+
+type Side = "left" | "right";
+
+type Section = {
+  chapter: (typeof CURRICULUM)[number];
+  index: number;
+  side: Side;
+  sectionHeight: number;
+  chapterCenterY: number;
+  challengeYs: number[];
+  challengeOffsets: number[];
+  startChallengeNumber: number;
+};
+
+let challengeCounter = 0;
+const sections: Section[] = CURRICULUM.map((chapter, ci) => {
+  const startChallengeNumber = challengeCounter + 1;
+  challengeCounter += chapter.challenges.length;
+
+  const n = chapter.challenges.length;
+
+  /* Cumulative offsets — cards with prerequisites get extra space
+   * below them so the "Builds on" hint sits comfortably in the gap. */
+  const localOffsets: number[] = [];
+  let cursor = 0;
+  chapter.challenges.forEach((ch, i) => {
+    localOffsets.push(cursor);
+    if (i < n - 1) {
+      const extra =
+        ch.prerequisites && ch.prerequisites.length > 0 ? PREREQS_EXTRA_GAP : 0;
+      cursor += CHALLENGE_H + CHALLENGE_GAP + extra;
+    }
+  });
+  const groupHeight = cursor + CHALLENGE_H;
+
+  const contentHeight = Math.max(CHAPTER_H_MIN, groupHeight);
+  const sectionHeight = contentHeight + 2 * SECTION_PAD_Y;
+  const chapterCenterY = sectionHeight / 2;
+  const groupTop = (sectionHeight - groupHeight) / 2;
+  const challengeOffsets = localOffsets.map(o => o + groupTop);
+  const challengeYs = challengeOffsets.map(o => o + CHALLENGE_H / 2);
+
+  return {
+    chapter,
+    index: ci + 1,
+    side: (ci + 1) % 2 === 1 ? "right" : "left",
+    sectionHeight,
+    chapterCenterY,
+    challengeYs,
+    challengeOffsets,
+    startChallengeNumber,
+  };
+});
+
+const backUrl = SITE.showBackButton ? Astro.url.pathname : `${base}/`;
+const pad = (n: number) => String(n).padStart(2, "0");
+
+const pageTitle = "The Roadmap";
+const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that ship in real production code, from the obvious versions to the ones that survive a code review.`;
+---
+
+<Layout
+  title={`Roadmap | ${SITE.title}`}
+  description={`A guided route through every OopsSec Store challenge. ${TOTAL_CHALLENGES} flags across ${CURRICULUM.length} chapters, from recon to remote code execution.`}
+>
+  <Header />
+  <Breadcrumb />
+
+  <div class="tracks-shell">
+    <aside class="track-toc" aria-label="Chapter navigation">
+      <p class="track-toc-title">Chapters</p>
+      <ol class="track-toc-list">
+        {
+          CURRICULUM.map((chapter, ci) => (
+            <li>
+              <a
+                href={`#chapter-${pad(ci + 1)}`}
+                class="track-toc-link"
+                data-chapter-link={pad(ci + 1)}
+              >
+                <span class="track-toc-num">{pad(ci + 1)}</span>
+                <span class="track-toc-text">{chapter.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </aside>
+
+    <main id="main-content" data-backurl={backUrl} class="track-main">
+      <h1 class="text-2xl font-semibold sm:text-3xl">{pageTitle}</h1>
+      <p class="mt-2 mb-6 italic">{pageDesc}</p>
+
+      <section class="track-stats" aria-label="Curriculum overview">
+        <div class="track-stat">
+          <div class="track-stat-value">{TOTAL_CHALLENGES}</div>
+          <div class="track-stat-label">Challenges</div>
+        </div>
+        <div class="track-stat">
+          <div class="track-stat-value">{CURRICULUM.length}</div>
+          <div class="track-stat-label">Chapters</div>
+        </div>
+        <div class="track-stat">
+          <div class="track-stat-value">
+            {CHALLENGES_BY_DIFFICULTY.EASY}<span class="track-stat-sep">/</span
+            >{CHALLENGES_BY_DIFFICULTY.MEDIUM}<span class="track-stat-sep"
+              >/</span
+            >{CHALLENGES_BY_DIFFICULTY.HARD}
+          </div>
+          <div class="track-stat-label">Easy / Med / Hard</div>
+        </div>
+        <div class="track-stat">
+          <div class="track-stat-value">33–48h</div>
+          <div class="track-stat-label">To finish</div>
+        </div>
+      </section>
+
+      <div class="track-intro">
+        <p>
+          By the end you'll have hands-on practice across every bug class
+          shipped in OopsSec Store — covering the full OWASP Top 10 (2025) plus
+          the modern AI and supply-chain attack surface: reconnaissance, broken
+          access control, client-side trust failures, XSS and CSRF, SQL
+          injection, server-side parsers, authentication failures, SSRF,
+          cryptographic mistakes, business logic flaws, AI/LLM attacks, and
+          supply chain compromises. The order is built so the easy bugs sharpen
+          the instincts you'll need for the harder ones.
+        </p>
+        <p>
+          The most important advice: try each challenge yourself before opening
+          the walkthrough. Skills come from finding the bug, not from reading
+          about it. And one rule that doesn't bend: only apply this to systems
+          you own or are explicitly authorized to test.
+        </p>
+      </div>
+
+      <div class="track-legend" aria-label="Difficulty legend">
+        <span class="track-legend-label">Legend</span>
+        <span class="track-legend-item">
+          <span class="challenge-dot" data-difficulty="EASY" aria-hidden="true"
+          ></span>
+          Easy
+        </span>
+        <span class="track-legend-item">
+          <span
+            class="challenge-dot"
+            data-difficulty="MEDIUM"
+            aria-hidden="true"></span>
+          Medium
+        </span>
+        <span class="track-legend-item">
+          <span class="challenge-dot" data-difficulty="HARD" aria-hidden="true"
+          ></span>
+          Hard
+        </span>
+      </div>
+
+      <div class="track-stage">
+        {
+          sections.map(section => (
+            <section
+              class:list={["track-section", `track-section--${section.side}`]}
+              id={`chapter-${pad(section.index)}`}
+              data-chapter-id={pad(section.index)}
+              style={`--section-h: ${section.sectionHeight}px;`}
+            >
+              <svg
+                class="track-section-svg"
+                viewBox={`0 0 100 ${section.sectionHeight}`}
+                preserveAspectRatio="none"
+                role="presentation"
+                aria-hidden="true"
+              >
+                {section.challengeYs.map(cY => {
+                  const start =
+                    section.side === "right" ? CHAPTER_EDGE_R : CHAPTER_EDGE_L;
+                  const end =
+                    section.side === "right"
+                      ? CHALLENGE_EDGE_R
+                      : CHALLENGE_EDGE_L;
+                  const mid = (start + end) / 2;
+                  return (
+                    <path
+                      d={`M ${start} ${section.chapterCenterY} C ${mid} ${section.chapterCenterY}, ${mid} ${cY}, ${end} ${cY}`}
+                      class="track-curve"
+                    />
+                  );
+                })}
+              </svg>
+
+              <article class="chapter-card">
+                <p class="chapter-eyebrow">
+                  Chapter {pad(section.index)}{" "}
+                  <span class="chapter-eyebrow-sep">/</span>{" "}
+                  {pad(CURRICULUM.length)}
+                </p>
+                <h2 class="chapter-title">{section.chapter.title}</h2>
+                <p class="chapter-tagline">{section.chapter.tagline}</p>
+              </article>
+
+              <ol class="challenges-group">
+                {section.chapter.challenges.map((challenge, i) => {
+                  const number = section.startChallengeNumber + i;
+                  const isLast = i === section.chapter.challenges.length - 1;
+                  const needsPrereqsGap =
+                    !!challenge.prerequisites &&
+                    challenge.prerequisites.length > 0 &&
+                    !isLast;
+                  return (
+                    <li
+                      class="challenge-item"
+                      id={`challenge-${pad(number)}`}
+                      data-prereqs-followed={
+                        needsPrereqsGap ? "true" : undefined
+                      }
+                    >
+                      <a
+                        href={`${base}/posts/${challenge.walkthroughSlug}`}
+                        class="challenge-card"
+                        aria-label={`Challenge ${pad(number)}: ${challenge.title} (${DIFFICULTY_LABEL[challenge.difficulty]})`}
+                      >
+                        <div class="challenge-head">
+                          <span class="challenge-number">{pad(number)}</span>
+                          <span
+                            class="challenge-difficulty"
+                            data-difficulty={challenge.difficulty}
+                          >
+                            <span
+                              class="challenge-dot"
+                              data-difficulty={challenge.difficulty}
+                              aria-hidden="true"
+                            />
+                            <span>{DIFFICULTY_CHIP[challenge.difficulty]}</span>
+                          </span>
+                        </div>
+                        <h3 class="challenge-title">{challenge.title}</h3>
+                      </a>
+                      {challenge.prerequisites &&
+                        challenge.prerequisites.length > 0 && (
+                          <div
+                            class="challenge-prereqs"
+                            aria-label={`Builds on challenges ${challenge.prerequisites.map(n => pad(n)).join(", ")}`}
+                          >
+                            <span
+                              class="challenge-prereqs-label"
+                              aria-hidden="true"
+                            >
+                              Builds on
+                            </span>
+                            {challenge.prerequisites.map((n, idx) => (
+                              <>
+                                {idx > 0 && (
+                                  <span
+                                    class="challenge-prereqs-sep"
+                                    aria-hidden="true"
+                                  >
+                                    ·
+                                  </span>
+                                )}
+                                <a
+                                  href={`#challenge-${pad(n)}`}
+                                  class="challenge-prereqs-link"
+                                  aria-label={`Jump to challenge ${pad(n)}`}
+                                >
+                                  {pad(n)}
+                                </a>
+                              </>
+                            ))}
+                          </div>
+                        )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ))
+        }
+
+        <section class="track-end">
+          <article class="end-card">
+            <p class="chapter-eyebrow">End of the line</p>
+            <h2 class="chapter-title">You made it through.</h2>
+            <p class="end-description">
+              If you reached this point by finding each bug yourself before
+              opening the walkthrough, you've built the instincts that matter:
+              the same ones that flag real vulnerabilities in real code reviews.
+              Congratulations.
+            </p>
+            <p class="end-description">
+              Drop your name in the
+              <a
+                href="https://github.com/kOaDT/oss-oopssec-store/blob/main/hall-of-fame/data.json"
+                class="track-inline-link"
+              >
+                Hall of Fame
+              </a>
+              if you flagged everything. And if you know a vulnerability pattern that
+              belongs in here, open a
+              <a
+                href="https://github.com/kOaDT/oss-oopssec-store"
+                class="track-inline-link"
+              >
+                pull request
+              </a>
+              . New challenges are always welcome.
+            </p>
+          </article>
+        </section>
+      </div>
+
+      <BackToTopButton />
+    </main>
+  </div>
+
+  <Footer />
+</Layout>
+
+<script>
+  function initTrackPage() {
+    /* persist backUrl like Main.astro does */
+    const main = document.querySelector<HTMLElement>("#main-content");
+    const backUrl = main?.dataset?.backurl;
+    if (backUrl) sessionStorage.setItem("backUrl", backUrl);
+
+    /* TOC scroll spy */
+    const tocLinks = document.querySelectorAll<HTMLAnchorElement>(
+      "[data-chapter-link]"
+    );
+    const chapterEls =
+      document.querySelectorAll<HTMLElement>("[data-chapter-id]");
+    if (
+      tocLinks.length &&
+      chapterEls.length &&
+      "IntersectionObserver" in window
+    ) {
+      const setActive = (id: string) => {
+        tocLinks.forEach(link => {
+          link.setAttribute(
+            "data-active",
+            link.dataset.chapterLink === id ? "true" : "false"
+          );
+        });
+      };
+      /* First chapter is active by default */
+      const firstId = chapterEls[0].getAttribute("data-chapter-id");
+      if (firstId) setActive(firstId);
+
+      const observer = new IntersectionObserver(
+        entries => {
+          const visible = entries
+            .filter(e => e.isIntersecting)
+            .sort(
+              (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
+            );
+          if (visible[0]) {
+            const id = visible[0].target.getAttribute("data-chapter-id");
+            if (id) setActive(id);
+          }
+        },
+        { rootMargin: "-25% 0px -65% 0px", threshold: 0 }
+      );
+      chapterEls.forEach(el => observer.observe(el));
+    }
+  }
+
+  initTrackPage();
+  document.addEventListener("astro:after-swap", initTrackPage);
+</script>
+
+<script is:inline data-astro-rerun>
+  /** Scroll progress indicator at the top of the page,
+   * mirrors the one in PostDetails layout. */
+  function createProgressBar() {
+    const progressContainer = document.createElement("div");
+    progressContainer.className =
+      "progress-container fixed top-0 z-10 h-1 w-full bg-background";
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress-bar h-1 w-0 bg-accent";
+    progressBar.id = "myBar";
+    progressContainer.appendChild(progressBar);
+    document.body.appendChild(progressContainer);
+  }
+  createProgressBar();
+
+  function updateScrollProgress() {
+    document.addEventListener("scroll", () => {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      const myBar = document.getElementById("myBar");
+      if (myBar) {
+        myBar.style.width = scrolled + "%";
+      }
+    });
+  }
+  updateScrollProgress();
+</script>
+
+<style>
+  /* ─── Two-column shell ─────────────────────────────────────── */
+  .tracks-shell {
+    max-width: 80rem;
+    margin: 1rem auto 4rem;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 1024px) {
+    .tracks-shell {
+      display: grid;
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: start;
+    }
+  }
+  .track-main {
+    min-width: 0;
+  }
+
+  /* ─── Sticky TOC ────────────────────────────────────────────── */
+  .track-toc {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .track-toc {
+      display: block;
+      position: sticky;
+      top: 5rem;
+      align-self: start;
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding: 0.75rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      background: color-mix(in srgb, var(--background) 92%, transparent);
+    }
+  }
+  .track-toc-title {
+    font-family: var(--font-app);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.6;
+    margin: 0.25rem 0.5rem 0.5rem;
+  }
+  .track-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .track-toc-list > li + li {
+    margin-top: 0.125rem;
+  }
+  .track-toc-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--foreground);
+    text-decoration: none;
+    opacity: 0.65;
+    line-height: 1.3;
+    transition:
+      opacity 180ms ease,
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+  .track-toc-link:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--muted) 40%, transparent);
+  }
+  .track-toc-link[data-active="true"] {
+    opacity: 1;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .track-toc-num {
+    font-family: var(--font-app);
+    font-size: 0.7rem;
+    opacity: 0.55;
+    flex-shrink: 0;
+  }
+  .track-toc-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ─── Stats banner ──────────────────────────────────────────── */
+  .track-stats {
+    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--muted) 30%, transparent);
+  }
+  @media (min-width: 640px) {
+    .track-stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .track-stat {
+    text-align: center;
+  }
+  .track-stat-value {
+    font-family: var(--font-app);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .track-stat-sep {
+    opacity: 0.4;
+    margin: 0 0.1rem;
+  }
+  .track-stat-label {
+    font-family: var(--font-app);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+  }
+
+  /* ─── Intro & legend ────────────────────────────────────────── */
+  .track-intro {
+    margin-top: 2rem;
+    line-height: 1.7;
+  }
+  .track-intro p {
+    margin: 0;
+  }
+  .track-intro p + p {
+    margin-top: 0.875rem;
+  }
+  .track-legend {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    font-size: 0.8125rem;
+  }
+  .track-legend-label {
+    font-family: var(--font-app);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .track-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ─── Stage ─────────────────────────────────────────────────── */
+  .track-stage {
+    position: relative;
+    margin-top: 3rem;
+  }
+
+  /* The spine — continuous vertical line at 50%, covered by chapter
+     cards which sit on top with a solid background. Visible at all
+     viewport sizes; on mobile the cards are stacked over it. */
+  .track-stage::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 2px solid var(--accent);
+    transform: translateX(-1px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ─── Section (chapter + its challenges) ────────────────────── */
+  .track-section {
+    position: relative;
+    scroll-margin-top: 5rem;
+    padding-block: 1.5rem;
+  }
+
+  /* Below desktop: stack chapter on top, challenges below. No spine,
+     no curves (SVG hidden via media query). */
+  @media (max-width: 1023.98px) {
+    .track-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+  }
+
+  /* Desktop: absolute positioning so X edges of cards match SVG path
+     X anchors exactly. The grid % approach was creating subtle
+     asymmetry between left and right sides. */
+  @media (min-width: 1024px) {
+    .track-section {
+      position: relative;
+      display: block;
+      height: var(--section-h);
+      padding-block: 0;
+    }
+    .track-section .chapter-card {
+      position: absolute;
+      top: 50%;
+      left: 35%; /* CHAPTER_EDGE_L */
+      width: 30%; /* spans to CHAPTER_EDGE_R = 65% */
+      transform: translateY(-50%);
+      max-width: none;
+    }
+    .track-section--right .challenges-group {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      width: 26.25%; /* right edge at 100%, left edge at CHALLENGE_EDGE_R = 73.75% */
+      transform: translateY(-50%);
+    }
+    .track-section--left .challenges-group {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 26.25%; /* left edge at 0%, right edge at CHALLENGE_EDGE_L = 26.25% */
+      transform: translateY(-50%);
+    }
+  }
+
+  /* SVG curves (desktop only) */
+  .track-section-svg {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .track-section-svg {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+  }
+  .track-curve {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.9;
+  }
+
+  /* ─── Chapter card ──────────────────────────────────────────── */
+  .chapter-card {
+    width: 100%;
+    max-width: 520px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    background: var(--background);
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  @media (min-width: 1024px) {
+    .chapter-card {
+      max-width: none;
+      padding: 0.875rem 1rem;
+    }
+  }
+
+  .chapter-eyebrow {
+    font-family: var(--font-app);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+  .chapter-eyebrow-sep {
+    opacity: 0.4;
+    margin: 0 0.15rem;
+  }
+  .chapter-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0.25rem 0 0;
+    color: var(--foreground);
+    line-height: 1.25;
+  }
+  @media (min-width: 1024px) {
+    .chapter-title {
+      font-size: 1rem;
+    }
+  }
+  .chapter-tagline {
+    margin: 0.375rem 0 0;
+    font-style: italic;
+    opacity: 0.75;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ─── Challenges group ──────────────────────────────────────── */
+  .challenges-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  @media (min-width: 1024px) {
+    .challenges-group {
+      max-width: none;
+      gap: 14px; /* matches CHALLENGE_GAP */
+    }
+  }
+  .challenge-item {
+    width: 100%;
+    position: relative;
+    scroll-margin-top: 5rem;
+  }
+  /* Extra room below cards that carry a "Builds on" hint, so the
+     hint sits centred between this card and the next. Matches
+     PREREQS_EXTRA_GAP in the geometry computation. */
+  .challenge-item[data-prereqs-followed="true"] {
+    margin-bottom: 18px;
+  }
+
+  /* ─── Challenge card ────────────────────────────────────────── */
+  .challenge-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background: var(--background);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease;
+    position: relative;
+    z-index: 2;
+  }
+  @media (min-width: 1024px) {
+    .challenge-card {
+      height: 88px; /* matches CHALLENGE_H */
+      padding: 0.5rem 0.875rem;
+    }
+  }
+  .challenge-card:hover,
+  .challenge-card:focus-visible {
+    border-color: var(--accent);
+    transform: translateX(2px);
+  }
+  .track-section--left .challenge-card:hover,
+  .track-section--left .challenge-card:focus-visible {
+    transform: translateX(-2px);
+  }
+  .challenge-card:hover .challenge-title,
+  .challenge-card:focus-visible .challenge-title {
+    color: var(--accent);
+  }
+
+  .challenge-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+  }
+  .challenge-number {
+    font-family: var(--font-app);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    opacity: 0.8;
+  }
+  .challenge-difficulty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-app);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--muted) 25%, transparent);
+    color: var(--foreground);
+  }
+
+  .challenge-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--foreground);
+    line-height: 1.3;
+    transition: color 180ms ease;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ─── "Builds on" prerequisites hint ──────────────────────────
+     Sits as plain gray text in the gap directly below the challenge
+     card. The hint is a sibling of the card anchor (not a descendant)
+     so each number is a real link that jumps to the prerequisite
+     challenge. Position: absolute keeps it out of the 88px card flow
+     so it never collides with a 2-line title. */
+  .challenge-prereqs {
+    position: absolute;
+    top: 100%;
+    margin-top: 0.625rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--font-app);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: color-mix(in srgb, var(--foreground) 55%, transparent);
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+  /* Anchor to the curve-facing side so the eye reads
+     "this curve brings prereqs". Mobile defaults to right. */
+  .challenge-prereqs {
+    right: 0.875rem;
+  }
+  @media (min-width: 1024px) {
+    .track-section--right .challenge-prereqs {
+      left: 0.875rem;
+      right: auto;
+    }
+    .track-section--left .challenge-prereqs {
+      right: 0.875rem;
+      left: auto;
+    }
+  }
+  .challenge-prereqs-sep {
+    opacity: 0.5;
+  }
+  .challenge-prereqs-link {
+    font-weight: 700;
+    color: color-mix(in srgb, var(--foreground) 70%, transparent);
+    text-decoration: none;
+    padding: 0 0.1rem;
+    transition: color 180ms ease;
+  }
+  .challenge-prereqs-link:hover,
+  .challenge-prereqs-link:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ─── Difficulty dot (palette only, fill level) ─────────────── */
+  .challenge-dot {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    background: var(--background);
+    flex-shrink: 0;
+  }
+  .challenge-dot[data-difficulty="MEDIUM"] {
+    background: linear-gradient(
+      to right,
+      var(--accent) 50%,
+      var(--background) 50%
+    );
+  }
+  .challenge-dot[data-difficulty="HARD"] {
+    background: var(--accent);
+  }
+
+  /* ─── End station ───────────────────────────────────────────── */
+  .track-end {
+    position: relative;
+    padding: 2.5rem 0 1rem;
+    display: flex;
+    justify-content: center;
+    z-index: 2;
+  }
+  .end-card {
+    width: 100%;
+    max-width: 560px;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--accent) 8%, var(--background));
+    text-align: center;
+  }
+  .end-card .chapter-title {
+    color: var(--accent);
+    font-size: 1.25rem;
+  }
+  .end-description {
+    margin: 0.75rem 0 0;
+    line-height: 1.6;
+    opacity: 0.9;
+    font-size: 0.9rem;
+  }
+
+  .track-inline-link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+  }
+  .track-inline-link:hover {
+    text-decoration-style: solid;
+  }
+
+  /* ─── Reduced motion ────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .challenge-card,
+    .challenge-title,
+    .track-toc-link {
+      transition: none;
+    }
+    .challenge-card:hover,
+    .challenge-card:focus-visible,
+    .track-section--left .challenge-card:hover,
+    .track-section--left .challenge-card:focus-visible {
+      transform: none;
+    }
+  }
+</style>
