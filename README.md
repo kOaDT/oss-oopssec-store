@@ -75,7 +75,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 - Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
 - Built with Next.js, React, Prisma, and SQLite
 - REST API with documented attack vectors
-- 34 CTF challenges across 12 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
+- 34 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
 
