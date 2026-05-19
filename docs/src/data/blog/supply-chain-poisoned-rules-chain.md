@@ -266,6 +266,23 @@ The lab puts all three back to back. The bad package gets you the
 prompt-injection payload, the prompt injection turns your own agent
 against you, and the agent is what writes the actual backdoor.
 
+## Wormable supply-chain propagation
+
+Compromising one developer workstation is no longer the end goal of
+modern supply-chain attacks. It's the propagation layer.
+
+The ["Shai-Hulud" npm worm](https://unit42.paloaltonetworks.com/npm-supply-chain-attack/) (September 2025) made that explicit. Its real
+objective was stealing developer and CI credentials, especially npm tokens, and using them to publish poisoned versions
+of every package the compromised maintainer could reach.
+
+Rules-file poisoning has **not yet** been observed combined with that
+pattern, but it would fit. A poisoned Cursor/Copilot/Claude rules file
+is a persistence primitive for the developer environment: the attacker
+influences the agent that writes the code, and the directive survives
+prompts, refactors, and repositories as long as the file stays loaded.
+With CI-connected agents, the same directive can adapt to each project
+(minimal stack-specific tailoring needed).
+
 ## Defenses
 
 **Block install scripts.** `npm config set ignore-scripts true`. Opt in
