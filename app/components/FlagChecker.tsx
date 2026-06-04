@@ -25,6 +25,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [foundFlags, setFoundFlags] = useState<string[]>([]);
   const [isInitialAnimation, setIsInitialAnimation] = useState(true);
+  const [highlightVerify, setHighlightVerify] = useState(false);
   const [supportBannerSlug, setSupportBannerSlug] = useState<string | null>(
     null
   );
@@ -50,6 +51,25 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
     }, INITIAL_ANIMATION_DURATION);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // The onboarding guide opens the checker and hands the player their first
+  // (practice) flag via this event so they validate it on the real control.
+  useEffect(() => {
+    const handleOpenRequest = (event: Event) => {
+      const detail = (event as CustomEvent<{ prefill?: string }>).detail;
+      setIsInitialAnimation(false);
+      setMessage(null);
+      setIsOpen(true);
+      if (detail?.prefill) {
+        setFlagInput(detail.prefill);
+        setHighlightVerify(true);
+      }
+    };
+
+    window.addEventListener("oss:open-flag-checker", handleOpenRequest);
+    return () =>
+      window.removeEventListener("oss:open-flag-checker", handleOpenRequest);
   }, []);
 
   const triggerConfetti = () => {
@@ -112,6 +132,15 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
 
       const data = await response.json();
 
+      if (data.tutorial) {
+        triggerVictoryCelebration();
+        setHighlightVerify(false);
+        setFlagInput("");
+        setIsOpen(false);
+        window.dispatchEvent(new CustomEvent("oss:tutorial-validated"));
+        return;
+      }
+
       if (data.valid) {
         if (data.alreadyFound) {
           setMessage("Flag already found!");
@@ -157,6 +186,14 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
     if (e.key === "Enter" && !isVerifying) {
       handleVerify();
     }
+  };
+
+  const closeChecker = () => {
+    if (isVerifying) return;
+    setIsOpen(false);
+    setFlagInput("");
+    setMessage(null);
+    setHighlightVerify(false);
   };
 
   return (
@@ -260,13 +297,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
       {isOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => {
-            if (!isVerifying) {
-              setIsOpen(false);
-              setFlagInput("");
-              setMessage(null);
-            }
-          }}
+          onClick={closeChecker}
         >
           <div
             className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-800"
@@ -283,13 +314,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                 {allFlagsFound ? "All Flags Found" : "Verify Flag"}
               </h2>
               <button
-                onClick={() => {
-                  if (!isVerifying) {
-                    setIsOpen(false);
-                    setFlagInput("");
-                    setMessage(null);
-                  }
-                }}
+                onClick={closeChecker}
                 className="cursor-pointer text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
                 disabled={isVerifying}
               >
@@ -451,7 +476,11 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                 <button
                   onClick={handleVerify}
                   disabled={isVerifying || !flagInput.trim()}
-                  className="rounded-lg cursor-pointer bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600"
+                  className={`rounded-lg cursor-pointer bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600 ${
+                    highlightVerify
+                      ? "ring-2 ring-primary-400 ring-offset-2"
+                      : ""
+                  }`}
                 >
                   {isVerifying ? "Verifying..." : "Verify"}
                 </button>
