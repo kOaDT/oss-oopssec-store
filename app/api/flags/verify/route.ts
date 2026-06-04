@@ -3,12 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
 import { verifyFlagBodySchema } from "@/lib/validation/schemas/flags";
+import { TUTORIAL_FLAG } from "@/lib/config";
 
 export async function POST(request: Request) {
   try {
     const parsed = await parseBody(request, verifyFlagBodySchema);
     if (!parsed.success) return parsed.response;
     const { flag } = parsed.data;
+
+    // Onboarding practice flag: accepted without touching the database, so it
+    // never affects the flag count, progress, or the Hall of Fame.
+    if (flag.trim() === TUTORIAL_FLAG) {
+      return NextResponse.json({ valid: true, tutorial: true });
+    }
 
     const matchedFlag = await prisma.flag.findFirst({
       where: {

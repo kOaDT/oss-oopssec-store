@@ -5,6 +5,7 @@ import FlagCheckerWrapper from "./components/FlagCheckerWrapper";
 import HintPanelWrapper from "./components/HintPanelWrapper";
 import ConsoleWelcome from "./components/ConsoleWelcome";
 import VisitorTracker from "./components/VisitorTracker";
+import OnboardingGuide from "./components/OnboardingGuide";
 
 const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -31,6 +32,7 @@ export default function RootLayout({
         <HintPanelWrapper />
         <ConsoleWelcome />
         <VisitorTracker />
+        <OnboardingGuide />
       </body>
     </html>
   );
