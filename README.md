@@ -53,6 +53,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 ## Table of contents
 
 - [Features](#features)
+- [Why OopsSec Store?](#why-oopssec-store)
 - [Installation](#installation)
   - [Quick start (npm)](#quick-start)
   - [Docker](#docker)
@@ -78,6 +79,26 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 - 34 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
+
+## Why OopsSec Store?
+
+OopsSec Store is the only intentionally vulnerable web application built with **Next.js and React**. The stack you'll actually encounter in production. And the AI-era attack surface is part of the core curriculum, not an afterthought: prompt injection, MCP tool poisoning, AI coding-agent backdoors, and an npm supply-chain attack chain simulated end to end.
+
+|                                                | OopsSec Store                                           | Juice Shop                              | DVWA                      |
+| ---------------------------------------------- | ------------------------------------------------------- | --------------------------------------- | ------------------------- |
+| Stack                                          | Next.js · React · Prisma                                | Node.js · Express · Angular             | PHP · MySQL               |
+| Setup                                          | `npx create-oss-store` (< 1 min) / Docker               | Docker / npm                            | Docker / manual LAMP      |
+| CTF flags                                      | ✅ Built in                                             | ✅ Opt-in CTF mode                      | ❌                        |
+| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 34 flags                     | ❌ Score board only                     | Partial (security levels) |
+| Walkthrough for every challenge                | ✅                                                      | ✅ Companion guide                      | Partial (hints)           |
+| LLM prompt injection                           | ✅ Plug in a free API key                               | ✅ v20+, bring & configure your own LLM | ❌                        |
+| MCP tool poisoning                             | ✅                                                      | ❌                                      | ❌                        |
+| AI coding-agent backdoor (poisoned rules file) | ✅                                                      | ❌                                      | ❌                        |
+| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor | Partial — identification only           | ❌                        |
+| Challenges built on real CVEs                  | ✅                                                      | ❌                                      | ❌                        |
+| Hall of Fame for players                       | ✅                                                      | ❌                                      | ❌                        |
+
+<sub>Last verified June 2026, against Juice Shop v20 and DVWA 2.x. Spotted an inaccuracy? [Open an issue](https://github.com/kOaDT/oss-oopssec-store/issues) or [open a PR](https://github.com/kOaDT/oss-oopssec-store/pulls).</sub>
 
 ## Installation
 

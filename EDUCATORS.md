@@ -22,7 +22,7 @@ Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/r
 
 ## Table of Contents
 
-1. [Why OopsSec Store?](#why-oss-oopssec-store)
+1. [Why OopsSec Store?](#why-oopssec-store)
 2. [OWASP Coverage Grid](#owasp-coverage-grid)
 3. [Challenge Catalog & Time Estimates](#challenge-catalog--time-estimates)
 4. [Syllabus Integration Guide](#syllabus-integration-guide)
@@ -34,18 +34,9 @@ Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/r
 
 ## Why OopsSec Store?
 
-OopsSec Store is the only intentionally vulnerable web application built with **Next.js and React**: the stack your students will actually encounter in production.
+OopsSec Store is the only intentionally vulnerable web application built with **Next.js and React**: the stack your students will actually encounter in production. It also treats the AI-era attack surface — prompt injection, MCP tool poisoning, AI coding-agent backdoors, supply-chain attack chains — as first-class challenges, not add-ons.
 
-|                           | OopsSec Store                    | DVWA            | Juice Shop        |
-| ------------------------- | -------------------------------- | --------------- | ----------------- |
-| Stack                     | Next.js · React · Prisma         | PHP · MySQL     | Node.js · Angular |
-| Setup                     | `npx create-oss-store` (< 1 min) | Manual / Docker | Docker            |
-| CTF format with flags     | ✅                               | ❌              | ✅                |
-| Walkthroughs included     | ✅                               | Partial (hints) | ❌                |
-| Modern API attack vectors | ✅                               | ❌              | Partial           |
-| Actively maintained       | ✅                               | ⚠️              | ✅                |
-| Hall of Fame for students | ✅                               | ❌              | ❌                |
-| Free & open source (MIT)  | ✅                               | ✅              | ✅                |
+For a feature-by-feature comparison with Juice Shop and DVWA, see the [comparison table in the README](https://github.com/kOaDT/oss-oopssec-store#why-oopssec-store).
 
 Each vulnerability hides a flag in the format `OSS{...}`. Walkthroughs are available at [koadt.github.io/oss-oopssec-store](https://koadt.github.io/oss-oopssec-store) (useful for debriefing sessions or when students get stuck.)
 
