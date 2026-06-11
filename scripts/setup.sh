@@ -44,6 +44,11 @@ npm run build
 
 echo "Setup completed successfully!"
 
+echo ""
+echo "★ Enjoying the lab? A star helps others find it:"
+echo "  https://github.com/kOaDT/oss-oopssec-store"
+echo ""
+
 echo "Launching Prisma Studio and application..."
 npx prisma studio -b none &
 PRISMA_PID=$!

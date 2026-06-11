@@ -130,6 +130,10 @@ export async function createOssStore(projectName) {
   console.log();
   console.log(chalk.dim("Good luck finding all the flags!"));
   console.log();
+  console.log(
+    `${chalk.yellow("★")} Enjoying the lab? A star helps others find it: ${chalk.underline("https://github.com/kOaDT/oss-oopssec-store")}`
+  );
+  console.log();
 }
 
 function runCommand(command, args, cwd) {
