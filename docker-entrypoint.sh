@@ -10,4 +10,9 @@ if [ ! -f "$DB_FILE" ]; then
   echo "Database initialized successfully."
 fi
 
+echo ""
+echo "★ Enjoying the lab? A star helps others find it:"
+echo "  https://github.com/kOaDT/oss-oopssec-store"
+echo ""
+
 exec npm start
