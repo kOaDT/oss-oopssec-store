@@ -1,5 +1,6 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { DOCS_ROADMAP_URL } from "@/lib/config";
 
 export default function About() {
   return (
@@ -81,47 +82,102 @@ export default function About() {
               </div>
               <div className="space-y-4 text-slate-700 dark:text-slate-300">
                 <p className="leading-relaxed">
-                  This platform is designed to help you learn about common web
-                  security vulnerabilities and how to identify, exploit, and
-                  ultimately defend against them. Key areas of focus include:
+                  This platform is designed to help you learn how to identify,
+                  exploit, and ultimately defend against real-world security
+                  vulnerabilities — from classic web flaws to AI-, crypto-, and
+                  supply-chain-specific risks. The challenges are grouped into
+                  these areas:
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                     <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
-                      Injection Attacks
+                      Injection
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      SQL injection, command injection, and other injection
-                      vulnerabilities
+                      SQL injection (search, second-order, header-based),
+                      cross-site scripting (XSS), XXE, and prompt injection
+                      against the AI assistant
                     </p>
                   </div>
                   <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                     <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
-                      Authentication & Session
+                      Authentication
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      Broken authentication, session management flaws, and
-                      access control issues
+                      Brute force without rate limiting, weak JWT secrets,
+                      session fixation, and insecure password resets
                     </p>
                   </div>
                   <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                     <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
-                      Cross-Site Scripting
+                      Authorization
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      XSS vulnerabilities and client-side security concerns
+                      Insecure direct object references (IDOR), broken
+                      object-level authorization, and middleware access-control
+                      bypasses
                     </p>
                   </div>
                   <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                     <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
-                      Security Misconfiguration
+                      Request Forgery
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      Improper security settings and exposed sensitive
-                      information
+                      Cross-site request forgery (CSRF), including
+                      profile-takeover chains, and server-side request forgery
+                      (SSRF)
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
+                      Cryptographic Failures
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Weak MD5 hashing, an AES-CBC padding oracle, and insecure
+                      randomness
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
+                      Information Disclosure
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Verbose API errors, plaintext passwords in logs, and
+                      secrets leaked through public environment variables
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
+                      Input Validation
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Client-side price manipulation, mass assignment, open
+                      redirects, and path traversal
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
+                      Supply Chain & Insecure Design
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      npm typosquatting, a malicious AI rules-file backdoor,
+                      business-logic flaws, and remote code execution
                     </p>
                   </div>
                 </div>
+                <p className="leading-relaxed">
+                  Not sure where to start? The{" "}
+                  <a
+                    href={DOCS_ROADMAP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
+                  >
+                    guided roadmap
+                  </a>{" "}
+                  orders these challenges into a recommended learning path, from
+                  reconnaissance basics through to chained, real-world exploits.
+                </p>
               </div>
             </div>
 
