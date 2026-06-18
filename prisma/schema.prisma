@@ -304,3 +304,16 @@ enum GiftCardStatus {
   PENDING
   REDEEMED
 }
+
+model StreamConfig {
+  id          Int      @id @default(autoincrement())
+  title       String
+  liveVideoId String
+  rtmpUrl     String
+  streamKey   String
+  isLive      Boolean  @default(true)
+  hijacked    Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@map("stream_config")
+}

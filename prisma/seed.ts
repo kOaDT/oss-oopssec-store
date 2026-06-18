@@ -4,6 +4,7 @@ import { getDatabaseUrl } from "../lib/database";
 import crypto from "crypto";
 import { generateInvoice } from "../lib/invoice";
 import { generateGiftCardCode } from "../lib/gift-card";
+import { OFFICIAL_VIDEO_ID, STREAM_DEFAULTS } from "../lib/live-stream";
 
 /**
  * If you want to add a new flag, you can add it here.
@@ -236,6 +237,16 @@ const flags = [
     owasp: "A01:2025",
     walkthroughSlug: "bola-wishlist-access",
     markdownFile: "broken-object-level-authorization.md",
+    category: "AUTHORIZATION" as const,
+    difficulty: "MEDIUM" as const,
+  },
+  {
+    flag: "OSS{brok3n_funct10n_l3v3l_4uth0r1z4t10n}",
+    slug: "broken-function-level-authorization",
+    cwe: "CWE-862",
+    owasp: "A01:2025",
+    walkthroughSlug: "live-stream-hijack",
+    markdownFile: "broken-function-level-authorization.md",
     category: "AUTHORIZATION" as const,
     difficulty: "MEDIUM" as const,
   },
@@ -482,6 +493,11 @@ const flagHints: Record<string, string[]> = {
     "Wishlists are personal, unless the API disagrees.",
     "The wishlist API retrieves any wishlist by its ID without verifying that the requesting user is the owner. Some wishlist IDs follow a predictable internal naming convention.",
     "Access GET /api/wishlists/wl-internal-001 while authenticated as any user. The server fetches the admin's internal wishlist without ownership checks. Since you're not the owner, the response includes the flag as proof of the authorization flaw.",
+  ],
+  "broken-function-level-authorization": [
+    "OopsSec Live streams product demos. The 'Update stream' button only shows for staff — but who actually checks that?",
+    "The admin Stream Management panel swaps the featured YouTube video via POST /api/live/stream. The button is hidden client-side for non-admins, yet the endpoint is mounted with withAuth, not withAdminAuth.",
+    'As any logged-in customer, replay POST /api/live/stream with { "liveVideoId": "dQw4w9WgXcQ" }. The server never checks your role, the public /live page now plays your video, and the response returns the flag as proof of the broadcast hijack.',
   ],
   "second-order-sql-injection": [
     "Not all inputs are dangerous when they first arrive. Sometimes the poison sits in the well, waiting.",
@@ -1171,6 +1187,20 @@ async function main() {
   });
 
   console.log("Created FLASHSALE coupon");
+
+  const existingStreamConfig = await prisma.streamConfig.findFirst();
+  if (!existingStreamConfig) {
+    await prisma.streamConfig.create({
+      data: { ...STREAM_DEFAULTS, isLive: true, hijacked: false },
+    });
+    console.log("Created OopsSec Live stream config");
+  } else {
+    await prisma.streamConfig.update({
+      where: { id: existingStreamConfig.id },
+      data: { liveVideoId: OFFICIAL_VIDEO_ID, hijacked: false },
+    });
+    console.log("Reset OopsSec Live stream config");
+  }
 
   const seededGiftCardCreatedAt = new Date("2025-01-15T10:42:33.456Z");
   const seededGiftCardCode = generateGiftCardCode(

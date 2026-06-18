@@ -76,7 +76,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 - Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
 - Built with Next.js, React, Prisma, and SQLite
 - REST API with documented attack vectors
-- 34 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
+- 35 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
 
@@ -89,7 +89,7 @@ OopsSec Store is the only intentionally vulnerable web application built with **
 | Stack                                          | Next.js · React · Prisma                                | Node.js · Express · Angular             | PHP · MySQL               |
 | Setup                                          | `npx create-oss-store` (< 1 min) / Docker               | Docker / npm                            | Docker / manual LAMP      |
 | CTF flags                                      | ✅ Built in                                             | ✅ Opt-in CTF mode                      | ❌                        |
-| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 34 flags                     | ❌ Score board only                     | Partial (security levels) |
+| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 35 flags                     | ❌ Score board only                     | Partial (security levels) |
 | Walkthrough for every challenge                | ✅                                                      | ✅ Companion guide                      | Partial (hints)           |
 | LLM prompt injection                           | ✅ Plug in a free API key                               | ✅ v20+, bring & configure your own LLM | ❌                        |
 | MCP tool poisoning                             | ✅                                                      | ❌                                      | ❌                        |

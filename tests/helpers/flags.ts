@@ -1,5 +1,7 @@
 export const FLAGS = {
   BROKEN_OBJECT_LEVEL_AUTHORIZATION: "OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}",
+  BROKEN_FUNCTION_LEVEL_AUTHORIZATION:
+    "OSS{brok3n_funct10n_l3v3l_4uth0r1z4t10n}",
   BRUTE_FORCE_NO_RATE_LIMIT: "OSS{brut3_f0rc3_n0_r4t3_l1m1t}",
   CLIENT_SIDE_PRICE_MANIPULATION: "OSS{cl13nt_s1d3_pr1c3_m4n1pul4t10n}",
   CROSS_SITE_REQUEST_FORGERY: "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}",
