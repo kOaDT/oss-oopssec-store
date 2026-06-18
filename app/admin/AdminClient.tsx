@@ -397,6 +397,14 @@ export default function AdminClient() {
                   "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400",
                 icon: "M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4",
               },
+              {
+                href: "/admin/live",
+                title: "Stream Management",
+                description: "Control the OopsSec Live broadcast",
+                color:
+                  "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400",
+                icon: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z",
+              },
             ].map((item) => (
               <Link
                 key={item.href}
