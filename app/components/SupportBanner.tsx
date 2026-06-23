@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { GITHUB_REPO } from "@/lib/config";
 
 const STORAGE_KEY = "oss_support_dismissed";
 const FLAG_BANNER_PREFIX = "oss_support_shown_";
@@ -95,7 +96,7 @@ export default function SupportBanner({
 
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <a
-            href="https://github.com/kOaDT/oss-oopssec-store"
+            href={GITHUB_REPO}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
@@ -118,7 +119,7 @@ export default function SupportBanner({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
             <a
-              href="https://github.com/kOaDT/oss-oopssec-store/fork"
+              href={`${GITHUB_REPO}/fork`}
               target="_blank"
               rel="noopener noreferrer"
               className="transition-colors hover:text-slate-700 dark:hover:text-slate-300"
@@ -127,7 +128,7 @@ export default function SupportBanner({
             </a>
             <span className="text-slate-300 dark:text-slate-600">|</span>
             <a
-              href="https://github.com/kOaDT/oss-oopssec-store/blob/main/hall-of-fame/data.json"
+              href={`${GITHUB_REPO}/blob/main/hall-of-fame/data.json`}
               target="_blank"
               rel="noopener noreferrer"
               className="transition-colors hover:text-slate-700 dark:hover:text-slate-300"

@@ -6,7 +6,11 @@ const DOCS_SITE_URL = "https://koadt.github.io/oss-oopssec-store";
 export const DOCS_BASE_URL = `${DOCS_SITE_URL}/posts`;
 export const DOCS_ROADMAP_URL = `${DOCS_SITE_URL}/roadmap`;
 
-export const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
+export const GITHUB_REPO_SLUG = "kOaDT/oss-oopssec-store";
+export const GITHUB_REPO = `https://github.com/${GITHUB_REPO_SLUG}`;
+
+/** Cache TTL (in seconds) for the GitHub-backed contributors list. */
+export const CONTRIBUTORS_REVALIDATE_SECONDS = 86_400;
 
 /**
  * Tutorial-only flag used by the onboarding guide. It is intentionally NOT

@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { DOCS_BASE_URL } from "@/lib/config";
+import { DOCS_BASE_URL, GITHUB_REPO } from "@/lib/config";
 import { getCveUrl, getCweUrl, getOwaspUrl } from "@/lib/format";
-
-const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 
 interface FoundFlag {
   slug: string;
