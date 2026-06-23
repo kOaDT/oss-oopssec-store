@@ -3,8 +3,14 @@ import Footer from "../components/Footer";
 import type { HallOfFameEntry } from "@/lib/types";
 import hallOfFameData from "@/hall-of-fame/data.json";
 import HallOfFameClient from "./HallOfFameClient";
+import ContributorsSection from "./ContributorsSection";
+import { TrophyIcon, GitHubIcon } from "./icons";
+import { fetchContributors } from "@/lib/github";
+import { GITHUB_REPO } from "@/lib/config";
 
-const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
+// Next.js requires a statically-analyzable literal here; keep in sync with
+// CONTRIBUTORS_REVALIDATE_SECONDS in lib/config.ts (24h).
+export const revalidate = 86400;
 
 export const metadata = {
   title: "Hall of Fame – OopsSec Store",
@@ -12,44 +18,9 @@ export const metadata = {
     "Players who have discovered all security flags in OopsSec Store",
 };
 
-function TrophyIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M5 3h14a2 2 0 012 2v2a4 4 0 01-4 4h-1v2a4 4 0 01-4 4 4 4 0 01-4-4v-2H7a4 4 0 01-4-4V5a2 2 0 012-2zm7 14v4m-4 0h8"
-      />
-    </svg>
-  );
-}
-
-function GitHubIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
-export default function HallOfFame() {
+export default async function HallOfFame() {
   const entries = hallOfFameData as HallOfFameEntry[];
+  const contributors = await fetchContributors();
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-900">
@@ -142,6 +113,8 @@ export default function HallOfFame() {
             </div>
           </div>
         </section>
+
+        <ContributorsSection contributors={contributors} />
       </main>
       <Footer />
     </div>

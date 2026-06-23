@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import confetti from "canvas-confetti";
 import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
+import { GITHUB_REPO } from "@/lib/config";
 
 function formatSlugToTitle(slug: string): string {
   return slug
@@ -436,7 +437,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                       Request on GitHub.
                     </p>
                     <a
-                      href="https://github.com/kOaDT/oss-oopssec-store/blob/main/hall-of-fame/data.json"
+                      href={`${GITHUB_REPO}/blob/main/hall-of-fame/data.json`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-lg bg-yellow-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600"

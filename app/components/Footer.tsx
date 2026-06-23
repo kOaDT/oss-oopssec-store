@@ -1,8 +1,7 @@
 import Link from "next/link";
 import packageJson from "../../package.json";
-import { DOCS_ROADMAP_URL } from "@/lib/config";
+import { DOCS_ROADMAP_URL, GITHUB_REPO } from "@/lib/config";
 
-const GITHUB_REPO = "https://github.com/kOaDT/oss-oopssec-store";
 const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
 const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
 const DEV_TO_URL = "https://dev.to/oopssec-store";

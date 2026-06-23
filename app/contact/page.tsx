@@ -1,6 +1,7 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Link from "next/link";
+import { GITHUB_REPO } from "@/lib/config";
 
 export default function Contact() {
   return (
@@ -53,7 +54,7 @@ export default function Contact() {
 
             <div className="grid gap-6 md:grid-cols-3">
               <Link
-                href="https://github.com/kOaDT/oss-oopssec-store"
+                href={GITHUB_REPO}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800 dark:hover:border-primary-600"
@@ -97,7 +98,7 @@ export default function Contact() {
               </Link>
 
               <Link
-                href="https://github.com/kOaDT/oss-oopssec-store/discussions"
+                href={`${GITHUB_REPO}/discussions`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800 dark:hover:border-primary-600"
@@ -143,7 +144,7 @@ export default function Contact() {
               </Link>
 
               <Link
-                href="https://github.com/kOaDT/oss-oopssec-store/issues"
+                href={`${GITHUB_REPO}/issues`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800 dark:hover:border-primary-600"

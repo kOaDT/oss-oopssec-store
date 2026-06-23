@@ -153,6 +153,13 @@ export interface HallOfFameEntry {
   country?: string;
 }
 
+export interface Contributor {
+  username: string;
+  avatarUrl: string;
+  githubUrl: string;
+  contributions: number;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;
