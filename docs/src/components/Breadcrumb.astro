@@ -1,4 +1,6 @@
 ---
+import { SITE } from "@/config";
+
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // Remove current url path, base prefix, and trailing slash
@@ -26,7 +28,35 @@ if (breadcrumbList[0] === "tags" && !isNaN(Number(breadcrumbList[2]))) {
     `${breadcrumbList[1]} ${Number(breadcrumbList[2]) === 1 ? "" : "(page " + breadcrumbList[2] + ")"}`
   );
 }
+
+// BreadcrumbList structured data mirroring the visible trail. URLs are
+// absolute (built from SITE.website) and incremental per segment.
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE.website },
+    ...currentUrlPath
+      .split("/")
+      .filter(Boolean)
+      .map((segment, index, segments) => ({
+        "@type": "ListItem",
+        position: index + 2,
+        name: decodeURIComponent(segment),
+        item: new URL(
+          `${segments.slice(0, index + 1).join("/")}/`,
+          SITE.website
+        ).href,
+      })),
+  ],
+};
 ---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(breadcrumbSchema)}
+/>
 
 <nav class="app-layout mt-8 mb-1" aria-label="breadcrumb">
   <ul

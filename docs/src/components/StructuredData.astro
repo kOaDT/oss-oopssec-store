@@ -1,0 +1,122 @@
+---
+import { SITE } from "@/config";
+
+type PageType = "article" | "website" | "page";
+
+interface Props {
+  pageType: PageType;
+  title: string;
+  description: string;
+  canonicalURL: URL | string;
+  image: URL | string;
+  author: string;
+  profile?: string;
+  pubDatetime?: Date;
+  modDatetime?: Date | null;
+  tags?: string[];
+  articleSection?: string;
+}
+
+const {
+  pageType,
+  title,
+  description,
+  canonicalURL,
+  image,
+  author,
+  profile,
+  pubDatetime,
+  modDatetime,
+  tags,
+  articleSection,
+} = Astro.props;
+
+const canonical = canonicalURL.toString();
+const imageUrl = image.toString();
+
+const orgId = `${SITE.website}#organization`;
+const websiteId = `${SITE.website}#website`;
+const logo = new URL("favicon.png", SITE.website).href;
+
+const organization = {
+  "@type": "Organization",
+  "@id": orgId,
+  name: SITE.title,
+  url: SITE.website,
+  logo: { "@type": "ImageObject", url: logo },
+};
+
+const website = {
+  "@type": "WebSite",
+  "@id": websiteId,
+  url: SITE.website,
+  name: SITE.title,
+  description: SITE.desc,
+  publisher: { "@id": orgId },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${SITE.website}search?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const graph: Record<string, unknown>[] = [organization, website];
+
+if (pageType === "article" && pubDatetime) {
+  graph.push({
+    "@type": "TechArticle",
+    headline: title,
+    description,
+    image: imageUrl,
+    datePublished: pubDatetime.toISOString(),
+    ...(modDatetime && { dateModified: modDatetime.toISOString() }),
+    author: {
+      "@type": "Person",
+      name: author,
+      ...(profile && { url: profile }),
+    },
+    publisher: { "@id": orgId },
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+    isPartOf: { "@id": websiteId },
+    url: canonical,
+    ...(tags && tags.length > 0 && { keywords: tags.join(", ") }),
+    ...(articleSection && { articleSection }),
+  });
+  graph.push({
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE.website },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Posts",
+        item: new URL("posts/", SITE.website).href,
+      },
+      { "@type": "ListItem", position: 3, name: title, item: canonical },
+    ],
+  });
+} else if (pageType === "page") {
+  graph.push({
+    "@type": "WebPage",
+    "@id": canonical,
+    url: canonical,
+    name: title,
+    description,
+    isPartOf: { "@id": websiteId },
+  });
+}
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": graph,
+};
+---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(structuredData)}
+/>

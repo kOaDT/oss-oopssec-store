@@ -77,6 +77,9 @@ export const SHARE_LINKS: Social[] = [
   },
 ] as const;
 
+export const HALL_OF_FAME_URL =
+  "https://github.com/kOaDT/oss-oopssec-store/blob/main/hall-of-fame/data.json";
+
 export const GISCUS: GiscusProps = {
   repo: "kOaDT/oss-oopssec-store",
   repoId: "R_kgDOQqqWhA",

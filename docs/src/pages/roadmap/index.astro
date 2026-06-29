@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
 import StarCallout from "@/components/StarCallout.astro";
 import { SITE } from "@/config";
+import { HALL_OF_FAME_URL } from "@/constants";
 import {
   CURRICULUM,
   TOTAL_CHALLENGES,
@@ -345,21 +346,15 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
             </p>
             <p class="end-description">
               Drop your name in the
-              <a
-                href="https://github.com/kOaDT/oss-oopssec-store/blob/main/hall-of-fame/data.json"
-                class="track-inline-link"
-              >
+              <a href={HALL_OF_FAME_URL} class="track-inline-link">
                 Hall of Fame
               </a>
               if you flagged everything. And if you know a vulnerability pattern that
-              belongs in here, open a
+              belongs in here, open a{" "}
               <a
                 href="https://github.com/kOaDT/oss-oopssec-store"
-                class="track-inline-link"
-              >
-                pull request
-              </a>
-              . New challenges are always welcome.
+                class="track-inline-link">pull request</a
+              >. New challenges are always welcome.
             </p>
           </article>
         </section>
