@@ -6,6 +6,7 @@ type PageType = "article" | "website" | "page";
 interface Props {
   pageType: PageType;
   title: string;
+  articleTitle?: string;
   description: string;
   canonicalURL: URL | string;
   image: URL | string;
@@ -20,6 +21,7 @@ interface Props {
 const {
   pageType,
   title,
+  articleTitle,
   description,
   canonicalURL,
   image,
@@ -33,6 +35,7 @@ const {
 
 const canonical = canonicalURL.toString();
 const imageUrl = image.toString();
+const headline = articleTitle ?? title;
 
 const orgId = `${SITE.website}#organization`;
 const websiteId = `${SITE.website}#website`;
@@ -68,7 +71,7 @@ const graph: Record<string, unknown>[] = [organization, website];
 if (pageType === "article" && pubDatetime) {
   graph.push({
     "@type": "TechArticle",
-    headline: title,
+    headline,
     description,
     image: imageUrl,
     datePublished: pubDatetime.toISOString(),
@@ -95,7 +98,7 @@ if (pageType === "article" && pubDatetime) {
         name: "Posts",
         item: new URL("posts/", SITE.website).href,
       },
-      { "@type": "ListItem", position: 3, name: title, item: canonical },
+      { "@type": "ListItem", position: 3, name: headline, item: canonical },
     ],
   });
 } else if (pageType === "page") {

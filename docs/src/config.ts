@@ -1,5 +1,5 @@
 export const SITE = {
-  website: "https://kOaDT.github.io/oss-oopssec-store/", // GitHub Pages URL
+  website: "https://koadt.github.io/oss-oopssec-store/", // GitHub Pages URL
   author: "kOaDT",
   profile: "https://github.com/kOaDT",
   desc: "OopsSec Store is an open-source, intentionally vulnerable e-commerce application built with Next.js and React. It provides a realistic environment to learn and practice web application security testing, including OWASP Top 10 vulnerabilities, API security flaws, and modern frontend attack vectors. Designed for penetration testers, security engineers, developers, and cybersecurity students, this project demonstrates how real-world vulnerabilities manifest in production-like single-page applications (SPA) with REST APIs.",

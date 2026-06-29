@@ -29,25 +29,28 @@ if (breadcrumbList[0] === "tags" && !isNaN(Number(breadcrumbList[2]))) {
   );
 }
 
-// BreadcrumbList structured data mirroring the visible trail. URLs are
-// absolute (built from SITE.website) and incremental per segment.
+const origin = new URL(SITE.website).origin;
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: SITE.website },
-    ...currentUrlPath
-      .split("/")
-      .filter(Boolean)
-      .map((segment, index, segments) => ({
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: new URL(`${base}/`, origin).href,
+    },
+    ...breadcrumbList.map((label, index) => {
+      const isLast = index + 1 === breadcrumbList.length;
+      return {
         "@type": "ListItem",
         position: index + 2,
-        name: decodeURIComponent(segment),
-        item: new URL(
-          `${segments.slice(0, index + 1).join("/")}/`,
-          SITE.website
-        ).href,
-      })),
+        name: decodeURIComponent(label),
+        item: isLast
+          ? new URL(`${base}${currentUrlPath}/`, origin).href
+          : new URL(`${base}/${label}/`, origin).href,
+      };
+    }),
   ],
 };
 ---
