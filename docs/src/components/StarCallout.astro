@@ -1,0 +1,197 @@
+---
+import IconStar from "@/assets/icons/IconStar.svg";
+import IconX from "@/assets/icons/IconX.svg";
+import { SOCIALS } from "@/constants";
+
+type Variant = "writeup" | "roadmap";
+
+interface Props {
+  variant?: Variant;
+}
+
+const { variant = "writeup" } = Astro.props;
+
+const repoUrl =
+  SOCIALS.find(social => social.name === "GitHub")?.href ??
+  "https://github.com/kOaDT/oss-oopssec-store";
+
+const COPY: Record<Variant, { lead: string; sub: string }> = {
+  writeup: {
+    lead: "Did this walkthrough help?",
+    sub: "A star on GitHub keeps the write-ups coming.",
+  },
+  roadmap: {
+    lead: "Following the roadmap?",
+    sub: "Star the repo to support the project and find your way back.",
+  },
+};
+
+const { lead, sub } = COPY[variant];
+---
+
+<aside
+  class="star-callout"
+  data-star-callout
+  data-pagefind-ignore
+  aria-label="Support the project"
+>
+  <span class="star-callout__icon" aria-hidden="true">
+    <IconStar />
+  </span>
+  <p class="star-callout__text">
+    <span class="star-callout__lead">{lead}</span>{" "}
+    <span class="star-callout__sub">{sub}</span>
+  </p>
+  <a
+    class="star-callout__action"
+    href={repoUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <span class="star-callout__action-icon" aria-hidden="true">
+      <IconStar />
+    </span>
+    Star on GitHub
+  </a>
+  <button
+    type="button"
+    class="star-callout__dismiss"
+    data-star-dismiss
+    aria-label="Dismiss this message"
+  >
+    <span aria-hidden="true">
+      <IconX />
+    </span>
+  </button>
+</aside>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const KEY = "oss:star-callout-dismissed";
+    const el = document.querySelector("[data-star-callout]");
+    if (!el) return;
+
+    let dismissed = false;
+    try {
+      dismissed = localStorage.getItem(KEY) === "1";
+    } catch {
+      /* localStorage unavailable (private mode) — show the callout */
+    }
+
+    if (dismissed) {
+      el.setAttribute("hidden", "");
+      return;
+    }
+
+    el.querySelector("[data-star-dismiss]")?.addEventListener("click", () => {
+      el.setAttribute("hidden", "");
+      try {
+        localStorage.setItem(KEY, "1");
+      } catch {
+        /* nothing persisted, but the callout is hidden for this session */
+      }
+    });
+  })();
+</script>
+
+<style>
+  .star-callout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 1.75rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--accent) 7%, var(--background));
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  .star-callout[hidden] {
+    display: none;
+  }
+
+  .star-callout__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+  .star-callout__icon :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .star-callout__text {
+    flex: 1 1 12rem;
+    min-width: 0;
+    margin: 0;
+  }
+  .star-callout__lead {
+    font-weight: 700;
+    color: var(--foreground);
+  }
+  .star-callout__sub {
+    opacity: 0.8;
+  }
+
+  .star-callout__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    font-family: var(--font-app);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+  .star-callout__action:hover,
+  .star-callout__action:focus-visible {
+    background: var(--accent);
+    color: var(--background);
+  }
+  .star-callout__action-icon {
+    display: inline-flex;
+  }
+  .star-callout__action-icon :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .star-callout__dismiss {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 0.25rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: none;
+    color: var(--foreground);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 180ms ease;
+  }
+  .star-callout__dismiss:hover,
+  .star-callout__dismiss:focus-visible {
+    opacity: 1;
+  }
+  .star-callout__dismiss :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .star-callout__action,
+    .star-callout__dismiss {
+      transition: none;
+    }
+  }
+</style>

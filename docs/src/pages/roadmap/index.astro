@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
+import StarCallout from "@/components/StarCallout.astro";
 import { SITE } from "@/config";
 import {
   CURRICULUM,
@@ -143,6 +144,7 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
     </aside>
 
     <main id="main-content" data-backurl={backUrl} class="track-main">
+      <StarCallout variant="roadmap" />
       <h1 class="text-2xl font-semibold sm:text-3xl">{pageTitle}</h1>
       <p class="mt-2 mb-6 italic">{pageDesc}</p>
 
