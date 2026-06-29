@@ -10,6 +10,7 @@ import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
+import StarCallout from "@/components/StarCallout.astro";
 import Comments from "@/components/Comments";
 import { getPath } from "@/utils/getPath";
 import { slugifyStr } from "@/utils/slugify";
@@ -94,6 +95,7 @@ const nextPost =
     class:list={["app-layout pb-12", { "mt-8": !SITE.showBackButton }]}
     data-pagefind-body
   >
+    <StarCallout variant="writeup" />
     <h1
       transition:name={slugifyStr(title.replaceAll(".", "-"))}
       class="inline-block text-2xl font-bold text-accent sm:text-3xl"
