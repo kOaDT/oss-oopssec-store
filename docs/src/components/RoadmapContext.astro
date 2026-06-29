@@ -1,0 +1,230 @@
+---
+import {
+  getRoadmapContext,
+  getNext,
+  getChapterSiblings,
+  resolveChallenges,
+} from "@/utils/getRoadmapContext";
+import type { Difficulty } from "@/data/roadmap";
+
+interface Props {
+  slug: string;
+  placement: "top" | "bottom";
+}
+
+const { slug, placement } = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const entry = getRoadmapContext(slug);
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const DIFFICULTY_LABEL: Record<Difficulty, string> = {
+  EASY: "Easy",
+  MEDIUM: "Medium",
+  HARD: "Hard",
+};
+
+const prerequisites = entry
+  ? resolveChallenges(entry.prerequisites).filter(p => p.slug !== slug)
+  : [];
+const next = entry ? getNext(entry.number) : null;
+const siblings = entry ? getChapterSiblings(slug) : [];
+---
+
+{
+  entry && placement === "top" && (
+    <aside class="rmctx-top" aria-label="Roadmap context">
+      <a class="rmctx-chapter" href={`${base}/topics/${entry.chapterSlug}`}>
+        Chapter {pad(entry.chapterIndex)} · {entry.chapterTitle}
+      </a>
+      <span class="rmctx-sep" aria-hidden="true">
+        ·
+      </span>
+      <a
+        class="rmctx-link"
+        href={`${base}/roadmap#challenge-${pad(entry.number)}`}
+      >
+        Challenge {pad(entry.number)} on the roadmap
+      </a>
+      <span class="rmctx-difficulty" data-difficulty={entry.difficulty}>
+        {DIFFICULTY_LABEL[entry.difficulty]}
+      </span>
+      {prerequisites.length > 0 && (
+        <span class="rmctx-prereqs">
+          <span class="rmctx-prereqs-label">Builds on</span>
+          {prerequisites.map((p, i) => (
+            <>
+              {i > 0 && (
+                <span class="rmctx-sep" aria-hidden="true">
+                  ·
+                </span>
+              )}
+              <a class="rmctx-link" href={`${base}/posts/${p.slug}`}>
+                {p.title}
+              </a>
+            </>
+          ))}
+        </span>
+      )}
+    </aside>
+  )
+}
+
+{
+  entry && placement === "bottom" && (next || siblings.length > 0) && (
+    <aside class="rmctx-bottom" aria-label="Continue the roadmap">
+      <p class="rmctx-eyebrow">Continue the roadmap</p>
+      {next && (
+        <p class="rmctx-next">
+          <span class="rmctx-next-label">Next challenge</span>
+          <a class="rmctx-next-link" href={`${base}/posts/${next.slug}`}>
+            {pad(next.number)} · {next.title}
+          </a>
+        </p>
+      )}
+      {siblings.length > 0 && (
+        <div class="rmctx-more">
+          <span class="rmctx-more-label">
+            More in{" "}
+            <a class="rmctx-link" href={`${base}/topics/${entry.chapterSlug}`}>
+              {entry.chapterTitle}
+            </a>
+          </span>
+          <ul class="rmctx-more-list">
+            {siblings.map(s => (
+              <li>
+                <a class="rmctx-link" href={`${base}/posts/${s.slug}`}>
+                  {s.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </aside>
+  )
+}
+
+<style>
+  /* ─── Top context strip ─────────────────────────────────────── */
+  .rmctx-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+    margin: 0.75rem 0 0;
+    font-family: var(--font-app);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+  .rmctx-chapter {
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .rmctx-chapter:hover,
+  .rmctx-chapter:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rmctx-sep {
+    opacity: 0.45;
+  }
+  .rmctx-link {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    opacity: 0.85;
+  }
+  .rmctx-link:hover,
+  .rmctx-link:focus-visible {
+    color: var(--accent);
+    text-decoration-style: solid;
+    opacity: 1;
+  }
+  .rmctx-difficulty {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--muted) 25%, transparent);
+  }
+  .rmctx-prereqs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    flex-basis: 100%;
+    opacity: 0.9;
+  }
+  .rmctx-prereqs-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* ─── Bottom "continue" card ────────────────────────────────── */
+  .rmctx-bottom {
+    margin: 2rem 0;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--accent) 6%, var(--background));
+  }
+  .rmctx-eyebrow {
+    margin: 0;
+    font-family: var(--font-app);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .rmctx-next {
+    margin: 0.6rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .rmctx-next-label {
+    font-family: var(--font-app);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .rmctx-next-link {
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .rmctx-next-link:hover,
+  .rmctx-next-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rmctx-more {
+    margin-top: 0.85rem;
+  }
+  .rmctx-more-label {
+    font-size: 0.8125rem;
+    opacity: 0.85;
+  }
+  .rmctx-more-list {
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    font-size: 0.8125rem;
+  }
+</style>

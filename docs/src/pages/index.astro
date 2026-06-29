@@ -19,7 +19,10 @@ const posts = await getCollection("blog");
 const sortedPosts = getSortedPosts(posts);
 ---
 
-<Layout>
+<Layout
+  pageType="website"
+  description="Step-by-step web security walkthroughs for the OopsSec Store CTF: OWASP Top 10, API, AI/LLM and supply-chain bugs, exploited and explained."
+>
   <Header />
   <main id="main-content" data-layout="index" class="app-layout">
     <section id="hero" class:list={["pt-8 pb-6", "border-b border-border"]}>

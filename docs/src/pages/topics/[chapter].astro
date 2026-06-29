@@ -1,0 +1,66 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import Main from "@/layouts/Main.astro";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Card from "@/components/Card.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import { getChapters } from "@/utils/getRoadmapContext";
+import { SITE } from "@/config";
+
+export const getStaticPaths = (async () => {
+  const chapters = getChapters();
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const bySlug = new Map(posts.map(post => [post.id, post]));
+
+  return chapters.map(chapter => ({
+    params: { chapter: chapter.slug },
+    props: {
+      chapter,
+      posts: chapter.slugs
+        .map(slug => bySlug.get(slug))
+        .filter((post): post is CollectionEntry<"blog"> => post != null),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { chapter, posts } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const pad = (n: number) => String(n).padStart(2, "0");
+
+const description = `${chapter.tagline} ${posts.length} OopsSec Store walkthrough${posts.length === 1 ? "" : "s"} on ${chapter.title}.`;
+---
+
+<Layout title={`${chapter.title} | ${SITE.title}`} {description}>
+  <Header />
+  <Main pageTitle={chapter.title} pageDesc={chapter.tagline}>
+    <p class="mb-6">
+      Chapter {pad(chapter.index)} of the{" "}
+      <a
+        href={`${base}/roadmap#chapter-${pad(chapter.index)}`}
+        class="underline decoration-dashed underline-offset-4 hover:text-accent"
+        >roadmap</a
+      >. Work through each walkthrough below, or browse{" "}
+      <a
+        href={`${base}/topics`}
+        class="underline decoration-dashed underline-offset-4 hover:text-accent"
+        >every topic</a
+      >.
+    </p>
+
+    <ul>
+      {posts.map(post => <Card {...post} />)}
+    </ul>
+
+    <div class="mt-8">
+      <LinkButton href={`${base}/roadmap#chapter-${pad(chapter.index)}`}>
+        See this chapter on the roadmap
+        <IconArrowRight class="inline-block rtl:-rotate-180" />
+      </LinkButton>
+    </div>
+  </Main>
+  <Footer />
+</Layout>

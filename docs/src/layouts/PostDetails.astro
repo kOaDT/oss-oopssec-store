@@ -11,6 +11,9 @@ import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
 import StarCallout from "@/components/StarCallout.astro";
+import RoadmapContext from "@/components/RoadmapContext.astro";
+import HallOfFameCta from "@/components/HallOfFameCta.astro";
+import { getRoadmapContext } from "@/utils/getRoadmapContext";
 import Comments from "@/components/Comments";
 import { getPath } from "@/utils/getPath";
 import { slugifyStr } from "@/utils/slugify";
@@ -42,6 +45,8 @@ const {
 
 const { Content } = await render(post);
 
+const roadmap = getRoadmapContext(post.id);
+
 let ogImageUrl: string | undefined;
 
 // Determine OG image source
@@ -70,6 +75,8 @@ const layoutProps = {
   canonicalURL,
   ogImage,
   scrollSmooth: true,
+  tags,
+  articleSection: roadmap?.chapterTitle,
 };
 
 /* ========== Prev/Next Posts ========== */
@@ -114,6 +121,7 @@ const nextPost =
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
+    <RoadmapContext slug={post.id} placement="top" />
     <article
       id="article"
       class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
@@ -134,6 +142,10 @@ const nextPost =
     <ShareLinks />
 
     <Comments client:only="react" />
+
+    <RoadmapContext slug={post.id} placement="bottom" />
+
+    {roadmap && <HallOfFameCta />}
 
     <hr class="my-6 border-dashed" />
 
@@ -287,10 +299,18 @@ const nextPost =
   }
   attachCopyButtons();
 
-  /* Go to page start after page swap */
-  document.addEventListener("astro:after-swap", () =>
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
-  );
+  /* Go to page start after page swap. If the target URL carries an anchor,
+   * scroll to that element instead (honouring its scroll-margin) so links
+   * like /roadmap#challenge-14 land in the right place. */
+  document.addEventListener("astro:after-swap", () => {
+    const { hash } = window.location;
+    const target = hash ? document.querySelector(hash) : null;
+    if (target) {
+      requestAnimationFrame(() => target.scrollIntoView());
+    } else {
+      window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+    }
+  });
 
   /** Image lightbox for article images */
   function initLightbox() {

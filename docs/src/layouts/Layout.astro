@@ -3,6 +3,7 @@ import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
+import StructuredData from "@/components/StructuredData.astro";
 import "@/styles/global.css";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -17,6 +18,9 @@ type Props = {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
+  pageType?: "article" | "website" | "page";
+  tags?: string[];
+  articleSection?: string;
 };
 
 const {
@@ -29,25 +33,13 @@ const {
   pubDatetime,
   modDatetime,
   scrollSmooth = false,
+  pageType = pubDatetime ? "article" : "page",
+  tags,
+  articleSection,
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
-
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  headline: `${title}`,
-  image: `${socialImageURL}`,
-  datePublished: `${pubDatetime?.toISOString()}`,
-  ...(modDatetime && { dateModified: modDatetime.toISOString() }),
-  author: [
-    {
-      "@type": "Person",
-      name: `${author}`,
-      ...(profile && { url: profile }),
-    },
-  ],
-};
+const ogType = pageType === "article" ? "article" : "website";
 ---
 
 <!doctype html>
@@ -77,6 +69,7 @@ const structuredData = {
     <link rel="sitemap" href={`${base}/sitemap-index.xml`} />
 
     <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
@@ -108,10 +101,18 @@ const structuredData = {
     <meta property="twitter:image" content={socialImageURL} />
 
     <!-- Google JSON-LD Structured data -->
-    <script
-      type="application/ld+json"
-      is:inline
-      set:html={JSON.stringify(structuredData)}
+    <StructuredData
+      {pageType}
+      {title}
+      {description}
+      {canonicalURL}
+      image={socialImageURL}
+      {author}
+      {profile}
+      {pubDatetime}
+      {modDatetime}
+      {tags}
+      {articleSection}
     />
 
     <!-- Enable RSS feed auto-discovery  -->
@@ -123,7 +124,7 @@ const structuredData = {
       href={new URL("rss.xml", Astro.site)}
     />
 
-    <meta name="theme-color" content="" />
+    <meta name="theme-color" content="#fdfdfd" />
 
     {
       // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,

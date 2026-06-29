@@ -1,0 +1,62 @@
+---
+import IconStar from "@/assets/icons/IconStar.svg";
+import { HALL_OF_FAME_URL } from "@/constants";
+---
+
+<aside class="hof-cta" aria-label="Hall of Fame">
+  <span class="hof-cta__icon" aria-hidden="true">
+    <IconStar />
+  </span>
+  <p class="hof-cta__text">
+    <span class="hof-cta__lead">Flagged this challenge?</span> Add your name to the{
+      " "
+    }
+    <a
+      class="hof-cta__link"
+      href={HALL_OF_FAME_URL}
+      target="_blank"
+      rel="noopener noreferrer">Hall of Fame</a
+    > once you've captured every flag.
+  </p>
+</aside>
+
+<style>
+  .hof-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--accent) 8%, var(--background));
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .hof-cta__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+  .hof-cta__icon :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .hof-cta__text {
+    margin: 0;
+  }
+  .hof-cta__lead {
+    font-weight: 700;
+    color: var(--foreground);
+  }
+  .hof-cta__link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+  }
+  .hof-cta__link:hover,
+  .hof-cta__link:focus-visible {
+    text-decoration-style: solid;
+  }
+</style>
