@@ -44,6 +44,7 @@ Then open [http://localhost:3000](http://localhost:3000) and start hunting flags
 
 - [GitHub Repository](https://github.com/kOaDT/oss-oopssec-store)
 - [NPM Package](https://www.npmjs.com/package/create-oss-store)
+- [Docker Image](https://hub.docker.com/r/leogra/oss-oopssec-store)
 - [Contributing Guide](https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md)
 - [Project Roadmap](https://github.com/users/kOaDT/projects/3)
 
