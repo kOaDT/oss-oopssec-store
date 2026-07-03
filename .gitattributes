@@ -1,0 +1,9 @@
+# Normalize line endings to LF on checkout, cross-platform.
+# Keeps Prettier's endOfLine: "lf" rule satisfied on Windows.
+* text=auto eol=lf
+
+# Binary files: leave untouched
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
