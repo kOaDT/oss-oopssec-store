@@ -1,4 +1,9 @@
-import { CURRICULUM, type Difficulty } from "@/data/roadmap";
+import {
+  CURRICULUM,
+  type Category,
+  type Difficulty,
+  type EstimatedMinutes,
+} from "@/data/roadmap";
 import { slugifyStr } from "./slugify";
 
 export interface RoadmapEntry {
@@ -6,6 +11,8 @@ export interface RoadmapEntry {
   slug: string;
   title: string;
   difficulty: Difficulty;
+  category: Category;
+  estimatedMinutes: EstimatedMinutes;
   /** Global challenge number (1-indexed across the whole curriculum) */
   number: number;
   chapterIndex: number;
@@ -36,6 +43,8 @@ for (const [ci, chapter] of CURRICULUM.entries()) {
       slug: challenge.walkthroughSlug,
       title: challenge.title,
       difficulty: challenge.difficulty,
+      category: challenge.category,
+      estimatedMinutes: challenge.estimatedMinutes,
       number: counter,
       chapterIndex: ci + 1,
       chapterTitle: chapter.title,

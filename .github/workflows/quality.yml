@@ -36,6 +36,37 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+  docs:
+    name: Docs Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Check code format
+        run: npm run format:check
+
+      # Mirrors the deploy-docs build so a broken walkthroughSlug (which fails
+      # the challenges.json route) surfaces on the PR, not after merge.
+      - name: Build Astro site
+        run: npm run build
+
   build:
     name: Build
     runs-on: ubuntu-latest

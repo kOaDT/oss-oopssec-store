@@ -4,6 +4,7 @@ import { SITE } from "@/config";
 import {
   CHALLENGES_BY_DIFFICULTY,
   TOTAL_CHALLENGES,
+  type Category,
   type Difficulty,
 } from "@/data/roadmap";
 import { getPath } from "@/utils/getPath";
@@ -35,6 +36,10 @@ interface FeedChallenge {
   number: number;
   title: string;
   difficulty: Difficulty;
+  /** Matches the app's `FlagCategory` enum, so this joins with `/api/flags`. */
+  category: Category;
+  /** Hands-on minutes to expect. A null `max` means open-ended. */
+  estimatedMinutes: { min: number; max: number | null };
   url: string;
   chapter: FeedChapter;
   prerequisites: number[];
@@ -59,9 +64,9 @@ export const GET: APIRoute = async ({ site }) => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const roadmapUrl = absolute(`${base}/roadmap`);
 
-  const posts = await getCollection("blog", postFilter);
+  const allPosts = await getCollection("blog");
   const walkthroughs = new Map<string, FeedWalkthrough>(
-    posts.map(({ id, filePath, data }) => [
+    allPosts.filter(postFilter).map(({ id, filePath, data }) => [
       id,
       {
         slug: id,
@@ -71,6 +76,25 @@ export const GET: APIRoute = async ({ site }) => {
       },
     ])
   );
+
+  /* A walkthroughSlug matching no post at all is a rename or a deletion, not a
+   * draft: it would ship a null into a public artifact and 404 the matching
+   * roadmap link. Fail the build rather than let it through silently. Posts
+   * that exist but are filtered out (draft, scheduled) stay a legitimate null. */
+  const known = new Set(allPosts.map(({ id }) => id));
+  const orphans = [
+    ...new Set(
+      getChallenges()
+        .map(({ slug }) => slug)
+        .filter(slug => !known.has(slug))
+    ),
+  ];
+  if (orphans.length > 0) {
+    throw new Error(
+      `challenges.json: no walkthrough post found for ${orphans.join(", ")} — ` +
+        `check walkthroughSlug in src/data/roadmap.ts`
+    );
+  }
 
   const feed: ChallengeFeed = {
     version: FEED_VERSION,
@@ -83,6 +107,11 @@ export const GET: APIRoute = async ({ site }) => {
       number: entry.number,
       title: entry.title,
       difficulty: entry.difficulty,
+      category: entry.category,
+      estimatedMinutes: {
+        min: entry.estimatedMinutes[0],
+        max: entry.estimatedMinutes[1],
+      },
       url: `${roadmapUrl}#${challengeAnchorId(entry.number)}`,
       chapter: {
         index: entry.chapterIndex,
