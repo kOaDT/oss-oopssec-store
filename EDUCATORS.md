@@ -67,6 +67,8 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 
 A visual version of this catalog is available as the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) on the docs site, grouped into 11 thematic chapters.
 
+Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — challenge number, title, difficulty, chapter, prerequisites and walkthrough URL, regenerated on every docs deploy.
+
 Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 
 | #   | Challenge                                        | Category               | Difficulty | Est. time  |

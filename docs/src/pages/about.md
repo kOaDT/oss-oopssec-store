@@ -47,6 +47,7 @@ Then open [http://localhost:3000](http://localhost:3000) and start hunting flags
 - [Docker Image](https://hub.docker.com/r/leogra/oss-oopssec-store)
 - [Contributing Guide](https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md)
 - [Project Roadmap](https://github.com/users/kOaDT/projects/3)
+- [Challenge feed (JSON)](https://koadt.github.io/oss-oopssec-store/challenges.json) - the curriculum in machine-readable form
 
 ## Disclaimer
 
