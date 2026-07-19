@@ -67,49 +67,49 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 
 A visual version of this catalog is available as the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) on the docs site, grouped into 11 thematic chapters.
 
-Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — challenge number, title, difficulty, chapter, prerequisites and walkthrough URL, regenerated on every docs deploy.
+Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — every column of the table below (number, title, chapter, category, difficulty, estimated minutes) plus prerequisites and the walkthrough URL, regenerated on every docs deploy.
 
 Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 
-| #   | Challenge                                        | Category               | Difficulty | Est. time  |
-| --- | ------------------------------------------------ | ---------------------- | ---------- | ---------- |
-| 1   | Public Environment Variable Exposure             | Information Disclosure | 🟢         | 15–20 min  |
-| 2   | Information Disclosure via API Errors            | Information Disclosure | 🟢         | 15–20 min  |
-| 3   | IDOR - Private Orders Access                     | Broken Access Control  | 🟢         | 20–30 min  |
-| 4   | Open Redirect via Login Page                     | Input Validation       | 🟢         | 20–30 min  |
-| 5   | Stored XSS via Product Review                    | Injection              | 🟢         | 30–45 min  |
-| 6   | Self-XSS - Profile Bio Injection                 | Injection              | 🟢         | 20–30 min  |
-| 7   | SQL Injection (Login)                            | Injection              | 🟡         | 30–45 min  |
-| 8   | Product Search SQL Injection                     | Injection              | 🟡         | 30–45 min  |
-| 9   | Weak JWT Secret                                  | Authentication         | 🟡         | 45–60 min  |
-| 10  | Client-Side Price Manipulation                   | Input Validation       | 🟡         | 30–45 min  |
-| 11  | Weak MD5 Hashing                                 | Cryptographic          | 🟡         | 30–45 min  |
-| 12  | Cross-Site Request Forgery (CSRF)                | Request Forgery        | 🟡         | 45–60 min  |
-| 13  | Mass Assignment / Parameter Pollution            | Input Validation       | 🟡         | 45–60 min  |
-| 14  | Path Traversal                                   | Input Validation       | 🟡         | 30–45 min  |
-| 15  | Server-Side Request Forgery (SSRF)               | Request Forgery        | 🟡         | 45–60 min  |
-| 16  | Session Fixation & Weak Session Management       | Authentication         | 🟡         | 60–90 min  |
-| 17  | Brute Force - No Rate Limiting                   | Authentication         | 🟡         | 30–45 min  |
-| 18  | Insecure Password Reset                          | Authentication         | 🟡         | 45–60 min  |
-| 19  | Broken Object Level Authorization (BOLA)         | Authorization          | 🟡         | 45–60 min  |
-| 20  | Broken Function Level Authorization (BFLA)       | Authorization          | 🟡         | 45–60 min  |
-| 21  | Plaintext Password in Server Logs                | Information Disclosure | 🟡         | 30 min     |
-| 22  | Prompt Injection - AI Support Assistant          | Injection              | 🟡         | 60–90 min  |
-| 23  | Middleware Authorization Bypass (CVE-2025-29927) | Authorization          | 🟡         | 30–45 min  |
-| 24  | Insecure Randomness — Gift Card Code             | Cryptographic          | 🟡         | 45–60 min  |
-| 25  | AI Rules File Backdoor                           | Supply Chain           | 🟡         | 20–30 min  |
-| 26  | Second-Order SQL Injection                       | Injection              | 🔴         | 60–90 min  |
-| 27  | XXE - Supplier Import Endpoint                   | Injection              | 🔴         | 45–60 min  |
-| 28  | SVG Upload - Stored XSS                          | Injection              | 🔴         | 45–60 min  |
-| 29  | X-Forwarded-For SQL Injection                    | Injection              | 🔴         | 60–90 min  |
-| 30  | CSRF + Self-XSS Chain - Profile Takeover         | Request Forgery        | 🔴         | 90–120 min |
-| 31  | Padding Oracle - AES-CBC Token Forgery           | Cryptographic          | 🔴         | 90–120 min |
-| 32  | MCP Server Poisoning - Agent Manipulation        | Injection              | 🔴         | 90–120 min |
-| 33  | React2Shell - RSC RCE (CVE-2025-55182)           | RCE                    | 🔴         | 120+ min   |
-| 34  | Race Condition — Coupon Abuse                    | Business Logic         | 🔴         | 45–90 min  |
-| 35  | npm Supply Chain Typosquat                       | Supply Chain           | 🔴         | 60–90 min  |
+| #   | Challenge                                        | Chapter                     | Category               | Difficulty | Est. time  |
+| --- | ------------------------------------------------ | --------------------------- | ---------------------- | ---------- | ---------- |
+| 1   | Public Environment Variable Exposure             | Reconnaissance & Disclosure | Information Disclosure | 🟢         | 15–20 min  |
+| 2   | Information Disclosure via API Errors            | Reconnaissance & Disclosure | Information Disclosure | 🟢         | 15–20 min  |
+| 3   | Plaintext Password in Server Logs                | Reconnaissance & Disclosure | Information Disclosure | 🟡         | 30 min     |
+| 4   | IDOR - Private Orders Access                     | Broken Access Control       | Broken Access Control  | 🟢         | 20–30 min  |
+| 5   | Open Redirect via Login Page                     | Broken Access Control       | Input Validation       | 🟢         | 20–30 min  |
+| 6   | Broken Object Level Authorization (BOLA)         | Broken Access Control       | Authorization          | 🟡         | 45–60 min  |
+| 7   | Broken Function Level Authorization (BFLA)       | Broken Access Control       | Authorization          | 🟡         | 45–60 min  |
+| 8   | Path Traversal                                   | Broken Access Control       | Input Validation       | 🟡         | 30–45 min  |
+| 9   | Client-Side Price Manipulation                   | Trusting the Client         | Input Validation       | 🟡         | 30–45 min  |
+| 10  | Mass Assignment / Parameter Pollution            | Trusting the Client         | Input Validation       | 🟡         | 45–60 min  |
+| 11  | Middleware Authorization Bypass (CVE-2025-29927) | Trusting the Client         | Authorization          | 🟡         | 30–45 min  |
+| 12  | Race Condition — Coupon Abuse                    | Trusting the Client         | Business Logic         | 🔴         | 45–90 min  |
+| 13  | Stored XSS via Product Review                    | Cross-Site Attacks          | Injection              | 🟢         | 30–45 min  |
+| 14  | Self-XSS - Profile Bio Injection                 | Cross-Site Attacks          | Injection              | 🟢         | 20–30 min  |
+| 15  | Cross-Site Request Forgery (CSRF)                | Cross-Site Attacks          | Request Forgery        | 🟡         | 45–60 min  |
+| 16  | CSRF + Self-XSS Chain - Profile Takeover         | Cross-Site Attacks          | Request Forgery        | 🔴         | 90–120 min |
+| 17  | SQL Injection (Login)                            | SQL Injection Deep Dive     | Injection              | 🟡         | 30–45 min  |
+| 18  | Product Search SQL Injection                     | SQL Injection Deep Dive     | Injection              | 🟡         | 30–45 min  |
+| 19  | X-Forwarded-For SQL Injection                    | SQL Injection Deep Dive     | Injection              | 🔴         | 60–90 min  |
+| 20  | Second-Order SQL Injection                       | SQL Injection Deep Dive     | Injection              | 🔴         | 60–90 min  |
+| 21  | SVG Upload - Stored XSS                          | Parsers Behaving Badly      | Injection              | 🔴         | 45–60 min  |
+| 22  | XXE - Supplier Import Endpoint                   | Parsers Behaving Badly      | Injection              | 🔴         | 45–60 min  |
+| 23  | Weak JWT Secret                                  | Authentication Failures     | Authentication         | 🟡         | 45–60 min  |
+| 24  | Brute Force - No Rate Limiting                   | Authentication Failures     | Authentication         | 🟡         | 30–45 min  |
+| 25  | Session Fixation & Weak Session Management       | Authentication Failures     | Authentication         | 🟡         | 60–90 min  |
+| 26  | Insecure Password Reset                          | Authentication Failures     | Authentication         | 🟡         | 45–60 min  |
+| 27  | Server-Side Request Forgery (SSRF)               | Server-Side Request Forgery | Request Forgery        | 🟡         | 45–60 min  |
+| 28  | Weak MD5 Hashing                                 | Cryptography Done Wrong     | Cryptographic          | 🟡         | 30–45 min  |
+| 29  | Insecure Randomness — Gift Card Code             | Cryptography Done Wrong     | Cryptographic          | 🟡         | 45–60 min  |
+| 30  | Padding Oracle - AES-CBC Token Forgery           | Cryptography Done Wrong     | Cryptographic          | 🔴         | 90–120 min |
+| 31  | Prompt Injection - AI Support Assistant          | AI & LLM Security           | Injection              | 🟡         | 60–90 min  |
+| 32  | MCP Server Poisoning - Agent Manipulation        | AI & LLM Security           | Injection              | 🔴         | 90–120 min |
+| 33  | npm Supply Chain Typosquat                       | Supply Chain & Framework    | Supply Chain           | 🔴         | 60–90 min  |
+| 34  | AI Rules File Backdoor                           | Supply Chain & Framework    | Supply Chain           | 🟡         | 20–30 min  |
+| 35  | React2Shell - RSC RCE (CVE-2025-55182)           | Supply Chain & Framework    | RCE                    | 🔴         | 120+ min   |
 
-**Total estimated time:** 33–48 hours for the full curriculum depending on student level. Challenges 25 and 35 are chained — once the chain is started for flag #35, flag #25 follows in a few minutes.
+**Total estimated time:** 26–36 hours for the full curriculum depending on student level. Challenges 33 and 34 are chained — once the chain is started for flag #33, flag #34 follows in a few minutes.
 You don't need to cover everything. Pick the challenges that match your course objectives and time constraints.
 
 ---
@@ -184,10 +184,10 @@ npx create-oss-store my-lab && cd my-lab && npm start
 Designed for pentesters or developers onboarding to a security-aware team.
 
 **Recommended path for developers** (focus on understanding, not exploitation):
-Challenges 1–6 (recon & basics) → 7–8 (SQLi) → 12 (CSRF) → 14 (Path Traversal) → 21 (Prompt Injection). Focus on the "How to Fix" section of each walkthrough.
+Public Env Variable, Info Disclosure API, IDOR, Open Redirect, Stored XSS, Self-XSS (recon & basics) → SQL Injection (login), Product Search SQLi → CSRF → Path Traversal → Prompt Injection. Focus on the "How to Fix" section of each walkthrough.
 
 **Recommended path for junior pentesters** (focus on technique):
-Full catalog in order of difficulty. Target: complete all 35 challenges in 4–5 weeks of part-time practice.
+Full catalog in roadmap order. Target: complete all 35 challenges in 4–5 weeks of part-time practice.
 
 ---
 
