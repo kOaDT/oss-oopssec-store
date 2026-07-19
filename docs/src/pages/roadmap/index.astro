@@ -13,6 +13,11 @@ import {
   CHALLENGES_BY_DIFFICULTY,
   type Difficulty,
 } from "@/data/roadmap";
+import {
+  chapterAnchorId,
+  challengeAnchorId,
+  formatRoadmapNumber as pad,
+} from "@/utils/getRoadmapContext";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -110,7 +115,6 @@ const sections: Section[] = CURRICULUM.map((chapter, ci) => {
 });
 
 const backUrl = SITE.showBackButton ? Astro.url.pathname : `${base}/`;
-const pad = (n: number) => String(n).padStart(2, "0");
 
 const pageTitle = "The Roadmap";
 const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that ship in real production code, from the obvious versions to the ones that survive a code review.`;
@@ -131,7 +135,7 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
           CURRICULUM.map((chapter, ci) => (
             <li>
               <a
-                href={`#chapter-${pad(ci + 1)}`}
+                href={`#${chapterAnchorId(ci + 1)}`}
                 class="track-toc-link"
                 data-chapter-link={pad(ci + 1)}
               >
@@ -218,7 +222,7 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
           sections.map(section => (
             <section
               class:list={["track-section", `track-section--${section.side}`]}
-              id={`chapter-${pad(section.index)}`}
+              id={chapterAnchorId(section.index)}
               data-chapter-id={pad(section.index)}
               style={`--section-h: ${section.sectionHeight}px;`}
             >
@@ -267,7 +271,7 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
                   return (
                     <li
                       class="challenge-item"
-                      id={`challenge-${pad(number)}`}
+                      id={challengeAnchorId(number)}
                       data-prereqs-followed={
                         needsPrereqsGap ? "true" : undefined
                       }
@@ -316,7 +320,7 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
                                   </span>
                                 )}
                                 <a
-                                  href={`#challenge-${pad(n)}`}
+                                  href={`#${challengeAnchorId(n)}`}
                                   class="challenge-prereqs-link"
                                   aria-label={`Jump to challenge ${pad(n)}`}
                                 >

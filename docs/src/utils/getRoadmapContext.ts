@@ -67,6 +67,19 @@ const byNumber = new Map<number, RoadmapEntry>(
   entries.map(entry => [entry.number, entry])
 );
 
+/** Zero-padded challenge or chapter number, e.g. 7 -> "07". */
+export const formatRoadmapNumber = (n: number): string =>
+  String(n).padStart(2, "0");
+
+export const chapterAnchorId = (index: number): string =>
+  `chapter-${formatRoadmapNumber(index)}`;
+
+export const challengeAnchorId = (number: number): string =>
+  `challenge-${formatRoadmapNumber(number)}`;
+
+/** Every challenge in curriculum order, one entry per challenge. */
+export const getChallenges = (): RoadmapEntry[] => [...entries];
+
 export const getRoadmapContext = (slug: string): RoadmapEntry | null =>
   bySlug.get(slug) ?? null;
 
