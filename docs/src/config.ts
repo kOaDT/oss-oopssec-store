@@ -14,7 +14,7 @@ export const SITE = {
   editPost: {
     enabled: true,
     text: "Edit page",
-    url: "https://github.com/kOaDT/oss-oopssec-store/edit/develop/docs/",
+    url: "https://github.com/kOaDT/oss-oopssec-store/edit/main/docs/",
   },
   dynamicOgImage: true,
   dir: "ltr", // "rtl" | "auto"
