@@ -20,7 +20,7 @@ export const getStaticPaths = (async () => {
     params: { chapter: chapter.slug },
     props: {
       chapter,
-      posts: chapter.slugs
+      posts: chapter.walkthroughSlugs
         .map(slug => bySlug.get(slug))
         .filter((post): post is CollectionEntry<"blog"> => post != null),
     },

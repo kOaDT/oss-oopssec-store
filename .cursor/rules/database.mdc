@@ -32,6 +32,9 @@ import { User, Product, Order } from "@/lib/generated/prisma";
 | `Order` | Order management with status |
 | `Address` | User and order addresses |
 | `Flag` | CTF flags (slug, category, difficulty) |
+| `Hint` | 3 progressive hints per flag (levels 1-3) |
+| `RevealedHint` | Tracks which hints a player has unlocked |
+| `FoundFlag` | Tracks which flags a player has captured |
 | `Review` | Product reviews |
 | `SupportAccessToken` | Support access tokens |
 
@@ -47,16 +50,28 @@ npm run db:seed       # Seed with initial data and flags
 
 ## Seeding Flags
 
-Add new flags in `prisma/seed.ts`:
+Flags and hints live in `prisma/flags.ts`, the single source of truth for the CTF curriculum. `prisma/seed.ts` imports them and upserts them by slug — don't add flags to `seed.ts` directly.
 
 ```typescript
-await prisma.flag.create({
-  data: {
+// prisma/flags.ts
+export const flags: ChallengeFlag[] = [
+  // ...
+  {
     flag: "OSS{example_flag}",
     slug: "vulnerability-slug",
+    markdownFile: "vulnerability-slug.md",
+    walkthroughSlug: "vulnerability-writeup",
     category: "INJECTION",
     difficulty: "MEDIUM",
-    markdownFile: "vulnerability-slug.md"
-  }
-});
+  },
+];
+
+export const flagHints: Record<string, string[]> = {
+  // ...
+  "vulnerability-slug": ["Vague nudge.", "Clearer direction.", "Near-solution."],
+};
 ```
+
+`tests/unit/challenge-parity.test.ts` validates every entry against the rest of the repo. Run `npm run test:unit` after editing this file. See `CONTRIBUTING.md` ("Adding a challenge") for the full flow.
+
+Other seed data (users, products, orders, coupons, gift cards) stays in `prisma/seed.ts`.

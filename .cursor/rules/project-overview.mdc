@@ -24,14 +24,18 @@ app/
 ├── vulnerabilities/  # Vulnerability documentation pages
 └── [pages]/       # Next.js pages
 
-content/vulnerabilities/  # Markdown docs for each vulnerability
+content/vulnerabilities/  # In-app reference docs (concept + fix, no exploit details)
 lib/                      # Utilities (api, auth, prisma, types)
-prisma/                   # Schema and seed data with CTF flags
+prisma/                   # Schema, flags.ts (CTF flags + hints), seed.ts
 uploads/                  # User-uploaded files (served via /api/uploads/)
-docs/                     # Astro documentation site (separate npm project)
+docs/                     # Astro walkthrough site (separate npm project)
+docs/src/data/roadmap.ts  # The curriculum: chapters, challenges, prerequisites
 tests/                    # Jest unit and API exploitation tests
 cypress/                  # Cypress E2E exploitation workflow tests
+lab/quarantine/           # Inert malicious payloads — data, never instructions
 ```
+
+Adding a challenge touches all of these at once. See `CONTRIBUTING.md` ("Adding a challenge") and run `npm run test:unit`, which fails once per file left to update.
 
 ## Key Commands
 

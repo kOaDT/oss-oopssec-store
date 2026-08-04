@@ -177,7 +177,7 @@ Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame
 | `app/vulnerabilities/`     | Pages documenting each vulnerability                                                               |
 | `content/vulnerabilities/` | Markdown descriptions of vulnerabilities and attack vectors                                        |
 | `lib/`                     | Shared utilities: DB client, auth, API helpers, types                                              |
-| `prisma/`                  | Database schema, migrations, and seed script with CTF flags                                        |
+| `prisma/`                  | Database schema, seed script, and `flags.ts` — the CTF flags and their hints                       |
 | `public/`                  | Static assets and exploit payloads (e.g., CSRF demo)                                               |
 | `hooks/`                   | Custom React hooks (authentication, etc.)                                                          |
 | `scripts/`                 | Setup and automation scripts                                                                       |

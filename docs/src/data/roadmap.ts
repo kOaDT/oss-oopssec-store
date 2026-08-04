@@ -23,6 +23,9 @@ export type EstimatedMinutes = [number, number | null];
 
 export interface Challenge {
   title: string;
+  /** `Flag.slug` in `prisma/flags.ts`. The join key between the curriculum,
+   * the app's `/api/flags` and `challenges.json`. Unique across the roadmap. */
+  slug: string;
   difficulty: Difficulty;
   category: Category;
   estimatedMinutes: EstimatedMinutes;
@@ -46,6 +49,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Public env variable leak",
+        slug: "public-env-variable",
         difficulty: "EASY",
         category: "INFORMATION_DISCLOSURE",
         estimatedMinutes: [15, 20],
@@ -53,6 +57,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Information disclosure via API errors",
+        slug: "information-disclosure-api-error",
         difficulty: "EASY",
         category: "INFORMATION_DISCLOSURE",
         estimatedMinutes: [15, 20],
@@ -60,6 +65,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Plaintext passwords in logs",
+        slug: "plaintext-password-in-logs",
         difficulty: "MEDIUM",
         category: "INFORMATION_DISCLOSURE",
         estimatedMinutes: [30, 30],
@@ -73,6 +79,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Insecure Direct Object Reference (IDOR)",
+        slug: "insecure-direct-object-reference",
         difficulty: "EASY",
         category: "AUTHORIZATION",
         estimatedMinutes: [20, 30],
@@ -80,6 +87,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Open redirect to login bypass",
+        slug: "open-redirect",
         difficulty: "EASY",
         category: "INPUT_VALIDATION",
         estimatedMinutes: [20, 30],
@@ -87,6 +95,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Broken Object Level Authorization (BOLA)",
+        slug: "broken-object-level-authorization",
         difficulty: "MEDIUM",
         category: "AUTHORIZATION",
         estimatedMinutes: [45, 60],
@@ -94,6 +103,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Broken Function Level Authorization (live stream hijack)",
+        slug: "broken-function-level-authorization",
         difficulty: "MEDIUM",
         category: "AUTHORIZATION",
         estimatedMinutes: [45, 60],
@@ -101,6 +111,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Path traversal in document API",
+        slug: "path-traversal",
         difficulty: "MEDIUM",
         category: "INPUT_VALIDATION",
         estimatedMinutes: [30, 45],
@@ -114,6 +125,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Client-side price manipulation",
+        slug: "client-side-price-manipulation",
         difficulty: "MEDIUM",
         category: "INPUT_VALIDATION",
         estimatedMinutes: [30, 45],
@@ -121,6 +133,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Mass assignment to admin role",
+        slug: "mass-assignment",
         difficulty: "MEDIUM",
         category: "INPUT_VALIDATION",
         estimatedMinutes: [45, 60],
@@ -128,6 +141,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Middleware bypass (CVE-2025-29927)",
+        slug: "middleware-authorization-bypass",
         difficulty: "MEDIUM",
         category: "AUTHORIZATION",
         estimatedMinutes: [30, 45],
@@ -135,6 +149,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Race condition coupon abuse",
+        slug: "race-condition-coupon-abuse",
         difficulty: "HARD",
         category: "INSECURE_DESIGN",
         estimatedMinutes: [45, 90],
@@ -148,6 +163,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Stored XSS in product reviews",
+        slug: "cross-site-scripting-xss",
         difficulty: "EASY",
         category: "INJECTION",
         estimatedMinutes: [30, 45],
@@ -155,6 +171,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Self-XSS in profile bio",
+        slug: "self-xss-profile-injection",
         difficulty: "EASY",
         category: "INJECTION",
         estimatedMinutes: [20, 30],
@@ -162,6 +179,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "CSRF on admin order update",
+        slug: "cross-site-request-forgery",
         difficulty: "MEDIUM",
         category: "REQUEST_FORGERY",
         estimatedMinutes: [45, 60],
@@ -169,6 +187,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "CSRF + Self-XSS profile takeover",
+        slug: "csrf-profile-takeover-chain",
         difficulty: "HARD",
         category: "REQUEST_FORGERY",
         estimatedMinutes: [90, 120],
@@ -183,6 +202,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "SQL injection in order search",
+        slug: "sql-injection",
         difficulty: "MEDIUM",
         category: "INJECTION",
         estimatedMinutes: [30, 45],
@@ -190,6 +210,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Product search SQLi",
+        slug: "product-search-sql-injection",
         difficulty: "MEDIUM",
         category: "INJECTION",
         estimatedMinutes: [30, 45],
@@ -197,6 +218,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "X-Forwarded-For SQLi",
+        slug: "x-forwarded-for-sql-injection",
         difficulty: "HARD",
         category: "INJECTION",
         estimatedMinutes: [60, 90],
@@ -205,6 +227,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Second-order SQL injection",
+        slug: "second-order-sql-injection",
         difficulty: "HARD",
         category: "INJECTION",
         estimatedMinutes: [60, 90],
@@ -219,6 +242,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Malicious file upload (SVG XSS)",
+        slug: "malicious-file-upload",
         difficulty: "HARD",
         category: "INJECTION",
         estimatedMinutes: [45, 60],
@@ -226,6 +250,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "XXE in supplier order import",
+        slug: "xxe-supplier-order-import",
         difficulty: "HARD",
         category: "INJECTION",
         estimatedMinutes: [45, 60],
@@ -239,6 +264,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Weak JWT secret",
+        slug: "weak-jwt-secret",
         difficulty: "MEDIUM",
         category: "AUTHENTICATION",
         estimatedMinutes: [45, 60],
@@ -246,6 +272,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Brute force, no rate limiting",
+        slug: "brute-force-no-rate-limiting",
         difficulty: "MEDIUM",
         category: "AUTHENTICATION",
         estimatedMinutes: [30, 45],
@@ -253,6 +280,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Session fixation",
+        slug: "session-fixation-weak-session-management",
         difficulty: "MEDIUM",
         category: "AUTHENTICATION",
         estimatedMinutes: [60, 90],
@@ -260,6 +288,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Insecure password reset",
+        slug: "insecure-password-reset",
         difficulty: "MEDIUM",
         category: "AUTHENTICATION",
         estimatedMinutes: [45, 60],
@@ -273,6 +302,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "SSRF internal page access",
+        slug: "server-side-request-forgery",
         difficulty: "MEDIUM",
         category: "REQUEST_FORGERY",
         estimatedMinutes: [45, 60],
@@ -286,6 +316,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Weak MD5 password hashing",
+        slug: "weak-md5-hashing",
         difficulty: "MEDIUM",
         category: "CRYPTOGRAPHIC",
         estimatedMinutes: [30, 45],
@@ -293,6 +324,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "Insecure randomness in gift cards",
+        slug: "insecure-randomness-gift-card",
         difficulty: "MEDIUM",
         category: "CRYPTOGRAPHIC",
         estimatedMinutes: [45, 60],
@@ -300,6 +332,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "AES-CBC padding oracle",
+        slug: "aes-cbc-padding-oracle",
         difficulty: "HARD",
         category: "CRYPTOGRAPHIC",
         estimatedMinutes: [90, 120],
@@ -313,6 +346,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "Prompt injection in AI assistant",
+        slug: "prompt-injection-ai-assistant",
         difficulty: "MEDIUM",
         category: "INJECTION",
         estimatedMinutes: [60, 90],
@@ -320,6 +354,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "MCP malicious server",
+        slug: "mcp-malicious-server",
         difficulty: "HARD",
         category: "INJECTION",
         estimatedMinutes: [90, 120],
@@ -333,6 +368,7 @@ export const CURRICULUM: Chapter[] = [
     challenges: [
       {
         title: "npm typosquat",
+        slug: "npm-supply-chain-typosquat",
         difficulty: "HARD",
         category: "SUPPLY_CHAIN",
         estimatedMinutes: [60, 90],
@@ -340,6 +376,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "AI rules file backdoor",
+        slug: "ai-rules-file-backdoor",
         difficulty: "MEDIUM",
         category: "SUPPLY_CHAIN",
         estimatedMinutes: [20, 30],
@@ -347,6 +384,7 @@ export const CURRICULUM: Chapter[] = [
       },
       {
         title: "react2shell (CVE-2025-55182)",
+        slug: "react2shell",
         difficulty: "HARD",
         category: "REMOTE_CODE_EXECUTION",
         estimatedMinutes: [120, null],

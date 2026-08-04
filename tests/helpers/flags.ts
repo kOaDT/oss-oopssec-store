@@ -1,3 +1,9 @@
+/**
+ * Every flag value in `prisma/flags.ts`, mirrored here so exploitation tests
+ * assert against a constant instead of a literal. `tests/unit/challenge-parity.test.ts`
+ * fails if a flag is missing from this map, so keep an entry per challenge even
+ * when no test consumes it yet.
+ */
 export const FLAGS = {
   BROKEN_OBJECT_LEVEL_AUTHORIZATION: "OSS{brok3n_0bj3ct_l3v3l_4uth0r1z4t10n}",
   BROKEN_FUNCTION_LEVEL_AUTHORIZATION:
@@ -13,6 +19,7 @@ export const FLAGS = {
   PATH_TRAVERSAL: "OSS{p4th_tr4v3rs4l_4tt4ck}",
   PLAINTEXT_PASSWORD_IN_LOGS: "OSS{pl41nt3xt_p4ssw0rd_1n_l0gs}",
   PRODUCT_SEARCH_SQL_INJECTION: "OSS{pr0duct_s34rch_sql_1nj3ct10n}",
+  PROMPT_INJECTION_AI_ASSISTANT: "OSS{pr0mpt_1nj3ct10n_41_4ss1st4nt}",
   PUBLIC_ENVIRONMENT_VARIABLE: "OSS{public_3nvir0nment_v4ri4bl3}",
   REACT2SHELL: "OSS{r3act2sh3ll}",
   SECOND_ORDER_SQL_INJECTION: "OSS{s3c0nd_0rd3r_sql_1nj3ct10n}",

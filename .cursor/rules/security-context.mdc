@@ -13,27 +13,48 @@ alwaysApply: true
 2. **Vulnerabilities are educational** - each teaches a real-world security concept
 3. **All vulnerabilities must be exploitable** - test them manually
 
-## When Adding New Vulnerabilities
+## When Adding New Challenges
 
-1. **Add CTF flag** to `prisma/seed.ts`:
+A challenge spans the app, the docs site and the teaching material. The app reads its totals from the database, so nothing there breaks when a step is skipped. **Run `npm run test:unit` after each step** — `tests/unit/challenge-parity.test.ts` fails once per file still left to update, and names it. Full walkthrough in `CONTRIBUTING.md` ("Adding a challenge").
+
+1. **Add the CTF flag** to the `flags` array in `prisma/flags.ts`:
    ```typescript
-   { flag: "OSS{your_flag_here}", slug: "vulnerability-slug", category: "INJECTION", difficulty: "MEDIUM" }
+   {
+     flag: "OSS{your_flag_here}",
+     slug: "vulnerability-slug",
+     markdownFile: "vulnerability-slug.md",
+     walkthroughSlug: "vulnerability-writeup",
+     category: "INJECTION",
+     difficulty: "MEDIUM",
+   }
    ```
 
-2. **Create documentation** in `content/vulnerabilities/your-vulnerability.md`:
-   - Overview and why it's dangerous
-   - Vulnerable code examples
-   - Exploitation techniques
-   - Mitigation strategies
+2. **Add exactly 3 hints** in the `flagHints` map of the same file, keyed by slug (level 1 vague → level 3 near-solution)
 
-3. **Ensure exploitability** - the vulnerability must be demonstrable
-4. **Add exploitation tests** - implement Jest/Cypress tests to prevent accidental regression
+3. **Ensure exploitability** - the vulnerability must be demonstrable, and reachable from the UI
+
+4. **Create the in-app reference doc** in `content/vulnerabilities/your-vulnerability.md`:
+   - Overview and why it's dangerous
+   - Vulnerable code (the snippet from this codebase)
+   - Secure implementation
+   - References (OWASP, CWE)
+
+   ❌ **Never** put exploitation steps, payloads, screenshots or the flag value here — they belong in the walkthrough on the docs site. The parity suite fails if a flag value appears in this folder.
+
+5. **Add exploitation tests** - the flag value in `tests/helpers/flags.ts`, plus Jest/Cypress tests asserting the *vulnerable* behaviour to prevent accidental regression
+
+6. **Write the walkthrough** in `docs/src/data/blog/` - payloads, step-by-step exploitation, screenshots. The post must exist for the docs build to pass (`draft: true` is allowed)
+
+7. **Add the challenge to `docs/src/data/roadmap.ts`** - in the right chapter, with `slug`, `difficulty`, `category` and `walkthroughSlug` matching the flag. Inserting mid-curriculum renumbers everything: re-check the `prerequisites` arrays
+
+8. **Update `README.md` and `EDUCATORS.md`** - challenge counts, OWASP coverage grid, catalog table, syllabus plans
 
 ## Testing
 
 Security regression tests ensure all vulnerability chains remain exploitable:
 
 - **Jest unit tests:** `tests/unit/` — utility functions (MD5, JWT, input filters)
+- **Challenge parity:** `tests/unit/challenge-parity.test.ts` — cross-checks `prisma/flags.ts` against `content/vulnerabilities/`, `tests/helpers/flags.ts`, the roadmap, the walkthroughs and the counts in `README.md` / `EDUCATORS.md`
 - **Jest API tests:** `tests/api/` — exploitation scenarios against API endpoints
 - **Cypress E2E tests:** `cypress/e2e/` — full exploitation workflows through the UI
 - **CI/CD:** `.github/workflows/test.yml` — runs on PRs to `main`
@@ -43,7 +64,10 @@ Any PR that accidentally hardens a vulnerability will fail CI.
 ## CTF Flag System
 
 - Flags format: `OSS{...}`
-- Stored in `Flag` model with: `flag`, `slug`, `category`, `difficulty`, `markdownFile`
-- Retrieved via API when vulnerabilities are exploited
-- Categories: INJECTION, AUTHENTICATION, AUTHORIZATION, XSS, CSRF, etc.
+- Source of truth: `prisma/flags.ts` (`flags` array + `flagHints` map), consumed by `prisma/seed.ts`
+- Stored in `Flag` model with: `flag`, `slug`, `category`, `difficulty`, `markdownFile`, optional `walkthroughSlug` / `cve` / `cwe` / `owasp`
+- Retrieved via API when vulnerabilities are exploited — always with `prisma.flag.findUnique({ where: { slug } })`, never a hardcoded string
+- Categories: the `FlagCategory` enum in `prisma/schema.prisma` — INJECTION, AUTHENTICATION, AUTHORIZATION, REQUEST_FORGERY, INFORMATION_DISCLOSURE, INPUT_VALIDATION, CRYPTOGRAPHIC, REMOTE_CODE_EXECUTION, INSECURE_DESIGN, SUPPLY_CHAIN, OTHER
 - Difficulty levels: EASY, MEDIUM, HARD
+- A new category must be added in 5 places: `prisma/schema.prisma`, `lib/types/index.ts`, `lib/format.ts` (`CATEGORY_LABELS`), `app/player-dashboard/PlayerDashboardClient.tsx`, `docs/src/data/roadmap.ts`
+- `slug` is the join key between `prisma/flags.ts`, `/api/flags`, the roadmap and the published `challenges.json` feed

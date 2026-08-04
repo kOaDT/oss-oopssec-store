@@ -8,14 +8,14 @@ import {
 import type { Difficulty } from "@/data/roadmap";
 
 interface Props {
-  slug: string;
+  walkthroughSlug: string;
   placement: "top" | "bottom";
 }
 
-const { slug, placement } = Astro.props;
+const { walkthroughSlug, placement } = Astro.props;
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-const entry = getRoadmapContext(slug);
+const entry = getRoadmapContext(walkthroughSlug);
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
@@ -25,10 +25,12 @@ const DIFFICULTY_LABEL: Record<Difficulty, string> = {
 };
 
 const prerequisites = entry
-  ? resolveChallenges(entry.prerequisites).filter(p => p.slug !== slug)
+  ? resolveChallenges(entry.prerequisites).filter(
+      p => p.walkthroughSlug !== walkthroughSlug
+    )
   : [];
 const next = entry ? getNext(entry.number) : null;
-const siblings = entry ? getChapterSiblings(slug) : [];
+const siblings = entry ? getChapterSiblings(walkthroughSlug) : [];
 ---
 
 {
@@ -59,7 +61,7 @@ const siblings = entry ? getChapterSiblings(slug) : [];
                   ·
                 </span>
               )}
-              <a class="rmctx-link" href={`${base}/posts/${p.slug}`}>
+              <a class="rmctx-link" href={`${base}/posts/${p.walkthroughSlug}`}>
                 {p.title}
               </a>
             </>
@@ -77,7 +79,10 @@ const siblings = entry ? getChapterSiblings(slug) : [];
       {next && (
         <p class="rmctx-next">
           <span class="rmctx-next-label">Next challenge</span>
-          <a class="rmctx-next-link" href={`${base}/posts/${next.slug}`}>
+          <a
+            class="rmctx-next-link"
+            href={`${base}/posts/${next.walkthroughSlug}`}
+          >
             {pad(next.number)} · {next.title}
           </a>
         </p>
@@ -93,7 +98,10 @@ const siblings = entry ? getChapterSiblings(slug) : [];
           <ul class="rmctx-more-list">
             {siblings.map(s => (
               <li>
-                <a class="rmctx-link" href={`${base}/posts/${s.slug}`}>
+                <a
+                  class="rmctx-link"
+                  href={`${base}/posts/${s.walkthroughSlug}`}
+                >
                   {s.title}
                 </a>
               </li>
