@@ -15,7 +15,10 @@ import {
 } from "@/utils/getRoadmapContext";
 import postFilter from "@/utils/postFilter";
 
-/** Bump on any breaking change to the payload shape below. */
+/** Bump only when the payload below changes in a way that breaks an existing
+ * consumer: a field removed, renamed, or given a new meaning. Adding a field is
+ * backward-compatible and does not bump — consumers pinned to a version would
+ * drop the feed for no reason. */
 const FEED_VERSION = 1;
 
 interface FeedWalkthrough {
@@ -35,6 +38,8 @@ interface FeedChapter {
 interface FeedChallenge {
   number: number;
   title: string;
+  /** Joins with `slug` on the app's `/api/flags`. Unique across the feed. */
+  slug: string;
   difficulty: Difficulty;
   /** Matches the app's `FlagCategory` enum, so this joins with `/api/flags`. */
   category: Category;
@@ -85,7 +90,7 @@ export const GET: APIRoute = async ({ site }) => {
   const orphans = [
     ...new Set(
       getChallenges()
-        .map(({ slug }) => slug)
+        .map(({ walkthroughSlug }) => walkthroughSlug)
         .filter(slug => !known.has(slug))
     ),
   ];
@@ -106,6 +111,7 @@ export const GET: APIRoute = async ({ site }) => {
     challenges: getChallenges().map(entry => ({
       number: entry.number,
       title: entry.title,
+      slug: entry.slug,
       difficulty: entry.difficulty,
       category: entry.category,
       estimatedMinutes: {
@@ -120,7 +126,7 @@ export const GET: APIRoute = async ({ site }) => {
         url: `${roadmapUrl}#${chapterAnchorId(entry.chapterIndex)}`,
       },
       prerequisites: entry.prerequisites,
-      walkthrough: walkthroughs.get(entry.slug) ?? null,
+      walkthrough: walkthroughs.get(entry.walkthroughSlug) ?? null,
     })),
   };
 

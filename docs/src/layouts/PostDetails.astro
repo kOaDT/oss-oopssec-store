@@ -122,7 +122,7 @@ const nextPost =
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
-    <RoadmapContext slug={post.id} placement="top" />
+    <RoadmapContext walkthroughSlug={post.id} placement="top" />
     <article
       id="article"
       class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
@@ -144,7 +144,7 @@ const nextPost =
 
     <Comments client:only="react" />
 
-    <RoadmapContext slug={post.id} placement="bottom" />
+    <RoadmapContext walkthroughSlug={post.id} placement="bottom" />
 
     {roadmap && <HallOfFameCta />}
 

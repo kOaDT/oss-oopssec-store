@@ -7,8 +7,10 @@ import {
 import { slugifyStr } from "./slugify";
 
 export interface RoadmapEntry {
-  /** walkthroughSlug, which equals the blog post id */
+  /** `Flag.slug` in `prisma/flags.ts`. Unique across the curriculum. */
   slug: string;
+  /** The blog post id. Two chained challenges may share one walkthrough. */
+  walkthroughSlug: string;
   title: string;
   difficulty: Difficulty;
   category: Category;
@@ -28,7 +30,7 @@ export interface ChapterSummary {
   tagline: string;
   slug: string;
   /** Distinct walkthrough slugs in curriculum order */
-  slugs: string[];
+  walkthroughSlugs: string[];
 }
 
 /* Flatten the curriculum once, mirroring the global numbering used by the
@@ -40,7 +42,8 @@ for (const [ci, chapter] of CURRICULUM.entries()) {
   for (const challenge of chapter.challenges) {
     counter += 1;
     entries.push({
-      slug: challenge.walkthroughSlug,
+      slug: challenge.slug,
+      walkthroughSlug: challenge.walkthroughSlug,
       title: challenge.title,
       difficulty: challenge.difficulty,
       category: challenge.category,
@@ -58,11 +61,11 @@ for (const [ci, chapter] of CURRICULUM.entries()) {
 /* A walkthrough can cover several challenges. Key on its first appearance for
  * metadata (number, title, chapter), but merge the prerequisites of every
  * challenge it covers so none are lost. */
-const bySlug = new Map<string, RoadmapEntry>();
+const byWalkthrough = new Map<string, RoadmapEntry>();
 for (const entry of entries) {
-  const existing = bySlug.get(entry.slug);
+  const existing = byWalkthrough.get(entry.walkthroughSlug);
   if (!existing) {
-    bySlug.set(entry.slug, {
+    byWalkthrough.set(entry.walkthroughSlug, {
       ...entry,
       prerequisites: [...entry.prerequisites],
     });
@@ -89,30 +92,37 @@ export const challengeAnchorId = (number: number): string =>
 /** Every challenge in curriculum order, one entry per challenge. */
 export const getChallenges = (): RoadmapEntry[] => [...entries];
 
-export const getRoadmapContext = (slug: string): RoadmapEntry | null =>
-  bySlug.get(slug) ?? null;
+/** Looks up a challenge by the id of the blog post documenting it. */
+export const getRoadmapContext = (
+  walkthroughSlug: string
+): RoadmapEntry | null => byWalkthrough.get(walkthroughSlug) ?? null;
 
 export const getNext = (number: number): RoadmapEntry | null =>
   byNumber.get(number + 1) ?? null;
 
 export const resolveChallenges = (
   numbers: number[]
-): Pick<RoadmapEntry, "number" | "title" | "slug">[] =>
+): Pick<RoadmapEntry, "number" | "title" | "walkthroughSlug">[] =>
   numbers
     .map(n => byNumber.get(n))
     .filter((entry): entry is RoadmapEntry => entry != null)
-    .map(({ number, title, slug }) => ({ number, title, slug }));
+    .map(({ number, title, walkthroughSlug }) => ({
+      number,
+      title,
+      walkthroughSlug,
+    }));
 
-/** Distinct walkthrough slugs in the same chapter, excluding `slug`. */
-export const getChapterSiblings = (slug: string): RoadmapEntry[] => {
-  const current = bySlug.get(slug);
+/** One entry per distinct walkthrough in the same chapter, excluding the
+ * walkthrough passed in. */
+export const getChapterSiblings = (walkthroughSlug: string): RoadmapEntry[] => {
+  const current = byWalkthrough.get(walkthroughSlug);
   if (!current) return [];
-  const seen = new Set<string>([slug]);
+  const seen = new Set<string>([walkthroughSlug]);
   const siblings: RoadmapEntry[] = [];
   for (const entry of entries) {
     if (entry.chapterIndex !== current.chapterIndex) continue;
-    if (seen.has(entry.slug)) continue;
-    seen.add(entry.slug);
+    if (seen.has(entry.walkthroughSlug)) continue;
+    seen.add(entry.walkthroughSlug);
     siblings.push(entry);
   }
   return siblings;
@@ -120,19 +130,19 @@ export const getChapterSiblings = (slug: string): RoadmapEntry[] => {
 
 export const getChapters = (): ChapterSummary[] =>
   CURRICULUM.map((chapter, ci) => {
-    const slugs: string[] = [];
+    const walkthroughSlugs: string[] = [];
     const seen = new Set<string>();
     for (const challenge of chapter.challenges) {
       if (seen.has(challenge.walkthroughSlug)) continue;
       seen.add(challenge.walkthroughSlug);
-      slugs.push(challenge.walkthroughSlug);
+      walkthroughSlugs.push(challenge.walkthroughSlug);
     }
     return {
       index: ci + 1,
       title: chapter.title,
       tagline: chapter.tagline,
       slug: slugifyStr(chapter.title),
-      slugs,
+      walkthroughSlugs,
     };
   });
 

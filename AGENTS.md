@@ -35,15 +35,15 @@ app/
 
 content/vulnerabilities/    # In-app reference docs (concept + fix, no exploit details)
 lib/                        # Utilities (api, auth, prisma, types)
-prisma/                     # Schema and seed.ts with CTF flags
+prisma/                     # Schema, flags.ts (CTF flags + hints), seed.ts
 uploads/                    # User-uploaded files (served via /api/uploads/)
 docs/                       # Astro walkthrough site (step-by-step exploits, screenshots)
 hall-of-fame/data.json      # Hall of Fame entries (community-driven via PRs)
 tests/                      # Jest unit and API exploitation tests
-├── unit/                   # Unit tests (MD5, JWT, input filters)
+├── unit/                   # Unit tests (MD5, JWT, input filters, challenge parity)
 ├── api/                    # API exploitation scenario tests
 ├── helpers/api.ts          # Shared test helpers (login, auth, assertions)
-└── plans/                  # Per-vulnerability test plan markdown files
+└── helpers/flags.ts        # Every flag value, mirrored from prisma/flags.ts
 cypress/                    # Cypress E2E exploitation workflow tests
 ├── e2e/                    # E2E spec files
 └── support/commands.ts     # Custom commands (login, verifyFlag)
@@ -117,21 +117,32 @@ npm run docs:build           # Build Astro site
 
 **DO NOT fix intentional vulnerabilities** - they are the core feature.
 
-### Adding New Vulnerabilities
+### Adding New Challenges
 
-1. Add flag to `prisma/seed.ts` in `OSS{...}` format (set `walkthroughSlug` if a writeup exists)
-2. Add 3 hints in the `flagHints` map in `prisma/seed.ts` (keyed by slug, levels 1→3 from vague to near-solution)
-3. Create the in-app reference doc in `content/vulnerabilities/` — overview, why dangerous, vulnerable code, secure implementation, references. **No exploitation steps, payloads, or flag value** (those go in the walkthrough).
-4. Optional: add a step-by-step walkthrough in `docs/src/data/blog/` (Astro site) — this is where exploit details, payloads, and screenshots belong.
-5. Test exploitability
+A challenge spans the app, the docs site and the teaching material. The app derives its totals from the database, so nothing there breaks when a step is skipped — `tests/unit/challenge-parity.test.ts` is what catches it. **Run `npm run test:unit` after every step: it fails once per file still left to update, and names it.**
+
+Full walkthrough in `CONTRIBUTING.md` ("Adding a challenge"). In order:
+
+1. Add the flag to the `flags` array in `prisma/flags.ts` (`OSS{...}` format, kebab-case `slug`, `markdownFile`, `walkthroughSlug`, `category`, `difficulty`, optional `cve` / `cwe` / `owasp`).
+2. Add exactly 3 hints in the `flagHints` map of the same file, keyed by slug, levels 1→3 from vague to near-solution.
+3. Implement the vulnerable path and make it reachable from the UI. Seed any supporting data in `prisma/seed.ts`; run `npm run db:generate && npm run db:push` after a schema change. Return the flag via `prisma.flag.findUnique`, never a hardcoded string.
+4. Create the in-app reference doc in `content/vulnerabilities/` — overview, why dangerous, vulnerable code, secure implementation, references. **No exploitation steps, payloads, or flag value** (the parity suite rejects a flag value in this folder).
+5. Add regression tests asserting the _vulnerable_ behaviour: the flag value in `tests/helpers/flags.ts`, an exploitation scenario in `tests/api/`, a UI flow in `cypress/e2e/` when relevant.
+6. Add the walkthrough in `docs/src/data/blog/` (Astro site) — this is where exploit details, payloads and screenshots belong. The post must exist for the docs build to pass; an unfinished one can ship as `draft: true`.
+7. Add the challenge to the right chapter of `docs/src/data/roadmap.ts`, with `slug`, `difficulty`, `category` and `walkthroughSlug` matching the flag. Inserting in the middle renumbers the curriculum — re-check every `prerequisites` array.
+8. Update `README.md` (challenge count in the feature list and the comparison table) and `EDUCATORS.md` (intro count, OWASP grid, catalog table, total estimated time, syllabus plans).
+
+Special cases: a new `FlagCategory` must be added to `prisma/schema.prisma`, `lib/types/index.ts`, `lib/format.ts`, `app/player-dashboard/PlayerDashboardClient.tsx` and `docs/src/data/roadmap.ts`; an acronym in a slug needs an entry in `TITLE_OVERRIDES` (`lib/format.ts`); a malicious artifact goes under `lab/quarantine/` and gets declared in this file (see Lab Quarantine Zones).
 
 ### CTF Flag System
 
 - Format: `OSS{...}`
+- Source of truth: `prisma/flags.ts` (`flags` + `flagHints`), consumed by `prisma/seed.ts`
 - Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`, `walkthroughSlug` (optional), `cve` (optional), `cwe` (optional), `owasp` (optional)
-- Categories: INJECTION, AUTHENTICATION, AUTHORIZATION, XSS, CSRF, etc.
+- Categories: the `FlagCategory` enum — INJECTION, AUTHENTICATION, AUTHORIZATION, REQUEST_FORGERY, INFORMATION_DISCLOSURE, INPUT_VALIDATION, CRYPTOGRAPHIC, REMOTE_CODE_EXECUTION, INSECURE_DESIGN, SUPPLY_CHAIN, OTHER
 - Difficulty: EASY, MEDIUM, HARD
 - Each flag has 3 progressive hints (stored in `Hint` model, tracked by `RevealedHint`)
+- `slug` is the join key between `prisma/flags.ts`, `/api/flags`, `docs/src/data/roadmap.ts` and the published `challenges.json` feed
 
 ## Database Models
 
@@ -183,6 +194,7 @@ const { user, logout } = useAuth();
 Security regression tests validate that all vulnerability chains and flags remain exploitable. Tests deliberately assert insecure behaviors — they prevent accidental hardening.
 
 - **Jest unit tests** (`tests/unit/`): Test utility functions (MD5 hashing, JWT signing, input filters)
+- **Challenge parity** (`tests/unit/challenge-parity.test.ts`): Cross-checks `prisma/flags.ts` against `content/vulnerabilities/`, `tests/helpers/flags.ts`, `docs/src/data/roadmap.ts`, `docs/src/data/blog/` and the counts in `README.md` / `EDUCATORS.md`. Fails when a challenge is half-added.
 - **Jest API tests** (`tests/api/`): Test exploitation scenarios against API endpoints
 - **Cypress E2E tests** (`cypress/e2e/`): Test full exploitation workflows through the UI
 - **CI/CD** (`.github/workflows/test.yml`): Runs on PRs to `main` — 3 parallel jobs (unit, API, E2E)

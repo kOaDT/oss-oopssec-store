@@ -33,35 +33,126 @@ New here? Check [good first issues](https://github.com/users/kOaDT/projects/3/vi
 - Documentation
 - Issue reports
 
-### Adding a vulnerability
+### Adding a challenge
 
-1. **Add the flag in `prisma/seed.ts`**
-   Create a `Flag` record with format `OSS{...}`. Set `slug`, `category`, `difficulty`, and `markdownFile` to match. Set `walkthroughSlug` if a walkthrough exists on the docs site (see step 6). Optionally set `cve` (e.g. `CVE-2025-29927`), `cwe` (e.g. `CWE-89`), and `owasp` (OWASP Top 10 2025 category, e.g. `A05:2025`; legacy 2021 ids like `A10:2021` are also accepted for categories no longer present in 2025, e.g. SSRF) — they are surfaced as badges in the UI.
+A challenge is spread over the app, the docs site and the teaching material. Nothing in the app breaks when one of those is forgotten — it reads its totals from the database — so a parity suite guards the rest.
 
-2. **Add hints in `prisma/seed.ts`**
-   Add three progressive hints in the `flagHints` map, keyed by slug. Level 1 is vague, level 2 more specific, level 3 near-solution.
+> **Start here.** Add your flag to `prisma/flags.ts`, then run `npm run test:unit`. `tests/unit/challenge-parity.test.ts` fails once for every file you still have to update, and names it. Work through the failures until it is green: that _is_ the checklist.
 
-3. **Implement the vulnerability**
-   Write the vulnerable code path (API route, page, feature) that lets an attacker get the flag. It needs to be actually exploitable.
+#### 1. Register the flag
 
-4. **Document it (reference doc)**
-   Add a markdown file under `content/vulnerabilities/` (e.g. `your-vulnerability.md`). This is the **in-app reference** rendered at `/vulnerabilities/<slug>` after a player finds the flag. It should focus on:
-   - Overview — what the vulnerability is
-   - Why it is dangerous
-   - Vulnerable code (the snippet from the codebase)
-   - Secure implementation (how to fix it)
-   - References (OWASP, CWE, etc.)
+Append an entry to the `flags` array in [`prisma/flags.ts`](prisma/flags.ts):
 
-   Do **not** include step-by-step exploitation, payloads, screenshots, or the flag value here. Those belong in the walkthrough (step 6). The in-app doc is meant to explain the concept and the fix, not to re-teach the exploit the player just executed.
+```typescript
+{
+  flag: "OSS{y0ur_fl4g}",
+  slug: "your-vulnerability",
+  cwe: "CWE-89",
+  owasp: "A05:2025",
+  markdownFile: "your-vulnerability.md",
+  walkthroughSlug: "your-vulnerability-writeup",
+  category: "INJECTION",
+  difficulty: "MEDIUM",
+},
+```
 
-5. **Add regression tests**
-   Tests keep the vulnerability exploitable so nobody accidentally patches it:
-   - Unit tests in `tests/unit/` for helpers (hashing, filters, etc.)
-   - API tests in `tests/api/` for exploitation scenarios
-   - E2E tests in `cypress/e2e/` for full exploitation flows through the UI
+| Field             | Notes                                                                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `flag`            | `OSS{...}`, unique. Leetspeak is the house style.                                                                                       |
+| `slug`            | kebab-case. Becomes `/vulnerabilities/<slug>` and the join key with the roadmap.                                                        |
+| `markdownFile`    | File name in `content/vulnerabilities/` (step 4).                                                                                       |
+| `walkthroughSlug` | Required. Id of the post in `docs/src/data/blog/` (step 6). Two chained challenges may share one.                                       |
+| `category`        | One of the `FlagCategory` values in `prisma/schema.prisma`.                                                                             |
+| `difficulty`      | `EASY`, `MEDIUM` or `HARD`.                                                                                                             |
+| `cve` `cwe`       | Optional, e.g. `CVE-2025-29927` / `CWE-89`. Rendered as badges linking to NVD and MITRE.                                                |
+| `owasp`           | Optional. OWASP Top 10 2025 id (`A05:2025`); legacy 2021 ids such as `A10:2021` are accepted for categories dropped in 2025, like SSRF. |
 
-6. **Optional: write a walkthrough (the exploit playbook)**
-   The walkthrough lives on the docs site (`docs/src/data/blog/`) and is where the step-by-step exploitation belongs: payloads, request examples, screenshots, narrative voice. See [Writing walkthroughs](#writing-walkthroughs) below. If you add one, set `walkthroughSlug` on the flag in `prisma/seed.ts` so the in-app reference page links to it.
+#### 2. Add three hints
+
+In the `flagHints` map of the same file, keyed by your slug. Level 1 is a vague nudge, level 2 gives direction, level 3 is near-solution. Players unlock them one at a time.
+
+#### 3. Implement the vulnerability
+
+Write the vulnerable code path — API route, page, feature — that hands out the flag. It has to be genuinely exploitable, not simulated. Along the way you may need to:
+
+- seed supporting data (a product, a coupon, an order) in `prisma/seed.ts`;
+- add a model to `prisma/schema.prisma`, then run `npm run db:generate && npm run db:push`;
+- give players a way in — a link in `app/components/Header.tsx`, `Footer.tsx` or the admin dashboard. A challenge nobody can find is a challenge nobody solves.
+
+Return the flag from the database, never a hardcoded string:
+
+```typescript
+const flag = await prisma.flag.findUnique({
+  where: { slug: "your-vulnerability" },
+});
+```
+
+#### 4. Write the in-app reference doc
+
+Add `content/vulnerabilities/<markdownFile>`. This is rendered at `/vulnerabilities/<slug>` once the player finds the flag:
+
+- Overview — what the vulnerability is
+- Why it is dangerous
+- Vulnerable code (the snippet from this codebase)
+- Secure implementation (how to fix it)
+- References (OWASP, CWE…)
+
+Do **not** put step-by-step exploitation, payloads, screenshots or the flag value here — the parity suite rejects a flag value in this folder. Those belong in the walkthrough. This page explains the concept and the fix; it does not re-teach the exploit the player just pulled off.
+
+#### 5. Add regression tests
+
+Tests keep the vulnerability exploitable so nobody accidentally patches it:
+
+- `tests/helpers/flags.ts` — add your flag value to the `FLAGS` map (required, even if no test consumes it yet)
+- `tests/unit/` — helpers you introduced (hashing, token derivation, filters)
+- `tests/api/<slug>.test.ts` — the exploitation scenario against the API
+- `cypress/e2e/<slug>.cy.ts` — the full flow through the UI, when the exploit is browser-driven
+
+Assert the **vulnerable** behaviour. A test that asserts the secure behaviour will pass the day someone accidentally fixes the challenge, which defeats the point.
+
+#### 6. Write the walkthrough
+
+The walkthrough lives on the docs site and is where the exploitation belongs: payloads, request examples, screenshots, narrative voice. See [Writing walkthroughs](#writing-walkthroughs) below.
+
+A post has to exist for the docs site to build — an unfinished one can ship as `draft: true`. Its id (the frontmatter `slug` if present, otherwise the file name) must equal the `walkthroughSlug` you set in step 1.
+
+#### 7. Place it on the roadmap
+
+Add the challenge to the right chapter in [`docs/src/data/roadmap.ts`](docs/src/data/roadmap.ts). `slug`, `difficulty`, `category` and `walkthroughSlug` must match the flag exactly; `estimatedMinutes` is `[min, max]`, with a `null` max for open-ended.
+
+Everything downstream is generated from this file — the roadmap page, `/topics`, `challenges.json`, the "Builds on / Next" links. Two things to watch:
+
+- **Inserting in the middle renumbers the curriculum.** Challenge numbers are positional. Re-check every `prerequisites` array, which references those numbers.
+- Adding a chapter changes the chapter count quoted in `README.md` and `EDUCATORS.md`.
+
+#### 8. Update the teaching material
+
+- `README.md` — the challenge count in the feature list and in the comparison table
+- `EDUCATORS.md` — the count in the intro, the OWASP coverage grid, the challenge catalog table (renumbered if you inserted in the middle), the total estimated time, and the day/week plans in the Syllabus Integration Guide
+
+The parity suite checks the counts and the catalog table row by row; the OWASP grid and the syllabus plans are on you.
+
+#### 9. Special cases
+
+| Situation                             | Also update                                                                                                                                                     |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New `FlagCategory`                    | `prisma/schema.prisma`, `lib/types/index.ts`, `lib/format.ts` (`CATEGORY_LABELS`), `app/player-dashboard/PlayerDashboardClient.tsx`, `docs/src/data/roadmap.ts` |
+| Acronym in the slug (SSRF, MCP, XXE…) | `TITLE_OVERRIDES` in `lib/format.ts`, otherwise the UI renders `Ssrf`                                                                                           |
+| Malicious artifact (payload, package) | Put it under `lab/quarantine/`, declare it in `AGENTS.md`, exclude it from `tsconfig.json`, `eslint.config.mjs` and `.prettierignore`                           |
+| New asset directory                   | `Dockerfile` (`mkdir -p`), `.dockerignore`, `.gitignore`                                                                                                        |
+| New environment variable              | `.env`, `scripts/setup.sh`, `Dockerfile`, and the `env:` block of `.github/workflows/test.yml` if a test needs it                                               |
+| New admin route to gate               | the `matcher` in `middleware.ts`                                                                                                                                |
+
+#### 10. Run the checks
+
+```bash
+npm run db:push && npm run db:seed
+npm run lint && npm run format:check
+npm run test:unit          # parity suite + unit tests
+npm run test:api           # needs a running server
+npm run test:e2e           # needs a running server
+npm run docs:build         # validates walkthroughSlug against the posts
+```
 
 ### Writing walkthroughs
 

@@ -67,7 +67,7 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 
 A visual version of this catalog is available as the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) on the docs site, grouped into 11 thematic chapters.
 
-Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — every column of the table below (number, title, chapter, category, difficulty, estimated minutes) plus prerequisites and the walkthrough URL, regenerated on every docs deploy. Note that `walkthrough.slug` is not a unique key — a chained challenge shares its write-up with the challenge it builds on (14 and 16, 33 and 34), so deduplicating on it would drop entries.
+Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — every column of the table below (number, title, chapter, category, difficulty, estimated minutes) plus prerequisites and the walkthrough URL, regenerated on every docs deploy. Each entry carries a `slug` that joins with the app's `/api/flags`; it is unique across the feed. Note that `walkthrough.slug` is **not** — a chained challenge shares its write-up with the challenge it builds on (14 and 16, 33 and 34), so deduplicating on that field would drop entries.
 
 Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 
@@ -240,7 +240,7 @@ Recommended setup for classrooms: each student runs the app on their own machine
 
 ### Can I contribute new challenges for my course?
 
-Yes, contributions are welcome. See [CONTRIBUTING.md](https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md). New challenges should include a flag in `seed.ts` and a markdown walkthrough in `content/vulnerabilities/`.
+Yes, contributions are welcome. See the "Adding a challenge" checklist in [CONTRIBUTING.md](https://github.com/kOaDT/oss-oopssec-store/blob/main/CONTRIBUTING.md#adding-a-challenge). A new challenge needs a flag in `prisma/flags.ts`, three hints, an exploitable code path, a reference doc in `content/vulnerabilities/`, regression tests, a walkthrough on the docs site and an entry on the roadmap. `npm run test:unit` tells you what is still missing.
 
 ---
 
