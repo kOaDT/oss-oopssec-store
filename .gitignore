@@ -26,6 +26,7 @@ cypress/downloads
 # misc
 .DS_Store
 *.pem
+!app/.well-known/partner-signing-key.pem/
 
 # debug
 npm-debug.log*

@@ -4,6 +4,7 @@ import { withAdminAuth } from "@/lib/server-auth";
 
 export const GET = withAdminAuth(async (_request, _context, _user) => {
   const orders = await prisma.supplierOrder.findMany({
+    where: { channel: "XML_IMPORT" },
     orderBy: { createdAt: "desc" },
   });
 

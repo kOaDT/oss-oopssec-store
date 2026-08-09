@@ -338,6 +338,15 @@ export const CURRICULUM: Chapter[] = [
         estimatedMinutes: [90, 120],
         walkthroughSlug: "aes-cbc-padding-oracle-forged-share-token",
       },
+      {
+        title: "JWT algorithm confusion (partner API)",
+        slug: "jwt-algorithm-confusion",
+        difficulty: "HARD",
+        category: "CRYPTOGRAPHIC",
+        estimatedMinutes: [90, 120],
+        walkthroughSlug: "jwt-algorithm-confusion-partner-api",
+        prerequisites: [23],
+      },
     ],
   },
   {

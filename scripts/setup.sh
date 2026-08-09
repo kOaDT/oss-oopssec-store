@@ -16,6 +16,7 @@ if [ ! -f .env ]; then
   echo "Creating .env file..."
   PROJECT_ROOT=$(pwd)
   echo "DATABASE_URL=\"file:${PROJECT_ROOT}/prisma/dev.db\"" > .env
+  echo "PARTNER_SIGNING_KEY_PATH=\"${PROJECT_ROOT}/prisma/partner-signing-key.pem\"" >> .env
   echo ".env file created"
 else
   echo ".env file already exists"

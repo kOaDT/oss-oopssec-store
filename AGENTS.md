@@ -162,8 +162,9 @@ Special cases: a new `FlagCategory` must be added to `prisma/schema.prisma`, `li
 ## Environment Variables
 
 ```env
-DATABASE_URL=           # SQLite connection string
-NEXT_PUBLIC_BASE_URL=   # Base URL (default: http://localhost:3000)
+DATABASE_URL=              # SQLite connection string
+NEXT_PUBLIC_BASE_URL=      # Base URL (default: http://localhost:3000)
+PARTNER_SIGNING_KEY_PATH=  # Partner API RSA key pair (default: next to the database file)
 ```
 
 ## Common Patterns

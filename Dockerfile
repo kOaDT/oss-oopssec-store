@@ -26,6 +26,7 @@ RUN mkdir -p /app/data /app/uploads /app/documents/invoices /app/logs
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:/app/data/dev.db
+ENV PARTNER_SIGNING_KEY_PATH=/app/data/partner-signing-key.pem
 ENV NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 RUN chmod +x ./docker-entrypoint.sh
