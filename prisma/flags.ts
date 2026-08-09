@@ -404,6 +404,16 @@ export const flags: ChallengeFlag[] = [
     category: "SUPPLY_CHAIN",
     difficulty: "MEDIUM",
   },
+  {
+    flag: "OSS{jwt_4lg_c0nfus10n}",
+    slug: "jwt-algorithm-confusion",
+    cwe: "CWE-347",
+    owasp: "A04:2025",
+    markdownFile: "jwt-algorithm-confusion.md",
+    walkthroughSlug: "jwt-algorithm-confusion-partner-api",
+    category: "CRYPTOGRAPHIC",
+    difficulty: "HARD",
+  },
 ];
 
 export const flagHints: Record<string, string[]> = {
@@ -576,6 +586,11 @@ export const flagHints: Record<string, string[]> = {
     "Even with a vulnerability you already know how to exploit, sometimes the most useful clue is hiding in plain sight, in the page itself.",
     "View the source of the documents page. A developer left a comment naming a recently-added dependency. Combine that name with what you already know about reading files outside the documents directory.",
     "Use the path-traversal endpoint to read `../package.json`-adjacent files. Spot the typosquatted dependency under `packages/`, then walk the chain: read its own `package.json`, then `scripts/postinstall.js`, then the artifact path it references in `lab/quarantine/`. Each file points to the next.",
+  ],
+  "jwt-algorithm-confusion": [
+    "OopsSec Store runs a B2B API for its suppliers, and it hands a working token to anyone who asks for one. Read what the integration page says about itself.",
+    "The sandbox token is an RS256 JWT whose `sub` claim is the only thing deciding whose purchase orders come back. The changelog admits the gateway still accepts the deprecated v1 signature format, and the webhook section tells you exactly where the verification key is published.",
+    "Rewrite the header as `alg: HS256` and sign the token with the published RSA public key as the HMAC secret — the exact PEM bytes served under /.well-known/, trailing newline included. Set `sub` to one of the real supplier IDs from the partner directory instead of the sandbox one.",
   ],
   "ai-rules-file-backdoor": [
     "Markdown looks innocent when it's rendered. The raw file sometimes tells a different story.",

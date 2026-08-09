@@ -5,6 +5,8 @@ import crypto from "crypto";
 import { generateInvoice } from "../lib/invoice";
 import { generateGiftCardCode } from "../lib/gift-card";
 import { OFFICIAL_VIDEO_ID, STREAM_DEFAULTS } from "../lib/live-stream";
+import { ensurePartnerSigningKey } from "../lib/partner-keys";
+import { SANDBOX_SUPPLIER_ID } from "../lib/partner-directory";
 import { flags, flagHints } from "./flags";
 
 config();
@@ -671,6 +673,96 @@ async function main() {
   console.log(
     `Created seeded $500 gift card (recipient forgotten-friend@oopssec.store)`
   );
+
+  const partnerApiFlag = await prisma.flag.findUniqueOrThrow({
+    where: { slug: "jwt-algorithm-confusion" },
+  });
+
+  const partnerOrders = [
+    {
+      id: "sup-ord-sandbox-001",
+      supplierId: SANDBOX_SUPPLIER_ID,
+      orderId: "PO-SBX-0001",
+      total: 240,
+      notes: "Sandbox fixture — not a real commitment.",
+    },
+    {
+      id: "sup-ord-sandbox-002",
+      supplierId: SANDBOX_SUPPLIER_ID,
+      orderId: "PO-SBX-0002",
+      total: 87.5,
+      notes: "Sandbox fixture — not a real commitment.",
+    },
+    {
+      id: "sup-ord-sandbox-003",
+      supplierId: SANDBOX_SUPPLIER_ID,
+      orderId: "PO-SBX-0003",
+      total: 1310.75,
+      notes: "Sandbox fixture — not a real commitment.",
+    },
+    {
+      id: "sup-ord-knead-001",
+      supplierId: "SUP-001",
+      orderId: "PO-2026-0114",
+      total: 4820,
+      notes: "Weekly sourdough and viennoiserie. Landed cost 1.18 EUR/unit.",
+    },
+    {
+      id: "sup-ord-knead-002",
+      supplierId: "SUP-001",
+      orderId: "PO-2026-0131",
+      total: 5140,
+      notes: "Seasonal volume uplift agreed at +18%. Net 30.",
+    },
+    {
+      id: "sup-ord-brie-001",
+      supplierId: "SUP-BRIE",
+      orderId: "PO-2026-0098",
+      total: 7310.4,
+      notes: "Cheese board assortment. Landed cost 11.40 EUR, shelf 24.99 EUR.",
+    },
+    {
+      id: "sup-ord-brie-002",
+      supplierId: "SUP-BRIE",
+      orderId: "PO-2026-0142",
+      total: 2985,
+      notes: "Charcuterie trial run, six-week review clause.",
+    },
+    {
+      id: "sup-ord-lettuce-001",
+      supplierId: "SUP-LETTUCE",
+      orderId: "PO-2026-0087",
+      total: 6240,
+      notes: "Organic produce, weekly. Landed cost 2.62 EUR/kg, margin 41%.",
+    },
+    {
+      id: "sup-ord-lettuce-002",
+      supplierId: "SUP-LETTUCE",
+      orderId: "PO-2026-0155",
+      total: 9875.3,
+      notes: `Renewal signed ahead of the open tender. Landed cost 2.10 EUR/kg, margin 44%. EDI credentials rotated: ${partnerApiFlag.flag}`,
+    },
+    {
+      id: "sup-ord-lettuce-003",
+      supplierId: "SUP-LETTUCE",
+      orderId: "PO-2026-0161",
+      total: 3120,
+      notes: "Dairy line added. Exclusivity clause until Q3.",
+    },
+  ];
+
+  await prisma.supplierOrder.deleteMany({
+    where: { channel: "PARTNER_PORTAL" },
+  });
+  await prisma.supplierOrder.createMany({
+    data: partnerOrders.map((order) => ({
+      ...order,
+      channel: "PARTNER_PORTAL" as const,
+    })),
+  });
+
+  console.log(`Created ${partnerOrders.length} partner portal supplier orders`);
+  console.log(`Partner API signing key ready at ${ensurePartnerSigningKey()}`);
 
   console.log("Seeding completed!");
 }
