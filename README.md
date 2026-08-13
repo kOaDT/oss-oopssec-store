@@ -78,6 +78,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
 - REST API with documented attack vectors
 - 36 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
+- A guided [TryHackMe room](https://tryhackme.com/jr/oopssecstorethesummeraudit) — _The Summer Audit_, 8 tasks and 7 flags, as a narrative on-ramp for newcomers
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
 
 ## Why OopsSec Store?
