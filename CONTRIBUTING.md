@@ -132,19 +132,7 @@ Everything downstream is generated from this file — the roadmap page, `/topics
 
 The parity suite checks the counts and the catalog table row by row; the OWASP grid and the syllabus plans are on you.
 
-#### 9. Regenerate the discussion forms
-
-```bash
-npm run discussions:templates
-```
-
-The "Stuck on a challenge" and "Show your solve" discussion forms carry a
-dropdown of every challenge, generated from `roadmap.ts`. It is how a question
-asked from the lab gets attached to the right walkthrough. Commit the two
-regenerated files under `.github/DISCUSSION_TEMPLATE/`; the parity suite fails
-if you forget.
-
-#### 10. Special cases
+#### 9. Special cases
 
 | Situation                             | Also update                                                                                                                                                     |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -155,7 +143,7 @@ if you forget.
 | New environment variable              | `.env`, `scripts/setup.sh`, `Dockerfile`, and the `env:` block of `.github/workflows/test.yml` if a test needs it                                               |
 | New admin route to gate               | the `matcher` in `middleware.ts`                                                                                                                                |
 
-#### 11. Run the checks
+#### 10. Run the checks
 
 ```bash
 npm run db:push && npm run db:seed

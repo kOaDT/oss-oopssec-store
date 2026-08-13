@@ -96,8 +96,8 @@ const DISCUSSIONS_URL =
  * generic picker. The app carries its own copy as `askAboutChallengeUrl` in
  * `lib/discussions.ts` — narrower, since a challenge page only ever links to
  * "stuck" — because the docs site is a separate package and cannot import from
- * it. Both read challenge titles from `roadmap.ts` so a thread is named the
- * same whichever entry point opened it.
+ * it. Both name a thread from `roadmap.ts` so it reads the same whichever entry
+ * point opened it.
  */
 const DISCUSSION_CATEGORIES = {
   stuck: { slug: "stuck-on-a-challenge", prefix: "[Stuck]" },
@@ -107,21 +107,19 @@ const DISCUSSION_CATEGORIES = {
 /**
  * Deep link to a new discussion, prefilled for one challenge.
  *
- * `challenge` targets the dropdown of the matching form under
- * `.github/DISCUSSION_TEMPLATE/` by field id, and its value has to match an
- * option verbatim — hence the `Title (slug)` shape the generator emits. An
- * unknown field or a non-matching value is ignored by GitHub, so the worst case
- * is the dropdown coming up empty.
+ * `title` is the only field GitHub prefills on a discussion form — the
+ * per-field query params that work on issue forms are ignored here. So the
+ * challenge name travels in the title, and the form asks for it in a plain
+ * input rather than a dropdown that would default to the wrong challenge.
  */
 export function challengeDiscussionUrl(
   kind: keyof typeof DISCUSSION_CATEGORIES,
-  challenge: { title: string; slug: string }
+  challenge: { title: string }
 ): string {
   const { slug, prefix } = DISCUSSION_CATEGORIES[kind];
   const params = new URLSearchParams({
     category: slug,
     title: `${prefix} ${challenge.title}`,
-    challenge: `${challenge.title} (${challenge.slug})`,
   });
   return `${DISCUSSIONS_URL}/new?${params}`;
 }

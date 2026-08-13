@@ -2,7 +2,7 @@ blank_issues_enabled: true
 contact_links:
   - name: 🧩 Stuck on a challenge
     url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=stuck-on-a-challenge
-    about: An exploit will not fire, or you cannot find the flag. Spoilers welcome — post your actual payloads.
+    about: An exploit will not fire, or you cannot find the flag. Post your actual payloads.
   - name: 🛠️ Setup and install help
     url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=setup-and-install
     about: The lab will not start, Docker fails, npm errors out.
