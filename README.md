@@ -250,7 +250,7 @@ For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oops
 
 ## 🎓 Using OopsSec Store in a course or CTF?
 
-Check out the [Educator Kit](EDUCATORS.md) - a ready-to-use guide with OWASP coverage grids, syllabus templates, deployment FAQ, and a student report template.
+Check out the [Educator Kit](EDUCATORS.md) - a ready-to-use guide with OWASP coverage grids, syllabus templates, deployment FAQ, and a student report template. Building your own tooling around the curriculum? The whole thing is published as a machine-readable feed at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json), regenerated on every docs deploy.
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 

@@ -4,6 +4,7 @@ import IconMail from "@/assets/icons/IconMail.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconNpm from "@/assets/icons/IconNpm.svg";
 import IconDocker from "@/assets/icons/IconDocker.svg";
+import IconTryHackMe from "@/assets/icons/IconTryHackMe.svg";
 import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
 import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconTelegram from "@/assets/icons/IconTelegram.svg";
@@ -35,6 +36,12 @@ export const SOCIALS: Social[] = [
     href: "https://hub.docker.com/r/leogra/oss-oopssec-store",
     linkTitle: `${SITE.title} on Docker Hub`,
     icon: IconDocker,
+  },
+  {
+    name: "TryHackMe",
+    href: "https://tryhackme.com/jr/oopssecstorethesummeraudit",
+    linkTitle: `${SITE.title} on TryHackMe`,
+    icon: IconTryHackMe,
   },
   {
     name: "Mail",
