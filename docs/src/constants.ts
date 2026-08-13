@@ -1,5 +1,4 @@
 import type { Props } from "astro";
-import type { GiscusProps } from "@giscus/react";
 import IconMail from "@/assets/icons/IconMail.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconNpm from "@/assets/icons/IconNpm.svg";
@@ -87,15 +86,42 @@ export const SHARE_LINKS: Social[] = [
 export const HALL_OF_FAME_URL =
   "https://github.com/kOaDT/oss-oopssec-store/blob/main/hall-of-fame/data.json";
 
-export const GISCUS: GiscusProps = {
-  repo: "kOaDT/oss-oopssec-store",
-  repoId: "R_kgDOQqqWhA",
-  category: "Announcements",
-  categoryId: "DIC_kwDOQqqWhM4Cz8BO",
-  mapping: "title",
-  reactionsEnabled: "1",
-  emitMetadata: "0",
-  inputPosition: "bottom",
-  lang: "en",
-  loading: "lazy",
-};
+const DISCUSSIONS_URL =
+  "https://github.com/kOaDT/oss-oopssec-store/discussions";
+
+/**
+ * Discussion categories reachable from a walkthrough, with the title prefix
+ * each one expects. The slugs are what GitHub derives from the category names:
+ * rename a category on the repo and these links silently fall back to the
+ * generic picker. The app carries its own copy as `askAboutChallengeUrl` in
+ * `lib/discussions.ts` — narrower, since a challenge page only ever links to
+ * "stuck" — because the docs site is a separate package and cannot import from
+ * it. Both read challenge titles from `roadmap.ts` so a thread is named the
+ * same whichever entry point opened it.
+ */
+const DISCUSSION_CATEGORIES = {
+  stuck: { slug: "stuck-on-a-challenge", prefix: "[Stuck]" },
+  solve: { slug: "show-your-solve", prefix: "[Solve]" },
+} as const;
+
+/**
+ * Deep link to a new discussion, prefilled for one challenge.
+ *
+ * `challenge` targets the dropdown of the matching form under
+ * `.github/DISCUSSION_TEMPLATE/` by field id, and its value has to match an
+ * option verbatim — hence the `Title (slug)` shape the generator emits. An
+ * unknown field or a non-matching value is ignored by GitHub, so the worst case
+ * is the dropdown coming up empty.
+ */
+export function challengeDiscussionUrl(
+  kind: keyof typeof DISCUSSION_CATEGORIES,
+  challenge: { title: string; slug: string }
+): string {
+  const { slug, prefix } = DISCUSSION_CATEGORIES[kind];
+  const params = new URLSearchParams({
+    category: slug,
+    title: `${prefix} ${challenge.title}`,
+    challenge: `${challenge.title} (${challenge.slug})`,
+  });
+  return `${DISCUSSIONS_URL}/new?${params}`;
+}

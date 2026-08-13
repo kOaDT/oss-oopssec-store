@@ -1,0 +1,51 @@
+title: "[Setup] "
+labels: ["community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For problems getting the lab running — not for the challenges
+        themselves. If the app starts but an exploit will not fire, use
+        **Stuck on a challenge** instead.
+
+  - type: dropdown
+    id: method
+    attributes:
+      label: How are you running it?
+      options:
+        - "npx create-oss-store"
+        - "Docker (docker run)"
+        - "Docker Compose"
+        - "Manual clone + npm run setup"
+        - "Something else"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS and version
+      placeholder: "Ubuntu 26.04 / macOS 15.3 / Windows 11 + WSL2"
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      description: Output of `node --version`. Leave blank if you only use Docker.
+      placeholder: "v22.14.0"
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you run, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Full output
+      description: Paste everything, not just the last line. Redact nothing — there are no real secrets in this lab.
+      render: shell
+    validations:
+      required: true

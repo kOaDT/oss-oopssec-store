@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { getBaseUrl, DOCS_BASE_URL } from "@/lib/config";
+import { askAboutChallengeUrl } from "@/lib/discussions";
 import {
   formatSlug,
   CATEGORY_LABELS,
@@ -263,6 +264,23 @@ export default async function VulnerabilityPage({
                 </ReactMarkdown>
               </div>
             </article>
+            {/* Deliberately placed after the writeup, not beside the link to
+             * it: nobody asks a question when the full solution is one click
+             * away. The moment someone needs the community is the one after
+             * the walkthrough failed them. */}
+            <p className="border-t border-slate-200 px-8 py-6 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-400">
+              Followed the walkthrough and it still will not fire?{" "}
+              <a
+                href={askAboutChallengeUrl(flag.slug)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary-600 underline transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                Ask about this challenge
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>{" "}
+              — spoilers welcome, post your actual payloads and output.
+            </p>
           </div>
         </section>
       </main>

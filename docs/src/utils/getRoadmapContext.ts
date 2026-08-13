@@ -97,6 +97,16 @@ export const getRoadmapContext = (
   walkthroughSlug: string
 ): RoadmapEntry | null => byWalkthrough.get(walkthroughSlug) ?? null;
 
+/** Every challenge a walkthrough covers, in curriculum order. Almost always
+ * one; a chained pair shares a single post. Use this over `getRoadmapContext`
+ * wherever the output is per-challenge rather than per-page — that one collapses
+ * a chain to its first link, which is right for a heading and wrong for
+ * anything a reader of the second half has to act on. */
+export const getWalkthroughChallenges = (
+  walkthroughSlug: string
+): RoadmapEntry[] =>
+  entries.filter(entry => entry.walkthroughSlug === walkthroughSlug);
+
 export const getNext = (number: number): RoadmapEntry | null =>
   byNumber.get(number + 1) ?? null;
 

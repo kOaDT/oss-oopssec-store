@@ -1,0 +1,41 @@
+title: "[Teaching] "
+labels: ["community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For anyone running the lab with a group — a class, a bootcamp, an
+        internal security training, a CTF night. The
+        [Educator Kit](https://github.com/kOaDT/oss-oopssec-store/blob/main/EDUCATORS.md)
+        covers deployment, OWASP coverage grids and report templates; this is
+        where the gaps in it get found.
+
+  - type: dropdown
+    id: context
+    attributes:
+      label: What is the setting?
+      options:
+        - "University or school course"
+        - "Bootcamp or training provider"
+        - "Internal corporate training"
+        - "Club, meetup, or CTF event"
+        - "Self-study group"
+        - "Something else"
+    validations:
+      required: true
+  - type: input
+    id: size
+    attributes:
+      label: Roughly how many participants?
+      placeholder: "25"
+    validations:
+      required: false
+  - type: textarea
+    id: topic
+    attributes:
+      label: What do you want to discuss?
+      description: >
+        Deployment for a group, which chapters fit a given session length,
+        grading, something missing from the Educator Kit — all fair game.
+    validations:
+      required: true

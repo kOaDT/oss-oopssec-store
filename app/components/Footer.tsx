@@ -3,13 +3,13 @@ import packageJson from "../../package.json";
 import {
   DEV_TO_URL,
   DOCS_ROADMAP_URL,
+  GITHUB_DISCUSSIONS,
   GITHUB_REPO,
   MEDIUM_URL,
   THM_ROOM_URL,
 } from "@/lib/config";
 
 const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
-const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
 const WALKTHROUGHS_URL = "https://koadt.github.io/oss-oopssec-store/";
 
 type FooterLink = {
