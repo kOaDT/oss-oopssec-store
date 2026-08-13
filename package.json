@@ -60,6 +60,9 @@
       "eslint --fix"
     ]
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@prisma/client": "^6.19.1",
     "@tailwindcss/typography": "^0.5.19",
