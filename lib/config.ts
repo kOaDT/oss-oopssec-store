@@ -9,6 +9,15 @@ export const DOCS_ROADMAP_URL = `${DOCS_SITE_URL}/roadmap`;
 export const GITHUB_REPO_SLUG = "kOaDT/oss-oopssec-store";
 export const GITHUB_REPO = `https://github.com/${GITHUB_REPO_SLUG}`;
 
+export const DEV_TO_URL = "https://dev.to/oopssec-store";
+export const MEDIUM_URL = "https://medium.com/@oopssec-store";
+
+/**
+ * TryHackMe walkthrough room built on top of this lab.
+ */
+export const THM_ROOM_URL =
+  "https://tryhackme.com/jr/oopssecstorethesummeraudit";
+
 /** Cache TTL (in seconds) for the GitHub-backed contributors list. */
 export const CONTRIBUTORS_REVALIDATE_SECONDS = 86_400;
 

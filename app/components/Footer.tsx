@@ -1,17 +1,93 @@
 import Link from "next/link";
 import packageJson from "../../package.json";
-import { DOCS_ROADMAP_URL, GITHUB_REPO } from "@/lib/config";
+import {
+  DEV_TO_URL,
+  DOCS_ROADMAP_URL,
+  GITHUB_REPO,
+  MEDIUM_URL,
+  THM_ROOM_URL,
+} from "@/lib/config";
 
 const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
 const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
-const DEV_TO_URL = "https://dev.to/oopssec-store";
+const WALKTHROUGHS_URL = "https://koadt.github.io/oss-oopssec-store/";
+
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
+/** In-app pages that double as challenge entry points. */
+const ATTACK_SURFACE: FooterLink[] = [
+  { label: "All Products", href: "/" },
+  { label: "Contact Support", href: "/support" },
+  { label: "AI Assistant", href: "/support/ai-assistant" },
+  { label: "News", href: "/news" },
+  { label: "Live Stream", href: "/live" },
+  { label: "Partner API", href: "/partners" },
+  { label: "Admin", href: "/admin" },
+];
+
+const PROGRESS: FooterLink[] = [
+  { label: "Roadmap", href: DOCS_ROADMAP_URL, external: true },
+  { label: "Flags", href: "/flags" },
+  { label: "Player Dashboard", href: "/player-dashboard" },
+  { label: "Hall of Fame", href: "/hall-of-fame" },
+];
+
+const COMMUNITY: FooterLink[] = [
+  { label: "TryHackMe room", href: THM_ROOM_URL, external: true },
+  { label: "Walkthroughs", href: WALKTHROUGHS_URL, external: true },
+  { label: "Issues", href: GITHUB_ISSUES, external: true },
+  { label: "Discussions", href: GITHUB_DISCUSSIONS, external: true },
+];
+
+const LINK_CLASS =
+  "text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400";
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: FooterLink[];
+}) {
+  return (
+    <div>
+      <h4 className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
+        {title}
+      </h4>
+      <ul className="space-y-3 text-sm">
+        {links.map(({ label, href, external }) => (
+          <li key={href}>
+            {external ? (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={LINK_CLASS}
+              >
+                {label}
+              </a>
+            ) : (
+              <Link href={href} className={LINK_CLASS}>
+                {label}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
             <h3 className="mb-4 text-xl font-bold text-primary-600 dark:text-primary-400">
               OSS – OopsSec Store
             </h3>
@@ -54,130 +130,27 @@ export default function Footer() {
                   <path d="M7.826 10.083a.784.784 0 0 0-.468-.175h-.701v4.198h.701a.786.786 0 0 0 .469-.175c.155-.117.233-.292.233-.525v-2.798c.001-.233-.079-.408-.234-.525zM19.236 3H4.764C3.79 3 3.001 3.787 3 4.76v14.48c.001.973.79 1.76 1.764 1.76h14.473c.974 0 1.762-.787 1.763-1.76V4.76A1.765 1.765 0 0 0 19.236 3zM9.195 13.414c0 .755-.466 1.901-1.942 1.898H5.389V8.665h1.903c1.424 0 1.902 1.144 1.903 1.899v2.85zm4.045-3.562H11.1v1.544h1.309v1.188H11.1v1.543h2.142v1.188h-2.498a.813.813 0 0 1-.833-.792V9.497a.813.813 0 0 1 .792-.832h2.539l-.002 1.187zm4.165 4.632c-.531 1.235-1.481.99-1.906 0l-1.548-5.818h1.309l1.193 4.569 1.188-4.569h1.31l-1.546 5.818z" />
                 </svg>
               </a>
+              <a
+                href={MEDIUM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+                aria-label="Medium Profile"
+              >
+                <svg
+                  className="h-6 w-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42zM24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z" />
+                </svg>
+              </a>
             </div>
           </div>
 
-          <div className="md:col-span-1">
-            <h4 className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
-              Navigation
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link
-                  href="/"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/support"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Contact Support
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/support/ai-assistant"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  AI Assistant
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/news"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  News
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/live"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Live Stream
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/partners"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Partner API
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Admin
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="md:col-span-1">
-            <h4 className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
-              Community
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a
-                  href={GITHUB_REPO}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  GitHub
-                </a>
-              </li>
-              <li>
-                <a
-                  href={GITHUB_ISSUES}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Issues
-                </a>
-              </li>
-              <li>
-                <a
-                  href={GITHUB_DISCUSSIONS}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Discussions
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://koadt.github.io/oss-oopssec-store/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Walkthroughs
-                </a>
-              </li>
-              <li>
-                <a
-                  href={DOCS_ROADMAP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-                >
-                  Roadmap
-                </a>
-              </li>
-            </ul>
-          </div>
+          <FooterColumn title="Attack surface" links={ATTACK_SURFACE} />
+          <FooterColumn title="Your progress" links={PROGRESS} />
+          <FooterColumn title="Learn & community" links={COMMUNITY} />
         </div>
 
         <div className="mt-8 border-t border-slate-200 pt-8 dark:border-slate-800">
@@ -188,37 +161,16 @@ export default function Footer() {
                 v{packageJson.version}
               </span>
             </p>
-            <div className="flex gap-6 text-sm text-slate-600 dark:text-slate-400">
-              <Link
-                href="/flags"
-                className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-              >
-                Flags
-              </Link>
-              <Link
-                href="/player-dashboard"
-                className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/hall-of-fame"
-                className="text-slate-600 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
-              >
-                Hall of Fame
-              </Link>
+            <div className="flex gap-6 text-sm">
               <a
                 href={`${GITHUB_REPO}/releases`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+                className={LINK_CLASS}
               >
                 Changelog
               </a>
-              <Link
-                href="/terms"
-                className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
-              >
+              <Link href="/terms" className={LINK_CLASS}>
                 Terms of Service
               </Link>
             </div>
