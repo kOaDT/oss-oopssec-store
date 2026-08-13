@@ -7,48 +7,12 @@ body:
         Post the full solution. Alternative routes to the same flag are the most
         useful thing you can share here — they are what the walkthroughs miss.
 
-  - type: dropdown
+  - type: input
     id: challenge
     attributes:
       label: Which challenge?
-      description: Pick the challenge this thread is about.
-      options:
-        - "Public env variable leak (public-env-variable)"
-        - "Information disclosure via API errors (information-disclosure-api-error)"
-        - "Plaintext passwords in logs (plaintext-password-in-logs)"
-        - "Insecure Direct Object Reference (IDOR) (insecure-direct-object-reference)"
-        - "Open redirect to login bypass (open-redirect)"
-        - "Broken Object Level Authorization (BOLA) (broken-object-level-authorization)"
-        - "Broken Function Level Authorization (live stream hijack) (broken-function-level-authorization)"
-        - "Path traversal in document API (path-traversal)"
-        - "Client-side price manipulation (client-side-price-manipulation)"
-        - "Mass assignment to admin role (mass-assignment)"
-        - "Middleware bypass (CVE-2025-29927) (middleware-authorization-bypass)"
-        - "Race condition coupon abuse (race-condition-coupon-abuse)"
-        - "Stored XSS in product reviews (cross-site-scripting-xss)"
-        - "Self-XSS in profile bio (self-xss-profile-injection)"
-        - "CSRF on admin order update (cross-site-request-forgery)"
-        - "CSRF + Self-XSS profile takeover (csrf-profile-takeover-chain)"
-        - "SQL injection in order search (sql-injection)"
-        - "Product search SQLi (product-search-sql-injection)"
-        - "X-Forwarded-For SQLi (x-forwarded-for-sql-injection)"
-        - "Second-order SQL injection (second-order-sql-injection)"
-        - "Malicious file upload (SVG XSS) (malicious-file-upload)"
-        - "XXE in supplier order import (xxe-supplier-order-import)"
-        - "Weak JWT secret (weak-jwt-secret)"
-        - "Brute force, no rate limiting (brute-force-no-rate-limiting)"
-        - "Session fixation (session-fixation-weak-session-management)"
-        - "Insecure password reset (insecure-password-reset)"
-        - "SSRF internal page access (server-side-request-forgery)"
-        - "Weak MD5 password hashing (weak-md5-hashing)"
-        - "Insecure randomness in gift cards (insecure-randomness-gift-card)"
-        - "AES-CBC padding oracle (aes-cbc-padding-oracle)"
-        - "JWT algorithm confusion (partner API) (jwt-algorithm-confusion)"
-        - "Prompt injection in AI assistant (prompt-injection-ai-assistant)"
-        - "MCP malicious server (mcp-malicious-server)"
-        - "npm typosquat (npm-supply-chain-typosquat)"
-        - "AI rules file backdoor (ai-rules-file-backdoor)"
-        - "react2shell (CVE-2025-55182) (react2shell)"
+      description: The title as it shows on the roadmap. The thread title above usually already carries it.
+      placeholder: "AES-CBC padding oracle"
     validations:
       required: true
   - type: textarea

@@ -247,41 +247,6 @@ describe("docs/src/data/roadmap.ts", () => {
   });
 });
 
-describe(".github/DISCUSSION_TEMPLATE", () => {
-  /* The per-challenge dropdown in these forms is generated from the curriculum
-   * by `npm run discussions:templates`. Nothing reads it at build time, so a
-   * stale one fails silently and in the worst way: the new challenge is simply
-   * absent from the picker, and every question about it arrives untagged. */
-  const GENERATED = ["stuck-on-a-challenge.yml", "show-your-solve.yml"];
-  const expected = CHALLENGES.map(({ title, slug }) => `${title} (${slug})`);
-
-  it.each(GENERATED)("keeps the challenge dropdown of %s in sync", (file) => {
-    const template = read(".github", "DISCUSSION_TEMPLATE", file);
-    const hint = `${file} — run \`npm run discussions:templates\``;
-
-    /* Scoped to the `challenge` dropdown: these forms may grow other dropdowns,
-     * and matching every option line in the file would then report the new
-     * field's choices as stale challenges. */
-    const block = template.match(
-      /^ {4}id: challenge$[\s\S]*?^ {4}validations:$/m
-    );
-    expect([hint, block !== null]).toEqual([hint, true]);
-    /* Options are emitted as JSON strings so a title containing a quote stays
-     * valid YAML; parse them back the same way rather than stripping the outer
-     * quotes, which would leave the escapes in the compared value. */
-    const options = [...block![0].matchAll(/^ {8}- (".*")$/gm)].map(
-      (m) => JSON.parse(m[1]) as string
-    );
-
-    const missing = expected.filter((option) => !options.includes(option));
-    const stale = options.filter((option) => !expected.includes(option));
-    expect([hint, missing, stale]).toEqual([hint, [], []]);
-
-    // Order carries meaning: the dropdown follows the curriculum.
-    expect([hint, options]).toEqual([hint, expected]);
-  });
-});
-
 describe("discussion categories", () => {
   /* GitHub derives a category's slug from its name, attaches the form named
    * after that slug, and silently ignores a `?category=` that resolves to
@@ -352,6 +317,21 @@ describe("discussion categories", () => {
   it("points the in-lab link at a category that has a form", () => {
     const { searchParams } = new URL(askAboutChallengeUrl(CHALLENGES[0].slug));
     expect(forms).toContain(searchParams.get("category"));
+  });
+
+  it("names the challenge in the title, the only field GitHub prefills", () => {
+    /* Per-field prefill works on issue forms and is ignored on discussion
+     * forms — a `challenge=` param left the dropdown on its first option, which
+     * tagged threads with the wrong challenge. The title is what carries it
+     * now, so a link that drops the challenge name carries nothing at all. */
+    for (const { slug, title } of CHALLENGES) {
+      const params = new URL(askAboutChallengeUrl(slug)).searchParams;
+      expect([slug, params.get("title")]).toEqual([slug, `[Stuck] ${title}`]);
+      expect([slug, [...params.keys()].sort()]).toEqual([
+        slug,
+        ["category", "title"],
+      ]);
+    }
   });
 
   it("prefixes thread titles the way the forms themselves do", () => {

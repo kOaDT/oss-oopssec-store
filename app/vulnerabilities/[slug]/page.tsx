@@ -279,7 +279,7 @@ export default async function VulnerabilityPage({
                 Ask about this challenge
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>{" "}
-              — spoilers welcome, post your actual payloads and output.
+              — post your actual payloads and output.
             </p>
           </div>
         </section>
