@@ -1,0 +1,134 @@
+---
+import IconGitHub from "@/assets/icons/IconGitHub.svg";
+import { getWalkthroughChallenges } from "@/utils/getRoadmapContext";
+import { challengeDiscussionUrl } from "@/constants";
+
+interface Props {
+  walkthroughSlug: string;
+}
+
+const { walkthroughSlug } = Astro.props;
+
+/* The single discussion surface for a walkthrough. It replaced an inline
+ * comment box: two places to talk about one challenge split what little
+ * activity there is across both, and neither the asker nor the answerer knows
+ * which to check. Everything now lands in Discussions, tagged by challenge.
+ *
+ * Two links rather than one because the bottom of a writeup is where two
+ * different people arrive — the one it did not work for, and the one who got
+ * there another way. Neither is served by the other's category.
+ *
+ * Posts outside the curriculum (theme docs, meta posts) resolve to nothing and
+ * render no prompt.
+ *
+ * One link per challenge the walkthrough covers, not one per page: a chained
+ * pair shares a single post, and a single link would tag every thread with the
+ * first half of the chain — including the ones from readers stuck on the
+ * second. That mistagging is the one thing the per-challenge dropdown exists to
+ * prevent, so it cannot be baked into the link that opens it. */
+const challenges = getWalkthroughChallenges(walkthroughSlug);
+const chained = challenges.length > 1;
+---
+
+{
+  challenges.length > 0 && (
+    <aside class="ask-cta" aria-label="Discuss this challenge">
+      <span class="ask-cta__icon" aria-hidden="true">
+        <IconGitHub />
+      </span>
+      <div class="ask-cta__body">
+        <p class="ask-cta__text">
+          <span class="ask-cta__lead">Still not firing?</span>{" "}
+          {challenges.map((challenge, index) => (
+            <Fragment>
+              {index > 0 && " or "}
+              <a
+                class="ask-cta__link"
+                href={challengeDiscussionUrl("stuck", challenge)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ask about {challenge.title}
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </Fragment>
+          ))}{" "}
+          — spoilers are welcome, so paste your actual payload and the response
+          you get back.
+        </p>
+        <p class="ask-cta__text">
+          <span class="ask-cta__lead">Got the flag another way?</span>{" "}
+          {challenges.map((challenge, index) => (
+            <Fragment>
+              {index > 0 && " or "}
+              <a
+                class="ask-cta__link"
+                href={challengeDiscussionUrl("solve", challenge)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {/* Naming the challenge only matters when there are two to tell
+                    apart; on the 34 single-challenge pages it just repeats the
+                    title in the heading above. */}
+                {chained
+                  ? `Post your route for ${challenge.title}`
+                  : "Post your route"}
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </Fragment>
+          ))}
+        </p>
+      </div>
+    </aside>
+  )
+}
+
+<style>
+  /* Same weight class as the Hall of Fame callout it sits next to: this is the
+   * only way to reach the community from a walkthrough, so it cannot read as a
+   * footnote under a louder box aimed at the few who already finished. */
+  .ask-cta {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin: 2rem 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--accent) 8%, var(--background));
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .ask-cta__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: var(--accent);
+  }
+  .ask-cta__icon :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .ask-cta__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .ask-cta__text {
+    margin: 0;
+  }
+  .ask-cta__lead {
+    font-weight: 700;
+    color: var(--foreground);
+  }
+  .ask-cta__link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+  }
+  .ask-cta__link:hover,
+  .ask-cta__link:focus-visible {
+    text-decoration-style: solid;
+  }
+</style>

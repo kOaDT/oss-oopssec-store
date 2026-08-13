@@ -8,6 +8,7 @@ export const DOCS_ROADMAP_URL = `${DOCS_SITE_URL}/roadmap`;
 
 export const GITHUB_REPO_SLUG = "kOaDT/oss-oopssec-store";
 export const GITHUB_REPO = `https://github.com/${GITHUB_REPO_SLUG}`;
+export const GITHUB_DISCUSSIONS = `${GITHUB_REPO}/discussions`;
 
 export const DEV_TO_URL = "https://dev.to/oopssec-store";
 export const MEDIUM_URL = "https://medium.com/@oopssec-store";

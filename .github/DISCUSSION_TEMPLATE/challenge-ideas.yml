@@ -1,0 +1,44 @@
+title: "[Idea] "
+labels: ["community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vulnerabilities you would like to see turned into a challenge. Bugs in
+        the lab itself go to [Issues](https://github.com/kOaDT/oss-oopssec-store/issues);
+        this is for new curriculum.
+
+  - type: input
+    id: vulnerability
+    attributes:
+      label: Which vulnerability class?
+      placeholder: "Server-side template injection"
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Where would it live in the store?
+      description: >
+        The lab is an e-commerce app. A challenge lands better when it hides in
+        a feature that would plausibly ship — a coupon engine, an invoice
+        renderer, a supplier import.
+    validations:
+      required: true
+  - type: textarea
+    id: prior_art
+    attributes:
+      label: Real-world precedent
+      description: A CVE, a disclosed bug bounty report, an incident write-up. Optional, but it is what makes a challenge feel real.
+    validations:
+      required: false
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you want to build it?
+      options:
+        - "I would like to implement it myself"
+        - "I would review or test it"
+        - "Just suggesting the idea"
+    validations:
+      required: true

@@ -58,6 +58,7 @@ docker run -p 3000:3000 leogra/oss-oopssec-store
   - [Quick start (npm)](#quick-start)
   - [Docker](#docker)
 - [Hall of fame](#hall-of-fame)
+- [Community](#community)
 - [Project structure](#project-structure)
 - [Recent activity](#recent-activity)
 - [Testing](#testing)
@@ -163,6 +164,19 @@ The database initializes on first start. Data persists across restarts via Docke
 ## Hall of fame
 
 Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame/data.json). Add your entry to `hall-of-fame/data.json` and your profile will show up on the `/hall-of-fame` page in the app.
+
+## Community
+
+Questions, solutions and feedback live in [Discussions](https://github.com/kOaDT/oss-oopssec-store/discussions).
+
+| Where to go                                                                                                           | For what                                              |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [🧩 Stuck on a challenge](https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=stuck-on-a-challenge)   | The exploit will not fire, the flag will not validate |
+| [🛠️ Setup and install](https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=setup-and-install)         | Docker, npm or Node problems getting the lab up       |
+| [🏆 Show your solve](https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=show-your-solve)             | A route to the flag the walkthrough does not cover    |
+| [💡 Challenge ideas](https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=challenge-ideas)             | A vulnerability class worth adding to the curriculum  |
+| [🎓 Teaching with OopsSec](https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=teaching-with-oopssec) | Running the lab with a class, a bootcamp or a team    |
+| [Issues](https://github.com/kOaDT/oss-oopssec-store/issues)                                                           | Bugs in the lab itself, and only those                |
 
 ## Project structure
 

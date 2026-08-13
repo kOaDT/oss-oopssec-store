@@ -13,8 +13,8 @@ import BackToTopButton from "@/components/BackToTopButton.astro";
 import StarCallout from "@/components/StarCallout.astro";
 import RoadmapContext from "@/components/RoadmapContext.astro";
 import HallOfFameCta from "@/components/HallOfFameCta.astro";
+import AskAboutChallenge from "@/components/AskAboutChallenge.astro";
 import { getRoadmapContext } from "@/utils/getRoadmapContext";
-import Comments from "@/components/Comments";
 import { getPath } from "@/utils/getPath";
 import { slugifyStr } from "@/utils/slugify";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
@@ -130,6 +130,8 @@ const nextPost =
       <Content />
     </article>
 
+    <AskAboutChallenge walkthroughSlug={post.id} />
+
     <hr class="my-8 border-dashed" />
 
     <EditPost class="sm:hidden" {hideEditPost} {post} />
@@ -141,8 +143,6 @@ const nextPost =
     <BackToTopButton />
 
     <ShareLinks />
-
-    <Comments client:only="react" />
 
     <RoadmapContext walkthroughSlug={post.id} placement="bottom" />
 

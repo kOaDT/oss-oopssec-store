@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🧩 Stuck on a challenge
+    url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=stuck-on-a-challenge
+    about: An exploit will not fire, or you cannot find the flag. Spoilers welcome — post your actual payloads.
+  - name: 🛠️ Setup and install help
+    url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=setup-and-install
+    about: The lab will not start, Docker fails, npm errors out.
+  - name: 🏆 Show your solve
+    url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=show-your-solve
+    about: Found a route the walkthrough does not cover? Post it.
+  - name: 💡 Suggest a challenge
+    url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=challenge-ideas
+    about: A vulnerability class you would like added to the curriculum.
+  - name: 🎓 Teaching with OopsSec
+    url: https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=teaching-with-oopssec
+    about: Running the lab with a class, a bootcamp, or a team.

@@ -3,6 +3,7 @@ import { join } from "path";
 import { flags, flagHints } from "../../prisma/flags";
 import { CURRICULUM, TOTAL_CHALLENGES } from "../../docs/src/data/roadmap";
 import { CATEGORY_LABELS } from "../../lib/format";
+import { askAboutChallengeUrl } from "../../lib/discussions";
 import { FLAGS } from "../helpers/flags";
 
 /**
@@ -230,6 +231,151 @@ describe("docs/src/data/roadmap.ts", () => {
         expect(prerequisite).toBeLessThan(index + 1);
       }
     });
+  });
+
+  it("stays free of imports so the Docker image can ship it alone", () => {
+    /* `lib/discussions.ts` imports this file, and `.dockerignore` re-includes
+     * it as the single exception to excluding `docs/`. An import added here
+     * would resolve everywhere except inside the image, where it fails at
+     * `next build` — a break invisible to every check that runs before it. */
+    const source = read("docs", "src", "data", "roadmap.ts");
+    const imports = source.match(/^\s*import\s.+$/gm) ?? [];
+    expect(["docs/src/data/roadmap.ts must not import", imports]).toEqual([
+      "docs/src/data/roadmap.ts must not import",
+      [],
+    ]);
+  });
+});
+
+describe(".github/DISCUSSION_TEMPLATE", () => {
+  /* The per-challenge dropdown in these forms is generated from the curriculum
+   * by `npm run discussions:templates`. Nothing reads it at build time, so a
+   * stale one fails silently and in the worst way: the new challenge is simply
+   * absent from the picker, and every question about it arrives untagged. */
+  const GENERATED = ["stuck-on-a-challenge.yml", "show-your-solve.yml"];
+  const expected = CHALLENGES.map(({ title, slug }) => `${title} (${slug})`);
+
+  it.each(GENERATED)("keeps the challenge dropdown of %s in sync", (file) => {
+    const template = read(".github", "DISCUSSION_TEMPLATE", file);
+    const hint = `${file} — run \`npm run discussions:templates\``;
+
+    /* Scoped to the `challenge` dropdown: these forms may grow other dropdowns,
+     * and matching every option line in the file would then report the new
+     * field's choices as stale challenges. */
+    const block = template.match(
+      /^ {4}id: challenge$[\s\S]*?^ {4}validations:$/m
+    );
+    expect([hint, block !== null]).toEqual([hint, true]);
+    /* Options are emitted as JSON strings so a title containing a quote stays
+     * valid YAML; parse them back the same way rather than stripping the outer
+     * quotes, which would leave the escapes in the compared value. */
+    const options = [...block![0].matchAll(/^ {8}- (".*")$/gm)].map(
+      (m) => JSON.parse(m[1]) as string
+    );
+
+    const missing = expected.filter((option) => !options.includes(option));
+    const stale = options.filter((option) => !expected.includes(option));
+    expect([hint, missing, stale]).toEqual([hint, [], []]);
+
+    // Order carries meaning: the dropdown follows the curriculum.
+    expect([hint, options]).toEqual([hint, expected]);
+  });
+});
+
+describe("discussion categories", () => {
+  /* GitHub derives a category's slug from its name, attaches the form named
+   * after that slug, and silently ignores a `?category=` that resolves to
+   * nothing — the link still opens, on the generic picker, with none of the
+   * prefill. Four files hardcode these slugs and nothing else compares them, so
+   * renaming a category on the repo breaks every entry point at once and no
+   * check anywhere goes red. This suite cannot see the repo's category names,
+   * but it can hold the four copies to the set of forms that exist. */
+  const forms = readdirSync(join(ROOT, ".github", "DISCUSSION_TEMPLATE"))
+    .filter((file) => file.endsWith(".yml"))
+    .map((file) => file.replace(/\.yml$/, ""));
+
+  /** The `?category=` slug of every discussion deep link in a file. */
+  const linkedFrom = (...segments: string[]) =>
+    [
+      ...read(...segments).matchAll(/discussions\/new\?category=([a-z0-9-]+)/g),
+    ].map((match) => match[1]);
+
+  /** `{ slug, prefix }` of `DISCUSSION_CATEGORIES`, scoped to that object so a
+   * later constant carrying its own `slug:` is not read as a category. */
+  const docsCategories = () => {
+    const block = read("docs", "src", "constants.ts").match(
+      /^const DISCUSSION_CATEGORIES = \{$[\s\S]*?^\} as const;$/m
+    );
+    expect(["docs/src/constants.ts", block !== null]).toEqual([
+      "docs/src/constants.ts",
+      true,
+    ]);
+    return [
+      ...block![0].matchAll(/slug: "([a-z0-9-]+)", prefix: "([^"]+)"/g),
+    ].map(([, slug, prefix]) => ({ slug, prefix }));
+  };
+
+  const DEEP_LINKING: Record<string, string[]> = {
+    ".github/ISSUE_TEMPLATE/config.yml": [
+      ".github",
+      "ISSUE_TEMPLATE",
+      "config.yml",
+    ],
+    "README.md": ["README.md"],
+  };
+
+  it.each(Object.keys(DEEP_LINKING))(
+    "only deep-links categories that have a form, in %s",
+    (label) => {
+      const linked = linkedFrom(...DEEP_LINKING[label]);
+      expect([label, linked.length > 0]).toEqual([label, true]);
+      expect([label, linked.filter((slug) => !forms.includes(slug))]).toEqual([
+        label,
+        [],
+      ]);
+    }
+  );
+
+  it("gives every form a way in from the issue picker", () => {
+    /* The forms are only discoverable through these links: a category nobody
+     * routes to collects nothing, however good its form is. */
+    const linked = linkedFrom(".github", "ISSUE_TEMPLATE", "config.yml");
+    expect(forms.filter((slug) => !linked.includes(slug))).toEqual([]);
+  });
+
+  it("points the docs site at categories that have a form", () => {
+    const slugs = docsCategories().map(({ slug }) => slug);
+    expect(slugs.length).toBeGreaterThan(0);
+    expect(slugs.filter((slug) => !forms.includes(slug))).toEqual([]);
+  });
+
+  it("points the in-lab link at a category that has a form", () => {
+    const { searchParams } = new URL(askAboutChallengeUrl(CHALLENGES[0].slug));
+    expect(forms).toContain(searchParams.get("category"));
+  });
+
+  it("prefixes thread titles the way the forms themselves do", () => {
+    /* A form's own `title:` seeds the field for anyone starting from GitHub;
+     * the deep links seed it from the app and the docs site. Let the two drift
+     * and one category ends up with two title conventions, which is enough to
+     * make the threads unsearchable by prefix. */
+    for (const { slug, prefix } of docsCategories()) {
+      const title = read(".github", "DISCUSSION_TEMPLATE", `${slug}.yml`).match(
+        /^title: "(.*)"$/m
+      );
+      expect([slug, title?.[1]]).toEqual([slug, `${prefix} `]);
+    }
+
+    const url = new URL(askAboutChallengeUrl(CHALLENGES[0].slug));
+    const form = read(
+      ".github",
+      "DISCUSSION_TEMPLATE",
+      `${url.searchParams.get("category")}.yml`
+    );
+    const prefix = form.match(/^title: "(.*)"$/m)![1];
+    expect(url.searchParams.get("title")).toBe(
+      `${prefix}${CHALLENGES[0].title}`
+    );
   });
 });
 

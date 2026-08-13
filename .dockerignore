@@ -17,6 +17,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 docs/
+# ...except the curriculum, which the app itself imports: `lib/discussions.ts`
+# reads challenge titles from it so a discussion thread is named the same
+# whether it was opened from the app or from a walkthrough. Keep this file
+# free of imports — nothing else under docs/ ships in the image, so any
+# dependency it grows would break the Docker build and only the Docker build.
+!docs/src/data/roadmap.ts
 packages/create-oss-store/
 tests/
 cypress/

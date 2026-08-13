@@ -27,6 +27,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "discussions:templates": "node scripts/generate-discussion-templates.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "docs:dev": "npm run dev --prefix docs",
