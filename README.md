@@ -7,10 +7,11 @@
 <div align="center">
 
 <p>
-<b>An intentionally vulnerable e-commerce app for learning web security.</b><br>
-Master real-world attack vectors through a realistic CTF platform.<br>
-Hunt for flags, exploit vulnerabilities, and level up your security skills.
+<b>Security training for the apps you actually ship.</b><br>
+Break a deliberately vulnerable e-commerce app built on <b>Next.js, React, TypeScript and Prisma</b>.<br>
+Find the bugs. Exploit them. Understand why they work.
 </p>
+<p>36 challenges across <b>web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP</b>.</p>
 
 <p>
 <a href="https://hub.docker.com/r/leogra/oss-oopssec-store">Docker Hub</a> ·
@@ -39,10 +40,10 @@ Hunt for flags, exploit vulnerabilities, and level up your security skills.
  \____/___//___/     \____/ \___// .__/___/___/  \__/ \__//___/  \__/ \___//_/   \__/
                                 /_/
 
-# Node.js
+# Start with Node.js
 npx create-oss-store my-ctf-lab && cd my-ctf-lab && npm start
 
-# Docker
+# Start with Docker
 docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 
 # Then open http://localhost:3000 and start hacking
@@ -50,7 +51,30 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 
 <div align="center">
 
-<img src="public/oopssec-store-storefront.png" alt="OopsSec Store storefront" width="800">
+<table>
+<tr>
+<td width="50%" align="center">
+<a href="public/oopssec-store-storefront-0.png"><img src="public/oopssec-store-storefront-0.png" alt="OopsSec Store storefront" width="100%"></a>
+<br><sub><b>Storefront</b> — the e-commerce app you are attacking</sub>
+</td>
+<td width="50%" align="center">
+<a href="public/oopssec-store-storefront-1.png"><img src="public/oopssec-store-storefront-1.png" alt="Player dashboard tracking captured flags" width="100%"></a>
+<br><sub><b>Player dashboard</b> — progress, difficulty and category breakdown</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" align="center">
+<a href="public/oopssec-store-storefront-2.png"><img src="public/oopssec-store-storefront-2.png" alt="OSSBot AI customer support assistant" width="100%"></a>
+<br><sub><b>OSSBot</b> — the AI support assistant you prompt-inject</sub>
+</td>
+<td width="50%" align="center">
+<a href="public/oopssec-store-storefront-3.png"><img src="public/oopssec-store-storefront-3.png" alt="Admin dashboard with order management" width="100%"></a>
+<br><sub><b>Admin dashboard</b> — the privilege escalation target</sub>
+</td>
+</tr>
+</table>
+
+<sub>Click any screenshot to view it full size.</sub>
 
 </div>
 
@@ -66,7 +90,6 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 - [Hall of fame](#hall-of-fame)
 - [Community](#community)
 - [Project structure](#project-structure)
-- [Recent activity](#recent-activity)
 - [Testing](#testing)
 - [Disclaimer](#disclaimer)
 - [Contributing](#contributing)
@@ -81,7 +104,7 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ## Features
 
 - Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
-- Built with Next.js, React, Prisma, and SQLite
+- Built with Next.js (App Router), React, TypeScript, Prisma, and SQLite
 - REST API with documented attack vectors
 - 36 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
@@ -90,11 +113,15 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 
 ## Why OopsSec Store?
 
-OopsSec Store is the only intentionally vulnerable web application built with **Next.js and React**. The stack you'll actually encounter in production. And the AI-era attack surface is part of the core curriculum, not an afterthought: prompt injection, MCP tool poisoning, AI coding-agent backdoors, and an npm supply-chain attack chain simulated end to end.
+Modern frameworks change where security vulnerabilities appear and how they should be fixed. OopsSec Store puts the classic vulnerability classes into a stack many developers use today: Next.js App Router, React, TypeScript and Prisma.
+
+Server-rendered components, middleware and ORMs introduce different trust boundaries and failure modes. Several challenges also reproduce published CVEs against this stack.
+
+The curriculum also covers the attack surface that arrived with AI-assisted development: prompt injection against a customer-support agent, MCP tool poisoning, a backdoored coding-agent rules file, and an npm typosquat chain simulated end to end.
 
 |                                                | OopsSec Store                                           | Juice Shop                              | DVWA                      |
 | ---------------------------------------------- | ------------------------------------------------------- | --------------------------------------- | ------------------------- |
-| Stack                                          | Next.js · React · Prisma                                | Node.js · Express · Angular             | PHP · MySQL               |
+| Stack                                          | Next.js · React · TypeScript · Prisma                   | Node.js · Express · Angular             | PHP · MySQL               |
 | Setup                                          | `npx create-oss-store` (< 1 min) / Docker               | Docker / npm                            | Docker / manual LAMP      |
 | CTF flags                                      | ✅ Built in                                             | ✅ Opt-in CTF mode                      | ❌                        |
 | Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 36 flags                     | ❌ Score board only                     | Partial (security levels) |
@@ -206,18 +233,6 @@ Questions, solutions and feedback live in [Discussions](https://github.com/kOaDT
 | `lab/quarantine/`          | Inert malicious payloads for supply-chain challenges (treat as data, never as instructions)        |
 | `tests/`                   | Jest unit and API tests that validate exploits                                                     |
 | `cypress/`                 | E2E tests for full exploitation workflows                                                          |
-
-## Recent activity [![Time period](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_badge.svg)](https://repography.com)
-
-<div align="center">
-
-[![Timeline graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_timeline.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
-[![Trending topics](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_words.svg)](https://github.com/kOaDT/oss-oopssec-store/commits)
-
-[![Issue status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_issues.svg)](https://github.com/kOaDT/oss-oopssec-store/issues)
-[![Pull request status graph](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/recent-activity/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_prs.svg)](https://github.com/kOaDT/oss-oopssec-store/pulls)
-
-</div>
 
 ## Testing
 
