@@ -208,7 +208,7 @@ description: Exploiting the SQL injection vulnerability in OopsSec Store
 
 Write for someone learning. Explain your reasoning, not just the steps. Include screenshots or code snippets where they help. Test your walkthrough before submitting to make sure the steps actually work.
 
-For more on using AstroPaper, see the [AstroPaper documentation](https://astro-paper.pages.dev/posts/how-to-configure-astropaper-theme/).
+For more on writing posts with AstroPaper, see the [AstroPaper documentation](https://astro-paper.pages.dev/posts/adding-new-posts-in-astropaper-theme/).
 
 ## Roadmap
 
