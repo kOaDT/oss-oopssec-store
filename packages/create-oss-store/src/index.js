@@ -1,11 +1,13 @@
 import { spawn } from "child_process";
-import { writeFileSync, existsSync } from "fs";
+import { writeFileSync, existsSync, rmSync } from "fs";
+import { homedir } from "os";
 import { resolve, join } from "path";
 import chalk from "chalk";
 import ora from "ora";
 import degit from "degit";
 
 const REPO = "kOaDT/oss-oopssec-store";
+const DEGIT_CACHE = join(homedir(), ".degit", "github", ...REPO.split("/"));
 
 const ASCII_ART = [
   String.raw`   ____  ____ ____     ____                  ____            ____  _                  `,
@@ -38,12 +40,18 @@ export async function createOssStore(projectName) {
   // Clone repository
   const cloneSpinner = ora("Cloning repository...").start();
   try {
+    // degit reuses whatever sits at its cache path without validating it, so an
+    // interrupted download leaves a truncated tarball that fails every later run
+    // with "zlib: unexpected end of file". Always start from a clean cache.
+    rmSync(DEGIT_CACHE, { recursive: true, force: true });
     const emitter = degit(REPO, { cache: false, force: true });
     await emitter.clone(targetPath);
     cloneSpinner.succeed("Repository cloned");
   } catch (error) {
     cloneSpinner.fail("Failed to clone repository");
     console.error(chalk.red(error.message));
+    rmSync(DEGIT_CACHE, { recursive: true, force: true });
+    rmSync(targetPath, { recursive: true, force: true });
     process.exit(1);
   }
 
@@ -110,7 +118,7 @@ export async function createOssStore(projectName) {
     await runCommand("npm", ["run", "build"], targetPath);
     buildSpinner.succeed("Lab is operational");
   } catch (error) {
-    seedSpinner.fail("Failed to build lab");
+    buildSpinner.fail("Failed to build lab");
     console.error(chalk.red(error.message));
     process.exit(1);
   }
