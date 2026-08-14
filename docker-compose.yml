@@ -3,6 +3,10 @@ services:
     build: .
     ports:
       - "127.0.0.1:3000:3000"
+    extra_hosts:
+      # MCP calls are made server-side, so the MCP poisoning challenge needs a
+      # way to reach the attacker server the player runs on the host.
+      - "host.docker.internal:host-gateway"
     env_file:
       - path: .env.local
         required: false
