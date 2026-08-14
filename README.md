@@ -48,6 +48,12 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 # Then open http://localhost:3000 and start hacking
 ```
 
+<div align="center">
+
+<img src="public/oopssec-store-storefront.png" alt="OopsSec Store storefront" width="800">
+
+</div>
+
 ---
 
 ## Table of contents
@@ -181,10 +187,6 @@ Questions, solutions and feedback live in [Discussions](https://github.com/kOaDT
 | [Issues](https://github.com/kOaDT/oss-oopssec-store/issues)                                                           | Bugs in the lab itself, and only those                |
 
 ## Project structure
-
-<div align="center">
-
-</div>
 
 | Folder                     | Description                                                                                        |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
