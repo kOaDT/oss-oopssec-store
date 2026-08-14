@@ -160,19 +160,13 @@ Designed to complement a web security or application security course over 6–10
 
 Designed for competitive CTF events with 10–30 participants.
 
-**Setup:** Deploy one shared instance with Docker for the event, or have each participant run their own local instance.
+**Setup:** Each participant runs their own instance. Flag capture is stored per instance, not per user, so a shared instance would let the first solve reveal the flag to everyone — see the [Deployment FAQ](#can-multiple-students-share-one-instance).
 
 ```bash
-# Shared instance (for organizers)
-git clone https://github.com/kOaDT/oss-oopssec-store.git
-cd oss-oopssec-store
-docker compose up -d
-
-# Per-participant instance
 npx create-oss-store my-lab && cd my-lab && npm start
 ```
 
-**Scoring suggestion:**
+**Scoring:** Keep the scoreboard on your side (CTFd, a spreadsheet) — participants submit the `OSS{...}` values they capture, you award the points:
 
 - 🟢 Beginner challenges: 100 pts each
 - 🟡 Intermediate challenges: 250 pts each
@@ -210,9 +204,9 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 
 ### Can multiple students share one instance?
 
-It's not recommended. Each student should run their own local instance. Shared instances can cause flag collisions (a student capturing a flag that another already submitted) and pollute the database state.
+No. A capture is recorded against the flag itself, not against a user, so the state is global to the instance: as soon as one student submits a flag, the API starts returning that flag's value to everyone else, and the dashboard counts it as found for the whole group.
 
-Exception: for CTF events where competition is the goal, a shared instance is fine.
+This rules out shared instances for competitive CTF events too — the first solve hands the answer to every other participant. Always one instance per student.
 
 ### How do I reset the database between sessions?
 
