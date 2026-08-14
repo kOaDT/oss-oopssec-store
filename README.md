@@ -43,7 +43,7 @@ Hunt for flags, exploit vulnerabilities, and level up your security skills.
 npx create-oss-store my-ctf-lab && cd my-ctf-lab && npm start
 
 # Docker
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 
 # Then open http://localhost:3000 and start hacking
 ```
@@ -130,16 +130,18 @@ This creates the `.env` file, installs dependencies, sets up the SQLite database
 
 No Node.js required. Just [Docker](https://docs.docker.com/get-docker/).
 
+> `127.0.0.1:3000:3000` keeps the lab reachable only from your own machine. Use plain `-p 3000:3000` only on an isolated VM you control.
+
 #### From Docker Hub (quickest)
 
 ```bash
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
 To persist data across restarts:
 
 ```bash
-docker run -p 3000:3000 -v oss-data:/app/data leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 -v oss-data:/app/data leogra/oss-oopssec-store
 ```
 
 #### From source (Docker Compose)

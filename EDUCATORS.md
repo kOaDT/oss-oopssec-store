@@ -13,7 +13,7 @@ cd my-lab && npm start
 Or with Docker (no Node.js required):
 
 ```bash
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
 Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) as their entry point. It lays out all 36 challenges in a visual learning path, with chapters ordered from easy to hard, and recommends a self-guided approach (try the challenge first, then read the walkthrough).
@@ -205,7 +205,7 @@ Yes. Both the local Node.js and Docker setups are fully self-contained. No exter
 docker pull leogra/oss-oopssec-store
 
 # Students run locally with no internet
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
 ### Can multiple students share one instance?

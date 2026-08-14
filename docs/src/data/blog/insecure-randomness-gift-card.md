@@ -35,7 +35,7 @@ npm start
 Or with Docker (no Node.js required):
 
 ```bash
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
 The app runs at `http://localhost:3000`. Two demo accounts are relevant:
