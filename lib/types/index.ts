@@ -76,7 +76,8 @@ export type FlagDifficulty = "EASY" | "MEDIUM" | "HARD";
 
 export interface Flag {
   id: string;
-  flag: string;
+  /** `null` until the challenge is solved — see `GET /api/flags`. */
+  flag: string | null;
   slug: string;
   cve?: string | null;
   cwe?: string | null;

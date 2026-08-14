@@ -67,7 +67,8 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${flag.flag} - ${flag.cve || "Vulnerability"}`,
+    // Never the flag value: this page is meant to be read before solving.
+    title: `${formatSlug(flag.slug)} - ${flag.cve || "Vulnerability"}`,
     description: `Learn about the ${flag.slug} vulnerability`,
   };
 }
