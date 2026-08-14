@@ -31,7 +31,7 @@ npm start
 Or with Docker (no Node.js required):
 
 ```bash
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
 Head to `http://localhost:3000` and log in with the test credentials shown on the login page. Use Alice's account -- she's a regular customer.

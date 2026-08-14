@@ -27,7 +27,7 @@ The goal is simple: hunt for hidden flags, exploit vulnerabilities, and level up
 npx create-oss-store && cd oss-oopssec-store && npm start
 
 # With Docker
-docker run -p 3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
 Then open [http://localhost:3000](http://localhost:3000) and start hunting flags.
