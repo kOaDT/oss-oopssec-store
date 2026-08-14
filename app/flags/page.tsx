@@ -1,45 +1,55 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { getBaseUrl } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
 import type { Flag } from "@/lib/types";
 import FlagsClient from "./FlagsClient";
 
+// The board reflects solves as they happen. The `fetch(..., no-store)` this page
+// used to make was what opted it into dynamic rendering; reading Prisma directly
+// carries no such signal, so without this the board would be prerendered at
+// build time and frozen on an empty progress state.
+export const dynamic = "force-dynamic";
+
+/**
+ * One query, one source of truth.
+ *
+ * The board used to read the flag list over HTTP from its own API and the
+ * solved set from Prisma separately, then let the client decide with one and
+ * render the other — which could show a "Found" badge above an empty value.
+ * Joining `foundFlag` here means the presence of a value *is* the solved
+ * state, so the two can no longer disagree.
+ */
 async function getFlags(): Promise<Flag[]> {
   try {
-    const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/flags`, {
-      cache: "no-store",
+    const rows = await prisma.flag.findMany({
+      orderBy: { slug: "asc" },
+      select: {
+        id: true,
+        flag: true,
+        slug: true,
+        cve: true,
+        cwe: true,
+        owasp: true,
+        markdownFile: true,
+        walkthroughSlug: true,
+        category: true,
+        difficulty: true,
+        foundFlag: { select: { id: true } },
+      },
     });
 
-    if (!response.ok) {
-      return [];
-    }
-
-    return await response.json();
+    return rows.map(({ foundFlag, flag, ...rest }) => ({
+      ...rest,
+      flag: foundFlag ? flag : null,
+    }));
   } catch (error) {
     console.error("Error fetching flags:", error);
     return [];
   }
 }
 
-async function getFoundFlagIds(): Promise<string[]> {
-  try {
-    const found = await prisma.foundFlag.findMany({
-      select: { flagId: true },
-    });
-    return found.map((f) => f.flagId);
-  } catch (error) {
-    console.error("Error fetching found flags:", error);
-    return [];
-  }
-}
-
 export default async function Flags() {
-  const [flags, foundFlagIds] = await Promise.all([
-    getFlags(),
-    getFoundFlagIds(),
-  ]);
+  const flags = await getFlags();
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
@@ -85,7 +95,7 @@ export default async function Flags() {
               </div>
             </div>
 
-            <FlagsClient flags={flags} foundFlagIds={foundFlagIds} />
+            <FlagsClient flags={flags} />
           </div>
         </section>
       </main>
