@@ -13,7 +13,15 @@ import {
 
 interface FlagsClientProps {
   flags: Flag[];
-  foundFlagIds: string[];
+}
+
+/**
+ * A challenge is solved exactly when the server sent its value down: unsolved
+ * flags arrive as `null`. Deriving it here rather than from a second list is
+ * what keeps the "Found" badge and the value it sits above from disagreeing.
+ */
+function isSolved(flag: Flag): boolean {
+  return flag.flag !== null;
 }
 
 function LockIcon() {
@@ -316,22 +324,19 @@ function FlagCardList({ flag, found }: { flag: Flag; found: boolean }) {
   );
 }
 
-export default function FlagsClient({ flags, foundFlagIds }: FlagsClientProps) {
+export default function FlagsClient({ flags }: FlagsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<
     FlagDifficulty | "ALL"
   >("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const foundSet = useMemo(() => new Set(foundFlagIds), [foundFlagIds]);
-
   const filteredFlags = useMemo(() => {
     return flags.filter((flag) => {
-      const isFound = foundSet.has(flag.id);
       const query = searchQuery.toLowerCase();
       const matchesSearch =
         searchQuery === "" ||
-        (isFound && flag.flag.toLowerCase().includes(query)) ||
+        (flag.flag?.toLowerCase().includes(query) ?? false) ||
         flag.slug.toLowerCase().includes(query) ||
         (flag.cve?.toLowerCase().includes(query) ?? false) ||
         (flag.cwe?.toLowerCase().includes(query) ?? false) ||
@@ -342,7 +347,7 @@ export default function FlagsClient({ flags, foundFlagIds }: FlagsClientProps) {
 
       return matchesSearch && matchesDifficulty;
     });
-  }, [flags, searchQuery, difficultyFilter, foundSet]);
+  }, [flags, searchQuery, difficultyFilter]);
 
   const stats = useMemo(() => {
     const byDifficulty = {
@@ -464,21 +469,13 @@ export default function FlagsClient({ flags, foundFlagIds }: FlagsClientProps) {
       ) : viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredFlags.map((flag) => (
-            <FlagCardGrid
-              key={flag.id}
-              flag={flag}
-              found={foundSet.has(flag.id)}
-            />
+            <FlagCardGrid key={flag.id} flag={flag} found={isSolved(flag)} />
           ))}
         </div>
       ) : (
         <div className="space-y-3">
           {filteredFlags.map((flag) => (
-            <FlagCardList
-              key={flag.id}
-              flag={flag}
-              found={foundSet.has(flag.id)}
-            />
+            <FlagCardList key={flag.id} flag={flag} found={isSolved(flag)} />
           ))}
         </div>
       )}
