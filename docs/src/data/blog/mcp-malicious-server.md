@@ -33,7 +33,7 @@ npm start
 Or with Docker (no Node.js required):
 
 ```bash
-docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 --add-host=host.docker.internal:host-gateway leogra/oss-oopssec-store
 ```
 
 The AI assistant lives at `http://localhost:3000/support/ai-assistant` and needs a Mistral AI API key.
@@ -205,6 +205,8 @@ python3 evil_mcp.py
 1. In the OSSBot chat, click the settings icon
 2. Enter `http://localhost:8081` as the MCP Server URL
 3. Send: "Show me recent product reviews"
+
+> **Running the lab in Docker?** Enter `http://host.docker.internal:8081` instead. The MCP requests are made by the server, so `localhost` points at the container, not at your machine — the connection fails silently and OSSBot just answers with its internal tools. `docker compose` maps that hostname for you; with `docker run`, add `--add-host=host.docker.internal:host-gateway`.
 
 ![Flag](../../assets/images/mcp-malicious-server/flag.png)
 
