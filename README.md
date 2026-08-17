@@ -7,11 +7,15 @@
 <div align="center">
 
 <p>
-<b>Security training for the apps you actually ship.</b><br>
+<b>Security training for the apps you actually ship.</b>
+</p>
+<p>
+36 challenges across <b>web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP</b>.
+</p>
+<p>
 Break a deliberately vulnerable e-commerce app built on <b>Next.js, React, TypeScript and Prisma</b>.<br>
 Find the bugs. Exploit them. Understand why they work.
 </p>
-<p>36 challenges across <b>web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP</b>.</p>
 
 <p>
 <a href="https://hub.docker.com/r/leogra/oss-oopssec-store">Docker Hub</a> ·
@@ -22,10 +26,13 @@ Find the bugs. Exploit them. Understand why they work.
 <a href="https://github.com/users/kOaDT/projects/3/views/6">Good first issues</a>
 </p>
 
+[![OWASP VWAD](https://img.shields.io/badge/OWASP-VWAD-000000?style=flat-square&logo=owasp&logoColor=white)](https://vwad.owasp.org/app/oopssec-store/)
+[![TryHackMe room](https://img.shields.io/badge/TryHackMe-The_Summer_Audit-212C42?style=flat-square&logo=tryhackme&logoColor=white)](https://tryhackme.com/jr/oopssecstorethesummeraudit)
+![Intentionally Vulnerable](https://img.shields.io/badge/⚠️_Intentionally-Vulnerable-red?style=flat-square)
+<br>
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/pulls)
 [![Good first issues](https://img.shields.io/badge/Good_first-issues-7057ff?style=flat-square)](https://github.com/users/kOaDT/projects/3/views/6)
-![Intentionally Vulnerable](https://img.shields.io/badge/⚠️_Intentionally-Vulnerable-red?style=flat-square)
 <br>
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/network)
@@ -55,21 +62,21 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 <tr>
 <td width="50%" align="center">
 <a href="public/oopssec-store-storefront-0.png"><img src="public/oopssec-store-storefront-0.png" alt="OopsSec Store storefront" width="100%"></a>
-<br><sub><b>Storefront</b> — the e-commerce app you are attacking</sub>
+<br><sub><b>Storefront</b> · the e-commerce app you are attacking</sub>
 </td>
 <td width="50%" align="center">
 <a href="public/oopssec-store-storefront-1.png"><img src="public/oopssec-store-storefront-1.png" alt="Player dashboard tracking captured flags" width="100%"></a>
-<br><sub><b>Player dashboard</b> — progress, difficulty and category breakdown</sub>
+<br><sub><b>Player dashboard</b> · progress, difficulty and category breakdown</sub>
 </td>
 </tr>
 <tr>
 <td width="50%" align="center">
 <a href="public/oopssec-store-storefront-2.png"><img src="public/oopssec-store-storefront-2.png" alt="OSSBot AI customer support assistant" width="100%"></a>
-<br><sub><b>OSSBot</b> — the AI support assistant you prompt-inject</sub>
+<br><sub><b>OSSBot</b> · the AI support assistant you prompt-inject</sub>
 </td>
 <td width="50%" align="center">
-<a href="public/oopssec-store-storefront-3.png"><img src="public/oopssec-store-storefront-3.png" alt="Admin dashboard with order management" width="100%"></a>
-<br><sub><b>Admin dashboard</b> — the privilege escalation target</sub>
+<a href="public/oopssec-store-storefront-3.png"><img src="public/oopssec-store-storefront-3.png" alt="Challenge roadmap across 11 chapters" width="100%"></a>
+<br><sub><b>Roadmap</b> · the bugs that ship in production code</sub>
 </td>
 </tr>
 </table>
@@ -77,6 +84,58 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 <sub>Click any screenshot to view it full size.</sub>
 
 </div>
+
+---
+
+## Getting started
+
+<table>
+<tr>
+<td width="56" align="center" valign="top"><img src="https://img.shields.io/badge/1-15803d?style=for-the-badge" alt="Step 1"></td>
+<td valign="top">
+<b>Start the lab</b><br>
+<code>npx create-oss-store my-ctf-lab &amp;&amp; cd my-ctf-lab &amp;&amp; npm start</code><br>
+<sub>Or <a href="#docker">run it with Docker</a>. The store comes up on <a href="http://localhost:3000">localhost:3000</a>.</sub>
+</td>
+</tr>
+<tr>
+<td width="56" align="center" valign="top"><img src="https://img.shields.io/badge/2-15803d?style=for-the-badge" alt="Step 2"></td>
+<td valign="top">
+<b>Go after challenge #1</b><br>
+<a href="http://localhost:3000/vulnerabilities/public-env-variable">Public env variable leak</a>: a payment secret that Next.js bakes into the client bundle.<br>
+<sub>Easy · 15–20 min · nothing but your browser devtools.</sub>
+</td>
+</tr>
+<tr>
+<td width="56" align="center" valign="top"><img src="https://img.shields.io/badge/3-15803d?style=for-the-badge" alt="Step 3"></td>
+<td valign="top">
+<b>Stuck? Read the walkthrough</b><br>
+Every challenge has one, from vulnerability to exploit to fix.<br>
+<sub>The first: <a href="https://koadt.github.io/oss-oopssec-store/posts/next-public-env-variable-leak/">Reading Secrets From the Browser: The NEXT_PUBLIC_ Trap in Next.js</a>.</sub>
+</td>
+</tr>
+<tr>
+<td width="56" align="center" valign="top"><img src="https://img.shields.io/badge/4-15803d?style=for-the-badge" alt="Step 4"></td>
+<td valign="top">
+<b>Validate the flag</b><br>
+Paste <code>OSS{...}</code> into the flag checker, the floating widget on every page.<br>
+<sub>Your <a href="http://localhost:3000/player-dashboard">player dashboard</a> tracks what is left.</sub>
+</td>
+</tr>
+<tr>
+<td width="56" align="center" valign="top"><img src="https://img.shields.io/badge/5-15803d?style=for-the-badge" alt="Step 5"></td>
+<td valign="top">
+<b>Pick the next one</b><br>
+The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orders every challenge across chapters: difficulty, time estimate, prerequisites.<br>
+<sub>Take the next card, then back to step 2. ↻</sub>
+</td>
+</tr>
+</table>
+
+> [!TIP]
+> All captured? [Join the Hall of Fame](#hall-of-fame), star the repo, and post your route in [Show your solve](https://github.com/kOaDT/oss-oopssec-store/discussions/categories/show-your-solve).
+
+<sub>New to offensive security? The <a href="https://tryhackme.com/jr/oopssecstorethesummeraudit">TryHackMe room</a> wraps the first flags in a guided narrative.</sub>
 
 ---
 
@@ -108,7 +167,7 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 - REST API with documented attack vectors
 - 36 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
-- A guided [TryHackMe room](https://tryhackme.com/jr/oopssecstorethesummeraudit) — _The Summer Audit_, 8 tasks and 7 flags, as a narrative on-ramp for newcomers
+- A guided [TryHackMe room](https://tryhackme.com/jr/oopssecstorethesummeraudit): _The Summer Audit_, 8 tasks and 7 flags, as a narrative on-ramp for newcomers
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
 
 ## Why OopsSec Store?
@@ -129,7 +188,7 @@ The curriculum also covers the attack surface that arrived with AI-assisted deve
 | LLM prompt injection                           | ✅ Plug in a free API key                               | ✅ v20+, bring & configure your own LLM | ❌                        |
 | MCP tool poisoning                             | ✅                                                      | ❌                                      | ❌                        |
 | AI coding-agent backdoor (poisoned rules file) | ✅                                                      | ❌                                      | ❌                        |
-| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor | Partial — identification only           | ❌                        |
+| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor | Partial (identification only)           | ❌                        |
 | Challenges built on real CVEs                  | ✅                                                      | ❌                                      | ❌                        |
 | Hall of Fame for players                       | ✅                                                      | ❌                                      | ❌                        |
 
@@ -223,7 +282,7 @@ Questions, solutions and feedback live in [Discussions](https://github.com/kOaDT
 | `app/vulnerabilities/`     | Pages documenting each vulnerability                                                               |
 | `content/vulnerabilities/` | Markdown descriptions of vulnerabilities and attack vectors                                        |
 | `lib/`                     | Shared utilities: DB client, auth, API helpers, types                                              |
-| `prisma/`                  | Database schema, seed script, and `flags.ts` — the CTF flags and their hints                       |
+| `prisma/`                  | Database schema, seed script, and `flags.ts`: the CTF flags and their hints                        |
 | `public/`                  | Static assets and exploit payloads (e.g., CSRF demo)                                               |
 | `hooks/`                   | Custom React hooks (authentication, etc.)                                                          |
 | `scripts/`                 | Setup and automation scripts                                                                       |
