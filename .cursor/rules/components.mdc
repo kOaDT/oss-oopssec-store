@@ -21,6 +21,7 @@ globs:
 - Pages: `page.tsx`
 - Client components: `*Client.tsx` (e.g., `CartClient.tsx`)
 - Shared components: PascalCase (e.g., `ProductCard.tsx`)
+- Props: `interface XxxProps` — no `T` or `I` prefix
 
 ## Styling
 
