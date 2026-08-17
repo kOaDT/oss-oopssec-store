@@ -1,4 +1,15 @@
+"use client";
+
+import { useState, FormEvent } from "react";
+
 export default function Newsletter() {
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubscribed(true);
+  };
+
   return (
     <section className="bg-gradient-to-r from-primary-500 to-secondary-500 py-16">
       <div className="container mx-auto px-4">
@@ -10,7 +21,10 @@ export default function Newsletter() {
             Subscribe to our newsletter and get exclusive offers, new product
             announcements, and special discounts delivered to your inbox.
           </p>
-          <form className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4 sm:flex-row sm:justify-center"
+          >
             <input
               type="email"
               placeholder="Enter your email"
@@ -24,6 +38,13 @@ export default function Newsletter() {
               Subscribe
             </button>
           </form>
+          <div role="status" aria-live="polite">
+            {subscribed && (
+              <p className="mt-4 text-base font-medium text-white">
+                Thanks for subscribing.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
