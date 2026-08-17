@@ -98,7 +98,7 @@ npm run docs:build           # Build Astro site
 - **Language:** All code, comments, documentation in English
 - **Comments:** Avoid unless code is not self-explanatory
 - **DRY:** Don't Repeat Yourself - avoid code duplication
-- **TypeScript:** Strict mode, prefer type inference, use Prisma-generated types from `@/lib/generated/prisma`. Object shapes use `interface`; `type` only for unions, intersections, and derived types.
+- **TypeScript:** Strict mode, prefer type inference, use Prisma-generated types from `@/lib/generated/prisma`. Prefer `interface` for object shapes; use `type` for unions, intersections, and derived types.
 
 ### API Routes
 
