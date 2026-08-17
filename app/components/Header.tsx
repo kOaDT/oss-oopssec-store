@@ -154,7 +154,7 @@ export default function Header() {
           }
           onClick={closeIfNavigating}
         >
-          <MainNavItems />
+          {isMenuOpen && <MainNavItems />}
         </div>
       </nav>
     </header>
