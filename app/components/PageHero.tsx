@@ -1,9 +1,9 @@
-type TPageHeroProps = {
+interface PageHeroProps {
   title: string;
   subtitle: string;
-};
+}
 
-export default function PageHero({ title, subtitle }: TPageHeroProps) {
+export default function PageHero({ title, subtitle }: PageHeroProps) {
   return (
     <section className="border-b border-slate-200 bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 dark:border-slate-800">
       <div className="container mx-auto px-4 py-16 md:py-24">
