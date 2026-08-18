@@ -87,6 +87,11 @@ export default async function HallOfFame() {
                     </code>{" "}
                     file.
                   </p>
+                  <p className="mb-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                    Once your entry is merged, a badge is generated for you —
+                    embed it in a README, a portfolio, or a write-up straight
+                    from your card above.
+                  </p>
                   <div className="flex flex-wrap justify-center gap-4 md:justify-start">
                     <a
                       href={`${GITHUB_REPO}/blob/main/hall-of-fame/data.json`}

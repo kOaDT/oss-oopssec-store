@@ -210,6 +210,35 @@ Write for someone learning. Explain your reasoning, not just the steps. Include 
 
 For more on writing posts with AstroPaper, see the [AstroPaper documentation](https://astro-paper.pages.dev/posts/adding-new-posts-in-astropaper-theme/).
 
+### Joining the Hall of Fame
+
+Captured every flag? Add yourself to `hall-of-fame/data.json` and open a pull
+request. Merging it publishes your entry on the `/hall-of-fame` page and builds
+your badge — the merged pull request is the whole of the verification, so the
+schema is enforced strictly and a malformed entry **fails the docs build on your
+pull request**:
+
+```json
+{
+  "username": "kOaDT",
+  "avatarUrl": "https://avatars.githubusercontent.com/u/17499022?v=4",
+  "githubUrl": "https://github.com/kOaDT",
+  "date": "2026-01-16",
+  "country": "France"
+}
+```
+
+| Field       | Rule                                                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `username`  | Your GitHub username, as GitHub itself allows it: alphanumerics with single inner hyphens, 39 characters max. It also has to be unique case-insensitively, since it names your badge files. |
+| `avatarUrl` | Must be `https` on `avatars.githubusercontent.com` — the docs build fetches it on a runner, so no other host is accepted. Copy it from your GitHub profile picture.                         |
+| `githubUrl` | Must be `https://github.com/<you>`.                                                                                                                                                         |
+| `date`      | The day you finished, `YYYY-MM-DD`. It is read as UTC and printed on your badge.                                                                                                            |
+| `country`   | Optional, free text.                                                                                                                                                                        |
+
+Run `npm run test:unit` to check your entry against the same validation the
+build applies.
+
 ## Roadmap
 
 Planned features and ideas live in the [Roadmap project](https://github.com/users/kOaDT/projects/3).

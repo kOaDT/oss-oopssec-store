@@ -564,7 +564,8 @@ export default function PlayerDashboardClient() {
               </h3>
               <p className="mb-6 font-mono text-sm text-slate-400">
                 You have successfully exploited all vulnerabilities. Submit a PR
-                to add your name to the Hall of Fame.
+                to add your name to the Hall of Fame — once it is merged, your
+                embeddable badge is generated with it.
               </p>
               <div className="flex flex-wrap justify-center gap-4 md:justify-start">
                 <a
