@@ -13,15 +13,32 @@ import {
 
 const WIDTH = 1200;
 const HEIGHT = 630;
+const PADDING = 60;
 const AVATAR_SIZE = 120;
+const AVATAR_GAP = 32;
 const COLUMNS = 3;
 
-/** The single character the monogram fallback draws. Kept beside the fallback
- * itself so the font subset and the render can never drift apart: Google Fonts
- * subsets on the exact text it is handed, and a glyph left out of that string
- * renders as a blank box rather than failing the build. */
-export function monogram(username) {
-  return username.slice(0, 1).toUpperCase();
+/** The size the name is set at when it has the room for it. */
+const NAME_FONT_SIZE = 52;
+
+/** Every glyph of a monospaced face advances the same fraction of the font
+ * size, so the width a username will take is known before satori lays it out.
+ * The figure is IBM Plex Mono's own advance, read off its `unitsPerEm`. */
+const MONO_ADVANCE = 0.6;
+
+/** What is left of the row once the avatar and the gap beside it are paid for. */
+const NAME_WIDTH = WIDTH - PADDING * 2 - AVATAR_SIZE - AVATAR_GAP;
+
+/**
+ * `USERNAME_PATTERN` in `getHallOfFame.ts` accepts up to 39 characters, which
+ * is far more than fits at the full size — and satori has no `text-overflow`,
+ * so an oversized name silently runs off the card and squeezes the avatar to a
+ * sliver on the way out. Shrinking the name is the one degradation that keeps
+ * the whole username readable, so it takes the hit rather than the avatar.
+ */
+function nameFontSize(username) {
+  const fits = Math.floor(NAME_WIDTH / (username.length * MONO_ADVANCE));
+  return Math.min(NAME_FONT_SIZE, fits);
 }
 
 function avatarNode(avatar, username) {
@@ -30,6 +47,7 @@ function avatarNode(avatar, username) {
     height: AVATAR_SIZE,
     borderRadius: "50%",
     border: `4px solid ${PALETTE.accent}`,
+    flexShrink: 0,
   };
 
   if (avatar) {
@@ -49,7 +67,7 @@ function avatarNode(avatar, username) {
         fontSize: 56,
         fontWeight: 700,
       },
-      children: monogram(username),
+      children: username.slice(0, 1).toUpperCase(),
     },
   };
 }
@@ -145,7 +163,7 @@ export default async function cardBadge(entry, { avatar, formattedDate }) {
           justifyContent: "space-between",
           width: "100%",
           height: "100%",
-          padding: 60,
+          padding: PADDING,
           background: PALETTE.ink,
           backgroundImage:
             "radial-gradient(circle at 88% 8%, rgba(251, 191, 36, 0.20), transparent 55%)",
@@ -175,12 +193,21 @@ export default async function cardBadge(entry, { avatar, formattedDate }) {
                 {
                   type: "div",
                   props: {
-                    style: { display: "flex", alignItems: "center", gap: 32 },
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      gap: AVATAR_GAP,
+                    },
                     children: [
                       avatarNode(avatar, entry.username),
                       stack(
                         [
-                          line(entry.username, 52, PALETTE.text, 700),
+                          line(
+                            entry.username,
+                            nameFontSize(entry.username),
+                            PALETTE.text,
+                            700
+                          ),
                           line(claim, 30, PALETTE.accent, 700),
                           line(formattedDate, 22, PALETTE.muted, 400),
                         ],
@@ -241,18 +268,7 @@ export default async function cardBadge(entry, { avatar, formattedDate }) {
       width: WIDTH,
       height: HEIGHT,
       embedFont: true,
-      fonts: await loadGoogleFonts(
-        eyebrow +
-          entry.username +
-          monogram(entry.username) +
-          claim +
-          formattedDate +
-          CURRICULUM_LABEL +
-          chapters.join("") +
-          PROJECT_NAME +
-          host +
-          (entry.country ?? "")
-      ),
+      fonts: await loadGoogleFonts(),
     }
   );
 }
