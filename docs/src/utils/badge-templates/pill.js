@@ -64,7 +64,7 @@ export default async function pillBadge(entry) {
     {
       height: HEIGHT,
       embedFont: true,
-      fonts: await loadGoogleFonts(PROJECT_SHORT + value),
+      fonts: await loadGoogleFonts(),
     }
   );
 }
