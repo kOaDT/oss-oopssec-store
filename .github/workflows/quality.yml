@@ -63,7 +63,8 @@ jobs:
         run: npm run format:check
 
       # Mirrors the deploy-docs build so a broken walkthroughSlug (which fails
-      # the challenges.json route) surfaces on the PR, not after merge.
+      # the challenges.json route) or a malformed Hall of Fame entry (which
+      # fails the badge routes) surfaces on the PR, not after merge.
       - name: Build Astro site
         run: npm run build
 

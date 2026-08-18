@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - "docs/**"
+      # Hall of Fame badges are rendered into the docs site at build time, so a
+      # merged entry has to trigger a deploy of its own to ever show up.
+      - "hall-of-fame/**"
   workflow_dispatch:
 
 permissions:

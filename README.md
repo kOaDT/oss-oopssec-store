@@ -259,6 +259,24 @@ The database initializes on first start. Data persists across restarts via Docke
 
 Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame/data.json). Add your entry to `hall-of-fame/data.json` and your profile will show up on the `/hall-of-fame` page in the app.
 
+Once your entry is merged, a badge is generated for you and served from the docs site:
+
+[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/koadt.svg)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
+
+```markdown
+[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/<your-username>.svg)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
+```
+
+A 1200x630 social card lives at the same path with a `.png` extension.
+
+[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/koadt.png)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
+
+```markdown
+[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/<your-username>.png)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
+```
+
+Both are copy-paste ready from your card on the `/hall-of-fame` page, in Markdown, HTML or as a bare URL.
+
 ## Community
 
 Questions, solutions and feedback live in [Discussions](https://github.com/kOaDT/oss-oopssec-store/discussions).
