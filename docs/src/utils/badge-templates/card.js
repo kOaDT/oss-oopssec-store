@@ -111,7 +111,7 @@ function chapterCell(title) {
               width: 8,
               height: 8,
               borderRadius: 2,
-              background: PALETTE.chapter,
+              background: PALETTE.product,
               flexShrink: 0,
             },
           },

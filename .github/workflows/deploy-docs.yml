@@ -8,12 +8,12 @@ on:
       # Hall of Fame badges are rendered into the docs site at build time, so a
       # merged entry has to trigger a deploy of its own to ever show up.
       - "hall-of-fame/**"
+  schedule:
+    - cron: "0 5 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: "pages"
@@ -23,6 +23,8 @@ jobs:
   build:
     name: Build Documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: docs
@@ -49,6 +51,10 @@ jobs:
 
       - name: Build Astro site
         run: npm run build
+        env:
+          # Only lifts the rate limit: everything the stats card reads is public.
+          # Without it the build falls back to the curriculum figures alone.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -59,6 +65,9 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
