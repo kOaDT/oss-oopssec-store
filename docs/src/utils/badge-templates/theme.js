@@ -10,9 +10,11 @@ export const PALETTE = {
    * white: white on gold sits at 1.7:1, well under AA. */
   accent: "#fbbf24",
   /** The emerald of the docs dark accent, cousin of the app's `primary-500`.
-   * Reserved for the chapter bullets, which is what ties the card back to the
-   * product without competing with the gold. */
-  chapter: "#10b981",
+   * The product colour: it marks what the curriculum itself contributes — the
+   * chapter bullets on the badge, the difficulty ramp and the sparkline on the
+   * stats card — which ties an image back to the project without competing
+   * with the gold. */
+  product: "#10b981",
   text: "#ffffff",
   muted: "#94a3b8",
   line: "#1e293b",

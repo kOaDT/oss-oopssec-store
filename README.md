@@ -153,7 +153,7 @@ The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orde
 - [Disclaimer](#disclaimer)
 - [Contributing](#contributing)
 - [Educator Kit](#-using-oopssec-store-in-a-course-or-ctf)
-- [Top contributors](#top-contributors)
+- [Project stats](#project-stats)
 
 ---
 
@@ -362,11 +362,13 @@ For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oops
 
 Check out the [Educator Kit](EDUCATORS.md) - a ready-to-use guide with OWASP coverage grids, syllabus templates, deployment FAQ, and a student report template. Building your own tooling around the curriculum? The whole thing is published as a machine-readable feed at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json), regenerated on every docs deploy.
 
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
+## Project stats
 
 <div align="center">
 
-[![Top contributors](https://images.repography.com/103508692/kOaDT/oss-oopssec-store/top-contributors/Q7MububoYUVlm99MQWYW12szb_gGlehkuutaTn9WlA4/8o02KXC0HvWi_KfBHD6iD-qSBHSu0s9Y_rns1fvWSjg_table.svg)](https://github.com/kOaDT/oss-oopssec-store/graphs/contributors)
+[![OopsSec Store project stats](https://koadt.github.io/oss-oopssec-store/stats.svg)](https://koadt.github.io/oss-oopssec-store/roadmap)
+
+<sub>Rendered from the curriculum itself and the GitHub API, refreshed daily. Want your avatar on that row? Grab a <a href="https://github.com/users/kOaDT/projects/3/views/6">good first issue</a>.</sub>
 
 </div>
 
