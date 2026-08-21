@@ -34,7 +34,7 @@ Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/r
 
 ## Why OopsSec Store?
 
-OopsSec Store is the only intentionally vulnerable web application built with **Next.js and React**: the stack your students will actually encounter in production. It also treats the AI-era attack surface — prompt injection, MCP tool poisoning, AI coding-agent backdoors, supply-chain attack chains — as first-class challenges, not add-ons.
+An intentionally vulnerable web application built with **Next.js and React**: the stack your students will actually encounter in production. It also treats the AI-era attack surface — prompt injection, MCP tool poisoning, AI coding-agent backdoors, supply-chain attack chains — as first-class challenges, not add-ons.
 
 For a feature-by-feature comparison with Juice Shop and DVWA, see the [comparison table in the README](https://github.com/kOaDT/oss-oopssec-store#why-oopssec-store).
 
