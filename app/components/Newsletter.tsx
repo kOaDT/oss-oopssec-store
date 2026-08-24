@@ -28,6 +28,7 @@ export default function Newsletter() {
             <input
               type="email"
               placeholder="Enter your email"
+              aria-label="Email address"
               className="w-full flex-1 rounded-full border-0 bg-white px-6 py-4 text-base text-slate-900 placeholder-slate-400 shadow-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-500 sm:max-w-md"
               required
             />
