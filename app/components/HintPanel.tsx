@@ -103,6 +103,7 @@ export default function HintPanel({ initialState }: HintPanelProps) {
               </h2>
               <button
                 onClick={() => setIsOpen(false)}
+                aria-label="Close"
                 className="cursor-pointer text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <svg
