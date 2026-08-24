@@ -316,6 +316,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
               </h2>
               <button
                 onClick={closeChecker}
+                aria-label="Close"
                 className="cursor-pointer text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
                 disabled={isVerifying}
               >
