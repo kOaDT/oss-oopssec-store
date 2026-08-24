@@ -2,6 +2,7 @@ import type { FlagCategory } from "@/lib/types";
 
 const TITLE_OVERRIDES: Record<string, string> = {
   CVE: "CVE",
+  NPM: "npm",
   SQL: "SQL",
   XSS: "XSS",
   CSRF: "CSRF",
