@@ -173,6 +173,14 @@ export default function Footer() {
               <Link href="/terms" className={LINK_CLASS}>
                 Terms of Service
               </Link>
+              <a
+                href={`${GITHUB_REPO}/blob/main/LICENSE`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={LINK_CLASS}
+              >
+                MIT License
+              </a>
             </div>
           </div>
         </div>
