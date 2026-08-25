@@ -7,7 +7,6 @@ import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
 import { GITHUB_REPO } from "@/lib/config";
 import { formatSlug } from "@/lib/format";
 
-
 const INITIAL_ANIMATION_DURATION = 10000;
 
 interface FlagCheckerProps {
@@ -237,8 +236,8 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             style={
               isInitialAnimation
                 ? {
-                    animation: "button-glow 2s ease-in-out infinite",
-                  }
+                  animation: "button-glow 2s ease-in-out infinite",
+                }
                 : undefined
             }
             aria-label="Check flag"
@@ -301,11 +300,10 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
           >
             <div className="mb-4 flex items-center justify-between">
               <h2
-                className={`text-xl font-bold ${
-                  allFlagsFound
+                className={`text-xl font-bold ${allFlagsFound
                     ? "text-yellow-600 dark:text-yellow-400"
                     : "text-slate-900 dark:text-slate-100"
-                }`}
+                  }`}
               >
                 {allFlagsFound ? "All Flags Found" : "Verify Flag"}
               </h2>
@@ -354,15 +352,14 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
 
             {message && (
               <div
-                className={`mb-4 rounded-lg p-3 text-sm ${
-                  message.includes("all flags")
+                className={`mb-4 rounded-lg p-3 text-sm ${message.includes("all flags")
                     ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
                     : message.includes("Congrats")
                       ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                       : message.includes("already found")
                         ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
                         : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                }`}
+                  }`}
               >
                 {message}
               </div>
@@ -459,11 +456,10 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
 
             <div className="flex items-center justify-between">
               <p
-                className={`text-sm ${
-                  allFlagsFound
+                className={`text-sm ${allFlagsFound
                     ? "text-yellow-600 dark:text-yellow-400"
                     : "text-slate-600 dark:text-slate-400"
-                }`}
+                  }`}
               >
                 {foundFlags.length}/{totalFlags} flags found
                 {allFlagsFound && " ✓"}
@@ -472,11 +468,10 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                 <button
                   onClick={handleVerify}
                   disabled={isVerifying || !flagInput.trim()}
-                  className={`rounded-lg cursor-pointer bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600 ${
-                    highlightVerify
+                  className={`rounded-lg cursor-pointer bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-500 dark:hover:bg-primary-600 ${highlightVerify
                       ? "ring-2 ring-primary-400 ring-offset-2"
                       : ""
-                  }`}
+                    }`}
                 >
                   {isVerifying ? "Verifying..." : "Verify"}
                 </button>

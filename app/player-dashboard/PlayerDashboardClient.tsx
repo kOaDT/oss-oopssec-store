@@ -59,8 +59,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: "OTHER",
 };
 
-
-
 function formatDuration(ms: number): string {
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -390,7 +388,7 @@ export default function PlayerDashboardClient() {
                 {foundFlags.map((flag, index) => {
                   const timeToFind = initializedAt
                     ? new Date(flag.foundAt).getTime() -
-                      new Date(initializedAt).getTime()
+                    new Date(initializedAt).getTime()
                     : 0;
                   const difficultyConfig =
                     DIFFICULTY_CONFIG[flag.difficulty] ||
