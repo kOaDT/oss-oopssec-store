@@ -5,13 +5,8 @@ import Link from "next/link";
 import confetti from "canvas-confetti";
 import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
 import { GITHUB_REPO } from "@/lib/config";
+import { formatSlug } from "@/lib/format";
 
-function formatSlugToTitle(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
 
 const INITIAL_ANIMATION_DURATION = 10000;
 
@@ -403,7 +398,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                           />
                         </svg>
                         <span className="truncate">
-                          {formatSlugToTitle(slug)}
+                          {formatSlug(slug)}
                         </span>
                       </Link>
                     </li>

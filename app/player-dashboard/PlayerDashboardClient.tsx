@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { DOCS_BASE_URL, GITHUB_REPO } from "@/lib/config";
-import { getCveUrl, getCweUrl, getOwaspUrl } from "@/lib/format";
+import { formatSlug, getCveUrl, getCweUrl, getOwaspUrl } from "@/lib/format";
 
 interface FoundFlag {
   slug: string;
@@ -59,12 +59,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: "OTHER",
 };
 
-function formatSlug(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+
 
 function formatDuration(ms: number): string {
   const seconds = Math.floor(ms / 1000);
