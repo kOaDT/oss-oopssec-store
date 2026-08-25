@@ -2,13 +2,7 @@
 
 import { useState, useCallback } from "react";
 import type { HintState, RevealedHint } from "@/lib/types";
-
-function formatSlugToTitle(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { formatSlug } from "@/lib/format";
 
 const DIFFICULTY_COLORS = {
   EASY: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
@@ -130,7 +124,7 @@ export default function HintPanel({ initialState }: HintPanelProps) {
               <>
                 <div className="mb-4 flex items-center gap-2">
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {formatSlugToTitle(hintState.activeFlag.slug)}
+                    {formatSlug(hintState.activeFlag.slug)}
                   </span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${DIFFICULTY_COLORS[hintState.activeFlag.difficulty]}`}
