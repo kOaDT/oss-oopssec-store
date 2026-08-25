@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { HintState, RevealedHint } from "@/lib/types";
 import { formatSlug } from "@/lib/format";
 
+
 const DIFFICULTY_COLORS = {
   EASY: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   MEDIUM:
@@ -147,10 +148,11 @@ export default function HintPanel({ initialState }: HintPanelProps) {
                             {[1, 2, 3].map((i) => (
                               <div
                                 key={i}
-                                className={`h-1.5 w-3 rounded-full ${i <= hint.level
+                                className={`h-1.5 w-3 rounded-full ${
+                                  i <= hint.level
                                     ? "bg-amber-400 dark:bg-amber-500"
                                     : "bg-amber-200 dark:bg-amber-800"
-                                  }`}
+                                }`}
                               />
                             ))}
                           </div>
