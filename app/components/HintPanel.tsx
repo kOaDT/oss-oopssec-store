@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import type { HintState, RevealedHint } from "@/lib/types";
 import { formatSlug } from "@/lib/format";
 
-
 const DIFFICULTY_COLORS = {
   EASY: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   MEDIUM:

@@ -7,7 +7,6 @@ import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
 import { GITHUB_REPO } from "@/lib/config";
 import { formatSlug } from "@/lib/format";
 
-
 const INITIAL_ANIMATION_DURATION = 10000;
 
 interface FlagCheckerProps {
@@ -397,9 +396,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
-                        <span className="truncate">
-                          {formatSlug(slug)}
-                        </span>
+                        <span className="truncate">{formatSlug(slug)}</span>
                       </Link>
                     </li>
                   ))}
