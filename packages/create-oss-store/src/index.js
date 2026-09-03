@@ -49,10 +49,8 @@ export async function createOssStore(projectName) {
     cloneSpinner.succeed("Repository cloned");
   } catch (error) {
     cloneSpinner.fail("Failed to clone repository");
-    console.error(chalk.red(error.message));
     rmSync(DEGIT_CACHE, { recursive: true, force: true });
-    rmSync(targetPath, { recursive: true, force: true });
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Create .env file
@@ -64,8 +62,7 @@ export async function createOssStore(projectName) {
     envSpinner.succeed(".env file created");
   } catch (error) {
     envSpinner.fail("Failed to create .env file");
-    console.error(chalk.red(error.message));
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Install dependencies
@@ -75,8 +72,7 @@ export async function createOssStore(projectName) {
     installSpinner.succeed("Dependencies installed");
   } catch (error) {
     installSpinner.fail("Failed to install dependencies");
-    console.error(chalk.red(error.message));
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Generate Prisma client
@@ -86,8 +82,7 @@ export async function createOssStore(projectName) {
     prismaSpinner.succeed("Prisma client generated");
   } catch (error) {
     prismaSpinner.fail("Failed to generate Prisma client");
-    console.error(chalk.red(error.message));
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Push database schema
@@ -97,8 +92,7 @@ export async function createOssStore(projectName) {
     dbSpinner.succeed("Database schema pushed");
   } catch (error) {
     dbSpinner.fail("Failed to push database schema");
-    console.error(chalk.red(error.message));
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Seed database
@@ -108,8 +102,7 @@ export async function createOssStore(projectName) {
     seedSpinner.succeed("Database seeded");
   } catch (error) {
     seedSpinner.fail("Failed to seed database");
-    console.error(chalk.red(error.message));
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Build
@@ -119,8 +112,7 @@ export async function createOssStore(projectName) {
     buildSpinner.succeed("Lab is operational");
   } catch (error) {
     buildSpinner.fail("Failed to build lab");
-    console.error(chalk.red(error.message));
-    process.exit(1);
+    failAndCleanup(error, targetPath);
   }
 
   // Success message
@@ -170,4 +162,10 @@ function runCommand(command, args, cwd) {
       reject(error);
     });
   });
+}
+
+function failAndCleanup(error, targetPath) {
+  console.error(chalk.red(error.message));
+  rmSync(targetPath, { recursive: true, force: true });
+  process.exit(1);
 }
