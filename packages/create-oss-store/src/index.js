@@ -1,4 +1,4 @@
-import { writeFileSync, existsSync, rmSync } from "fs";
+import { writeFileSync, existsSync, readFileSync, rmSync } from "fs";
 import { homedir } from "os";
 import { resolve, join } from "path";
 import chalk from "chalk";
@@ -7,6 +7,7 @@ import degit from "degit";
 import { runCommand } from "./run-command.js";
 
 const REPO = "kOaDT/oss-oopssec-store";
+const FALLBACK_REF = "main";
 const DEGIT_CACHE = join(homedir(), ".degit", "github", ...REPO.split("/"));
 
 const ASCII_ART = [
@@ -17,7 +18,7 @@ const ASCII_ART = [
   String.raw`                                /_/                                                   `,
 ];
 
-export async function createOssStore(projectName) {
+export async function createOssStore(projectName, { ref } = {}) {
   console.log();
   ASCII_ART.forEach((line) => console.log(chalk.cyan(line)));
   console.log();
@@ -37,21 +38,7 @@ export async function createOssStore(projectName) {
     process.exit(1);
   }
 
-  // Clone repository
-  const cloneSpinner = ora("Cloning repository...").start();
-  try {
-    // degit reuses whatever sits at its cache path without validating it, so an
-    // interrupted download leaves a truncated tarball that fails every later run
-    // with "zlib: unexpected end of file". Always start from a clean cache.
-    rmSync(DEGIT_CACHE, { recursive: true, force: true });
-    const emitter = degit(REPO, { cache: false, force: true });
-    await emitter.clone(targetPath);
-    cloneSpinner.succeed("Repository cloned");
-  } catch (error) {
-    cloneSpinner.fail("Failed to clone repository");
-    rmSync(DEGIT_CACHE, { recursive: true, force: true });
-    failAndCleanup(error, targetPath);
-  }
+  await cloneRepository(targetPath, ref);
 
   // Create .env file
   const envSpinner = ora("Creating .env file...").start();
@@ -134,6 +121,86 @@ export async function createOssStore(projectName) {
     `${chalk.yellow("★")} Enjoying the lab? A star helps others find it: ${chalk.underline("https://github.com/kOaDT/oss-oopssec-store")}`
   );
   console.log();
+}
+
+/**
+ * Installs the release matching this CLI version so that a given
+ * `npx create-oss-store@x.y.z` always produces the same lab. An explicit ref is
+ * honoured as-is; the default tag falls back to the default branch when the
+ * release does not exist, which is the case for an unpublished CLI.
+ */
+async function cloneRepository(targetPath, requestedRef) {
+  const ref = requestedRef ?? `v${readCliVersion()}`;
+
+  const cloneSpinner = ora(`Cloning repository (${ref})...`).start();
+  try {
+    await clone(ref, targetPath);
+    cloneSpinner.succeed(`Repository cloned (${ref})`);
+    return;
+  } catch (error) {
+    if (requestedRef || error.code !== "MISSING_REF") {
+      cloneSpinner.fail("Failed to clone repository");
+      failAndCleanup(error, targetPath);
+    }
+    cloneSpinner.warn(
+      chalk.yellow(
+        `Release ${ref} not found, falling back to "${FALLBACK_REF}". The lab may not match this CLI version.`
+      )
+    );
+  }
+
+  const fallbackSpinner = ora(
+    `Cloning repository (${FALLBACK_REF})...`
+  ).start();
+  try {
+    await clone(FALLBACK_REF, targetPath);
+    fallbackSpinner.succeed(`Repository cloned (${FALLBACK_REF})`);
+  } catch (error) {
+    fallbackSpinner.fail("Failed to clone repository");
+    failAndCleanup(error, targetPath);
+  }
+}
+
+async function clone(ref, targetPath) {
+  // degit reuses whatever sits at its cache path without validating it, so an
+  // interrupted download leaves a truncated tarball that fails every later run
+  // with "zlib: unexpected end of file". Always start from a clean cache.
+  rmSync(DEGIT_CACHE, { recursive: true, force: true });
+
+  const emitter = degit(`${REPO}#${ref}`, { cache: false, force: true });
+  // degit swallows a failing `git ls-remote` and reports the ref as missing,
+  // which would make an unreachable GitHub look like a deleted release and send
+  // the user chasing a phantom tag. The warning it emits on the way is the only
+  // way to tell the two apart.
+  let unreachable = null;
+  emitter.on("warn", (info) => {
+    if (info.code === "COULD_NOT_FETCH") {
+      unreachable = info;
+    }
+  });
+
+  try {
+    await emitter.clone(targetPath);
+  } catch (error) {
+    rmSync(DEGIT_CACHE, { recursive: true, force: true });
+    if (unreachable && error.code === "MISSING_REF") {
+      throw Object.assign(
+        new Error(
+          `Could not reach ${unreachable.url}. Check your network connection and proxy settings, and make sure "git" is installed.`
+        ),
+        { code: "COULD_NOT_FETCH" }
+      );
+    }
+    throw error;
+  }
+}
+
+function readCliVersion() {
+  const packageJson = readFileSync(
+    new URL("../package.json", import.meta.url),
+    "utf8"
+  );
+  return JSON.parse(packageJson).version;
 }
 
 function failAndCleanup(error, targetPath) {

@@ -12,11 +12,33 @@ npm start
 
 Then open http://localhost:3000 in your browser and start hunting for flags.
 
+## Options
+
+| Option            | Description                                                          |
+| ----------------- | -------------------------------------------------------------------- |
+| `[project-name]`  | Target directory (default: `oss-oopssec-store`)                      |
+| `--ref <git-ref>` | Tag or branch to install (default: the tag matching the CLI version) |
+| `-h`, `--help`    | Show usage                                                           |
+
+Every version of the CLI installs the matching release tag, so the same command
+always produces the same lab. Pin it to keep a classroom or a write-up
+reproducible:
+
+```bash
+npx create-oss-store@2.20.0 my-ctf-lab
+```
+
+Use `--ref` to install something else, for instance the latest development state:
+
+```bash
+npx create-oss-store my-ctf-lab --ref main
+```
+
 ## What it does
 
 This CLI will:
 
-- Clone the OSS – OopsSec Store repository
+- Clone the OSS – OopsSec Store release matching the CLI version
 - Create the `.env` configuration file
 - Install all dependencies
 - Set up the SQLite database with Prisma
