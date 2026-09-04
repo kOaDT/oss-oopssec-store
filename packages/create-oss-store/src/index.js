@@ -166,6 +166,20 @@ function runCommand(command, args, cwd) {
 
 function failAndCleanup(error, targetPath) {
   console.error(chalk.red(error.message));
-  rmSync(targetPath, { recursive: true, force: true });
+  try {
+    // rmSync can throw on Windows (EBUSY/EPERM) if a file in node_modules
+    // is locked by antivirus or an editor. Catch it so we exit cleanly
+    // instead of crashing mid-cleanup and leaving a broken project behind.
+    rmSync(targetPath, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 200,
+    });
+  } catch {
+    console.error(
+      chalk.yellow(`Could not remove ${targetPath}, please delete it manually.`)
+    );
+  }
   process.exit(1);
 }
