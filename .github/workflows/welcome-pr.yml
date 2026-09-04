@@ -5,10 +5,11 @@ on:
     types: [opened]
 
 permissions:
-  # Label and comment endpoints accept Issues write, and
-  # `GET /repos/{owner}/{repo}/issues` is covered by Issues only. Pull requests
-  # stays read: the sole call against it is `pulls.listFiles`.
-  pull-requests: read
+  # Both are required, not alternatives: acting on a PR through the issues API
+  # answers with `x-accepted-github-permissions: issues=write;
+  # pull_requests=write`, and the `;` is an AND. Narrowing either one to read
+  # gets a 403 on addLabels and createComment.
+  pull-requests: write
   issues: write
 
 jobs:

@@ -5,8 +5,11 @@ on:
     types: [closed]
 
 permissions:
-  # `GET /repos/{owner}/{repo}/issues` is covered by Issues only, and the
-  # comment endpoint accepts Issues write — nothing here touches the pulls API.
+  # Both are required, not alternatives: commenting on a PR answers with
+  # `x-accepted-github-permissions: issues=write; pull_requests=write`, and the
+  # `;` is an AND. `issues` alone gets a 403 on createComment, even though the
+  # scope does cover the `GET /repos/{owner}/{repo}/issues` read below.
+  pull-requests: write
   issues: write
 
 jobs:
