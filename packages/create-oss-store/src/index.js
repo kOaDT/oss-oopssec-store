@@ -1,10 +1,10 @@
-import { spawn } from "child_process";
 import { writeFileSync, existsSync, rmSync } from "fs";
 import { homedir } from "os";
 import { resolve, join } from "path";
 import chalk from "chalk";
 import ora from "ora";
 import degit from "degit";
+import { runCommand } from "./run-command.js";
 
 const REPO = "kOaDT/oss-oopssec-store";
 const DEGIT_CACHE = join(homedir(), ".degit", "github", ...REPO.split("/"));
@@ -134,34 +134,6 @@ export async function createOssStore(projectName) {
     `${chalk.yellow("★")} Enjoying the lab? A star helps others find it: ${chalk.underline("https://github.com/kOaDT/oss-oopssec-store")}`
   );
   console.log();
-}
-
-function runCommand(command, args, cwd) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd,
-      stdio: "pipe",
-      shell: process.platform === "win32",
-    });
-
-    let stderr = "";
-
-    child.stderr.on("data", (data) => {
-      stderr += data.toString();
-    });
-
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(stderr || `Command failed with code ${code}`));
-      }
-    });
-
-    child.on("error", (error) => {
-      reject(error);
-    });
-  });
 }
 
 function failAndCleanup(error, targetPath) {
