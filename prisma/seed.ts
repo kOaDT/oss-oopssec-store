@@ -356,6 +356,21 @@ async function main() {
             "Heard the devs left some old flags lying around at the root... files that say exactly what they are. Classic mistake!",
           author: "Mr. Robot",
         },
+        {
+          productId: firstProduct.id,
+          content: "For those who come after.",
+          author: "Gustave",
+        },
+        {
+          productId: secondProduct.id,
+          content: "When one falls, we continue.",
+          author: "Maelle",
+        },
+        {
+          productId: thirdProduct.id,
+          content: "Do you want to fly?",
+          author: "Esquie",
+        },
       ],
     });
     console.log("Created sample reviews");

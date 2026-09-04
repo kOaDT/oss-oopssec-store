@@ -35,6 +35,7 @@
     "docs:format": "npm run format --prefix docs",
     "docs:format:check": "npm run format:check --prefix docs",
     "prepare": "husky",
+    "version": "npm version $npm_package_version --prefix packages/create-oss-store --no-git-tag-version --allow-same-version && git add packages/create-oss-store/package.json packages/create-oss-store/package-lock.json",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
