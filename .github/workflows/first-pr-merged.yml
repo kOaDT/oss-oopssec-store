@@ -1,0 +1,64 @@
+name: First PR Merged
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  # `GET /repos/{owner}/{repo}/issues` is covered by Issues only, and the
+  # comment endpoint accepts Issues write — nothing here touches the pulls API.
+  issues: write
+
+jobs:
+  celebrate:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say thanks once, on the first merge
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            const author = pr.user.login;
+
+            if (pr.user.type === 'Bot') return;
+
+            const insider = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+            if (insider.includes(pr.author_association)) return;
+
+            // The issues list carries `pull_request.merged_at`, so one paginated
+            // read answers "has anything of theirs landed before?" without the
+            // search index. This PR is already merged by the time the event
+            // fires, hence the number check.
+            let isFirstMerge = true;
+            const history = github.paginate.iterator(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              creator: author,
+              state: 'closed',
+              per_page: 100,
+            });
+            outer: for await (const page of history) {
+              for (const issue of page.data) {
+                if (issue.pull_request?.merged_at && issue.number !== prNumber) {
+                  isFirstMerge = false;
+                  break outer;
+                }
+              }
+            }
+
+            if (!isFirstMerge) return;
+
+            const body = [
+              `Merged — and it's your first one here, @${author}. Thank you!`,
+              `If the project was useful to you, a star helps other people find it!`,
+            ].join('\n\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body,
+            });
