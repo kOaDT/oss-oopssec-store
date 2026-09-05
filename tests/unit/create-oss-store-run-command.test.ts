@@ -48,14 +48,16 @@ describe("create-oss-store runCommand", () => {
     expect(result.stdout).not.toContain("Command failed with code 1");
   });
 
-  it("still prefers stderr when both streams have output", () => {
+  it("keeps stdout when stderr only carries an unrelated notice", () => {
+    // The Browserslist advisory goes to stderr on almost every `next build`,
+    // while the compilation error that actually killed it goes to stdout.
     const result = runWithRunCommand(`
       try {
         await runCommand(
           process.execPath,
           [
             "-e",
-            "process.stdout.write('build log'); process.stderr.write('real error'); process.exit(1)",
+            "process.stdout.write('Type error: cannot compile foo.ts'); process.stderr.write('Browserslist: caniuse-lite is outdated'); process.exit(1)",
           ],
           process.cwd()
         );
@@ -68,8 +70,35 @@ describe("create-oss-store runCommand", () => {
 
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain("real error");
-    expect(result.stdout).not.toContain("build log");
+    expect(result.stdout).toContain("Type error: cannot compile foo.ts");
+    expect(result.stdout).toContain("Browserslist: caniuse-lite is outdated");
+  });
+
+  it("keeps the tail of a stream that overflows the cap", () => {
+    const result = runWithRunCommand(`
+      try {
+        await runCommand(
+          process.execPath,
+          [
+            "-e",
+            // process.exit() would drop the pending tail of a write this large,
+            // so let the child flush and die on its exit code instead.
+            "process.stdout.write('noise'.repeat(40 * 1024)); process.stdout.write('Type error: cannot compile foo.ts'); process.exitCode = 1",
+          ],
+          process.cwd()
+        );
+        process.stdout.write("RESOLVED");
+        process.exit(2);
+      } catch (error) {
+        process.stdout.write(String(error.message.length) + "|" + error.message.slice(-40));
+      }
+    `);
+
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("Type error: cannot compile foo.ts");
+    const [length] = result.stdout.split("|");
+    expect(Number(length)).toBeLessThan(70 * 1024);
   });
 
   it("completes when the child writes more than 64KB to stdout", () => {
