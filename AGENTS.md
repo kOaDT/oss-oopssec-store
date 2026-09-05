@@ -6,13 +6,15 @@ Intentionally vulnerable e-commerce web application for security training and Ca
 
 ## Tech Stack
 
-| Layer    | Technology                                                              |
-| -------- | ----------------------------------------------------------------------- |
-| Frontend | Next.js 16.0.6 (App Router), React 19.2.0, TypeScript 5, Tailwind CSS 4 |
-| Backend  | Next.js API Routes, SQLite + Prisma ORM 6.19.1                          |
-| Auth     | JWT tokens (intentionally weak implementation)                          |
-| Font     | Poppins (Google Fonts)                                                  |
-| Markdown | react-markdown + remark-gfm                                             |
+| Layer    | Technology                                            |
+| -------- | ----------------------------------------------------- |
+| Frontend | Next.js (App Router), React, TypeScript, Tailwind CSS |
+| Backend  | Next.js API Routes, SQLite + Prisma ORM               |
+| Auth     | JWT tokens (intentionally weak implementation)        |
+| Font     | Poppins (Google Fonts)                                |
+| Markdown | react-markdown + remark-gfm                           |
+
+See `package.json` for exact pinned versions. Some are frozen on purpose to keep published CVEs reproducible — `SECURITY.md` documents which ones and why.
 
 ## Project Structure
 
