@@ -193,6 +193,11 @@ async function clone(ref, targetPath) {
     }
     throw error;
   }
+
+  // The workflows only make sense in the upstream repository: pushing the lab to
+  // a personal GitHub would schedule a daily docs deploy, try to publish the CLI
+  // to npm without any secret, and comment on the learner's own pull requests.
+  rmSync(join(targetPath, ".github"), { recursive: true, force: true });
 }
 
 function readCliVersion() {
