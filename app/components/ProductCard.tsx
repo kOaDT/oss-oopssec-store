@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { api, ApiError } from "@/lib/api";
 import type { ProductCardProps } from "@/lib/types";
 
 export default function ProductCard({
@@ -10,6 +14,44 @@ export default function ProductCard({
   price,
   imageUrl,
 }: ProductCardProps) {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isAdding) {
+      return;
+    }
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    setIsAdding(true);
+
+    try {
+      await api.post("/api/cart/add", {
+        productId: id,
+        quantity: 1,
+      });
+
+      router.push("/cart");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      const errorMessage =
+        error instanceof ApiError
+          ? error.message
+          : "Failed to add item to cart. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <Link
       href={`/products/${id}`}
@@ -25,7 +67,10 @@ export default function ProductCard({
         />
         <div className="absolute right-3 top-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <button
-            className="cursor-pointer rounded-full bg-white p-2 shadow-lg transition-transform hover:scale-110 dark:bg-slate-700"
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isAdding}
+            className="cursor-pointer rounded-full bg-white p-2 shadow-lg transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700"
             aria-label="Add to cart"
           >
             <svg
@@ -53,12 +98,12 @@ export default function ProductCard({
             ${price.toFixed(2)}
           </span>
           <button
-            className="cursor-pointer rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30"
-            onClick={(e) => {
-              e.preventDefault();
-            }}
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isAdding}
+            className="cursor-pointer rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30"
           >
-            Add
+            {isAdding ? "Adding..." : "Add"}
           </button>
         </div>
       </div>
