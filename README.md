@@ -241,10 +241,11 @@ docker run -p 127.0.0.1:3000:3000 -v oss-data:/app/data leogra/oss-oopssec-store
 ```bash
 git clone https://github.com/kOaDT/oss-oopssec-store.git
 cd oss-oopssec-store
-docker compose up -d
+npm run docker:up
 ```
 
-Or using the npm helper scripts:
+The helper scripts pass the Node version from `.nvmrc` to the build, so go through
+them rather than calling `docker compose` directly:
 
 ```bash
 npm run docker:up       # Start in background (builds image on first run)

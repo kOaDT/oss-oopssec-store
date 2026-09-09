@@ -1,6 +1,11 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Set by scripts/compose.sh from .nvmrc; there is no default on purpose,
+        # so a stale version can never be baked in silently.
+        NODE_VERSION: ${NODE_VERSION:?run docker compose through npm run docker:* so the version is read from .nvmrc}
     ports:
       - "127.0.0.1:3000:3000"
     extra_hosts:
