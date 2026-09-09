@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "Dockerfile"
+      - ".nvmrc"
       - "docker-compose.yml"
       - "docker-entrypoint.sh"
       - "package*.json"
@@ -31,4 +32,4 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build Docker image
-        run: docker build -t oss-oopssec-store:test .
+        run: docker build --build-arg NODE_VERSION="$(cat .nvmrc)" -t oss-oopssec-store:test .

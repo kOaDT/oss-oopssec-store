@@ -1,4 +1,6 @@
-FROM node:20-alpine
+# Keep in sync with .nvmrc; CI passes the value from that file as a build arg.
+ARG NODE_VERSION=22
+FROM node:${NODE_VERSION}-alpine
 
 RUN apk add --no-cache python3 make g++ gcc libxml2-dev libxslt-dev
 
