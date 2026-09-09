@@ -2,35 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { parseQuery } from "@/lib/validation";
+import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
 import { productSearchQuerySchema } from "@/lib/validation/schemas/products";
-
-const isSQLInjectionAttempt = (input: string): boolean => {
-  const sqlKeywords = [
-    "UNION",
-    "SELECT",
-    "INSERT",
-    "UPDATE",
-    "DELETE",
-    "DROP",
-    "CREATE",
-    "ALTER",
-    "EXEC",
-    "EXECUTE",
-    "SCRIPT",
-    "OR 1=1",
-    "OR '1'='1",
-    'OR "1"="1',
-    "';",
-    '";',
-    "--",
-    "/*",
-    "*/",
-    "XP_",
-    "sp_",
-  ];
-  const upperInput = input.toUpperCase();
-  return sqlKeywords.some((keyword) => upperInput.includes(keyword));
-};
 
 export async function GET(request: NextRequest) {
   try {

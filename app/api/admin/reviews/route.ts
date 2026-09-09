@@ -5,35 +5,8 @@ import Database from "better-sqlite3";
 import { getDatabaseUrl } from "@/lib/database";
 import { logger } from "@/lib/logger";
 import { parseQuery } from "@/lib/validation";
+import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
 import { reviewsAuditQuerySchema } from "@/lib/validation/schemas/admin";
-
-const isSQLInjectionAttempt = (input: string): boolean => {
-  const sqlKeywords = [
-    "UNION",
-    "SELECT",
-    "INSERT",
-    "UPDATE",
-    "DELETE",
-    "DROP",
-    "CREATE",
-    "ALTER",
-    "EXEC",
-    "EXECUTE",
-    "SCRIPT",
-    "OR 1=1",
-    "OR '1'='1",
-    'OR "1"="1',
-    "';",
-    '";',
-    "--",
-    "/*",
-    "*/",
-    "XP_",
-    "sp_",
-  ];
-  const upperInput = input.toUpperCase();
-  return sqlKeywords.some((keyword) => upperInput.includes(keyword));
-};
 
 function getDbPath(): string {
   const url = getDatabaseUrl();

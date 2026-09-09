@@ -3,35 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
+import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
 import { orderSearchBodySchema } from "@/lib/validation/schemas/orders";
-
-const isSQLInjectionAttempt = (input: string): boolean => {
-  const sqlKeywords = [
-    "UNION",
-    "SELECT",
-    "INSERT",
-    "UPDATE",
-    "DELETE",
-    "DROP",
-    "CREATE",
-    "ALTER",
-    "EXEC",
-    "EXECUTE",
-    "SCRIPT",
-    "OR 1=1",
-    "OR '1'='1",
-    'OR "1"="1',
-    "';",
-    '";',
-    "--",
-    "/*",
-    "*/",
-    "XP_",
-    "sp_",
-  ];
-  const upperInput = input.toUpperCase();
-  return sqlKeywords.some((keyword) => upperInput.includes(keyword));
-};
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
