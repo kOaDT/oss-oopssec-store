@@ -75,7 +75,7 @@ npm run db:seed              # Seed database with flags
 # Setup
 npm run setup                # Full setup (env, deps, seed)
 
-# Docker (no Node.js required)
+# Docker (no local npm install required)
 npm run docker:up            # Build image and start container (detached)
 npm run docker:down          # Stop and remove container
 npm run docker:build         # Rebuild Docker image

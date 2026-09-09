@@ -1,6 +1,25 @@
 #!/usr/bin/env node
 
-import { createOssStore } from "../src/index.js";
+import { readFileSync } from "node:fs";
+
+// npx does not enforce engines, so a user on an older Node would otherwise get a
+// cryptic node-gyp failure halfway through the install. engines.node stays the
+// single source of truth; the floor is read from it rather than repeated here.
+const { engines } = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8")
+);
+const requiredMajor = Number(engines.node.match(/\d+/)[0]);
+const currentMajor = Number(process.versions.node.split(".")[0]);
+
+if (currentMajor < requiredMajor) {
+  console.error(
+    `create-oss-store needs Node.js ${requiredMajor} or newer, but this is ${process.version}.`
+  );
+  console.error(
+    `Install it with "nvm install ${requiredMajor} && nvm use ${requiredMajor}", or from https://nodejs.org, then run this command again.`
+  );
+  process.exit(1);
+}
 
 const USAGE = `Usage: create-oss-store [project-name] [options]
 
@@ -59,5 +78,8 @@ try {
 if (args.help) {
   console.log(USAGE);
 } else {
+  // Imported lazily so the version check above runs before any dependency is
+  // evaluated on an unsupported runtime.
+  const { createOssStore } = await import("../src/index.js");
   await createOssStore(args.projectName, { ref: args.ref });
 }

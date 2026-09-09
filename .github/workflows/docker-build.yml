@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "Dockerfile"
+      - ".nvmrc"
       - "docker-compose.yml"
       - "docker-entrypoint.sh"
       - "package*.json"

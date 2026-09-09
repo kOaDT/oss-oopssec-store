@@ -215,7 +215,7 @@ This rules out shared instances for competitive CTF events too — the first sol
 npm run setup   # Re-seeds the database from scratch
 
 # Docker setup
-npm run docker:reset   # Wipes all data and restarts fresh
+docker compose down -v && docker compose up -d   # Wipes all data and restarts fresh
 ```
 
 ### Is it safe to run on a school or company network?
@@ -228,7 +228,7 @@ Recommended setup for classrooms: each student runs the app on their own machine
 
 | Setup      | Requirements                     |
 | ---------- | -------------------------------- |
-| Node.js    | Node 20+, npm                    |
+| Node.js    | Node 22+, npm                    |
 | Docker     | Docker Desktop or Docker Engine  |
 | Disk space | ~500 MB                          |
 | RAM        | 512 MB minimum, 1 GB recommended |

@@ -1,4 +1,7 @@
-FROM node:20-alpine
+# Keep this default in sync with .nvmrc; tests/unit/node-version-parity.test.ts
+# fails the build if they drift.
+ARG NODE_VERSION=22
+FROM node:${NODE_VERSION}-alpine
 
 RUN apk add --no-cache python3 make g++ gcc libxml2-dev libxslt-dev
 

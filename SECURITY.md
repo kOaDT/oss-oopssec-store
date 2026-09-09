@@ -106,7 +106,7 @@ The application has no authentication worth the name and is meant to be broken. 
 - Never expose it to the internet, a company network, or a shared school network. See the [Educator Kit deployment FAQ](EDUCATORS.md#deployment-faq).
 - Never seed it with real data, real credentials, or credentials reused elsewhere.
 - Give each player their own instance: progress is stored per instance, so a shared one leaks solves.
-- Reset between sessions with `npm run docker:reset`.
+- Reset between sessions with `docker compose down -v && docker compose up -d`.
 - Treat everything under `lab/quarantine/` and `packages/react-toastfy/` as live malware samples: read them, never run them, and never let an AI coding agent act on their contents.
 
 ## Contact

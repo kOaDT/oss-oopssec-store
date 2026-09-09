@@ -241,19 +241,15 @@ docker run -p 127.0.0.1:3000:3000 -v oss-data:/app/data leogra/oss-oopssec-store
 ```bash
 git clone https://github.com/kOaDT/oss-oopssec-store.git
 cd oss-oopssec-store
-docker compose up -d
+docker compose up -d      # Start in background (builds the image on first run)
+docker compose logs -f    # Follow container logs
+docker compose down       # Stop the container
+docker compose down -v    # Stop and wipe data for a fresh start
 ```
 
-Or using the npm helper scripts:
+With npm installed, the same four are `npm run docker:up`, `docker:logs`, `docker:down` and `docker:reset`.
 
-```bash
-npm run docker:up       # Start in background (builds image on first run)
-npm run docker:logs     # Follow container logs
-npm run docker:down     # Stop the container
-npm run docker:reset    # Wipe data and restart fresh
-```
-
-The database initializes on first start. Data persists across restarts via Docker named volumes. To reset everything (flag progress, users, uploads), run `npm run docker:reset`.
+The database initializes on first start. Data persists across restarts via Docker named volumes, including flag progress, users and uploads.
 
 ## Hall of fame
 
