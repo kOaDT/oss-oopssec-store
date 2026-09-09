@@ -215,7 +215,7 @@ This rules out shared instances for competitive CTF events too — the first sol
 npm run setup   # Re-seeds the database from scratch
 
 # Docker setup
-npm run docker:reset   # Wipes all data and restarts fresh
+docker compose down -v && docker compose up -d   # Wipes all data and restarts fresh
 ```
 
 ### Is it safe to run on a school or company network?

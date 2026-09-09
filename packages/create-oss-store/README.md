@@ -2,6 +2,11 @@
 
 Create a new [OSS – OopsSec Store](https://github.com/kOaDT/oss-oopssec-store) instance for web security CTF training.
 
+## Requirements
+
+Node.js 22 or newer, and npm. The CLI refuses to run on an older major rather
+than failing halfway through the install.
+
 ## Quick Start
 
 ```bash

@@ -1,8 +1,6 @@
-# check=skip=InvalidDefaultArgInFrom
-# The Node version is not hardcoded here: .nvmrc is the single source of truth.
-# Callers must pass it, which npm run docker:* and the CI workflows do for you.
-# Building by hand: docker build --build-arg NODE_VERSION="$(cat .nvmrc)" .
-ARG NODE_VERSION
+# Keep this default in sync with .nvmrc; tests/unit/node-version-parity.test.ts
+# fails the build if they drift.
+ARG NODE_VERSION=22
 FROM node:${NODE_VERSION}-alpine
 
 RUN apk add --no-cache python3 make g++ gcc libxml2-dev libxslt-dev
