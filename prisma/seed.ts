@@ -8,6 +8,7 @@ import { OFFICIAL_VIDEO_ID, STREAM_DEFAULTS } from "../lib/live-stream";
 import { ensurePartnerSigningKey } from "../lib/partner-keys";
 import { SANDBOX_SUPPLIER_ID } from "../lib/partner-directory";
 import { flags, flagHints } from "./flags";
+import { CANARY_SLUGS, generateCanaryToken } from "../lib/sql-injection-canary";
 
 config();
 
@@ -561,6 +562,16 @@ async function main() {
   } else {
     console.log("Visitor logs already exist, skipping visitor log creation");
   }
+
+  await prisma.internalSecret.deleteMany({});
+  await prisma.internalSecret.createMany({
+    data: CANARY_SLUGS.map((slug) => ({
+      slug,
+      token: generateCanaryToken(slug),
+    })),
+  });
+
+  console.log(`Created ${CANARY_SLUGS.length} SQL injection canaries`);
 
   const existingWishlists = await prisma.wishlist.findFirst();
 
