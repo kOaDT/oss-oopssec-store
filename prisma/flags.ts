@@ -478,9 +478,9 @@ export const flagHints: Record<string, string[]> = {
     "Send a POST to /api/orders/search with a crafted 'status' field containing SQL syntax. A UNION-based injection like ' UNION SELECT ... FROM users -- can extract data from other tables. Watch out for server-side keyword filters.",
   ],
   "product-search-sql-injection": [
-    "The search bar understands more languages than you'd expect.",
-    "Product search queries are built using string concatenation with the user's search term. The input lands directly inside a SQL LIKE clause.",
-    "Search for a term containing SQL syntax, even a simple ' UNION SELECT-- in the q parameter at /api/products/search will be detected as injection. The server rewards the attempt by including the flag in its response.",
+    "The search bar understands more languages than you'd expect, and it answers in SQL errors.",
+    "The search term lands inside a LIKE clause built by string concatenation, so the results list is yours to extend. The catalogue holds nothing worth stealing: the flag waits on a row no product search would ever return.",
+    "Close the LIKE clause in the q parameter at /api/products/search and append a UNION SELECT. The catalogue query returns five columns, and SQLite says so when the count is wrong. Read sqlite_master through that UNION to find the internal_secrets table, then return its token for slug 'product-search-sql-injection' as one of the five columns.",
   ],
   "session-fixation-weak-session-management": [
     "Support access might be a bit too... generous.",

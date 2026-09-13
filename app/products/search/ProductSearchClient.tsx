@@ -34,6 +34,7 @@ export default function ProductSearchClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flag, setFlag] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
   const fetchProducts = useCallback(async (query: string) => {
@@ -45,6 +46,7 @@ export default function ProductSearchClient() {
 
     setError(null);
     setFlag(null);
+    setMessage(null);
     setIsLoading(true);
     setHasSearched(true);
 
@@ -64,6 +66,9 @@ export default function ProductSearchClient() {
 
       if (data.flag) {
         setFlag(data.flag);
+      }
+      if (data.message) {
+        setMessage(data.message);
       }
 
       setProducts(results);
@@ -138,6 +143,15 @@ export default function ProductSearchClient() {
           {flag && (
             <div className="mb-6">
               <FlagDisplay flag={flag} title="Flag Retrieved" />
+            </div>
+          )}
+
+          {message && !flag && (
+            <div
+              role="status"
+              className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+            >
+              {message}
             </div>
           )}
 
