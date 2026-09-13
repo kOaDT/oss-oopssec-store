@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { parseQuery } from "@/lib/validation";
-import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
+import {
+  isAccessingFlagsTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "@/lib/sql-injection-detection";
 import { productSearchQuerySchema } from "@/lib/validation/schemas/products";
 
 export async function GET(request: NextRequest) {
@@ -21,20 +25,8 @@ export async function GET(request: NextRequest) {
 
     if (query && typeof query === "string") {
       sqlInjectionDetected = isSQLInjectionAttempt(query);
-      const upperQuery = query.toUpperCase();
-      const normalizedQuery = upperQuery.replace(/\s+/g, " ");
-      const isAccessingFlagsTable =
-        normalizedQuery.includes("FROM FLAGS") ||
-        normalizedQuery.includes("FROM`FLAGS`") ||
-        normalizedQuery.includes('FROM"FLAGS"') ||
-        normalizedQuery.includes("JOIN FLAGS") ||
-        normalizedQuery.includes("JOIN`FLAGS`") ||
-        normalizedQuery.includes('JOIN"FLAGS"') ||
-        normalizedQuery.includes("FLAGS WHERE") ||
-        normalizedQuery.includes("FLAGS.") ||
-        /FLAGS\s*[,\s]/.test(normalizedQuery);
 
-      if (isAccessingFlagsTable) {
+      if (isAccessingFlagsTable(query)) {
         return NextResponse.json(
           {
             error:
@@ -75,23 +67,7 @@ export async function GET(request: NextRequest) {
         unknown
       >[];
 
-      results = queryResults
-        .map((row: Record<string, unknown>) => {
-          const result: Record<string, unknown> = {};
-          for (const key in row) {
-            const value = row[key];
-            if (
-              typeof value === "string" &&
-              (value.toLowerCase().includes("flags") ||
-                value.toLowerCase().includes("flag"))
-            ) {
-              continue;
-            }
-            result[key] = value;
-          }
-          return result;
-        })
-        .filter((row) => Object.keys(row).length > 0);
+      results = stripFlagValues(queryResults);
     } catch (error) {
       logger.error(
         { err: error, route: "/api/products/search" },
