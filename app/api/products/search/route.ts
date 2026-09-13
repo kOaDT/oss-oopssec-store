@@ -7,7 +7,10 @@ import {
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
+import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
 import { productSearchQuerySchema } from "@/lib/validation/schemas/products";
+
+const CANARY_SLUG = "product-search-sql-injection";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,35 +23,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ products: [] });
     }
 
-    let flag: string | null = null;
-    let sqlInjectionDetected = false;
-
-    if (query && typeof query === "string") {
-      sqlInjectionDetected = isSQLInjectionAttempt(query);
-
-      if (isAccessingFlagsTable(query)) {
-        return NextResponse.json(
-          {
-            error:
-              "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
-            products: [],
-          },
-          { status: 403 }
-        );
-      }
-
-      if (sqlInjectionDetected) {
-        const sqlInjectionFlag = await prisma.flag.findUnique({
-          where: { slug: "product-search-sql-injection" },
-        });
-        if (sqlInjectionFlag) {
-          flag = sqlInjectionFlag.flag;
-        }
-      }
+    if (isAccessingFlagsTable(query)) {
+      return NextResponse.json(
+        {
+          error:
+            "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
+          products: [],
+        },
+        { status: 403 }
+      );
     }
 
     const sqlQuery = `
-      SELECT 
+      SELECT
         id,
         name,
         description,
@@ -74,10 +61,17 @@ export async function GET(request: NextRequest) {
         "Query error"
       );
       return NextResponse.json(
-        { error: "Search failed", products: [] },
+        {
+          error: error instanceof Error ? error.message : "Search failed",
+          products: [],
+        },
         { status: 500 }
       );
     }
+
+    const canary = await prisma.internalSecret.findUnique({
+      where: { slug: CANARY_SLUG },
+    });
 
     const response: {
       products: Record<string, unknown>[];
@@ -87,9 +81,18 @@ export async function GET(request: NextRequest) {
       products: results,
     };
 
-    if (sqlInjectionDetected && flag) {
-      response.flag = flag;
-      response.message = "SQL injection detected";
+    if (hasExfiltratedCanary(results, canary)) {
+      const flag = await prisma.flag.findUnique({
+        where: { slug: CANARY_SLUG },
+      });
+      if (flag) {
+        response.flag = flag.flag;
+        response.message =
+          "Internal secret exfiltrated through the product search! Well done!";
+      }
+    } else if (isSQLInjectionAttempt(query)) {
+      response.message =
+        "SQL syntax detected in the search term, but the results hold nothing you did not already know.";
     }
 
     return NextResponse.json(response);
