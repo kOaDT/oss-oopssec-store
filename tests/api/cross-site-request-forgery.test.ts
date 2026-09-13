@@ -8,133 +8,113 @@ import {
 import { FLAGS } from "../helpers/flags";
 
 const ORDER_ID = "ORD-001";
+const EXPLOIT_PAGE = "http://localhost:3000/exploits/csrf-attack.html";
+
+interface UpdateResponse {
+  success: boolean;
+  order: { id: string; status: string };
+  flag?: string;
+  message?: string;
+}
+
+/** What a browser attaches when a page fires the request, unlike a CLI client. */
+const firedByPage = (referer: string) => ({
+  Referer: referer,
+  "Sec-Fetch-Site": "same-origin",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Dest": "empty",
+});
 
 describe("Cross-Site Request Forgery (CSRF)", () => {
-  describe("Status update without admin referer returns CSRF flag", () => {
-    it("returns 200 and flag when Referer is evil origin", async () => {
-      const token = await loginOrFail(
-        TEST_USERS.admin.email,
-        TEST_USERS.admin.password
-      );
+  let adminToken: string;
 
-      const { status, data } = await apiRequest<{ flag?: string }>(
-        `/api/orders/${ORDER_ID}`,
-        {
-          method: "PATCH",
-          headers: {
-            ...authHeaders(token),
-            Referer: "https://evil.com/attack",
-          },
-          body: JSON.stringify({ status: "SHIPPED" }),
-        }
-      );
-
-      expect(status).toBe(200);
-      expectFlag(data, FLAGS.CROSS_SITE_REQUEST_FORGERY);
+  const updateStatus = (status: string, headers: Record<string, string> = {}) =>
+    apiRequest<UpdateResponse>(`/api/orders/${ORDER_ID}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(adminToken), ...headers },
+      body: JSON.stringify({ status }),
     });
+
+  beforeAll(async () => {
+    adminToken = await loginOrFail(
+      TEST_USERS.admin.email,
+      TEST_USERS.admin.password
+    );
   });
 
-  describe("Status update from admin dashboard does NOT return flag", () => {
-    it("returns 200 without flag when Referer contains /admin", async () => {
-      const token = await loginOrFail(
-        TEST_USERS.admin.email,
-        TEST_USERS.admin.password
-      );
+  it("returns the flag when the attacker page fires the request", async () => {
+    const { status, data } = await updateStatus(
+      "SHIPPED",
+      firedByPage(EXPLOIT_PAGE)
+    );
 
-      const { status, data } = await apiRequest<{ flag?: string }>(
-        `/api/orders/${ORDER_ID}`,
-        {
-          method: "PATCH",
-          headers: {
-            ...authHeaders(token),
-            Referer: "http://localhost:3000/admin/orders",
-          },
-          body: JSON.stringify({ status: "PROCESSING" }),
-        }
-      );
-
-      expect(status).toBe(200);
-      expect(data).not.toHaveProperty("flag");
-    });
+    expect(status).toBe(200);
+    expectFlag(data, FLAGS.CROSS_SITE_REQUEST_FORGERY);
+    expect(data.order.status).toBe("SHIPPED");
   });
 
-  describe("Status update with no referer returns flag", () => {
-    it("returns 200 and flag when Referer is absent", async () => {
-      const token = await loginOrFail(
-        TEST_USERS.admin.email,
-        TEST_USERS.admin.password
-      );
+  it("returns the flag for a form-encoded POST from the attacker page", async () => {
+    const { status, data } = await apiRequest<UpdateResponse>(
+      `/api/orders/${ORDER_ID}`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders(adminToken),
+          ...firedByPage(EXPLOIT_PAGE),
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "status=CANCELLED",
+      }
+    );
 
-      const { status, data } = await apiRequest<{ flag?: string }>(
-        `/api/orders/${ORDER_ID}`,
-        {
-          method: "PATCH",
-          headers: authHeaders(token),
-          body: JSON.stringify({ status: "DELIVERED" }),
-        }
-      );
-
-      expect(status).toBe(200);
-      expect(data).toHaveProperty("flag", FLAGS.CROSS_SITE_REQUEST_FORGERY);
-    });
+    expect(status).toBe(200);
+    expectFlag(data, FLAGS.CROSS_SITE_REQUEST_FORGERY);
   });
 
-  describe("Form-encoded POST also works (CSRF simulation)", () => {
-    it("returns 200 and flag for form-encoded POST with evil Referer", async () => {
-      const token = await loginOrFail(
-        TEST_USERS.admin.email,
-        TEST_USERS.admin.password
-      );
+  it("does not reward a request no page ever fired", async () => {
+    const { status, data } = await updateStatus("DELIVERED");
 
-      const { status, data } = await apiRequest<{ flag?: string }>(
-        `/api/orders/${ORDER_ID}`,
-        {
-          method: "POST",
-          headers: {
-            ...authHeaders(token),
-            "Content-Type": "application/x-www-form-urlencoded",
-            Referer: "https://evil.com",
-          },
-          body: "status=CANCELLED",
-        }
-      );
-
-      expect(status).toBe(200);
-      expectFlag(data, FLAGS.CROSS_SITE_REQUEST_FORGERY);
-    });
+    expect(status).toBe(200);
+    expect(data).not.toHaveProperty("flag");
+    expect(data.message).toContain("nothing says a page fired this request");
   });
 
-  describe("Non-admin cannot update order status", () => {
-    it("returns 403 when non-admin patches order", async () => {
-      const token = await loginOrFail(
-        TEST_USERS.alice.email,
-        TEST_USERS.alice.password
-      );
+  it("still updates the order without any anti-CSRF check, flag or not", async () => {
+    const { data } = await updateStatus("PROCESSING");
 
-      const { status } = await apiRequest(`/api/orders/${ORDER_ID}`, {
-        method: "PATCH",
-        headers: authHeaders(token),
-        body: JSON.stringify({ status: "SHIPPED" }),
-      });
-
-      expect(status).toBe(403);
-    });
+    expect(data.success).toBe(true);
+    expect(data.order.status).toBe("PROCESSING");
   });
 
-  describe("Invalid status is rejected", () => {
-    it("returns 400 when status is invalid", async () => {
-      const token = await loginOrFail(
-        TEST_USERS.admin.email,
-        TEST_USERS.admin.password
-      );
+  it("does not reward the admin dashboard doing its own job", async () => {
+    const { status, data } = await updateStatus(
+      "PENDING",
+      firedByPage("http://localhost:3000/admin/orders")
+    );
 
-      const { status } = await apiRequest(`/api/orders/${ORDER_ID}`, {
-        method: "PATCH",
-        headers: authHeaders(token),
-        body: JSON.stringify({ status: "INVALID" }),
-      });
+    expect(status).toBe(200);
+    expect(data).not.toHaveProperty("flag");
+    expect(data).not.toHaveProperty("message");
+  });
 
-      expect(status).toBe(400);
+  it("refuses a non-admin", async () => {
+    const token = await loginOrFail(
+      TEST_USERS.alice.email,
+      TEST_USERS.alice.password
+    );
+
+    const { status } = await apiRequest(`/api/orders/${ORDER_ID}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(token), ...firedByPage(EXPLOIT_PAGE) },
+      body: JSON.stringify({ status: "SHIPPED" }),
     });
+
+    expect(status).toBe(403);
+  });
+
+  it("rejects an invalid status", async () => {
+    const { status } = await updateStatus("INVALID", firedByPage(EXPLOIT_PAGE));
+
+    expect(status).toBe(400);
   });
 });
