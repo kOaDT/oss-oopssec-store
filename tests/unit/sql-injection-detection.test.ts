@@ -1,4 +1,8 @@
-import { isSQLInjectionAttempt } from "../../lib/sql-injection-detection";
+import {
+  isAccessingFlagsTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "../../lib/sql-injection-detection";
 
 describe("isSQLInjectionAttempt (SQL injection heuristic)", () => {
   it("matches the canonical walkthrough payloads", () => {
@@ -55,5 +59,49 @@ describe("isSQLInjectionAttempt (SQL injection heuristic)", () => {
     expect(isSQLInjectionAttempt("SP_HELP")).toBe(false);
     // "XP_" is upper case in the list, so it does match.
     expect(isSQLInjectionAttempt("xp_cmdshell")).toBe(true);
+  });
+});
+
+describe("isAccessingFlagsTable (flags table guard)", () => {
+  it("blocks the flags table whatever the quoting or spacing", () => {
+    expect(isAccessingFlagsTable("' UNION SELECT flag FROM flags --")).toBe(
+      true
+    );
+    expect(isAccessingFlagsTable("' UNION SELECT flag FROM`flags` --")).toBe(
+      true
+    );
+    expect(
+      isAccessingFlagsTable("' UNION SELECT flag FROM flags WHERE 1=1")
+    ).toBe(true);
+    expect(
+      isAccessingFlagsTable("' UNION SELECT f.flag FROM main.flags f")
+    ).toBe(true);
+    expect(isAccessingFlagsTable("' JOIN flags ON 1=1 --")).toBe(true);
+  });
+
+  it("leaves the canary table and ordinary input alone", () => {
+    expect(
+      isAccessingFlagsTable("' UNION SELECT token FROM internal_secrets --")
+    ).toBe(false);
+    expect(isAccessingFlagsTable("192.168.1.10")).toBe(false);
+  });
+});
+
+describe("stripFlagValues (response sanitizer)", () => {
+  it("removes flag values but keeps the row's other columns", () => {
+    expect(
+      stripFlagValues([{ id: "1", leaked: "OSS{s0m3_fl4g}", name: "Bread" }])
+    ).toEqual([{ id: "1", name: "Bread" }]);
+  });
+
+  it("keeps schema enumeration readable", () => {
+    const tables = "reviews,flags,hints,internal_secrets";
+    expect(stripFlagValues([{ userAgent: tables }])).toEqual([
+      { userAgent: tables },
+    ]);
+  });
+
+  it("drops a row that carried nothing but a flag value", () => {
+    expect(stripFlagValues([{ leaked: "OSS{s0m3_fl4g}" }])).toEqual([]);
   });
 });
