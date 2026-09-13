@@ -503,9 +503,9 @@ export const flagHints: Record<string, string[]> = {
     "CVE-2025-55182 affects React 19.x's Flight protocol used in Server Components. The vulnerability exploits unsafe deserialization to achieve prototype pollution and then RCE. Look up the public PoC and send a crafted payload to the server's root endpoint.",
   ],
   "x-forwarded-for-sql-injection": [
-    "Logs eat whatever headers you feed them.",
-    "The visitor tracking system records HTTP headers in a database. Not all headers go through sanitization before being inserted into SQL queries.",
-    "Send a POST request to /api/tracking and include SQL syntax in the X-Forwarded-For header. The server inserts this header value directly into an INSERT query on the visitor_logs table. Any SQL keyword in the header triggers injection detection and reveals the flag.",
+    "Logs eat whatever headers you feed them, and hand back what they swallowed.",
+    "The visitor tracker builds its INSERT by concatenating the X-Forwarded-For header, then echoes the row it just stored. A keyword alone proves nothing: the flag needs a value read from a table the tracker never touches.",
+    "POST to /api/tracking with an X-Forwarded-For header that closes the VALUES list early. Enumerate sqlite_master through the stored row to find the internal_secrets table, then log (SELECT token FROM internal_secrets WHERE slug='x-forwarded-for-sql-injection') into one of the columns. The flag drops when the echoed visit carries that token.",
   ],
   "prompt-injection-ai-assistant": [
     "The AI assistant knows more than it's supposed to share.",

