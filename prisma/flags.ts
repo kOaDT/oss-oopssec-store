@@ -524,8 +524,8 @@ export const flagHints: Record<string, string[]> = {
   ],
   "second-order-sql-injection": [
     "Not all inputs are dangerous when they first arrive. Sometimes the poison sits in the well, waiting.",
-    "The review form lets you choose a display name. That name is stored safely, but the admin moderation panel reuses it in a way the developer assumed was safe because the data came from the application's own database.",
-    "Submit a product review with a SQL payload as your display name (e.g., '; DROP TABLE reviews; --). Then access the admin review moderation page at /admin/reviews and filter by that author. The backend interpolates the stored author into a raw SQL query via $queryRawUnsafe, triggering injection detection and revealing the flag.",
+    "The review form lets you choose a display name. That name is stored safely, but the admin moderation panel rebuilds a raw query from it, trusting it because it came from its own database. The panel only ever reports on names it already stores, and the flag is not in the reviews: it sits in a table that query never joins.",
+    "Post a product review whose display name closes the author filter and appends a UNION SELECT over the panel's six columns: x' UNION SELECT 1, 2, token, 4, 5, 6 FROM internal_secrets WHERE slug='second-order-sql-injection' --. Then filter by that author at /admin/reviews. The panel rebuilds its query from the stored name and hands back the canary.",
   ],
   "plaintext-password-in-logs": [
     "What the server writes down in private might not stay private forever.",
