@@ -473,9 +473,9 @@ export const flagHints: Record<string, string[]> = {
     "Submit a support request with the screenshotUrl field pointing to an internal endpoint like http://localhost:3000/internal. The server fetches it with an internal request header and returns the response content to you.",
   ],
   "sql-injection": [
-    "The search speaks SQL if you ask it nicely.",
-    "The order search endpoint constructs SQL queries by concatenating user input directly. The status filter is not parameterized.",
-    "Send a POST to /api/orders/search with a crafted 'status' field containing SQL syntax. A UNION-based injection like ' UNION SELECT ... FROM users -- can extract data from other tables. Watch out for server-side keyword filters.",
+    "The order list only ever shows you your own orders. The filter behind it is far less strict.",
+    "The status filter is concatenated into a raw query, so the result set is yours to extend — other customers' orders included. That alone is not the flag: it waits in a table no order search would ever join.",
+    "POST to /api/orders/search with a status that closes the quote and appends a UNION SELECT. The order query returns nine columns, and SQLite says so when the count is wrong. Enumerate sqlite_master through that UNION to find the internal_secrets table, then return its token for slug 'sql-injection' in one of the nine columns.",
   ],
   "product-search-sql-injection": [
     "The search bar understands more languages than you'd expect, and it answers in SQL errors.",
