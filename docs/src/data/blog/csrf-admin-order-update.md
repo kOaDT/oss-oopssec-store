@@ -51,7 +51,9 @@ Nothing sits between steps 1 and 3 to prove the request actually came from the a
 
 ## Exploitation
 
-The lab serves the attacker page from the same origin (`/exploits/csrf-attack.html`) so the exploit works without setting up DNS or hosting. The same exploit works from a third-party origin too, either by carrying the request through a top-level navigation or against any deployment that loosens `sameSite`.
+The lab serves the attacker page from its own origin (`/exploits/csrf-attack.html`) so the exploit works without setting up DNS or hosting. That is a simulation, and an honest one: with `sameSite: "lax"`, a genuine cross-site `POST` would never carry the cookie at all. The same attack lands from a third-party origin against any deployment that loosens `sameSite` — which is exactly why the setting is the fix.
+
+What the lab does insist on is that a page fires the request. The endpoint hands over the flag only when the call carries the metadata a browser attaches on behalf of a page — `Sec-Fetch-Site` and a `Referer` — and that `Referer` is not the admin dashboard. Replaying the same `PATCH` by hand from a terminal still changes the order, because the vulnerability is real and unguarded, but it proves nothing about a victim's browser, so it earns no flag.
 
 ### Step 1: Authenticate as an administrator
 
@@ -90,13 +92,24 @@ The route handler is registered for both `POST` and `PATCH`, so either verb hits
 
 ## Flag retrieval
 
-The vulnerable endpoint returns the flag in its JSON response when the status update succeeds:
+Open the browser console: the forged request came back with the flag.
 
 ```json
 {
   "success": true,
   "order": { "id": "ORD-003", "status": "DELIVERED" },
-  "flag": "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}"
+  "flag": "OSS{cr0ss_s1t3_r3qu3st_f0rg3ry}",
+  "message": "An authenticated admin action, triggered by a page the admin never meant to trust. Well done!"
+}
+```
+
+Send the same request from a terminal and the order still changes — nothing protects it — but the answer is different:
+
+```json
+{
+  "success": true,
+  "order": { "id": "ORD-003", "status": "DELIVERED" },
+  "message": "The order status changed, but nothing says a page fired this request: no Sec-Fetch metadata, no Referer. A CSRF is the victim's browser acting on your behalf, not a client you drive by hand."
 }
 ```
 
