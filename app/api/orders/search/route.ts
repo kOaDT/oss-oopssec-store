@@ -3,7 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
-import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
+import {
+  isAccessingFlagsTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "@/lib/sql-injection-detection";
 import { orderSearchBodySchema } from "@/lib/validation/schemas/orders";
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
@@ -17,20 +21,8 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     if (status) {
       sqlInjectionDetected = isSQLInjectionAttempt(status);
-      const upperStatus = status.toUpperCase();
-      const normalizedStatus = upperStatus.replace(/\s+/g, " ");
-      const isAccessingFlagsTable =
-        normalizedStatus.includes("FROM FLAGS") ||
-        normalizedStatus.includes("FROM`FLAGS`") ||
-        normalizedStatus.includes('FROM"FLAGS"') ||
-        normalizedStatus.includes("JOIN FLAGS") ||
-        normalizedStatus.includes("JOIN`FLAGS`") ||
-        normalizedStatus.includes('JOIN"FLAGS"') ||
-        normalizedStatus.includes("FLAGS WHERE") ||
-        normalizedStatus.includes("FLAGS.") ||
-        /FLAGS\s*[,\s]/.test(normalizedStatus);
 
-      if (isAccessingFlagsTable) {
+      if (isAccessingFlagsTable(status)) {
         return NextResponse.json(
           {
             error:
@@ -70,33 +62,9 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       ORDER BY o.id DESC
     `;
 
-    let results: Record<string, unknown>[] = [];
-    try {
-      const queryResults = (await prisma.$queryRawUnsafe(query)) as Record<
-        string,
-        unknown
-      >[];
-
-      results = queryResults
-        .map((row: Record<string, unknown>) => {
-          const result: Record<string, unknown> = {};
-          for (const key in row) {
-            const value = row[key];
-            if (
-              typeof value === "string" &&
-              (value.toLowerCase().includes("flags") ||
-                value.toLowerCase().includes("flag"))
-            ) {
-              continue;
-            }
-            result[key] = value;
-          }
-          return result;
-        })
-        .filter((row) => Object.keys(row).length > 0);
-    } catch (error) {
-      throw error;
-    }
+    const results = stripFlagValues(
+      (await prisma.$queryRawUnsafe(query)) as Record<string, unknown>[]
+    );
 
     const response: {
       orders: Record<string, unknown>[];

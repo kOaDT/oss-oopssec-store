@@ -5,7 +5,11 @@ import Database from "better-sqlite3";
 import { getDatabaseUrl } from "@/lib/database";
 import { logger } from "@/lib/logger";
 import { parseQuery } from "@/lib/validation";
-import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
+import {
+  isAccessingFlagsTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "@/lib/sql-injection-detection";
 import { reviewsAuditQuerySchema } from "@/lib/validation/schemas/admin";
 
 function getDbPath(): string {
@@ -35,20 +39,7 @@ export const GET = withAdminAuth(
       if (authorFilter) {
         sqlInjectionDetected = isSQLInjectionAttempt(authorFilter);
 
-        const upperFilter = authorFilter.toUpperCase();
-        const normalizedFilter = upperFilter.replace(/\s+/g, " ");
-        const isAccessingFlagsTable =
-          normalizedFilter.includes("FROM FLAGS") ||
-          normalizedFilter.includes("FROM`FLAGS`") ||
-          normalizedFilter.includes('FROM"FLAGS"') ||
-          normalizedFilter.includes("JOIN FLAGS") ||
-          normalizedFilter.includes("JOIN`FLAGS`") ||
-          normalizedFilter.includes('JOIN"FLAGS"') ||
-          normalizedFilter.includes("FLAGS WHERE") ||
-          normalizedFilter.includes("FLAGS.") ||
-          /FLAGS\s*[,\s]/.test(normalizedFilter);
-
-        if (isAccessingFlagsTable) {
+        if (isAccessingFlagsTable(authorFilter)) {
           return NextResponse.json(
             {
               error:
@@ -116,23 +107,7 @@ export const GET = withAdminAuth(
           db.close();
         }
 
-        reviews = queryResults
-          .map((row: Record<string, unknown>) => {
-            const result: Record<string, unknown> = {};
-            for (const key in row) {
-              const value = row[key];
-              if (
-                typeof value === "string" &&
-                (value.toLowerCase().includes("flags") ||
-                  value.toLowerCase().includes("oss{"))
-              ) {
-                continue;
-              }
-              result[key] = value;
-            }
-            return result;
-          })
-          .filter((row) => Object.keys(row).length > 0);
+        reviews = stripFlagValues(queryResults);
       } else {
         const safeReviews = await prisma.review.findMany({
           include: {
