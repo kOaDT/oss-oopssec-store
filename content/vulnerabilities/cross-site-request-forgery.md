@@ -27,7 +27,7 @@ response.cookies.set("authToken", token, {
 });
 ```
 
-`lax` blocks cookies on cross-site `fetch`/`XHR`, but allows them on top-level navigations and on same-origin requests, which is all the exploit needs once the attacker can host content under the same origin (or convince the browser to navigate).
+`lax` blocks cookies on cross-site `fetch`/`XHR`, but allows them on top-level GET navigations and on every same-origin request, which is all the exploit needs once the attacker can host content under the same origin.
 
 The order status handler accepts the request body with no anti-forgery verification:
 
