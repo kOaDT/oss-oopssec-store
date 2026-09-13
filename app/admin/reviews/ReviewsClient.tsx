@@ -18,6 +18,7 @@ interface AdminReview {
 interface ReviewsResponse {
   reviews: AdminReview[];
   authors: string[];
+  error?: string;
   flag?: string;
   message?: string;
 }
@@ -176,6 +177,25 @@ export default function ReviewsClient() {
           </Link>
         </div>
         {flag && <FlagDisplay flag={flag} variant="compact" />}
+
+        {data?.message && !flag && (
+          <div
+            role="status"
+            className="rounded-xl border-2 border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20"
+          >
+            <p className="text-center text-sm text-amber-800 dark:text-amber-300">
+              {data.message}
+            </p>
+          </div>
+        )}
+
+        {data?.error && (
+          <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+            <p className="text-center font-mono text-sm text-red-700 dark:text-red-300">
+              {data.error}
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
