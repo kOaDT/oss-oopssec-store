@@ -79,7 +79,7 @@ A row of `1,2,3,4,5` shows up among the products: the single quote broke out of 
 
 ```json
 {
-  "message": "SQL syntax detected in the search term, but the results hold nothing you did not already know."
+  "message": "SQL syntax detected in the search term. The flag tracks one specific internal secret, and it is not in these rows."
 }
 ```
 

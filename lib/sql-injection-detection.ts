@@ -28,23 +28,14 @@ export function isSQLInjectionAttempt(input: string): boolean {
   return SQL_KEYWORDS.some((keyword) => upperInput.includes(keyword));
 }
 
-const FLAGS_TABLE_PATTERNS = [
-  "FROM FLAGS",
-  "FROM`FLAGS`",
-  'FROM"FLAGS"',
-  "JOIN FLAGS",
-  "JOIN`FLAGS`",
-  'JOIN"FLAGS"',
-  "FLAGS WHERE",
-  "FLAGS.",
-];
-
+/**
+ * Any mention of the table, whatever the quoting or the punctuation that
+ * follows: a stored payload reaching `exec()` can drop it outright, and
+ * `found_flags` cascades away with it. The underscore in `found_flags` breaks
+ * the word boundary, so player progress stays reachable.
+ */
 export function isAccessingFlagsTable(input: string): boolean {
-  const normalized = input.toUpperCase().replace(/\s+/g, " ");
-  return (
-    FLAGS_TABLE_PATTERNS.some((pattern) => normalized.includes(pattern)) ||
-    /FLAGS\s*[,\s]/.test(normalized)
-  );
+  return /\bFLAGS\b/.test(input.toUpperCase());
 }
 
 /**

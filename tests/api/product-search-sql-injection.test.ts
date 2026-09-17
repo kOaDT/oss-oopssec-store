@@ -1,4 +1,4 @@
-import { apiRequest, expectFlag } from "../helpers/api";
+import { apiRequest, canaryFrom, expectFlag } from "../helpers/api";
 import { FLAGS } from "../helpers/flags";
 
 interface SearchResponse {
@@ -29,6 +29,22 @@ describe("SQL Injection - Product Search", () => {
     expect(status).toBe(200);
     expectFlag(data, FLAGS.PRODUCT_SEARCH_SQL_INJECTION);
     expect(JSON.stringify(data.products)).toContain("CANARY-");
+  });
+
+  it("refuses a canary the query pasted back in as a literal", async () => {
+    const extracted = await search(
+      union(
+        "token",
+        "FROM internal_secrets WHERE slug='product-search-sql-injection'"
+      )
+    );
+    const canary = canaryFrom(extracted.data.products);
+
+    const { status, data } = await search(union(`'${canary}'`, ""));
+
+    expect(status).toBe(200);
+    expect(JSON.stringify(data.products)).toContain(canary);
+    expect(data).not.toHaveProperty("flag");
   });
 
   it("leaks the schema through the results, which is how the canary is found", async () => {
@@ -63,14 +79,13 @@ describe("SQL Injection - Product Search", () => {
     expect(data.error).toContain("Access to flags table is not allowed");
   });
 
-  it("never returns a flag value, even when the guard is dodged", async () => {
+  it("blocks the flags table even when the name is schema-qualified", async () => {
     const { status, data } = await search(
       union("group_concat(flag)", "FROM main.flags", "--")
     );
 
-    expect(status).toBe(200);
-    expect(JSON.stringify(data.products)).not.toContain("OSS{");
-    expect(data).not.toHaveProperty("flag");
+    expect(status).toBe(403);
+    expect(data.error).toContain("Access to flags table is not allowed");
   });
 
   it("searches the catalogue without returning a flag", async () => {
