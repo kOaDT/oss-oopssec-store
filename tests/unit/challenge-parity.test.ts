@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { flags, flagHints } from "../../prisma/flags";
+import { CANARY_SLUGS } from "../../lib/sql-injection-canary";
 import { CURRICULUM, TOTAL_CHALLENGES } from "../../docs/src/data/roadmap";
 import { CATEGORY_LABELS } from "../../lib/format";
 import { askAboutChallengeUrl } from "../../lib/discussions";
@@ -96,6 +97,15 @@ describe("prisma/flags.ts", () => {
           slug,
           expect.stringMatching(/^A\d{2}:(2021|2025)$/),
         ]);
+    }
+  });
+});
+
+describe("lib/sql-injection-canary.ts", () => {
+  it("names a flag for every canary the seed plants", () => {
+    const slugs = flags.map((flag) => flag.slug);
+    for (const slug of CANARY_SLUGS) {
+      expect([slug, slugs.includes(slug)]).toEqual([slug, true]);
     }
   });
 });
