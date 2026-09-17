@@ -94,7 +94,7 @@ Select it. If the column count is wrong, the panel says so, which is how you fin
 
 Each correction means posting a new review with the adjusted display name — the payload only ever arrives through storage.
 
-The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so keep that one for after you have the flag (and `npm run db:seed` to recover).
+The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so keep that one for after you have the flag. To recover, run `npm run db:push && npm run db:seed`: `db:push` recreates the missing table, and the seed needs it back before it can read it. Your captured flags survive both steps.
 
 ### Step 4: Enumerate the schema
 
