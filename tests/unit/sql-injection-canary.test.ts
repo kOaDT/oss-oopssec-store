@@ -28,17 +28,38 @@ describe("hasExfiltratedCanary", () => {
 
   it("matches a token nested anywhere in the returned rows", () => {
     expect(
-      hasExfiltratedCanary([{ id: 1 }, { userAgent: canary.token }], canary)
+      hasExfiltratedCanary([{ id: 1 }, { userAgent: canary.token }], canary, [
+        "zzz' UNION SELECT 1, token, 'x', 1, 'y' FROM internal_secrets --",
+      ])
     ).toBe(true);
+  });
+
+  it("refuses a token the query pasted in as a literal", () => {
+    const query = `zzz' UNION SELECT 1, '${canary.token}', 'x', 1, 'y' --`;
+
+    expect(
+      hasExfiltratedCanary([{ name: canary.token }], canary, [query])
+    ).toBe(false);
+  });
+
+  it("refuses a token a stored request field echoed back", () => {
+    expect(
+      hasExfiltratedCanary([{ ip: canary.token }], canary, [
+        canary.token,
+        "Mozilla/5.0",
+        "/",
+        "",
+      ])
+    ).toBe(false);
   });
 
   it("rejects a payload that only carries the predictable prefix", () => {
     expect(
-      hasExfiltratedCanary([{ ip: "CANARY-SQL-INJECTION-" }], canary)
+      hasExfiltratedCanary([{ ip: "CANARY-SQL-INJECTION-" }], canary, [])
     ).toBe(false);
   });
 
   it("rejects everything when the canary row is missing", () => {
-    expect(hasExfiltratedCanary([{ ip: canary.token }], null)).toBe(false);
+    expect(hasExfiltratedCanary([{ ip: canary.token }], null, [])).toBe(false);
   });
 });

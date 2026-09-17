@@ -77,7 +77,7 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       orders: results,
     };
 
-    if (hasExfiltratedCanary(results, canary)) {
+    if (hasExfiltratedCanary(results, canary, [status ?? ""])) {
       const flag = await prisma.flag.findUnique({
         where: { slug: CANARY_SLUG },
       });
@@ -88,7 +88,8 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       }
     } else if (status && isSQLInjectionAttempt(status)) {
       response.message =
-        "SQL syntax detected in the status filter, but the results hold nothing you did not already know.";
+        "SQL syntax detected in the status filter." +
+        " The flag tracks one specific internal secret, and it is not in these rows.";
     }
 
     return NextResponse.json(response);

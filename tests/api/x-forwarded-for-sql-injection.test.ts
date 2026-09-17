@@ -1,4 +1,4 @@
-import { apiRequest, expectFlag } from "../helpers/api";
+import { apiRequest, canaryFrom, expectFlag } from "../helpers/api";
 import { FLAGS } from "../helpers/flags";
 
 interface TrackingResponse {
@@ -31,6 +31,33 @@ describe("SQL Injection - X-Forwarded-For", () => {
     expect(status).toBe(200);
     expectFlag(data, FLAGS.X_FORWARDED_FOR_SQL_INJECTION);
     expect(JSON.stringify(data.logged)).toContain("CANARY-");
+  });
+
+  it("refuses a canary the header supplied itself, with no SQL at all", async () => {
+    const extracted = await track(
+      exfiltrate(
+        "SELECT token FROM internal_secrets WHERE slug='x-forwarded-for-sql-injection'"
+      )
+    );
+    const canary = canaryFrom(extracted.data.logged);
+
+    const { status, data } = await track(canary);
+
+    expect(status).toBe(200);
+    expect(JSON.stringify(data.logged)).toContain(canary);
+    expect(data).not.toHaveProperty("flag");
+  });
+
+  it("logs back only the row this request created", async () => {
+    const responses = await Promise.all(
+      ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4"].map(track)
+    );
+
+    for (const { data } of responses) {
+      expect(data.logged).toHaveLength(1);
+    }
+    const seen = responses.map(({ data }) => data.logged[0].ip);
+    expect(new Set(seen).size).toBe(4);
   });
 
   it("leaks the schema through the logged row, which is how the canary is found", async () => {
@@ -73,14 +100,13 @@ describe("SQL Injection - X-Forwarded-For", () => {
     );
   });
 
-  it("never echoes a flag value extracted from the flags table", async () => {
+  it("blocks the flags table even when the name is schema-qualified", async () => {
     const { status, data } = await track(
       exfiltrate("SELECT group_concat(flag) FROM main.flags")
     );
 
-    expect(status).toBe(200);
-    expect(JSON.stringify(data.logged)).not.toContain("OSS{");
-    expect(data).not.toHaveProperty("flag");
+    expect(status).toBe(403);
+    expect(data.error).toContain("Access to flags table is not allowed");
   });
 
   it("logs a normal visit without returning a flag", async () => {

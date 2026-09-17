@@ -12,13 +12,6 @@ import { trackingBodySchema } from "@/lib/validation/schemas/tracking";
 
 const CANARY_SLUG = "x-forwarded-for-sql-injection";
 
-const latestLoggedRowId = async (): Promise<number> => {
-  const [{ rowId }] = await prisma.$queryRawUnsafe<{ rowId: number | null }[]>(
-    `SELECT MAX(rowid) AS rowId FROM visitor_logs`
-  );
-  return rowId ?? 0;
-};
-
 export async function POST(request: NextRequest) {
   try {
     const parsed = await parseBody(request, trackingBodySchema);
@@ -51,8 +44,6 @@ export async function POST(request: NextRequest) {
       VALUES ('${id}', '${ip}', '${userAgent.replace(/'/g, "''")}', '${visitPath.replace(/'/g, "''")}', ${visitorSessionId ? `'${visitorSessionId}'` : "NULL"}, datetime('now'))
     `;
 
-    const rowIdBefore = await latestLoggedRowId();
-
     let sqlError: string | null = null;
     try {
       await prisma.$queryRawUnsafe(query);
@@ -64,9 +55,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Scoped to the id this request generated: a rowid window would hand the
+    // caller rows logged for other visitors, and with them a canary they never
+    // extracted. The player reads their injection back through this row.
     const logged = stripFlagValues(
       await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
-        `SELECT * FROM visitor_logs WHERE rowid > ${rowIdBefore} ORDER BY rowid ASC`
+        `SELECT * FROM visitor_logs WHERE id = '${id}'`
       )
     );
 
@@ -89,7 +83,14 @@ export async function POST(request: NextRequest) {
       response.error = sqlError;
     }
 
-    if (hasExfiltratedCanary(logged, canary)) {
+    if (
+      hasExfiltratedCanary(logged, canary, [
+        ip,
+        userAgent,
+        visitPath,
+        visitorSessionId ?? "",
+      ])
+    ) {
       const flag = await prisma.flag.findUnique({
         where: { slug: CANARY_SLUG },
       });
@@ -100,7 +101,8 @@ export async function POST(request: NextRequest) {
       }
     } else if (forwardedFor && isSQLInjectionAttempt(forwardedFor)) {
       response.message =
-        "SQL syntax detected in X-Forwarded-For, but the logged visit holds nothing you did not already know.";
+        "SQL syntax detected in X-Forwarded-For." +
+        " The flag tracks one specific internal secret, and it is not in the logged visit.";
     }
 
     return NextResponse.json(response);

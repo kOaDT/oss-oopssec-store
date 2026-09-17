@@ -79,11 +79,21 @@ describe("isAccessingFlagsTable (flags table guard)", () => {
     expect(isAccessingFlagsTable("' JOIN flags ON 1=1 --")).toBe(true);
   });
 
+  it("blocks dropping the table, whatever follows the name", () => {
+    expect(isAccessingFlagsTable("x'; DROP TABLE flags; --")).toBe(true);
+    expect(isAccessingFlagsTable("x'; DROP TABLE flags;--")).toBe(true);
+    expect(isAccessingFlagsTable("x'; DROP TABLE `flags`; --")).toBe(true);
+  });
+
   it("leaves the canary table and ordinary input alone", () => {
     expect(
       isAccessingFlagsTable("' UNION SELECT token FROM internal_secrets --")
     ).toBe(false);
     expect(isAccessingFlagsTable("192.168.1.10")).toBe(false);
+    expect(
+      isAccessingFlagsTable("' UNION SELECT flagId FROM found_flags --")
+    ).toBe(false);
+    expect(isAccessingFlagsTable("x'; DROP TABLE reviews; --")).toBe(false);
   });
 });
 

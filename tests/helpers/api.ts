@@ -75,6 +75,13 @@ export const TEST_USERS = {
   admin: { email: "admin@oss.com", password: "admin" },
 } as const;
 
+/** Pulls the canary a route just handed back, to replay it as a known value. */
+export function canaryFrom(data: unknown): string {
+  const match = /CANARY-[A-Z0-9-]+-[0-9a-f]{12}/.exec(JSON.stringify(data));
+  if (!match) throw new Error("no canary in the response to replay");
+  return match[0];
+}
+
 export function expectFlag(data: unknown, expectedFlag: string): void {
   expect(data).toHaveProperty("flag", expectedFlag);
 }
