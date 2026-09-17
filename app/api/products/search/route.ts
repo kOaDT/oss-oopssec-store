@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       products: results,
     };
 
-    if (hasExfiltratedCanary(results, canary)) {
+    if (hasExfiltratedCanary(results, canary, [query])) {
       const flag = await prisma.flag.findUnique({
         where: { slug: CANARY_SLUG },
       });
@@ -92,7 +92,8 @@ export async function GET(request: NextRequest) {
       }
     } else if (isSQLInjectionAttempt(query)) {
       response.message =
-        "SQL syntax detected in the search term, but the results hold nothing you did not already know.";
+        "SQL syntax detected in the search term." +
+        " The flag tracks one specific internal secret, and it is not in these rows.";
     }
 
     return NextResponse.json(response);

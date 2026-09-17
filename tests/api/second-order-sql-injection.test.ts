@@ -3,6 +3,7 @@ import {
   loginOrFail,
   authHeaders,
   TEST_USERS,
+  canaryFrom,
   expectFlag,
 } from "../helpers/api";
 import { FLAGS } from "../helpers/flags";
@@ -68,6 +69,19 @@ describe("Second-Order SQL Injection", () => {
     expect(JSON.stringify(data.reviews)).toContain("CANARY-");
   });
 
+  it("refuses a canary stored as the author and read straight back", async () => {
+    expect((await storeReview(CANARY_PAYLOAD)).status).toBe(201);
+    const extracted = await audit(CANARY_PAYLOAD);
+    const canary = canaryFrom(extracted.data.reviews);
+    expect((await storeReview(canary)).status).toBe(201);
+
+    const { status, data } = await audit(canary);
+
+    expect(status).toBe(200);
+    expect(JSON.stringify(data.reviews)).toContain(canary);
+    expect(data).not.toHaveProperty("flag");
+  });
+
   it("refuses the same payload when it never went through the review form", async () => {
     const neverStored = union(
       "token",
@@ -112,14 +126,13 @@ describe("Second-Order SQL Injection", () => {
     expect(data.error).toContain("Access to flags table is not allowed");
   });
 
-  it("never returns a flag value, even when the guard is dodged", async () => {
+  it("blocks the flags table even when the name is schema-qualified", async () => {
     const { status, data } = await audit(
       union("group_concat(flag)", "FROM main.flags", "--")
     );
 
-    expect(status).toBe(200);
-    expect(JSON.stringify(data.reviews)).not.toContain("OSS{");
-    expect(data).not.toHaveProperty("flag");
+    expect(status).toBe(403);
+    expect(data.error).toContain("Access to flags table is not allowed");
   });
 
   it("filters by a normal author without returning a flag", async () => {

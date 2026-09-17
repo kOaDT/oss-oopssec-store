@@ -69,8 +69,10 @@ export const GET = withAdminAuth(
         let queryResults: Record<string, unknown>[] = [];
         const db = new Database(getDbPath());
         try {
-          // The moderation panel runs the filter as a script before reading it
-          // back as a query, so a stored author can carry several statements.
+          // exec() runs every statement, so a stored author carrying
+          // `; DROP TABLE ...` takes effect here. prepare() below then refuses
+          // anything but a single statement: such a payload returns the error
+          // and no rows.
           db.exec(query);
           queryResults = db.prepare(query).all() as Record<string, unknown>[];
         } catch (error) {
@@ -120,7 +122,7 @@ export const GET = withAdminAuth(
           where: { slug: CANARY_SLUG },
         });
 
-        if (hasExfiltratedCanary(reviews, canary)) {
+        if (hasExfiltratedCanary(reviews, canary, [authorFilter])) {
           const storedReview = await prisma.review.findFirst({
             where: { author: authorFilter },
             select: { id: true },
@@ -141,7 +143,8 @@ export const GET = withAdminAuth(
           }
         } else if (isSQLInjectionAttempt(authorFilter)) {
           response.message =
-            "SQL syntax detected in the author filter, but the results hold nothing you did not already know.";
+            "SQL syntax detected in the author filter." +
+            " The flag tracks one specific internal secret, and it is not in these rows.";
         }
       }
 
