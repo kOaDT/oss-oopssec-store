@@ -137,7 +137,9 @@ describe("Second-Order SQL Injection", () => {
     );
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("blocks the flags table even when the name is schema-qualified", async () => {
@@ -146,7 +148,9 @@ describe("Second-Order SQL Injection", () => {
     );
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("filters by a normal author without returning a flag", async () => {

@@ -70,11 +70,13 @@ describe("SQL Injection - Order Search", () => {
   });
 
   it("returns other customers' orders without handing out the flag", async () => {
+    const own = await search();
+    const ownOrderIds = new Set(own.data.orders.map((order) => order.id));
+
     const { status, data } = await search("PENDING' OR '1'='1");
 
     expect(status).toBe(200);
-    const owners = new Set(data.orders.map((order) => order.userId));
-    expect(owners.size).toBeGreaterThan(1);
+    expect(data.orders.some((order) => !ownOrderIds.has(order.id))).toBe(true);
     expect(data).not.toHaveProperty("flag");
     expect(data.message).toContain("SQL syntax detected");
   });
@@ -92,7 +94,9 @@ describe("SQL Injection - Order Search", () => {
     );
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("blocks the flags table even when the name is schema-qualified", async () => {
@@ -101,7 +105,9 @@ describe("SQL Injection - Order Search", () => {
     );
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("filters by status without returning a flag", async () => {
