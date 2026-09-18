@@ -8,10 +8,13 @@ import {
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
-import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
+import {
+  hasExfiltratedCanary,
+  type CanarySlug,
+} from "@/lib/sql-injection-canary";
 import { orderSearchBodySchema } from "@/lib/validation/schemas/orders";
 
-const CANARY_SLUG = "sql-injection";
+const CANARY_SLUG: CanarySlug = "sql-injection";
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
