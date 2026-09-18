@@ -1,26 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, FormEvent, useMemo } from "react";
+import { useState, useEffect, useCallback, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getStoredUser } from "@/lib/client-auth";
-import FlagDisplay from "@/app/components/FlagDisplay";
-
-const FLAG = "OSS{x_f0rw4rd3d_f0r_sql1}";
-
-const isValidIp = (ip: string): boolean => {
-  // localhost
-  if (ip === "unknown") return true;
-  if (ip === "localhost") return true;
-  if (ip === "::1") return true;
-  // IPv4 regex
-  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  // IPv6 regex (simplified)
-  const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-  // Also accept "unknown" as valid
-  if (ip === "unknown") return true;
-  return ipv4Regex.test(ip) || ipv6Regex.test(ip);
-};
 
 interface Visit {
   id: string;
@@ -115,12 +98,6 @@ export default function AnalyticsClient() {
     return new Date(dateString).toLocaleString();
   };
 
-  // Check if any IP in the data is not a valid IP address (SQL injection detected)
-  const hasInvalidIp = useMemo(() => {
-    if (!data?.visits) return false;
-    return data.visits.some((visit) => !isValidIp(visit.ip));
-  }, [data?.visits]);
-
   if (isLoading) {
     return (
       <section className="container mx-auto px-4 py-16">
@@ -198,15 +175,6 @@ export default function AnalyticsClient() {
             Back to Admin
           </Link>
         </div>
-        {hasInvalidIp && (
-          <FlagDisplay
-            flag={FLAG}
-            title="SQL Injection Detected!"
-            description="An invalid IP address was found in the visitor logs. This indicates a successful SQL injection attack via the X-Forwarded-For header."
-            showIcon
-            variant="default"
-          />
-        )}
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
             <div className="flex items-center gap-4">
