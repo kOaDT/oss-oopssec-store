@@ -53,7 +53,9 @@ Nothing sits between steps 1 and 3 to prove the request actually came from the a
 
 The lab serves the attacker page from its own origin (`/exploits/csrf-attack.html`) so the exploit works without setting up DNS or hosting. That is a simulation, and an honest one: with `sameSite: "lax"`, a genuine cross-site `POST` would never carry the cookie at all. The same attack lands from a third-party origin against any deployment that loosens `sameSite` — which is exactly why the setting is the fix.
 
-What the lab does insist on is that a page fires the request. The endpoint hands over the flag only when the call carries the metadata a browser attaches on behalf of a page — `Sec-Fetch-Site` and a `Referer` — and that `Referer` is not the admin dashboard. Replaying the same `PATCH` by hand from a terminal still changes the order, because the vulnerability is real and unguarded, but it proves nothing about a victim's browser, so it earns no flag.
+What the lab does insist on is that the request look like one a page fired. The endpoint hands over the flag only when the call carries the metadata a browser attaches on behalf of a page — `Sec-Fetch-Site` and a `Referer` — and that `Referer` is not the admin dashboard. A bare `PATCH` from a terminal still changes the order, because the vulnerability is real and unguarded, but it comes back without the flag.
+
+That check is a signpost, not a defence. Both headers are forbidden to page JavaScript, so a browser is the only thing that sets them _honestly_ — but any CLI client can type them out, and the API test suite does exactly that to drive the scenario without a browser. Read the gate as "reproduce the shape of the attack", not as proof that a browser was involved. A server that trusted these headers to stop CSRF would be trusting the attacker.
 
 ### Step 1: Authenticate as an administrator
 
@@ -103,13 +105,13 @@ Open the browser console: the forged request came back with the flag.
 }
 ```
 
-Send the same request from a terminal and the order still changes — nothing protects it — but the answer is different:
+Send a bare request from a terminal and the order still changes — nothing protects it — but the answer is different:
 
 ```json
 {
   "success": true,
   "order": { "id": "ORD-003", "status": "DELIVERED" },
-  "message": "The order status changed, but nothing says a page fired this request: no Sec-Fetch metadata, no Referer. A CSRF is the victim's browser acting on your behalf, not a client you drive by hand."
+  "message": "The order status changed, but the request carries none of the metadata a browser attaches on behalf of a page: no Sec-Fetch headers, no Referer. Have the victim's browser fire it from a page it should never have trusted."
 }
 ```
 

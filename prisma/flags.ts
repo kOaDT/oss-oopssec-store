@@ -455,7 +455,7 @@ export const flagHints: Record<string, string[]> = {
   "cross-site-request-forgery": [
     "Sometimes the most dangerous links are the ones you can't see.",
     "The admin dashboard hints at hidden content. Inspect the page source for links styled with display:none, one leads to a proof-of-concept demonstration.",
-    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in as admin and click the button: the page uses your authentication cookie to submit a forged request that changes an order status, and the flag comes back in the response. Replaying that request by hand from a terminal changes the order just as well, but earns nothing — only a request a page fired in your browser counts.",
+    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in as admin and click the button: the page uses your authentication cookie to submit a forged request that changes an order status, and the flag comes back in the response. The endpoint only hands the flag to a request carrying the metadata a browser attaches for a page — a Sec-Fetch-Site header and a Referer that is not the admin dashboard.",
   ],
   "mass-assignment": [
     "The signup form shows you some fields. The API accepts more.",
