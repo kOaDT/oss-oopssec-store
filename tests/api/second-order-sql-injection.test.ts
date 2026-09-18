@@ -30,11 +30,11 @@ describe("Second-Order SQL Injection", () => {
   let adminToken: string;
   let productId: string;
 
-  const storeReview = (author: string) =>
+  const storeReview = (author: string, content = "Great product!") =>
     apiRequest(`/api/products/${productId}/reviews`, {
       method: "POST",
       headers: authHeaders(userToken),
-      body: JSON.stringify({ content: "Great product!", author }),
+      body: JSON.stringify({ content, author }),
     });
 
   const audit = (author?: string) =>
@@ -76,6 +76,20 @@ describe("Second-Order SQL Injection", () => {
     expect((await storeReview(canary)).status).toBe(201);
 
     const { status, data } = await audit(canary);
+
+    expect(status).toBe(200);
+    expect(JSON.stringify(data.reviews)).toContain(canary);
+    expect(data).not.toHaveProperty("flag");
+  });
+
+  it("refuses a canary pasted into a review body under a benign author", async () => {
+    expect((await storeReview(CANARY_PAYLOAD)).status).toBe(201);
+    const extracted = await audit(CANARY_PAYLOAD);
+    const canary = canaryFrom(extracted.data.reviews);
+    const author = "benign-body-carrier";
+    expect((await storeReview(author, canary)).status).toBe(201);
+
+    const { status, data } = await audit(author);
 
     expect(status).toBe(200);
     expect(JSON.stringify(data.reviews)).toContain(canary);
