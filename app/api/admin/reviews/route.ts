@@ -10,10 +10,13 @@ import {
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
-import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
+import {
+  hasExfiltratedCanary,
+  type CanarySlug,
+} from "@/lib/sql-injection-canary";
 import { reviewsAuditQuerySchema } from "@/lib/validation/schemas/admin";
 
-const CANARY_SLUG = "second-order-sql-injection";
+const CANARY_SLUG: CanarySlug = "second-order-sql-injection";
 
 function getDbPath(): string {
   const url = getDatabaseUrl();
@@ -122,13 +125,20 @@ export const GET = withAdminAuth(
           where: { slug: CANARY_SLUG },
         });
 
-        if (hasExfiltratedCanary(reviews, canary, [authorFilter])) {
-          const storedReview = await prisma.review.findFirst({
-            where: { author: authorFilter },
-            select: { id: true },
-          });
+        const storedReviews = await prisma.review.findMany({
+          where: { author: authorFilter },
+          select: { author: true, content: true },
+        });
 
-          if (storedReview) {
+        // A review body is free text anyone can post without an account, and it
+        // reaches the panel untouched. A token pasted there is not exfiltration.
+        const supplied = [
+          authorFilter,
+          ...storedReviews.flatMap((r) => [r.author, r.content]),
+        ];
+
+        if (hasExfiltratedCanary(reviews, canary, supplied)) {
+          if (storedReviews.length > 0) {
             const flag = await prisma.flag.findUnique({
               where: { slug: CANARY_SLUG },
             });
