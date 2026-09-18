@@ -20,9 +20,10 @@ export const generateCanaryToken = (slug: CanarySlug): string =>
 
 /**
  * `supplied` holds the raw request values that reached the SQL string. A token
- * echoed back from one of them proves nothing: the player can paste a token it
- * already knows as a SQL literal, or into a field the route stores and reads
- * back. Only a token the request never carried was read from the table.
+ * echoed back verbatim from one of them proves nothing: the player can paste a
+ * token it already knows as a SQL literal, or into a field the route stores and
+ * reads back. Splitting the token across SQL string concatenation defeats this
+ * check, which is accepted: knowing the token at all means the table was read.
  */
 export const hasExfiltratedCanary = (
   payload: unknown,

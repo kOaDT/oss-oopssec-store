@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { parseQuery } from "@/lib/validation";
 import {
-  isAccessingFlagsTable,
+  isAccessingProtectedTable,
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ products: [] });
     }
 
-    if (isAccessingFlagsTable(query)) {
+    if (isAccessingProtectedTable(query)) {
       return NextResponse.json(
         {
           error:
-            "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
+            "Access to the flags and hints tables is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
           products: [],
         },
         { status: 403 }
