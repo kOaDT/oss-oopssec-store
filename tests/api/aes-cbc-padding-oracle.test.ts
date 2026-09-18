@@ -164,26 +164,29 @@ describe("AES-CBC Padding Oracle", () => {
       const bytes = Buffer.from(shareToken, "hex");
       const cipherBlock = bytes.subarray(16, 32);
 
-      // Bad padding: random IV that almost certainly won't produce valid padding
-      const badPaddingIv = Buffer.from(
-        "00000000000000000000000000000001",
-        "hex"
-      );
-      const badPaddingToken = Buffer.concat([
-        badPaddingIv,
-        cipherBlock,
-      ]).toString("hex");
-      const { status: badPaddingStatus } = await apiRequest(
-        `/api/documents/share?token=${badPaddingToken}`
+      // The share token carries a random IV, so a single chosen IV lands on
+      // valid padding once in ~256 runs. Walking the last IV byte is what the
+      // attack does anyway: it only moves the last plaintext byte, so at most
+      // two of these eight probes can pad correctly.
+      const badPaddingStatuses = await Promise.all(
+        Array.from({ length: 8 }, (_, i) => {
+          const iv = Buffer.alloc(16);
+          iv[15] = i;
+          const token = Buffer.concat([iv, cipherBlock]).toString("hex");
+          return apiRequest(`/api/documents/share?token=${token}`).then(
+            (r) => r.status
+          );
+        })
       );
 
-      // Valid padding: use original IV but flip a non-critical byte
       const { status: validTokenStatus } = await apiRequest(
         `/api/documents/share?token=${shareToken}`
       );
 
       // The oracle: bad padding gives 400, valid token gives 200
-      expect(badPaddingStatus).toBe(400);
+      expect(
+        badPaddingStatuses.filter((s) => s === 400).length
+      ).toBeGreaterThan(5);
       expect(validTokenStatus).toBe(200);
     });
   });
