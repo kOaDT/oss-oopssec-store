@@ -66,14 +66,6 @@ Write anything in the review body and submit. Nothing happens yet — the review
 
 ![Exploit](../../assets/images/second-order-sql-injection/exploit.png)
 
-Only the stored value counts. Passing the same payload straight to `/admin/reviews?author=…` extracts the same rows, but the panel answers:
-
-```json
-{
-  "message": "The canary came back, but no review was ever posted under that author. A second-order injection has to reach the panel from the database, not from the query string."
-}
-```
-
 ### Step 2: Gain admin access
 
 To access the admin panel, you need admin privileges. You can get there through other vulnerabilities in the lab (Mass Assignment, JWT forgery, SQL Injection with Weak MD5, etc).
@@ -81,8 +73,6 @@ To access the admin panel, you need admin privileges. You can get there through 
 ### Step 3: Trigger the injection
 
 Navigate to `/admin/reviews`. The moderation panel lists every review and offers a "Filter by author" dropdown, populated with the distinct author names in the database — yours included.
-
-![Admin Interface with SQL Injection](../../assets/images/second-order-sql-injection/admin-with-sql.png)
 
 Select it. If the column count is wrong, the panel says so, which is how you find out the query returns six of them:
 
@@ -92,9 +82,13 @@ Select it. If the column count is wrong, the panel says so, which is how you fin
 }
 ```
 
+![Admin Interface with SQL Injection](../../assets/images/second-order-sql-injection/admin-with-sql.png)
+
 Each correction means posting a new review with the adjusted display name — the payload only ever arrives through storage.
 
-The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so keep that one for after you have the flag. To recover, run `npm run db:push && npm run db:seed`: `db:push` recreates the missing table, and the seed needs it back before it can read it. Your captured flags survive both steps.
+The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so, if you want to try, keep that one for after you have the flag.
+
+> To recover, run `npm run db:push && npm run db:seed`: `db:push` recreates the missing table, and the seed needs it back before it can read it. Your captured flags survive both steps.
 
 ### Step 4: Enumerate the schema
 
