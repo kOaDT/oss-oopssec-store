@@ -17,8 +17,12 @@ interface UpdateResponse {
   message?: string;
 }
 
-/** What a browser attaches when a page fires the request, unlike a CLI client. */
-const firedByPage = (referer: string) => ({
+/**
+ * The metadata a browser attaches on behalf of a page. Page JavaScript cannot
+ * set these, but any CLI client can, which is how these tests drive the
+ * scenario without a browser: the endpoint reads a shape, not a proof.
+ */
+const browserMetadata = (referer: string) => ({
   Referer: referer,
   "Sec-Fetch-Site": "same-origin",
   "Sec-Fetch-Mode": "cors",
@@ -42,10 +46,10 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
     );
   });
 
-  it("returns the flag when the attacker page fires the request", async () => {
+  it("returns the flag for a request shaped like one an attacker page fired", async () => {
     const { status, data } = await updateStatus(
       "SHIPPED",
-      firedByPage(EXPLOIT_PAGE)
+      browserMetadata(EXPLOIT_PAGE)
     );
 
     expect(status).toBe(200);
@@ -53,14 +57,14 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
     expect(data.order.status).toBe("SHIPPED");
   });
 
-  it("returns the flag for a form-encoded POST from the attacker page", async () => {
+  it("returns the flag for a form-encoded POST shaped like the attacker page's", async () => {
     const { status, data } = await apiRequest<UpdateResponse>(
       `/api/orders/${ORDER_ID}`,
       {
         method: "POST",
         headers: {
           ...authHeaders(adminToken),
-          ...firedByPage(EXPLOIT_PAGE),
+          ...browserMetadata(EXPLOIT_PAGE),
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: "status=CANCELLED",
@@ -71,12 +75,12 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
     expectFlag(data, FLAGS.CROSS_SITE_REQUEST_FORGERY);
   });
 
-  it("does not reward a request no page ever fired", async () => {
+  it("does not reward a request carrying no browser metadata", async () => {
     const { status, data } = await updateStatus("DELIVERED");
 
     expect(status).toBe(200);
     expect(data).not.toHaveProperty("flag");
-    expect(data.message).toContain("nothing says a page fired this request");
+    expect(data.message).toContain("carries none of the metadata");
   });
 
   it("still updates the order without any anti-CSRF check, flag or not", async () => {
@@ -86,10 +90,10 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
     expect(data.order.status).toBe("PROCESSING");
   });
 
-  it("does not reward the admin dashboard doing its own job", async () => {
+  it("does not reward a Referer pointing at the admin dashboard", async () => {
     const { status, data } = await updateStatus(
       "PENDING",
-      firedByPage("http://localhost:3000/admin/orders")
+      browserMetadata("http://localhost:3000/admin/orders")
     );
 
     expect(status).toBe(200);
@@ -105,7 +109,7 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
 
     const { status } = await apiRequest(`/api/orders/${ORDER_ID}`, {
       method: "PATCH",
-      headers: { ...authHeaders(token), ...firedByPage(EXPLOIT_PAGE) },
+      headers: { ...authHeaders(token), ...browserMetadata(EXPLOIT_PAGE) },
       body: JSON.stringify({ status: "SHIPPED" }),
     });
 
@@ -113,7 +117,10 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
   });
 
   it("rejects an invalid status", async () => {
-    const { status } = await updateStatus("INVALID", firedByPage(EXPLOIT_PAGE));
+    const { status } = await updateStatus(
+      "INVALID",
+      browserMetadata(EXPLOIT_PAGE)
+    );
 
     expect(status).toBe(400);
   });
