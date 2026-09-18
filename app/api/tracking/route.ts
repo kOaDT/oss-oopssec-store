@@ -7,10 +7,13 @@ import {
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
-import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
+import {
+  hasExfiltratedCanary,
+  type CanarySlug,
+} from "@/lib/sql-injection-canary";
 import { trackingBodySchema } from "@/lib/validation/schemas/tracking";
 
-const CANARY_SLUG = "x-forwarded-for-sql-injection";
+const CANARY_SLUG: CanarySlug = "x-forwarded-for-sql-injection";
 
 export async function POST(request: NextRequest) {
   try {
