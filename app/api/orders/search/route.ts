@@ -4,7 +4,7 @@ import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
 import {
-  isAccessingFlagsTable,
+  isAccessingProtectedTable,
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
@@ -22,11 +22,11 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     if (!parsed.success) return parsed.response;
     const { status } = parsed.data;
 
-    if (status && isAccessingFlagsTable(status)) {
+    if (status && isAccessingProtectedTable(status)) {
       return NextResponse.json(
         {
           error:
-            "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
+            "Access to the flags and hints tables is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
           orders: [],
         },
         { status: 403 }

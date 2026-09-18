@@ -76,7 +76,9 @@ describe("SQL Injection - Product Search", () => {
     const { status, data } = await search("' UNION SELECT flag FROM flags --");
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("blocks the flags table even when the name is schema-qualified", async () => {
@@ -85,7 +87,20 @@ describe("SQL Injection - Product Search", () => {
     );
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
+  });
+
+  it("blocks the hints table, which would hand over every walkthrough", async () => {
+    const { status, data } = await search(
+      union("group_concat(content)", "FROM hints", "--")
+    );
+
+    expect(status).toBe(403);
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("searches the catalogue without returning a flag", async () => {

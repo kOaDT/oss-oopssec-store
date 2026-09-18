@@ -6,7 +6,7 @@ import { getDatabaseUrl } from "@/lib/database";
 import { logger } from "@/lib/logger";
 import { parseQuery } from "@/lib/validation";
 import {
-  isAccessingFlagsTable,
+  isAccessingProtectedTable,
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
@@ -39,11 +39,11 @@ export const GET = withAdminAuth(
 
       const distinctAuthors = authors.map((a) => a.author);
 
-      if (authorFilter && isAccessingFlagsTable(authorFilter)) {
+      if (authorFilter && isAccessingProtectedTable(authorFilter)) {
         return NextResponse.json(
           {
             error:
-              "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
+              "Access to the flags and hints tables is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
             reviews: [],
             authors: distinctAuthors,
           },

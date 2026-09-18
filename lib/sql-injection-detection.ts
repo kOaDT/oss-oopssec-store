@@ -29,13 +29,15 @@ export function isSQLInjectionAttempt(input: string): boolean {
 }
 
 /**
- * Any mention of the table, whatever the quoting or the punctuation that
- * follows: a stored payload reaching `exec()` can drop it outright, and
- * `found_flags` cascades away with it. The underscore in `found_flags` breaks
- * the word boundary, so player progress stays reachable.
+ * Any mention of either table, whatever the quoting or the punctuation that
+ * follows: a stored payload reaching `exec()` can drop one outright, and
+ * `found_flags` cascades away with it. `hints` holds the level 3 solutions, so
+ * one `group_concat` would hand over every walkthrough at once. The underscore
+ * in `found_flags` and `revealed_hints` breaks the word boundary, so player
+ * progress stays reachable.
  */
-export function isAccessingFlagsTable(input: string): boolean {
-  return /\bFLAGS\b/.test(input.toUpperCase());
+export function isAccessingProtectedTable(input: string): boolean {
+  return /\b(FLAGS|HINTS)\b/.test(input.toUpperCase());
 }
 
 /**

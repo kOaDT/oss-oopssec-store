@@ -96,7 +96,7 @@ describe("SQL Injection - X-Forwarded-For", () => {
 
     expect(status).toBe(403);
     expect((data as unknown as { error: string }).error).toContain(
-      "Access to flags table is not allowed"
+      "Access to the flags and hints tables is not allowed"
     );
   });
 
@@ -106,7 +106,9 @@ describe("SQL Injection - X-Forwarded-For", () => {
     );
 
     expect(status).toBe(403);
-    expect(data.error).toContain("Access to flags table is not allowed");
+    expect(data.error).toContain(
+      "Access to the flags and hints tables is not allowed"
+    );
   });
 
   it("logs a normal visit without returning a flag", async () => {

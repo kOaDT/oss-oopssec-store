@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
 import {
-  isAccessingFlagsTable,
+  isAccessingProtectedTable,
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
     const visitPath = path || "/";
     const visitorSessionId = sessionId || null;
 
-    if (forwardedFor && isAccessingFlagsTable(forwardedFor)) {
+    if (forwardedFor && isAccessingProtectedTable(forwardedFor)) {
       return NextResponse.json(
         {
           error:
-            "Access to flags table is not allowed... Nice try though! The flag is hidden elsewhere...",
+            "Access to the flags and hints tables is not allowed... Nice try though! The flag is hidden elsewhere...",
           success: false,
         },
         { status: 403 }
