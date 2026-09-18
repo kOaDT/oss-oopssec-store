@@ -93,8 +93,6 @@ Getting the column count wrong is just as informative, because SQLite's error co
 
 Five columns it is.
 
-![SQL injection payload submitted in search box](../../assets/images/product-search-sql-injection/sql-injection-test.png)
-
 ### UNION-based data extraction
 
 Time to pull real data. Submit this:
@@ -134,8 +132,6 @@ users,products,carts,cart_items,orders,order_items,addresses,flags,hints,reveale
 ```sql
 CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT NULL, "token" TEXT NOT NULL)
 ```
-
-One row per injection challenge, keyed by the challenge slug.
 
 ### Claiming the flag
 
