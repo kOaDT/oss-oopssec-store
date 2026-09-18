@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const id = crypto.randomUUID();
     const query = `
       INSERT INTO visitor_logs (id, ip, userAgent, path, sessionId, createdAt)
-      VALUES ('${id}', '${ip}', '${userAgent.replace(/'/g, "''")}', '${visitPath.replace(/'/g, "''")}', ${visitorSessionId ? `'${visitorSessionId}'` : "NULL"}, datetime('now'))
+      VALUES ('${id}', '${ip}', '${userAgent.replace(/'/g, "''")}', '${visitPath.replace(/'/g, "''")}', ${visitorSessionId ? `'${visitorSessionId.replace(/'/g, "''")}'` : "NULL"}, datetime('now'))
     `;
 
     let sqlError: string | null = null;
