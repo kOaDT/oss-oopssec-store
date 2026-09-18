@@ -7,10 +7,13 @@ import {
   isSQLInjectionAttempt,
   stripFlagValues,
 } from "@/lib/sql-injection-detection";
-import { hasExfiltratedCanary } from "@/lib/sql-injection-canary";
+import {
+  hasExfiltratedCanary,
+  type CanarySlug,
+} from "@/lib/sql-injection-canary";
 import { productSearchQuerySchema } from "@/lib/validation/schemas/products";
 
-const CANARY_SLUG = "product-search-sql-injection";
+const CANARY_SLUG: CanarySlug = "product-search-sql-injection";
 
 export async function GET(request: NextRequest) {
   try {
