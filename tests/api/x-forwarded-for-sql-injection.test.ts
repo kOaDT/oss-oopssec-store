@@ -9,10 +9,10 @@ interface TrackingResponse {
   message?: string;
 }
 
-const track = (forwardedFor?: string) =>
+const track = (forwardedFor?: string, sessionId = "test") =>
   apiRequest<TrackingResponse>("/api/tracking", {
     method: "POST",
-    body: JSON.stringify({ path: "/", sessionId: "test" }),
+    body: JSON.stringify({ path: "/", sessionId }),
     headers: forwardedFor ? { "X-Forwarded-For": forwardedFor } : {},
   });
 
@@ -50,7 +50,7 @@ describe("SQL Injection - X-Forwarded-For", () => {
 
   it("logs back only the row this request created", async () => {
     const responses = await Promise.all(
-      ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4"].map(track)
+      ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4"].map((ip) => track(ip))
     );
 
     for (const { data } of responses) {
@@ -118,5 +118,26 @@ describe("SQL Injection - X-Forwarded-For", () => {
     expect(data.success).toBe(true);
     expect(data.logged).toHaveLength(1);
     expect(data).not.toHaveProperty("flag");
+  });
+
+  it("stores a sessionId as a literal instead of running it as SQL", async () => {
+    const payload =
+      "x'||(SELECT group_concat(slug||token) FROM internal_secrets)||'";
+    const { status, data } = await track(undefined, payload);
+
+    expect(status).toBe(200);
+    expect(data.logged[0].sessionId).toBe(payload);
+    expect(JSON.stringify(data.logged)).not.toContain("CANARY-");
+    expect(data).not.toHaveProperty("flag");
+  });
+
+  it("keeps the flags table out of a response driven by the sessionId", async () => {
+    const { status, data } = await track(
+      undefined,
+      "x'||(SELECT group_concat(replace(flag,'OSS{','~')) FROM flags)||'"
+    );
+
+    expect(status).toBe(200);
+    expect(JSON.stringify(data.logged)).not.toMatch(/~[a-z0-9_]+}/);
   });
 });
