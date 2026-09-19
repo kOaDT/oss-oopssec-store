@@ -213,6 +213,14 @@ model ProjectInit {
   @@map("project_init")
 }
 
+model InternalSecret {
+  id    String @id @default(cuid())
+  slug  String @unique
+  token String
+
+  @@map("internal_secrets")
+}
+
 model VisitorLog {
   id        String   @id @default(cuid())
   ip        String

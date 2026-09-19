@@ -455,7 +455,7 @@ export const flagHints: Record<string, string[]> = {
   "cross-site-request-forgery": [
     "Sometimes the most dangerous links are the ones you can't see.",
     "The admin dashboard hints at hidden content. Inspect the page source for links styled with display:none, one leads to a proof-of-concept demonstration.",
-    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in as admin. The page uses your authentication cookie to submit a forged request that changes an order status, and the flag is returned in the response.",
+    "View the source of the admin page and find the hidden link to /exploits/csrf-attack.html. Visit it while logged in as admin and click the button: the page uses your authentication cookie to submit a forged request that changes an order status, and the flag comes back in the response. The endpoint only hands the flag to a request carrying the metadata a browser attaches for a page — a Sec-Fetch-Site header and a Referer that is not the admin dashboard.",
   ],
   "mass-assignment": [
     "The signup form shows you some fields. The API accepts more.",
@@ -473,14 +473,14 @@ export const flagHints: Record<string, string[]> = {
     "Submit a support request with the screenshotUrl field pointing to an internal endpoint like http://localhost:3000/internal. The server fetches it with an internal request header and returns the response content to you.",
   ],
   "sql-injection": [
-    "The search speaks SQL if you ask it nicely.",
-    "The order search endpoint constructs SQL queries by concatenating user input directly. The status filter is not parameterized.",
-    "Send a POST to /api/orders/search with a crafted 'status' field containing SQL syntax. A UNION-based injection like ' UNION SELECT ... FROM users -- can extract data from other tables. Watch out for server-side keyword filters.",
+    "The order list only ever shows you your own orders. The filter behind it is far less strict.",
+    "The status filter is concatenated into a raw query, so the result set is yours to extend — other customers' orders included. That alone is not the flag: it waits in a table no order search would ever join.",
+    "POST to /api/orders/search with a status that closes the quote and appends a UNION SELECT. The order query returns nine columns, and SQLite says so when the count is wrong. Enumerate sqlite_master through that UNION to find the internal_secrets table, then return its token for slug 'sql-injection' in one of the nine columns.",
   ],
   "product-search-sql-injection": [
-    "The search bar understands more languages than you'd expect.",
-    "Product search queries are built using string concatenation with the user's search term. The input lands directly inside a SQL LIKE clause.",
-    "Search for a term containing SQL syntax, even a simple ' UNION SELECT-- in the q parameter at /api/products/search will be detected as injection. The server rewards the attempt by including the flag in its response.",
+    "The search bar understands more languages than you'd expect, and it answers in SQL errors.",
+    "The search term lands inside a LIKE clause built by string concatenation, so the results list is yours to extend. The catalogue holds nothing worth stealing: the flag waits on a row no product search would ever return.",
+    "Close the LIKE clause in the q parameter at /api/products/search and append a UNION SELECT. The catalogue query returns five columns, and SQLite says so when the count is wrong. Read sqlite_master through that UNION to find the internal_secrets table, then return its token for slug 'product-search-sql-injection' as one of the five columns.",
   ],
   "session-fixation-weak-session-management": [
     "Support access might be a bit too... generous.",
@@ -503,9 +503,9 @@ export const flagHints: Record<string, string[]> = {
     "CVE-2025-55182 affects React 19.x's Flight protocol used in Server Components. The vulnerability exploits unsafe deserialization to achieve prototype pollution and then RCE. Look up the public PoC and send a crafted payload to the server's root endpoint.",
   ],
   "x-forwarded-for-sql-injection": [
-    "Logs eat whatever headers you feed them.",
-    "The visitor tracking system records HTTP headers in a database. Not all headers go through sanitization before being inserted into SQL queries.",
-    "Send a POST request to /api/tracking and include SQL syntax in the X-Forwarded-For header. The server inserts this header value directly into an INSERT query on the visitor_logs table. Any SQL keyword in the header triggers injection detection and reveals the flag.",
+    "Logs eat whatever headers you feed them, and hand back what they swallowed.",
+    "The visitor tracker builds its INSERT by concatenating the X-Forwarded-For header, then echoes the row it just stored. A keyword alone proves nothing: the flag needs a value read from a table the tracker never touches.",
+    "POST to /api/tracking with an X-Forwarded-For header that closes the VALUES list early. Enumerate sqlite_master through the stored row to find the internal_secrets table, then log (SELECT token FROM internal_secrets WHERE slug='x-forwarded-for-sql-injection') into one of the columns. The flag drops when the echoed visit carries that token.",
   ],
   "prompt-injection-ai-assistant": [
     "The AI assistant knows more than it's supposed to share.",
@@ -524,8 +524,8 @@ export const flagHints: Record<string, string[]> = {
   ],
   "second-order-sql-injection": [
     "Not all inputs are dangerous when they first arrive. Sometimes the poison sits in the well, waiting.",
-    "The review form lets you choose a display name. That name is stored safely, but the admin moderation panel reuses it in a way the developer assumed was safe because the data came from the application's own database.",
-    "Submit a product review with a SQL payload as your display name (e.g., '; DROP TABLE reviews; --). Then access the admin review moderation page at /admin/reviews and filter by that author. The backend interpolates the stored author into a raw SQL query via $queryRawUnsafe, triggering injection detection and revealing the flag.",
+    "The review form lets you choose a display name. That name is stored safely, but the admin moderation panel rebuilds a raw query from it, trusting it because it came from its own database. The panel only ever reports on names it already stores, and the flag is not in the reviews: it sits in a table that query never joins.",
+    "Post a product review whose display name closes the author filter and appends a UNION SELECT over the panel's six columns: x' UNION SELECT 1, 2, token, 4, 5, 6 FROM internal_secrets WHERE slug='second-order-sql-injection' --. Then filter by that author at /admin/reviews. The panel rebuilds its query from the stored name and hands back the canary.",
   ],
   "plaintext-password-in-logs": [
     "What the server writes down in private might not stay private forever.",

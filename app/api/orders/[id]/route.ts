@@ -133,9 +133,14 @@ const updateOrderStatus = async (
       },
     });
 
+    // The update above runs whatever the request looks like: the missing CSRF
+    // protection is the vulnerability. What follows only reads the metadata a
+    // browser attaches on behalf of a page. Any client can set those headers;
+    // they mark the intended path, they do not authenticate it.
     const referer = request.headers.get("referer");
-
-    const isFromAdminDashboard = referer?.includes("/admin") ?? false;
+    const hasBrowserMetadata =
+      referer !== null && request.headers.get("sec-fetch-site") !== null;
+    const firedByAdminUi = referer?.includes("/admin") ?? false;
 
     const response: {
       success: boolean;
@@ -144,6 +149,7 @@ const updateOrderStatus = async (
         status: string;
       };
       flag?: string;
+      message?: string;
     } = {
       success: true,
       order: {
@@ -152,13 +158,18 @@ const updateOrderStatus = async (
       },
     };
 
-    if (!isFromAdminDashboard) {
+    if (hasBrowserMetadata && !firedByAdminUi) {
       const csrfFlag = await prisma.flag.findUnique({
         where: { slug: "cross-site-request-forgery" },
       });
       if (csrfFlag) {
         response.flag = csrfFlag.flag;
+        response.message =
+          "An authenticated admin action, triggered by a page the admin never meant to trust. Well done!";
       }
+    } else if (!hasBrowserMetadata) {
+      response.message =
+        "The order status changed, but the request carries none of the metadata a browser attaches on behalf of a page: no Sec-Fetch headers, no Referer. Have the victim's browser fire it from a page it should never have trusted.";
     }
 
     return NextResponse.json(response);

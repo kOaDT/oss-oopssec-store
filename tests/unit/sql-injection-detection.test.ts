@@ -1,4 +1,8 @@
-import { isSQLInjectionAttempt } from "../../lib/sql-injection-detection";
+import {
+  isAccessingProtectedTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "../../lib/sql-injection-detection";
 
 describe("isSQLInjectionAttempt (SQL injection heuristic)", () => {
   it("matches the canonical walkthrough payloads", () => {
@@ -55,5 +59,74 @@ describe("isSQLInjectionAttempt (SQL injection heuristic)", () => {
     expect(isSQLInjectionAttempt("SP_HELP")).toBe(false);
     // "XP_" is upper case in the list, so it does match.
     expect(isSQLInjectionAttempt("xp_cmdshell")).toBe(true);
+  });
+});
+
+describe("isAccessingProtectedTable (flags and hints guard)", () => {
+  it("blocks the flags table whatever the quoting or spacing", () => {
+    expect(isAccessingProtectedTable("' UNION SELECT flag FROM flags --")).toBe(
+      true
+    );
+    expect(
+      isAccessingProtectedTable("' UNION SELECT flag FROM`flags` --")
+    ).toBe(true);
+    expect(
+      isAccessingProtectedTable("' UNION SELECT flag FROM flags WHERE 1=1")
+    ).toBe(true);
+    expect(
+      isAccessingProtectedTable("' UNION SELECT f.flag FROM main.flags f")
+    ).toBe(true);
+    expect(isAccessingProtectedTable("' JOIN flags ON 1=1 --")).toBe(true);
+  });
+
+  it("blocks dropping the table, whatever follows the name", () => {
+    expect(isAccessingProtectedTable("x'; DROP TABLE flags; --")).toBe(true);
+    expect(isAccessingProtectedTable("x'; DROP TABLE flags;--")).toBe(true);
+    expect(isAccessingProtectedTable("x'; DROP TABLE `flags`; --")).toBe(true);
+  });
+
+  it("blocks the hints table, which holds the level 3 solutions", () => {
+    expect(
+      isAccessingProtectedTable("' UNION SELECT content FROM hints --")
+    ).toBe(true);
+    expect(
+      isAccessingProtectedTable(
+        "' UNION SELECT group_concat(content) FROM hints--"
+      )
+    ).toBe(true);
+    expect(isAccessingProtectedTable("x'; DROP TABLE `hints`; --")).toBe(true);
+  });
+
+  it("leaves the canary table and ordinary input alone", () => {
+    expect(
+      isAccessingProtectedTable("' UNION SELECT token FROM internal_secrets --")
+    ).toBe(false);
+    expect(isAccessingProtectedTable("192.168.1.10")).toBe(false);
+    expect(
+      isAccessingProtectedTable("' UNION SELECT flagId FROM found_flags --")
+    ).toBe(false);
+    expect(
+      isAccessingProtectedTable("' UNION SELECT hintId FROM revealed_hints --")
+    ).toBe(false);
+    expect(isAccessingProtectedTable("x'; DROP TABLE reviews; --")).toBe(false);
+  });
+});
+
+describe("stripFlagValues (response sanitizer)", () => {
+  it("removes flag values but keeps the row's other columns", () => {
+    expect(
+      stripFlagValues([{ id: "1", leaked: "OSS{s0m3_fl4g}", name: "Bread" }])
+    ).toEqual([{ id: "1", name: "Bread" }]);
+  });
+
+  it("keeps schema enumeration readable", () => {
+    const tables = "reviews,flags,hints,internal_secrets";
+    expect(stripFlagValues([{ userAgent: tables }])).toEqual([
+      { userAgent: tables },
+    ]);
+  });
+
+  it("drops a row that carried nothing but a flag value", () => {
+    expect(stripFlagValues([{ leaked: "OSS{s0m3_fl4g}" }])).toEqual([]);
   });
 });

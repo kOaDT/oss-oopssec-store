@@ -3,8 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
-import { isSQLInjectionAttempt } from "@/lib/sql-injection-detection";
+import {
+  isAccessingProtectedTable,
+  isSQLInjectionAttempt,
+  stripFlagValues,
+} from "@/lib/sql-injection-detection";
+import {
+  hasExfiltratedCanary,
+  type CanarySlug,
+} from "@/lib/sql-injection-canary";
 import { orderSearchBodySchema } from "@/lib/validation/schemas/orders";
+
+const CANARY_SLUG: CanarySlug = "sql-injection";
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
@@ -12,43 +22,15 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     if (!parsed.success) return parsed.response;
     const { status } = parsed.data;
 
-    let flag: string | null = null;
-    let sqlInjectionDetected = false;
-
-    if (status) {
-      sqlInjectionDetected = isSQLInjectionAttempt(status);
-      const upperStatus = status.toUpperCase();
-      const normalizedStatus = upperStatus.replace(/\s+/g, " ");
-      const isAccessingFlagsTable =
-        normalizedStatus.includes("FROM FLAGS") ||
-        normalizedStatus.includes("FROM`FLAGS`") ||
-        normalizedStatus.includes('FROM"FLAGS"') ||
-        normalizedStatus.includes("JOIN FLAGS") ||
-        normalizedStatus.includes("JOIN`FLAGS`") ||
-        normalizedStatus.includes('JOIN"FLAGS"') ||
-        normalizedStatus.includes("FLAGS WHERE") ||
-        normalizedStatus.includes("FLAGS.") ||
-        /FLAGS\s*[,\s]/.test(normalizedStatus);
-
-      if (isAccessingFlagsTable) {
-        return NextResponse.json(
-          {
-            error:
-              "Access to flags table is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
-            orders: [],
-          },
-          { status: 403 }
-        );
-      }
-
-      if (sqlInjectionDetected) {
-        const sqlInjectionFlag = await prisma.flag.findUnique({
-          where: { slug: "sql-injection" },
-        });
-        if (sqlInjectionFlag) {
-          flag = sqlInjectionFlag.flag;
-        }
-      }
+    if (status && isAccessingProtectedTable(status)) {
+      return NextResponse.json(
+        {
+          error:
+            "Access to the flags and hints tables is not allowed... Well, that's a shame... You'll have to find another way to get them all...",
+          orders: [],
+        },
+        { status: 403 }
+      );
     }
 
     const statusFilter = status ? `AND o.status = '${status}'` : "";
@@ -72,31 +54,23 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
 
     let results: Record<string, unknown>[] = [];
     try {
-      const queryResults = (await prisma.$queryRawUnsafe(query)) as Record<
-        string,
-        unknown
-      >[];
-
-      results = queryResults
-        .map((row: Record<string, unknown>) => {
-          const result: Record<string, unknown> = {};
-          for (const key in row) {
-            const value = row[key];
-            if (
-              typeof value === "string" &&
-              (value.toLowerCase().includes("flags") ||
-                value.toLowerCase().includes("flag"))
-            ) {
-              continue;
-            }
-            result[key] = value;
-          }
-          return result;
-        })
-        .filter((row) => Object.keys(row).length > 0);
+      results = stripFlagValues(
+        (await prisma.$queryRawUnsafe(query)) as Record<string, unknown>[]
+      );
     } catch (error) {
-      throw error;
+      logger.error({ err: error, route: "/api/orders/search" }, "Query error");
+      return NextResponse.json(
+        {
+          error: error instanceof Error ? error.message : "Search failed",
+          orders: [],
+        },
+        { status: 500 }
+      );
     }
+
+    const canary = await prisma.internalSecret.findUnique({
+      where: { slug: CANARY_SLUG },
+    });
 
     const response: {
       orders: Record<string, unknown>[];
@@ -106,9 +80,19 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
       orders: results,
     };
 
-    if (sqlInjectionDetected && flag && results.length > 0) {
-      response.flag = flag;
-      response.message = "SQL injection detected";
+    if (hasExfiltratedCanary(results, canary, [status ?? ""])) {
+      const flag = await prisma.flag.findUnique({
+        where: { slug: CANARY_SLUG },
+      });
+      if (flag) {
+        response.flag = flag.flag;
+        response.message =
+          "Internal secret exfiltrated through the order search! Well done!";
+      }
+    } else if (status && isSQLInjectionAttempt(status)) {
+      response.message =
+        "SQL syntax detected in the status filter." +
+        " The flag tracks one specific internal secret, and it is not in these rows.";
     }
 
     return NextResponse.json(response);
