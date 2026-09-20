@@ -76,7 +76,9 @@ describe("assertDatabaseIsCurrent", () => {
 
     await expect(assertDatabaseIsCurrent()).resolves.toBeUndefined();
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("1 of the 4 SQL injection canaries are missing")
+      expect.stringContaining(
+        `1 of the ${CANARY_SLUGS.length} SQL injection canaries are missing`
+      )
     );
 
     warn.mockRestore();

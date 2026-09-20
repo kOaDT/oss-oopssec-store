@@ -90,6 +90,8 @@ export const assertDatabaseIsCurrent = async (): Promise<void> => {
     where: { slug: { in: [...CANARY_SLUGS] } },
   });
 
+  // A warning rather than a throw: a lab missing its canaries still serves
+  // every other challenge, so refusing to boot costs more than it saves.
   if (canaries < CANARY_SLUGS.length) {
     console.warn(
       `${CANARY_SLUGS.length - canaries} of the ${CANARY_SLUGS.length} SQL injection canaries are missing, so their flags cannot be claimed. Run \`npm run db:upgrade\` to mint them.`
