@@ -34,6 +34,9 @@ export default function ReviewsClient() {
 
   const fetchReviews = useCallback(
     async (author?: string) => {
+      setError(null);
+      setFlag(null);
+
       try {
         const url = author
           ? `/api/admin/reviews?author=${encodeURIComponent(author)}`
