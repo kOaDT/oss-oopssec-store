@@ -82,9 +82,9 @@ Select it. If the column count is wrong, the panel says so, which is how you fin
 }
 ```
 
-![Admin Interface with SQL Injection](../../assets/images/second-order-sql-injection/admin-with-sql.png)
-
 Each correction means posting a new review with the adjusted display name — the payload only ever arrives through storage.
+
+![The six-column probe lands, and the injected row shows up in the table](../../assets/images/second-order-sql-injection/admin-with-sql.png)
 
 The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so, if you want to try, keep that one for after you have the flag.
 
