@@ -146,6 +146,7 @@ The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orde
 - [Installation](#installation)
   - [Quick start (npm)](#quick-start)
   - [Docker](#docker)
+  - [Updating an existing install](#updating-an-existing-install)
 - [Hall of fame](#hall-of-fame)
 - [Community](#community)
 - [Project structure](#project-structure)
@@ -250,6 +251,21 @@ docker compose down -v    # Stop and wipe data for a fresh start
 With npm installed, the same four are `npm run docker:up`, `docker:logs`, `docker:down` and `docker:reset`.
 
 The database initializes on first start. Data persists across restarts via Docker named volumes, including flag progress, users and uploads.
+
+### Updating an existing install
+
+A new version usually brings new challenges, and with them tables and rows your database has never seen. Catch up without starting over:
+
+```bash
+npm run db:upgrade             # local clone
+docker compose up -d --build   # Docker: the entrypoint upgrades on start
+```
+
+This regenerates the client, pushes the schema, then re-applies the rows every install needs — flags, hints and the SQL injection canaries. Your orders, captured flags, users and uploads are left untouched; tokens already minted keep their value.
+
+What it does not carry over is the demo catalogue: rows added to `prisma/seed.ts` only ever reach a fresh install, and replaying the full seed would recreate your orders.
+
+The app refuses to start against a database that is a schema behind, and names the command to run. To wipe everything instead and start fresh, use `npm run docker:reset` (Docker) or `npm run setup` (local clone).
 
 ## Hall of fame
 
