@@ -136,7 +136,7 @@ The `userAgent` column now holds whatever sub-query we put in the second slot. W
 }
 ```
 
-The same slot accepts a literal, which is the shortest proof the injection runs — visible afterwards at `/admin/analytics`:
+The `ip` slot takes a literal too, by the other route: concatenating into the value instead of closing the list. It is the shortest proof the injection runs — visible afterwards at `/admin/analytics`:
 
 ```bash
 curl -X POST http://localhost:3000/api/tracking \
