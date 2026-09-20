@@ -8,6 +8,12 @@ if [ ! -f "$DB_FILE" ]; then
   npx prisma db push --skip-generate
   npx tsx prisma/seed.ts
   echo "Database initialized successfully."
+else
+  # A pulled image brings models and challenges the mounted volume never saw.
+  # Replaying the whole seed would reset orders, so only the additive rows.
+  echo "Existing database found: applying pending upgrades..."
+  npm run db:upgrade
+  echo "Database up to date."
 fi
 
 echo ""

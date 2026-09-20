@@ -71,6 +71,7 @@ npm run db:push              # Push schema changes
 npm run db:migrate           # Run migrations
 npm run db:studio            # Open Prisma Studio
 npm run db:seed              # Seed database with flags
+npm run db:upgrade           # Push schema + replay challenge data (keeps player progress)
 
 # Setup
 npm run setup                # Full setup (env, deps, seed)
@@ -128,7 +129,7 @@ Full walkthrough in `CONTRIBUTING.md` ("Adding a challenge"). In order:
 
 1. Add the flag to the `flags` array in `prisma/flags.ts` (`OSS{...}` format, kebab-case `slug`, `markdownFile`, `walkthroughSlug`, `category`, `difficulty`, optional `cve` / `cwe` / `owasp`).
 2. Add exactly 3 hints in the `flagHints` map of the same file, keyed by slug, levels 1→3 from vague to near-solution.
-3. Implement the vulnerable path and make it reachable from the UI. Seed any supporting data in `prisma/seed.ts`; run `npm run db:generate && npm run db:push` after a schema change. Return the flag via `prisma.flag.findUnique`, never a hardcoded string.
+3. Implement the vulnerable path and make it reachable from the UI. Seed any supporting data in `seedChallengeData` (`prisma/challenge-data.ts`), so `npm run db:upgrade` carries it to installs already in use; run `npm run db:generate && npm run db:push` after a schema change. Return the flag via `prisma.flag.findUnique`, never a hardcoded string.
 4. Create the in-app reference doc in `content/vulnerabilities/` — overview, why dangerous, vulnerable code, secure implementation, references. **No exploitation steps, payloads, or flag value** (the parity suite rejects a flag value in this folder).
 5. Add regression tests asserting the _vulnerable_ behaviour: the flag value in `tests/helpers/flags.ts`, an exploitation scenario in `tests/api/`, a UI flow in `cypress/e2e/` when relevant.
 6. Add the walkthrough in `docs/src/data/blog/` (Astro site) — this is where exploit details, payloads and screenshots belong. The post must exist for the docs build to pass; an unfinished one can ship as `draft: true`.
@@ -140,7 +141,7 @@ Special cases: a new `FlagCategory` must be added to `prisma/schema.prisma`, `li
 ### CTF Flag System
 
 - Format: `OSS{...}`
-- Source of truth: `prisma/flags.ts` (`flags` + `flagHints`), consumed by `prisma/seed.ts`
+- Source of truth: `prisma/flags.ts` (`flags` + `flagHints`), consumed by `prisma/challenge-data.ts`, which both `prisma/seed.ts` and `npm run db:upgrade` go through
 - Model: `Flag` with `flag`, `slug`, `category`, `difficulty`, `markdownFile`, `walkthroughSlug` (optional), `cve` (optional), `cwe` (optional), `owasp` (optional)
 - Categories: the `FlagCategory` enum — INJECTION, AUTHENTICATION, AUTHORIZATION, REQUEST_FORGERY, INFORMATION_DISCLOSURE, INPUT_VALIDATION, CRYPTOGRAPHIC, REMOTE_CODE_EXECUTION, INSECURE_DESIGN, SUPPLY_CHAIN, OTHER
 - Difficulty: EASY, MEDIUM, HARD
@@ -161,6 +162,7 @@ Special cases: a new `FlagCategory` must be added to `prisma/schema.prisma`, `li
 | RevealedHint       | Tracks which hints have been revealed        |
 | Review             | Product reviews                              |
 | SupportAccessToken | Support access tokens                        |
+| InternalSecret     | SQL injection canaries, one per challenge    |
 
 ## Environment Variables
 
