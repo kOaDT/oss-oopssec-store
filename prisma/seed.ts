@@ -1,30 +1,15 @@
-import { config } from "dotenv";
-import { PrismaClient } from "../lib/generated/prisma/client";
-import { getDatabaseUrl } from "../lib/database";
 import crypto from "crypto";
 import { generateInvoice } from "../lib/invoice";
 import { generateGiftCardCode } from "../lib/gift-card";
 import { OFFICIAL_VIDEO_ID, STREAM_DEFAULTS } from "../lib/live-stream";
 import { ensurePartnerSigningKey } from "../lib/partner-keys";
 import { SANDBOX_SUPPLIER_ID } from "../lib/partner-directory";
-import { flags, flagHints } from "./flags";
-import { CANARY_SLUGS, generateCanaryToken } from "../lib/sql-injection-canary";
-
-config();
+import { prisma } from "./seed-client";
+import { seedChallengeData } from "./challenge-data";
 
 const hashMD5 = (text: string): string => {
   return crypto.createHash("md5").update(text).digest("hex");
 };
-
-const databaseUrl = getDatabaseUrl();
-
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: databaseUrl,
-    },
-  },
-});
 
 async function main() {
   console.log("Seeding database...");
@@ -379,32 +364,7 @@ async function main() {
     console.log("Reviews already exist, skipping review creation");
   }
 
-  for (const flag of flags) {
-    await prisma.flag.upsert({
-      where: { slug: flag.slug },
-      update: flag,
-      create: flag,
-    });
-  }
-
-  console.log(`Created ${flags.length} flags`);
-
-  for (const [slug, hints] of Object.entries(flagHints)) {
-    const flag = await prisma.flag.findUnique({ where: { slug } });
-    if (!flag) continue;
-
-    for (let i = 0; i < hints.length; i++) {
-      await prisma.hint.upsert({
-        where: {
-          flagId_level: { flagId: flag.id, level: i + 1 },
-        },
-        update: { content: hints[i] },
-        create: { flagId: flag.id, level: i + 1, content: hints[i] },
-      });
-    }
-  }
-
-  console.log(`Created hints for ${Object.keys(flagHints).length} flags`);
+  await seedChallengeData(prisma);
 
   const bobOrderIds = ["ORD-001", "ORD-002", "ORD-003"];
 
@@ -562,16 +522,6 @@ async function main() {
   } else {
     console.log("Visitor logs already exist, skipping visitor log creation");
   }
-
-  await prisma.internalSecret.deleteMany({});
-  await prisma.internalSecret.createMany({
-    data: CANARY_SLUGS.map((slug) => ({
-      slug,
-      token: generateCanaryToken(slug),
-    })),
-  });
-
-  console.log(`Created ${CANARY_SLUGS.length} SQL injection canaries`);
 
   const existingWishlists = await prisma.wishlist.findFirst();
 
