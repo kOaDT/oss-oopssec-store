@@ -1,4 +1,5 @@
-import { seedCanaries } from "../../prisma/challenge-data";
+import { seedCanaries, seedChallengeData } from "../../prisma/challenge-data";
+import { flags, flagHints } from "../../prisma/flags";
 import { CANARY_SLUGS } from "../../lib/sql-injection-canary";
 import type { PrismaClient } from "../../lib/generated/prisma/client";
 
@@ -91,5 +92,119 @@ describe("seedCanaries", () => {
     await seedCanaries(db.client);
 
     expect(db.rows().map((row) => row.slug)).not.toContain("retired-injection");
+  });
+});
+
+interface FlagRow {
+  id: string;
+  slug: string;
+  flag: string;
+}
+
+interface HintRow {
+  id: string;
+  flagId: string;
+  level: number;
+  content: string;
+}
+
+/**
+ * Stands in for `flags` and `hints`, the two tables `found_flags` and
+ * `revealed_hints` point at: an upgrade that recreated either row instead of
+ * updating it would drop the progress hanging off the old id.
+ */
+const fakeChallengeDatabase = (flagRows: FlagRow[], hintRows: HintRow[]) => {
+  let minted = 0;
+
+  const client = {
+    flag: {
+      upsert: async ({
+        where,
+        update,
+        create,
+      }: {
+        where: { slug: string };
+        update: Partial<FlagRow>;
+        create: Omit<FlagRow, "id">;
+      }) => {
+        const existing = flagRows.find((row) => row.slug === where.slug);
+        if (existing) Object.assign(existing, update);
+        else flagRows.push({ id: `minted-${++minted}`, ...create });
+      },
+      findUnique: async ({ where }: { where: { slug: string } }) =>
+        flagRows.find((row) => row.slug === where.slug) ?? null,
+    },
+    hint: {
+      upsert: async ({
+        where,
+        update,
+        create,
+      }: {
+        where: { flagId_level: { flagId: string; level: number } };
+        update: Partial<HintRow>;
+        create: Omit<HintRow, "id">;
+      }) => {
+        const { flagId, level } = where.flagId_level;
+        const existing = hintRows.find(
+          (row) => row.flagId === flagId && row.level === level
+        );
+        if (existing) Object.assign(existing, update);
+        else hintRows.push({ id: `minted-${++minted}`, ...create });
+      },
+    },
+    internalSecret: {
+      deleteMany: async () => {},
+      upsert: async () => {},
+    },
+  };
+
+  return client as unknown as PrismaClient;
+};
+
+describe("seedChallengeData", () => {
+  const [firstFlag] = flags;
+
+  let log: jest.SpyInstance;
+
+  beforeAll(() => {
+    log = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    log.mockRestore();
+  });
+
+  it("refreshes a flag a player already captured without changing its id", async () => {
+    const flagRows: FlagRow[] = [
+      { id: "captured", slug: firstFlag.slug, flag: "OSS{stale_value}" },
+    ];
+
+    await seedChallengeData(fakeChallengeDatabase(flagRows, []));
+
+    expect(flagRows).toContainEqual(
+      expect.objectContaining({ id: "captured", flag: firstFlag.flag })
+    );
+  });
+
+  it("refreshes a hint a player already revealed without changing its id", async () => {
+    const flagRows: FlagRow[] = [
+      { id: "captured", slug: firstFlag.slug, flag: firstFlag.flag },
+    ];
+    const hintRows: HintRow[] = [
+      { id: "revealed", flagId: "captured", level: 1, content: "stale hint" },
+    ];
+
+    await seedChallengeData(fakeChallengeDatabase(flagRows, hintRows));
+
+    expect(
+      hintRows.filter((row) => row.flagId === "captured" && row.level === 1)
+    ).toEqual([
+      {
+        id: "revealed",
+        flagId: "captured",
+        level: 1,
+        content: flagHints[firstFlag.slug][0],
+      },
+    ]);
   });
 });
