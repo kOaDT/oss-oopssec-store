@@ -28,7 +28,9 @@ export async function POST(request: NextRequest) {
     const visitPath = path || "/";
     const visitorSessionId = sessionId || null;
 
-    if (forwardedFor && isAccessingProtectedTable(forwardedFor)) {
+    // Both headers resolve into `ip`, and `ip` is what the INSERT concatenates:
+    // guard the resolved value, not just the header the challenge is named after.
+    if (isAccessingProtectedTable(ip)) {
       return NextResponse.json(
         {
           error:
@@ -102,7 +104,7 @@ export async function POST(request: NextRequest) {
         response.message =
           "Internal secret exfiltrated through the X-Forwarded-For header! Well done!";
       }
-    } else if (forwardedFor && isSQLInjectionAttempt(forwardedFor)) {
+    } else if (isSQLInjectionAttempt(ip)) {
       response.message =
         "SQL syntax detected in X-Forwarded-For." +
         " The flag tracks one specific internal secret, and it is not in the logged visit.";

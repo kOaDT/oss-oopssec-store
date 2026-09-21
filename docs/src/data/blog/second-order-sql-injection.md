@@ -88,7 +88,7 @@ Each correction means posting a new review with the adjusted display name — th
 
 The panel is also happy to run several statements at once, because the filter goes through `better-sqlite3`'s `exec()`. A display name like `'; DROP TABLE reviews; --` really does wipe the reviews table, so, if you want to try, keep that one for after you have the flag.
 
-> To recover, run `npm run db:push && npm run db:seed`: `db:push` recreates the missing table, and the seed needs it back before it can read it. Your captured flags survive both steps.
+> To recover, run `npm run db:push && npm run db:seed`: `db:push` recreates the missing table, and the seed needs it back before it can read it. Your captured flags survive both steps; the three demo orders go back to their seeded state.
 
 ### Step 4: Enumerate the schema
 
@@ -101,7 +101,7 @@ x' UNION SELECT 1, 2, group_concat(name), 4, 5, 6 FROM sqlite_master WHERE type=
 Filter by it, and the third column of the injected row lists every table:
 
 ```
-users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets
+users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,internal_secrets,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence
 ```
 
 `flags` is walled off — naming it returns `403`, and any `OSS{…}` value is stripped from the response before it leaves the server. `internal_secrets` is not.
