@@ -265,7 +265,7 @@ This regenerates the client, pushes the schema, then re-applies the rows every i
 
 What it does not carry over is the demo catalogue: rows added to `prisma/seed.ts` only ever reach a fresh install, and replaying the full seed would recreate your orders.
 
-The app refuses to start against a database that is a schema behind, and names the command to run. To wipe everything instead and start fresh, use `npm run docker:reset` (Docker) or `npm run setup` (local clone).
+The app refuses to start against a database that is a schema behind, and names the command to run. To wipe everything instead and start fresh, use `npm run docker:reset` (Docker) or `npm run setup` (npm).
 
 ## Hall of fame
 

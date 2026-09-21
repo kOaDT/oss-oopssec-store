@@ -18,8 +18,8 @@ async function main() {
         "An upgrade only replays challenge rows, which would leave an empty store.",
         "",
         "Seed it first, it is idempotent and keeps whatever is already there:",
-        "  npm run db:seed                          (local clone)",
-        "  docker compose exec app npm run db:seed  (Docker)",
+        "  npm run db:seed                                           (npm)",
+        "  docker compose run --rm --entrypoint npm app run db:seed  (Docker)",
         "",
       ].join("\n")
     );

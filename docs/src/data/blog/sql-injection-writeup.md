@@ -89,11 +89,12 @@ Breaking it down:
 3. The column count has to match the original query — nine columns, hence the repeated ones
 4. `--` comments out whatever comes after
 
-You do not have to count the columns by hand, by the way. Get it wrong and SQLite tells you:
+You do not have to count the columns by hand, by the way. Get it wrong and SQLite tells you, in an HTTP 500:
 
 ```json
 {
-  "error": "Raw query failed. Code: `1`. Message: `SELECTs to the left and right of UNION do not have the same number of result columns`"
+  "error": "\nInvalid `prisma.$queryRawUnsafe()` invocation:\n\n\nRaw query failed. Code: `1`. Message: `SELECTs to the left and right of UNION do not have the same number of result columns`",
+  "orders": []
 }
 ```
 
@@ -124,7 +125,7 @@ Ask SQLite what it is holding, through the same nine columns:
 ```
 
 ```
-users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence,internal_secrets
+users,products,carts,cart_items,orders,order_items,addresses,flags,hints,revealed_hints,reviews,support_access_tokens,found_flags,project_init,internal_secrets,visitor_logs,wishlists,wishlist_items,password_reset_tokens,supplier_orders,coupons,gift_cards,stream_config,sqlite_sequence
 ```
 
 `flags` is walled off — naming it in a payload returns `403`, and any `OSS{…}` value is stripped from the response on its way out. `internal_secrets` is not:

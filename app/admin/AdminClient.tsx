@@ -85,9 +85,11 @@ export default function AdminClient() {
     setError(null);
 
     try {
-      const baseUrl = getBaseUrl();
-
-      const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
+      // Relative, so the call stays same-origin whichever hostname the admin
+      // browses. A cross-origin fetch would strip the path from the Referer,
+      // and the CSRF challenge reads that path to tell its own panel apart
+      // from a page that forged the request.
+      const response = await fetch(`/api/orders/${orderId}`, {
         method: "PATCH",
         credentials: "include",
         headers: {
