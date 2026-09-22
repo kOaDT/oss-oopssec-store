@@ -102,7 +102,7 @@ You will be told which way the triage went, including when a report is judged ou
 
 The application has no authentication worth the name and is meant to be broken. Treat it as hostile software:
 
-- Run it on `localhost` or an isolated VM. The documented commands bind to loopback (`-p 127.0.0.1:3000:3000`) — keep it that way.
+- Run it on `localhost` or an isolated VM. The documented commands stay on loopback (`npm start` binds `127.0.0.1`, Docker publishes `-p 127.0.0.1:3000:3000`) — keep it that way.
 - Never expose it to the internet, a company network, or a shared school network. See the [Educator Kit deployment FAQ](EDUCATORS.md#deployment-faq).
 - Never seed it with real data, real credentials, or credentials reused elsewhere.
 - Give each player their own instance: progress is stored per instance, so a shared one leaks solves.

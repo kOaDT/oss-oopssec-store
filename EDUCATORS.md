@@ -160,7 +160,7 @@ Designed to complement a web security or application security course over 6–10
 
 Designed for competitive CTF events with 10–30 participants.
 
-**Setup:** Each participant runs their own instance. Flag capture is stored per instance, not per user, so a shared instance would let the first solve reveal the flag to everyone — see the [Deployment FAQ](#can-multiple-students-share-one-instance).
+**Setup:** Each participant runs their own instance on their own machine. `npm start` binds `127.0.0.1`, so no instance is reachable from the event network. Flag capture is stored per instance, not per user, so a shared instance would let the first solve reveal the flag to everyone — see the [Deployment FAQ](#can-multiple-students-share-one-instance).
 
 ```bash
 npx create-oss-store my-lab && cd my-lab && npm start
@@ -221,6 +221,8 @@ docker compose down -v && docker compose up -d   # Wipes all data and restarts f
 ### Is it safe to run on a school or company network?
 
 **No.** OopsSec Store must only be run in isolated environments (local machine or air-gapped VM). It contains intentional security flaws and must never be exposed to a production network or the internet.
+
+Both setups stay on loopback by default: `npm start` listens on `127.0.0.1`, and the documented Docker commands publish on `127.0.0.1:3000`. Reaching the lab from another machine takes a deliberate change.
 
 Recommended setup for classrooms: each student runs the app on their own machine via `localhost`. No shared network exposure needed.
 
