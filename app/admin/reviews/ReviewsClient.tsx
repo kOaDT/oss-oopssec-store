@@ -53,10 +53,18 @@ export default function ReviewsClient() {
           }
           if (response.status === 403) {
             const errorData = await response.json();
-            setError(
-              errorData.error ||
-                "Forbidden: You do not have administrator privileges."
-            );
+            // The protected-table refusal answers with the panel's own payload,
+            // so the filter stays usable and the refusal shows inline. A denial
+            // from the auth wrapper carries no reviews and no author list.
+            if (Array.isArray(errorData.authors)) {
+              setData(errorData);
+            } else {
+              setData(null);
+              setError(
+                errorData.error ||
+                  "Forbidden: You do not have administrator privileges."
+              );
+            }
             setIsLoading(false);
             setIsFiltering(false);
             return;
@@ -72,6 +80,14 @@ export default function ReviewsClient() {
         }
       } catch (err) {
         console.error("Error fetching reviews:", err);
+        // `data.error` and `data.message` hold the previous filter's verdict,
+        // which must not sit next to this failure. The reviews and the author
+        // list stay, so the filter survives a transient error.
+        setData((previous) =>
+          previous
+            ? { ...previous, error: undefined, message: undefined }
+            : null
+        );
         setError("An error occurred while fetching reviews.");
       } finally {
         setIsLoading(false);

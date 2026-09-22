@@ -14,16 +14,6 @@ const hashMD5 = (text: string): string => {
 async function main() {
   console.log("Seeding database...");
 
-  const existingProjectInit = await prisma.projectInit.findFirst();
-  if (!existingProjectInit) {
-    await prisma.projectInit.create({
-      data: {},
-    });
-    console.log("Created project initialization timestamp");
-  } else {
-    console.log("Project initialization already exists, skipping");
-  }
-
   const aliceAddress = await prisma.address.upsert({
     where: { id: "addr-alice-001" },
     update: {},
@@ -739,6 +729,18 @@ async function main() {
 
   console.log(`Created ${partnerOrders.length} partner portal supplier orders`);
   console.log(`Partner API signing key ready at ${ensurePartnerSigningKey()}`);
+
+  // Last: the boot guard reads this row as proof the seed ran to completion, so
+  // a seed that dies halfway must not leave it behind.
+  const existingProjectInit = await prisma.projectInit.findFirst();
+  if (!existingProjectInit) {
+    await prisma.projectInit.create({
+      data: {},
+    });
+    console.log("Created project initialization timestamp");
+  } else {
+    console.log("Project initialization already exists, skipping");
+  }
 
   console.log("Seeding completed!");
 }

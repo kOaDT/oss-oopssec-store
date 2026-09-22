@@ -70,16 +70,16 @@ The tracking API uses raw SQL with the X-Forwarded-For header directly concatena
 const forwardedFor = request.headers.get("x-forwarded-for");
 const ip = forwardedFor || request.headers.get("x-real-ip") || "unknown";
 
-// VULNERABLE: Direct header value in SQL query
+// VULNERABLE: `ip` is the one value that reaches the statement unescaped
 const query = `
   INSERT INTO visitor_logs (id, ip, userAgent, path, sessionId, createdAt)
-  VALUES ('${id}', '${ip}', '${userAgent}', '${path}', ${sessionId}, datetime('now'))
+  VALUES ('${id}', '${ip}', '${userAgent.replace(/'/g, "''")}', '${path.replace(/'/g, "''")}', ${sessionId ? `'${sessionId.replace(/'/g, "''")}'` : "NULL"}, datetime('now'))
 `;
 
 await prisma.$queryRawUnsafe(query);
 ```
 
-The `ip` variable comes straight from the X-Forwarded-For header and lands in the SQL query with no sanitization.
+The `ip` variable comes straight from the X-Forwarded-For header and lands in the SQL query with no sanitization. The user agent, the path and the session id are escaped on the way in, so the header is the only way through.
 
 ## Exploitation
 
@@ -126,7 +126,7 @@ INSERT INTO visitor_logs (id, ip, userAgent, path, sessionId, createdAt)
 VALUES ('…', '1.2.3.4', (SELECT 1), '/x', NULL, datetime('now'))--', 'curl/8.18.0', …)
 ```
 
-The `userAgent` column now holds whatever sub-query we put in the second slot. When a payload does not compile — drop the trailing `--` and the real user agent runs on as SQL — SQLite says so in the response, which makes this a comfortable place to iterate:
+The `userAgent` column now holds whatever sub-query we put in the third slot. When a payload does not compile — drop the trailing `--` and the real user agent runs on as SQL — SQLite says so in the response, which makes this a comfortable place to iterate:
 
 ```json
 {

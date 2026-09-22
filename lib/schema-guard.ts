@@ -86,6 +86,24 @@ export const assertDatabaseIsCurrent = async (): Promise<void> => {
     );
   }
 
+  // `db push` creates every table, so a schema-complete but never-seeded
+  // database clears the drift checks above and would serve a store with no
+  // catalogue, no users and no flags. `db:upgrade` pushes the schema before it
+  // refuses to run, which is one way to land exactly here.
+  const initialized = await prisma.projectInit.findFirst();
+
+  if (!initialized) {
+    throw new Error(
+      [
+        "Database not initialized: no row in project_init, so the catalogue, users and flags were never seeded.",
+        "",
+        "Create and seed it:",
+        ...INIT_COMMANDS,
+        "",
+      ].join("\n")
+    );
+  }
+
   const canaries = await prisma.internalSecret.count({
     where: { slug: { in: [...CANARY_SLUGS] } },
   });

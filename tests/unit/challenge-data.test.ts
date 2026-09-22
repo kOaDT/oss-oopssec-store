@@ -99,6 +99,9 @@ interface FlagRow {
   id: string;
   slug: string;
   flag: string;
+  cve?: string | null;
+  cwe?: string | null;
+  owasp?: string | null;
 }
 
 interface HintRow {
@@ -133,6 +136,18 @@ const fakeChallengeDatabase = (flagRows: FlagRow[], hintRows: HintRow[]) => {
       },
       findUnique: async ({ where }: { where: { slug: string } }) =>
         flagRows.find((row) => row.slug === where.slug) ?? null,
+      deleteMany: async ({
+        where,
+      }: {
+        where: { slug: { notIn: string[] } };
+      }) => {
+        const kept = flagRows.filter((row) =>
+          where.slug.notIn.includes(row.slug)
+        );
+        const count = flagRows.length - kept.length;
+        flagRows.splice(0, flagRows.length, ...kept);
+        return { count };
+      },
     },
     hint: {
       upsert: async ({
@@ -184,6 +199,36 @@ describe("seedChallengeData", () => {
     expect(flagRows).toContainEqual(
       expect.objectContaining({ id: "captured", flag: firstFlag.flag })
     );
+  });
+
+  it("clears a badge the curriculum entry no longer carries", async () => {
+    const unbadged = flags.find((flag) => !flag.cve);
+    if (!unbadged) throw new Error("expected a flag declared without a cve");
+
+    const flagRows: FlagRow[] = [
+      {
+        id: "captured",
+        slug: unbadged.slug,
+        flag: unbadged.flag,
+        cve: "CVE-2000-0000",
+      },
+    ];
+
+    await seedChallengeData(fakeChallengeDatabase(flagRows, []));
+
+    expect(flagRows).toContainEqual(
+      expect.objectContaining({ id: "captured", cve: null })
+    );
+  });
+
+  it("drops a flag that left the curriculum, so progress stops counting it", async () => {
+    const flagRows: FlagRow[] = [
+      { id: "retired", slug: "retired-challenge", flag: "OSS{gone}" },
+    ];
+
+    await seedChallengeData(fakeChallengeDatabase(flagRows, []));
+
+    expect(flagRows.map((row) => row.slug)).not.toContain("retired-challenge");
   });
 
   it("refreshes a hint a player already revealed without changing its id", async () => {
