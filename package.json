@@ -22,9 +22,9 @@
   ],
   "description": "OSS – OopsSec Store, a vulnerable e-commerce for modern web security training.",
   "scripts": {
-    "dev": "next dev --turbopack -H 127.0.0.1",
+    "dev": "next dev --turbopack -H localhost",
     "build": "next build",
-    "start": "next start -H 127.0.0.1",
+    "start": "next start -H localhost",
     "start:network": "next start -H 0.0.0.0",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
