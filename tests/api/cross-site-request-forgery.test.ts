@@ -22,12 +22,19 @@ interface UpdateResponse {
  * set these, but any CLI client can, which is how these tests drive the
  * scenario without a browser: the endpoint reads a shape, not a proof.
  */
-const browserMetadata = (referer: string) => ({
+const browserMetadata = (referer: string, site = "same-origin") => ({
   Referer: referer,
-  "Sec-Fetch-Site": "same-origin",
+  "Sec-Fetch-Site": site,
   "Sec-Fetch-Mode": "cors",
   "Sec-Fetch-Dest": "empty",
 });
+
+/** What a page carrying `<meta name="referrer" content="no-referrer">` sends. */
+const secFetchWithoutReferer = {
+  "Sec-Fetch-Site": "cross-site",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Dest": "empty",
+};
 
 describe("Cross-Site Request Forgery (CSRF)", () => {
   let adminToken: string;
@@ -81,6 +88,37 @@ describe("Cross-Site Request Forgery (CSRF)", () => {
     expect(status).toBe(200);
     expect(data).not.toHaveProperty("flag");
     expect(data.message).toContain("carries none of the metadata");
+  });
+
+  it("does not reward a Referer that arrives without Sec-Fetch headers", async () => {
+    const { status, data } = await updateStatus("DELIVERED", {
+      Referer: EXPLOIT_PAGE,
+    });
+
+    expect(status).toBe(200);
+    expect(data).not.toHaveProperty("flag");
+    expect(data.message).toContain("carries none of the metadata");
+  });
+
+  it("does not reward Sec-Fetch headers that arrive without a Referer", async () => {
+    const { status, data } = await updateStatus(
+      "DELIVERED",
+      secFetchWithoutReferer
+    );
+
+    expect(status).toBe(200);
+    expect(data).not.toHaveProperty("flag");
+    expect(data.message).toContain("carries none of the metadata");
+  });
+
+  it("returns the flag for a page served from another origin", async () => {
+    const { status, data } = await updateStatus(
+      "SHIPPED",
+      browserMetadata("https://evil.com/attack", "cross-site")
+    );
+
+    expect(status).toBe(200);
+    expectFlag(data, FLAGS.CROSS_SITE_REQUEST_FORGERY);
   });
 
   it("still updates the order without any anti-CSRF check, flag or not", async () => {

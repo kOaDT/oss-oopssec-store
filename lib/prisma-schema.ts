@@ -29,7 +29,7 @@ export const parseSchema = (schema: string): SchemaTable[] => {
 
     if (current === null) continue;
 
-    if (line.startsWith("}")) {
+    if (line.trim().startsWith("}")) {
       tables.push(current);
       current = null;
       continue;

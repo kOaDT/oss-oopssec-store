@@ -11,12 +11,30 @@ export const seedChallengeData = async (prisma: PrismaClient) => {
   for (const flag of flags) {
     await prisma.flag.upsert({
       where: { slug: flag.slug },
-      update: flag,
+      update: {
+        ...flag,
+        // Prisma leaves `undefined` alone, so a badge dropped upstream would
+        // outlive it here while a fresh install comes up without it.
+        cve: flag.cve ?? null,
+        cwe: flag.cwe ?? null,
+        owasp: flag.owasp ?? null,
+      },
       create: flag,
     });
   }
 
   console.log(`Ensured ${flags.length} flags`);
+
+  // A flag dropped from the curriculum otherwise keeps its `found_flags` row
+  // and holds the progress denominator up for good. The cascades take its
+  // hints and their revealed rows with it.
+  const removed = await prisma.flag.deleteMany({
+    where: { slug: { notIn: flags.map((flag) => flag.slug) } },
+  });
+
+  if (removed.count > 0) {
+    console.log(`Removed ${removed.count} flags no longer in the curriculum`);
+  }
 
   for (const [slug, hints] of Object.entries(flagHints)) {
     const flag = await prisma.flag.findUnique({ where: { slug } });

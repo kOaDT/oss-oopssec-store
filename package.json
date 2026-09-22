@@ -41,7 +41,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "db:upgrade": "prisma generate && prisma db push --skip-generate && tsx prisma/upgrade.ts",
+    "db:upgrade": "prisma generate && prisma db push --skip-generate --accept-data-loss && tsx prisma/upgrade.ts",
     "setup": "bash scripts/setup.sh",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
