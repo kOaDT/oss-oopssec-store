@@ -21,4 +21,5 @@ echo "★ Enjoying the lab? A star helps others find it:"
 echo "  https://github.com/kOaDT/oss-oopssec-store"
 echo ""
 
-exec npm start
+# The published port reaches the container on its bridge IP, not on loopback.
+exec npm run start:network

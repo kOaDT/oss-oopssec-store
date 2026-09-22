@@ -51,7 +51,7 @@ echo "  https://github.com/kOaDT/oss-oopssec-store"
 echo ""
 
 echo "Launching Prisma Studio and application..."
-npx prisma studio -b none &
+npx prisma studio -b none --hostname 127.0.0.1 --port 5555 &
 PRISMA_PID=$!
 
 npm start &
