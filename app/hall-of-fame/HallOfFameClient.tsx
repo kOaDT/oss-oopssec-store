@@ -4,25 +4,9 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import type { HallOfFameEntry } from "@/lib/types";
 import { getCountryFlag } from "@/app/hall-of-fame/constants";
+import { formatDateUTC } from "@/lib/format";
 import { TrophyIcon, GitHubIcon } from "./icons";
 import BadgePanel from "./BadgePanel";
-
-/** Pinned to UTC so the date here matches the one baked into the player's
- * badge, which is rendered on a CI runner. Left to the local zone, a visitor
- * west of Greenwich would read the day before the one on their own card. */
-function formatDate(dateString: string): string {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: "UTC",
-    });
-  } catch {
-    return dateString;
-  }
-}
 
 function HallOfFameCard({ entry }: { entry: HallOfFameEntry }) {
   return (
@@ -60,7 +44,7 @@ function HallOfFameCard({ entry }: { entry: HallOfFameEntry }) {
         )}
 
         <div className="mb-6 text-xs text-slate-500 dark:text-slate-500">
-          Joined {formatDate(entry.date)}
+          Joined {formatDateUTC(entry.date)}
         </div>
 
         <a

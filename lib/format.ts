@@ -31,6 +31,21 @@ export function formatSlug(slug: string): string {
     .join(" ");
 }
 
+/** Pinned to UTC so a visitor west of Greenwich does not read the day before the
+ * one baked into the Hall of Fame badge, which is rendered on a CI runner. */
+export function formatDateUTC(dateString: string): string {
+  try {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  } catch {
+    return dateString;
+  }
+}
+
 export const CATEGORY_LABELS: Record<FlagCategory, string> = {
   INJECTION: "Injection",
   AUTHENTICATION: "Authentication",
