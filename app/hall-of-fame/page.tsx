@@ -1,9 +1,11 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import type { HallOfFameEntry } from "@/lib/types";
+import type { CommunityResource, HallOfFameEntry } from "@/lib/types";
 import hallOfFameData from "@/hall-of-fame/data.json";
+import communityResourcesData from "@/hall-of-fame/community-resources.json";
 import HallOfFameClient from "./HallOfFameClient";
 import ContributorsSection from "./ContributorsSection";
+import CommunityResourcesSection from "./CommunityResourcesSection";
 import { TrophyIcon, GitHubIcon } from "./icons";
 import { fetchContributors } from "@/lib/github";
 import { GITHUB_REPO } from "@/lib/config";
@@ -20,6 +22,7 @@ export const metadata = {
 
 export default async function HallOfFame() {
   const entries = hallOfFameData as HallOfFameEntry[];
+  const communityResources = communityResourcesData as CommunityResource[];
   const contributors = await fetchContributors();
 
   return (
@@ -120,6 +123,8 @@ export default async function HallOfFame() {
         </section>
 
         <ContributorsSection contributors={contributors} />
+
+        <CommunityResourcesSection resources={communityResources} />
       </main>
       <Footer />
     </div>

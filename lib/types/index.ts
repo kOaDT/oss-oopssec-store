@@ -161,6 +161,18 @@ export interface Contributor {
   contributions: number;
 }
 
+export type CommunityResourceType = "video" | "article" | "talk" | "course";
+
+export interface CommunityResource {
+  title: string;
+  author: string;
+  url: string;
+  type: CommunityResourceType;
+  date: string;
+  /** BCP 47 tag, omitted for English. Drives both the badge and `lang`. */
+  language?: string;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;
