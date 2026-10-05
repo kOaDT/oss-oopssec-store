@@ -5,8 +5,9 @@ DB_FILE="${DATABASE_URL#file:}"
 
 if [ ! -f "$DB_FILE" ]; then
   echo "First run: initializing database..."
-  npx prisma db push --skip-generate
-  npx tsx prisma/seed.ts
+  # Without a TTY, npx would download a missing package instead of failing.
+  npx --no prisma db push --skip-generate
+  npx --no tsx prisma/seed.ts
   echo "Database initialized successfully."
 else
   # A pulled image brings models and challenges the mounted volume never saw.
