@@ -18,7 +18,6 @@ services:
       - oss-data:/app/data
       - oss-uploads:/app/uploads
       - oss-documents:/app/documents
-    restart: unless-stopped
 
 volumes:
   oss-data:
