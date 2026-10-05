@@ -70,6 +70,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "better-sqlite3": "^12.6.2",
     "canvas-confetti": "^1.9.4",
+    "dotenv": "^17.2.3",
     "libxmljs2": "^0.37.0",
     "next": "15.2.2",
     "pdf-lib": "^1.17.1",
@@ -80,6 +81,7 @@
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.3.0",
     "remark-gfm": "^4.0.1",
+    "tsx": "^4.21.0",
     "zod": "^4.4.1"
   },
   "devDependencies": {
@@ -93,7 +95,6 @@
     "@types/react-dom": "^19",
     "cross-env": "^7.0.3",
     "cypress": "^15.10.0",
-    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
     "eslint-config-prettier": "^10.1.8",
@@ -105,7 +106,6 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
     "typescript": "^5",
     "wait-on": "^9.0.4"
   }
