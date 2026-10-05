@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "Dockerfile"
+      - ".dockerignore"
       - ".nvmrc"
       - "docker-compose.yml"
       - "docker-entrypoint.sh"
@@ -33,3 +34,22 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t oss-oopssec-store:test .
+
+      # Offline, so a package missing from the image fails here instead of
+      # being fetched from the registry at startup.
+      - name: Smoke test the image offline
+        timeout-minutes: 5
+        run: |
+          docker run -d --name smoke --network none oss-oopssec-store:test
+          until docker logs smoke 2>&1 | grep -F "Database initialized successfully." >/dev/null; do
+            [ "$(docker inspect -f '{{.State.Running}}' smoke)" = true ] || exit 1
+            sleep 2
+          done
+          until docker exec smoke wget -qO- http://127.0.0.1:3000/api/flags/count; do
+            [ "$(docker inspect -f '{{.State.Running}}' smoke)" = true ] || exit 1
+            sleep 2
+          done
+
+      - name: Show container logs
+        if: failure()
+        run: docker logs smoke
