@@ -29,3 +29,8 @@ cypress/
 .cursor/
 .husky/
 prisma/*.pem
+# Untracked local tooling, absent from any CI build: keeps a locally built
+# image identical to the published one.
+.claude/
+.plan/
+.venv/
