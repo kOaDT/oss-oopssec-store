@@ -89,7 +89,8 @@ export default function News() {
               <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
                 The following is a sample of the customer data that was
                 compromised in the breach. This information has been made
-                publicly available by the attackers.
+                publicly available by the attackers. Fortunately, passwords were
+                never stored in plain text...
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-slate-300 dark:border-slate-700">
