@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
+import { getStoredUser } from "@/lib/client-auth";
 import type { ProductCardProps } from "@/lib/types";
 
 export default function ProductCard({
@@ -14,7 +14,6 @@ export default function ProductCard({
   price,
   imageUrl,
 }: ProductCardProps) {
-  const { user } = useAuth();
   const router = useRouter();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -26,7 +25,7 @@ export default function ProductCard({
       return;
     }
 
-    if (!user) {
+    if (!getStoredUser()) {
       router.push("/login");
       return;
     }
@@ -39,8 +38,13 @@ export default function ProductCard({
         quantity: 1,
       });
 
-      router.push("/cart");
+      window.dispatchEvent(new Event("storage"));
     } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        router.push("/login");
+        return;
+      }
+
       console.error("Error adding to cart:", error);
       const errorMessage =
         error instanceof ApiError
