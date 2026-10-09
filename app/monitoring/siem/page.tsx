@@ -69,11 +69,15 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           onSubmit={handleSubmit}
           className="rounded-lg border border-slate-700/50 bg-[#111827] p-6"
         >
-          <div className="mb-4">
-            <label className="mb-1 block font-mono text-xs text-slate-400">
+         <div className="mb-4">
+            <label
+              htmlFor="username"
+              className="mb-1 block font-mono text-xs text-slate-400"
+            >
               Username
             </label>
             <input
+              id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -81,17 +85,25 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               autoComplete="off"
             />
           </div>
+
           <div className="mb-4">
-            <label className="mb-1 block font-mono text-xs text-slate-400">
+            <label
+              htmlFor="password"
+              className="mb-1 block font-mono text-xs text-slate-400"
+            >
               Password
             </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded border border-slate-600 bg-[#0a0e17] px-3 py-2 font-mono text-sm text-slate-200 outline-none focus:border-cyan-500"
             />
           </div>
+```
+ 
+             
           {error && (
             <p className="mb-3 font-mono text-xs text-red-400">{error}</p>
           )}
