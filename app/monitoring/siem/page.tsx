@@ -85,7 +85,6 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               autoComplete="off"
             />
           </div>
-
           <div className="mb-4">
             <label
               htmlFor="password"
@@ -101,8 +100,6 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               className="w-full rounded border border-slate-600 bg-[#0a0e17] px-3 py-2 font-mono text-sm text-slate-200 outline-none focus:border-cyan-500"
             />
           </div>
- 
-             
           {error && (
             <p className="mb-3 font-mono text-xs text-red-400">{error}</p>
           )}
