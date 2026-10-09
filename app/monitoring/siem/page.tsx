@@ -69,7 +69,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           onSubmit={handleSubmit}
           className="rounded-lg border border-slate-700/50 bg-[#111827] p-6"
         >
-         <div className="mb-4">
+          <div className="mb-4">
             <label
               htmlFor="username"
               className="mb-1 block font-mono text-xs text-slate-400"
@@ -101,7 +101,6 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               className="w-full rounded border border-slate-600 bg-[#0a0e17] px-3 py-2 font-mono text-sm text-slate-200 outline-none focus:border-cyan-500"
             />
           </div>
-```
  
              
           {error && (
