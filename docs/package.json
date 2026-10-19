@@ -23,7 +23,7 @@
     "lodash.kebabcase": "4.1.1",
     "remark-collapse": "0.1.2",
     "remark-toc": "9.0.0",
-    "satori": "0.33.4",
+    "satori": "0.35.0",
     "sharp": "0.35.5",
     "slugify": "1.6.9",
     "tailwindcss": "4.3.3"
@@ -31,18 +31,18 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@pagefind/default-ui": "1.5.2",
-    "@shikijs/transformers": "4.4.3",
+    "@shikijs/transformers": "4.5.0",
     "@tailwindcss/typography": "0.5.20",
     "@types/lodash.kebabcase": "4.1.9",
-    "@typescript-eslint/parser": "8.69.0",
-    "eslint": "10.10.0",
+    "@typescript-eslint/parser": "8.71.1",
+    "eslint": "10.12.0",
     "eslint-plugin-astro": "2.1.1",
-    "globals": "17.12.0",
+    "globals": "17.13.0",
     "pagefind": "1.5.2",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "0.8.1",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.69.0"
+    "typescript-eslint": "8.71.1"
   }
 }
