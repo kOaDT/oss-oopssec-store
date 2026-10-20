@@ -142,6 +142,7 @@ The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orde
 ## Table of contents
 
 - [Features](#features)
+- [Changelog](CHANGELOG.md)
 - [Why OopsSec Store?](#why-oopssec-store)
 - [Installation](#installation)
   - [Quick start (npm)](#quick-start)
