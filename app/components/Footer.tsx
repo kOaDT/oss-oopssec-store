@@ -163,7 +163,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-6 text-sm">
               <a
-                href={`${GITHUB_REPO}/releases`}
+                href={`${GITHUB_REPO}/blob/main/CHANGELOG.md`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={LINK_CLASS}
