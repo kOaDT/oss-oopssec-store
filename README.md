@@ -142,7 +142,6 @@ The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orde
 ## Table of contents
 
 - [Features](#features)
-- [Changelog](CHANGELOG.md)
 - [Why OopsSec Store?](#why-oopssec-store)
 - [Installation](#installation)
   - [Quick start (npm)](#quick-start)
@@ -255,7 +254,7 @@ The database initializes on first start. Data persists across restarts via Docke
 
 ### Updating an existing install
 
-A new version usually brings new challenges, and with them tables and rows your database has never seen. Catch up without starting over:
+A new version usually brings new challenges, and with them tables and rows your database has never seen. Check the [changelog](CHANGELOG.md) for breaking changes, then catch up without starting over:
 
 ```bash
 npm run db:upgrade             # local clone

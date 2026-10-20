@@ -2,612 +2,791 @@
 
 All notable changes to OopsSec Store are documented here. This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and links to the official GitHub release notes for full details.
 
-**Maintenance:** This file is maintained manually. Update it when publishing each release, using the published release notes and keeping summaries short.
+Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/oss-oopssec-store/releases) at each release.
 
-## [v2.22.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.22.0) - 2026-10-07
+## [v2.22.0] - 2026-10-07
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.22.0)
 
 ### Added
 
-- Community Resources on the Hall of Fame page.
+- New Community Resources section on the Hall of Fame page lists community courses, talks, videos and articles from `hall-of-fame/community-resources.json`.
 
 ### Changed
 
-- Smaller Docker image.
-- Docker startup fails fast on a missing package.
-- Documentation. The About page on the docs site now matches the README pitch.
+- A multi-stage build shrinks the Docker image, which no longer ships dev tooling such as Jest, ESLint or Cypress.
+- Docker startup fails on a missing package instead of downloading it, and `tsx` and `dotenv` are now runtime dependencies.
+- The About page on the docs site now matches the README pitch.
+- A new CI smoke test runs the Docker image offline, so a package missing from the image fails CI.
+- `cypress-io/github-action` is updated from `7.4.4` to `7.4.6` in CI.
 
 ### Fixed
 
-- Accurate Juice Shop comparison.
+- The README comparison table now correctly describes Juice Shop's CTF mode (`CTF_KEY`, CTFd/RootTheBox/FBCTF export) and CVE coverage.
 
 ### Security
 
-- The Docker lab no longer restarts on its own.
+- The Docker lab no longer restarts automatically; after a host reboot, start it again with `npm run docker:up`.
 
-## [v2.21.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.21.1) - 2026-09-22
+## [v2.21.1] - 2026-09-22
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.21.1)
 
 ### Fixed
 
-- Corrected local Node.js server binding to `localhost` to prevent browser/API origin mismatches and CORS login failures.
+- `npm start` and `npm run dev` bind `localhost` instead of `127.0.0.1`, so the printed startup URL no longer breaks login.
 
-## [v2.21.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.21.0) - 2026-09-22
+## [v2.21.0] - 2026-09-22
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.21.0)
 
 ### Added
 
-- SQL injection challenges now reward real exfiltration.
-- The CSRF flag now requires a request a page actually fired.
-- Existing installs can catch up without being wiped.
+- The SQL injection challenges (product search, order search, `X-Forwarded-For` tracking, second-order reviews) now require exfiltrating a canary from `internal_secrets`.
+- The CSRF flag now requires a request fired by a page, not a bare `PATCH` from a terminal.
+- `npm run db:upgrade` brings existing installs up to the Prisma schema without wiping data; Docker's entrypoint runs it on start.
+- New `npm run start:network` script binds all interfaces when network access is intentional.
 
 ### Changed
 
-- The four SQL injection routes share a single flags-table guard and response sanitizer.
-- Documentation corrections across the walkthroughs: the reviews table recovery command (`db:seed` alone fails once the table is dropped.
-- Expanded regression coverage for CSRF, SQL injection canaries, database upgrades, and padding-oracle behavior.
+- **Breaking:** The four SQL injection flags now require reading a canary from `internal_secrets`, and the CSRF flag a page-issued request; run `npm run db:upgrade` or `docker compose up -d --build` to create the canary rows.
+- **Breaking:** The app refuses to start against a database behind `prisma/schema.prisma`; run `npm run db:upgrade` or `docker compose up -d --build`, or start over with `npm run docker:reset` or `npm run setup`.
+- **Breaking:** `npm start`, `npm run dev` and Prisma Studio from `npm run setup` now bind `127.0.0.1`; use `npm run start:network` to bind `0.0.0.0` for remote access; Docker users are unaffected.
+- The four SQL injection routes share one flags-table guard and a sanitizer matching `OSS{`, so `sqlite_master` output reaches players.
+- Walkthrough corrections cover the reviews table recovery (`db:seed` alone fails), CSRF gate, `sameSite=lax` behaviour and SQLi command outputs.
+- Regression tests cover the CSRF flag via the shipped exploit page, canary slugs, upgrade-preserved ids and the padding oracle probe.
+- The documentation site runs on Astro 7, with `@shikijs/transformers`, `satori`, ESLint, `typescript-eslint` and `eslint-plugin-astro` updated.
+- Application, docs and CLI dependencies are updated, including `degit` 3 and `ora` in the CLI.
+- CI uses `cypress-io/github-action` 7.4.4 and `docker/build-push-action` 7.4.0.
+- The CLI publish job no longer runs an unused install step.
 
 ### Fixed
 
 - The `X-Forwarded-For` flag is no longer handed to every visitor arriving from localhost.
-- The second-order SQLi flag is refused when the canary is carried by a review body rather than exfiltrated through the stored filter value.
-- The admin review panel now clears its error and captured flag when the filter changes, instead of carrying stale state between queries.
+- The second-order SQLi flag is refused when the canary comes from a review body instead of the stored filter value.
+- The admin review panel clears its error and captured flag when the filter changes.
+- Injectable responses no longer leak the hints table or the tracking `sessionId`.
 
 ### Security
 
-- The lab binds loopback by default.
+- `npm start`, `npm run dev` and Prisma Studio from `npm run setup` bind `127.0.0.1` by default.
 - The `create-oss-store` CLI is published to npm with build provenance.
 
-## [v2.20.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.20.0) - 2026-09-09
+## [v2.20.0] - 2026-09-09
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.20.0)
 
 ### Added
 
-- Shareable Hall of Fame badges can now be generated for completed challenges.
-- The README project statistics are now produced by a self-hosted stats card instead of the third-party Repography service, removing an external dependency from the project page.
-- Labs scaffolded with `create-oss-store` no longer carry the upstream `.github` directory, so new projects start without inherited workflows.
+- Shareable Hall of Fame badges can be generated for completed challenges.
+- README project statistics come from a self-hosted stats card instead of the third-party Repography service.
+- Labs scaffolded with `create-oss-store` no longer include the upstream `.github` directory and its inherited workflows.
 
 ### Changed
 
-- Node.js 22 is now the minimum supported version.
-- Automated PR comments are much shorter and limited to information the PR page cannot already show.
-- Open Graph image generation loads Satori fonts once per build rather than once per image, cutting build time.
+- **Breaking:** Node.js 22, declared in `.nvmrc`, is now the minimum version for the store, tests, Docker image, CI and `create-oss-store`, which fails fast on older runtimes; Node 20 users must upgrade to Node 22 (`nvm use`) before installing.
+- Automated PR comments are shorter and only include information the PR page cannot already show.
+- Open Graph image generation loads Satori fonts once per build instead of once per image, cutting build time.
+- Informational pages and the support page share one page hero component, with a documented convention for component props types.
+- SQL injection detection is consolidated in one shared helper instead of being duplicated.
+- Documentation gains a getting started section and VWAD and TryHackMe badges, and references `package.json` for framework versions.
+- The inert `.degitignore` file is removed.
+- CI dependencies are updated: `cypress-io/github-action` `7.4.1` → `7.4.3` and `actions/deploy-pages` `5.0.0` → `5.0.1`.
 
 ### Fixed
 
-- Failed builds now surface the real error message, and large command output no longer hangs the process on an unread pipe.
-- Both output streams are reported when a setup command fails.
-- The CLI installs the matching release tag instead of `main`, so scaffolded projects match the published version.
+- `create-oss-store` reports real build errors, installs the matching release tag, recovers corrupted degit caches and cleans up partial installs.
+- Mobile navigation is interactive and mounts its items only while the menu is open.
+- Newsletter submissions are handled correctly.
+- The newsletter email field and the FlagChecker and HintPanel close buttons expose accessible names to screen readers.
+- Challenge titles render the `npm` slug in lowercase, as in "npm Supply Chain Typosquat".
+- Slug formatting uses the shared `formatSlug` helper, and the footer links to the MIT license.
+- PR automation requires both permission scopes, not just one, before commenting.
 
 ### Security
 
-- Added `SECURITY.md` describing the vulnerability reporting process for this intentionally vulnerable project.
-- The react2shell test suite now acts as a real exploit canary, failing if the intended vulnerability stops being reachable.
+- New `SECURITY.md` describes the vulnerability reporting process for this intentionally vulnerable project.
+- The react2shell test suite acts as an exploit canary, failing if the intended vulnerability becomes unreachable.
 
-## [v2.19.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.19.0) - 2026-08-14
+## [v2.19.0] - 2026-08-14
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.19.0)
 
 ### Added
 
-- Community discussions are now a dedicated, routed space.
-- The TryHackMe room is now surfaced across the project.
+- Community discussions have their own routed section, so threads are linkable and easier to browse.
+- The TryHackMe room is linked from the documentation site and from a reorganized footer.
 
 ### Changed
 
-- Removed the React and Giscus dependencies from the Astro documentation site, reducing its footprint.
-- Docker examples are now bound to `localhost`, and the shared-instance setup for CTF events has been removed to avoid unsafe network exposure.
-- The educator setup guide now states the Node 20 requirement.
+- **Breaking:** Node.js 20 or later is now required: the `create-oss-store` `engines` field moved from `>=18.0.0` to `>=20.0.0`, enforced workspace-wide; upgrade to Node.js 20 LTS or later before installing or updating.
+- The Astro documentation site no longer depends on React and Giscus, reducing its footprint.
+- Docker examples bind to `localhost`, and the shared-instance setup for CTF events is removed to avoid unsafe network exposure.
+- The educator setup guide states the Node 20 requirement.
+- The README shows a storefront screenshot, the AstroPaper demo post is removed, and the AstroPaper link targets "Adding new posts".
 
 ### Fixed
 
-- Flag values are no longer exposed before a challenge is solved.
-- The MCP poisoning challenge is now reachable from Docker.
-- Discussion topics now carry the challenge in the title.
+- Flag values stay hidden until their challenge is solved, restoring the intended difficulty.
+- The MCP poisoning challenge can be reached and solved from Docker without additional configuration.
+- Discussion topics carry the challenge in their title instead of a dropdown selector.
 
-## [v2.18.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.18.0) - 2026-08-11
+## [v2.18.0] - 2026-08-11
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.18.0)
 
 ### Added
 
-- New challenge: Partner API with a JWT algorithm confusion flaw.
-- Machine-readable challenge feed.
-- Improved discoverability.
+- New challenge: a Partner API vulnerable to RS256/HS256 JWT algorithm confusion, letting players forge tokens it accepts.
+- A `challenges.json` feed generated from the roadmap exposes each challenge's category and estimated completion time.
+- The Hall of Fame shows project contributors alongside players, fetched from the GitHub API at build time.
+- New topic pages, JSON-LD structured data and roadmap cross-linking make challenges easier to find from search engines.
+- A dismissible Star-on-GitHub callout appears on writeups and the roadmap.
 
 ### Changed
 
-- The educator catalog documentation is now aligned with the roadmap numbering, and the `challenges.json` feed is linked from both the educator kit and the About page.
-- Added a Docker image resource link to the documentation.
-- Repository URLs are centralized in a single configuration module instead of being hardcoded throughout the app.
+- **Breaking:** A new `channel` column on `supplier_orders` requires existing installs, including mounted Docker volumes, to run `npm run db:push && npm run db:seed`, else `/api/partner/orders` and `/api/admin/suppliers` return 500; set `PARTNER_SIGNING_KEY_PATH` if your data directory is read-only.
+- The educator catalog documentation follows the roadmap numbering, and the educator kit and About page link the `challenges.json` feed.
+- The documentation includes a Docker image resource link.
+- Repository URLs live in a single configuration module instead of being hardcoded throughout the app.
+- A parity test and contributor checklist stop partially registered new challenges from being merged.
+- Minor and patch-level project dependencies are updated.
+- CI workflows use updated `actions/checkout`, `actions/setup-node`, `docker/login-action`, `docker/build-push-action` and `cypress-io/github-action` actions.
 
 ### Fixed
 
-- Edit page links now point at the `main` branch instead of `develop`, so "edit this page" no longer leads to a stale or missing target.
-- Corrected inconsistencies in the JSON-LD structured data.
-- Enforced LF line endings across the repository, fixing checkout issues reported in #239.
+- "Edit this page" links point at the `main` branch instead of `develop`.
+- Inconsistencies in the JSON-LD structured data are corrected.
+- The repository enforces LF line endings, resolving checkout issues.
 
-## [v2.17.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.17.0) - 2026-06-18
+## [v2.17.0] - 2026-06-18
 
-### Added
-
-- Added a new Broken Function Level Authorization challenge featuring a live stream hijack scenario, expanding the hands-on lab catalog.
-
-### Changed
-
-- Updated the _About_ page learning objectives so they accurately reflect the available lab challenges.
-- Corrected the padding oracle write-up to align with the challenge's actual behavior.
-
-## [v2.16.3](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.3) - 2026-06-11
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.17.0)
 
 ### Added
 
-- The setup script, npx installer, and Docker entrypoint now display a reminder inviting users to star the project on GitHub, helping support the project's visibility.
+- New challenge: Broken Function Level Authorization, featuring a live stream hijack scenario.
 
 ### Changed
 
-- Added a verified comparison table to the README, making it easier to evaluate the project against alternative deliberately-vulnerable applications.
-- Streamlined the EDUCATORS.md guide for a more focused and readable experience.
-- Updated CI dependencies.
+- The About page learning objectives now match the available lab challenges.
+- The padding oracle write-up now matches how the challenge actually behaves.
 
-## [v2.16.2](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.2) - 2026-06-04
+## [v2.16.3] - 2026-06-11
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.3)
 
 ### Added
 
-- Added a first-visit onboarding guide to help new users get started, including a dedicated practice flag for guided hands-on learning.
+- The setup script, npx installer and Docker entrypoint show a reminder inviting users to star the project on GitHub.
 
 ### Changed
 
-- Expanded the supply-chain attack write-up to connect the Shai-Hulud scenario with rules-file poisoning, clarifying the relationship between the two techniques.
-- Applied patch-level updates across project dependencies.
-- Upgraded `docker/build-push-action` (7.1.0 → 7.2.0) and `docker/login-action` (4.1.0 → 4.2.0) in the CI/CD pipeline.
+- The README has a verified comparison table for evaluating the project against other deliberately vulnerable applications.
+- The `EDUCATORS.md` guide is shorter, more focused and easier to read.
+- The CI dependencies `actions/checkout` and `cypress-io/github-action` are updated.
+
+## [v2.16.2] - 2026-06-04
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.2)
+
+### Added
+
+- A first-visit **onboarding guide** helps new users get started, with a dedicated practice flag for guided hands-on learning.
+
+### Changed
+
+- The supply-chain attack write-up now connects the **Shai-Hulud** scenario with rules-file poisoning, clarifying how the two techniques relate.
+- Project dependencies received patch-level updates.
+- The CI/CD pipeline upgrades `docker/build-push-action` (`7.1.0` → `7.2.0`) and `docker/login-action` (`4.1.0` → `4.2.0`).
 
 ### Fixed
 
-- Corrected the displayed curriculum chapter count so it accurately reflects the available content.
+- The displayed curriculum chapter count now accurately reflects the available content.
 
-## [v2.16.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.1) - 2026-05-18
+## [v2.16.1] - 2026-05-18
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.1)
 
 ### Added
 
-- Added a new pedagogical roadmap available at https://koadt.github.io/oss-oopssec-store/roadmap, offering a structured learning path for users navigating the challenges and walkthroughs.
+- A new pedagogical roadmap page offers a structured learning path through the challenges and walkthroughs.
 
 ### Changed
 
-- Corrected IDOR/BOLA labels and chained challenge numbering for consistency across walkthroughs.
-- Removed an unnecessary screenshot from the supply-chain poisoned-rules-chain walkthrough.
-- Bumped `typescript-eslint` to 8.59.2 for TypeScript 6 compatibility.
+- IDOR/BOLA labels and chained challenge numbering are now consistent across walkthroughs.
+- The supply-chain poisoned-rules-chain walkthrough no longer contains an unnecessary screenshot.
+- `typescript-eslint` is bumped to 8.59.2 for TypeScript 6 compatibility.
+- Patch-level dependencies are updated across the project.
+- `cypress-io/github-action` is bumped from 7.1.10 to 7.3.0 in CI workflows.
 
 ### Fixed
 
-- Fixed the Docker image build so the `packages/react-toastfy` package is now included.
+- The Docker image now includes `packages/react-toastfy`, so the supply-chain challenge is reachable again when the lab runs via Docker.
 
-## [v2.16.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.0) - 2026-05-04
+## [v2.16.0] - 2026-05-04
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.16.0)
 
 ### Added
 
-- New supply-chain attack scenario.
+- New supply-chain attack scenario: a typosquat package combined with an AI rules file backdoor plants a runtime backdoor.
 
 ### Changed
 
-- Bumped `cypress-io/github-action` from `7.1.9` to `7.1.10` (patch update) via Dependabot.
+- `cypress-io/github-action` is bumped from `7.1.9` to `7.1.10`.
 
 ### Security
 
-- Input validation hardening.
+- API route inputs are validated with Zod schemas for strict, type-safe request parsing.
 
-## [v2.15.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.15.1) - 2026-04-28
+## [v2.15.1] - 2026-04-28
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.15.1)
 
 ### Added
 
-- Migrated OWASP Top 10 references from the 2021 edition to the 2025 edition across the platform.
-- Added CWE and OWASP identifiers to flags, and linked CVE/CWE/OWASP badges to their external reference pages.
-- Flag values on the `/flags` page are now masked until they have been found by the user, preserving the challenge experience.
+- OWASP Top 10 references across the platform now use the 2025 edition instead of the 2021 edition.
+- Flags carry CWE and OWASP identifiers, and CVE/CWE/OWASP badges link to their external reference pages.
+- Flag values on the `/flags` page stay masked until the user finds them.
+- In-app vulnerability pages link directly to the corresponding walkthrough site.
+- The site footer includes a dev.to social link.
 
 ### Changed
 
-- Moved `@types/canvas-confetti` and `@types/jsonwebtoken` from `dependencies` to `devDependencies`, since they are only needed at build time @TrivCodez https://github.com/kOaDT/oss-oopssec-store/issues/79.
-- Reframed the CSRF challenge alert from the victim's perspective for clearer storytelling.
-- Clarified contribution guides and updated CSRF and educator documentation.
+- `@types/canvas-confetti` and `@types/jsonwebtoken` moved from `dependencies` to `devDependencies`, since they are only needed at build time.
+- The CSRF challenge alert is told from the victim's perspective for clearer storytelling.
+- Rewritten docs clarify `content/` versus `docs/`, add a CSRF admin order update writeup, and list Insecure Randomness in `EDUCATORS.md`.
+- CI workflows use `actions/setup-node` 6.4.0, up from 4.4.0.
 
 ### Fixed
 
-- Made the AES-CBC padding oracle tamper test deterministic, eliminating intermittent failures.
-- Fixed a pre-existing gap where the `INSECURE_DESIGN` category was missing from the `FlagCategory` type.
+- The AES-CBC padding oracle tamper test is deterministic, so it no longer fails intermittently.
+- The `FlagCategory` type includes the previously missing `INSECURE_DESIGN` category.
 
-## [v2.15.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.15.0) - 2026-04-22
+## [v2.15.0] - 2026-04-22
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.15.0)
 
 ### Added
 
-- Added a new Insecure Randomness Gift Card challenge, demonstrating vulnerabilities tied to predictable random number generation.
-- Published a new path traversal writeup and linked its walkthrough for improved learner navigation.
+- New challenge: **Insecure Randomness Gift Card**, which shows the vulnerabilities that come from predictable random number generation.
+- A new path traversal writeup is published, and its walkthrough is linked so learners can find it more easily.
 
 ### Fixed
 
-- Pinned TypeScript to 5.9.3 to align with the `@astrojs/check` peer dependency requirement and prevent version mismatch issues.
+- TypeScript is pinned to `5.9.3` to match the `@astrojs/check` peer dependency and prevent version mismatches.
 
-## [v2.14.2](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.14.2) - 2026-04-18
+## [v2.14.2] - 2026-04-18
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.14.2)
 
 ### Changed
 
-- Added server-side pagination to the SIEM log viewer for smoother navigation of large log volumes.
-- Migrated application logging from `console` to Pino structured logging.
-- Enhanced the welcome PR message with contribution stats, size labels, and CI information.
+- The SIEM log viewer is paginated server-side for smoother navigation of large log volumes.
+- Application logging uses Pino structured logging instead of `console`.
+- The welcome PR message shows contribution stats, size labels and CI information.
+- Authentication uses unified `withAuth` and `withAdminAuth` wrappers instead of scattered manual checks.
+- New writeup for the `NEXT_PUBLIC_` environment variable leak challenge.
+- The plaintext-password-in-logs writeup reflects the Pino logging migration.
+- The public-env and info-disclosure flags link to their walkthroughs through `walkthroughSlug`.
+- Dependabot bumps GitHub Actions: `actions/github-script`, `actions/upload-artifact`, `actions/upload-pages-artifact`, `docker/build-push-action`, `docker/login-action`, `cypress-io/github-action`.
 
 ### Fixed
 
-- Fixed the `NEXT_PUBLIC_` environment variable leak challenge, which only worked in development mode.
-- Made the padding oracle test deterministic by flipping the entire block, eliminating flaky runs.
+- The `NEXT_PUBLIC_` environment variable leak challenge works again in production builds (`npm start`) through an `X-Payment-Auth` header.
+- The padding oracle test is deterministic, flipping the entire block to eliminate flaky runs.
 
-## [v2.14.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.14.1) - 2026-04-04
+## [v2.14.1] - 2026-04-04
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.14.1)
 
 ### Added
 
-- Added a walkthrough for the "Information Disclosure via API Error Message" vulnerability https://github.com/kOaDT/oss-oopssec-store/issues/62.
+- New walkthrough for the "Information Disclosure via API Error Message" vulnerability.
 
 ### Changed
 
-- Export fields now use an array with checkboxes instead of a comma-separated string, improving "Information Disclosure via API Error Message" vulnerability.
-- Bumped `actions/deploy-pages` from 4.0.5 to 5.0.0.
+- The "Information Disclosure via API Error Message" vulnerability's export fields use checkboxes and an array, not a comma-separated string.
+- `actions/deploy-pages` is bumped from `4.0.5` to `5.0.0`.
 
 ### Fixed
 
-- Fixed incorrect category assignment for the race condition coupon flag (now uses `INSECURE_DESIGN`).
-- Removed unused flag type definition.
+- The race condition coupon flag is now categorized as `INSECURE_DESIGN`.
+- An unused flag type definition was deleted.
 
-## [v2.14.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.14.0) - 2026-03-28
+## [v2.14.0] - 2026-03-28
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.14.0)
 
 ### Added
 
-- Add a new flag for a race condition vulnerability.
+- New challenge: a race condition vulnerability (OWASP A01, A04) where concurrent requests exploit non-atomic read-then-write operations on shared state.
 
 ### Fixed
 
-- Removed a stale `screen.png` asset that was incorrectly left in the codebase.
+- The stale `screen.png` asset, wrongly left in the codebase, is removed.
 
-## [v2.13.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.13.0) - 2026-03-22
+## [v2.13.0] - 2026-03-22
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.13.0)
 
 ### Added
 
-- Middleware authorization bypass challenge (CVE-2025-29927).
-- Support banner after flag capture.
-- Educator kit: addition of a kit explaining to teachers, mentors.
+- New challenge: Middleware authorization bypass, based on the Next.js middleware authorization bypass (CVE-2025-29927).
+- A contextual support banner appears after a user captures a flag.
+- New educator kit for teaching with the lab, with OWASP grids, syllabus templates and a student report template.
 
 ### Changed
 
-- Upgraded to Astro 6.
-- Node.js bumped to 22.
-- Dependency updates.
+- The documentation site moves from Astro 5 to Astro 6 and `@astrojs/react 5.0.0`, and experimental config options become stable.
+- CI pipelines run on Node.js 22 for Astro 6 compatibility.
+- Dependency updates: `chalk` and `ora` in create-oss-store, `cypress-io/github-action` 7.1.8, and latest minor versions of `@astrojs/rss`, `@astrojs/check` and `slugify`.
 
 ### Fixed
 
-- Mistral model pinned to `mistral-small-2603`.
-- Removed obsolete Astro experimental flag.
+- The Mistral model is pinned to `mistral-small-2603` and checked by an availability test to prevent model availability issues.
+- The obsolete Astro experimental flag, which could cause warnings or build issues, is removed from the configuration.
 
-## [v2.12.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.12.0) - 2026-03-14
+## [v2.12.0] - 2026-03-14
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.12.0)
 
 ### Added
 
-- MCP Malicious Server challenge.
+- New challenge: MCP Malicious Server, where poisoned MCP tool responses drive indirect prompt injection to bypass access control, plus SSRF.
 
 ### Changed
 
-- Added business logic test coverage across unit, API, and E2E layers.
+- Business logic tests now cover the unit, API and E2E layers.
 
 ### Fixed
 
-- Fixed hydration mismatches.
+- Authentication-dependent header components no longer cause client/server hydration mismatches.
 
-## [v2.11.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.11.0) - 2026-03-13
+## [v2.11.0] - 2026-03-13
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.11.0)
 
 ### Added
 
-- AES-CBC padding oracle vulnerability.
+- New challenge: AES-CBC padding oracle vulnerability in a secure document sharing scenario.
 
 ### Changed
 
-- CI pipeline enhancements.
-- `actions/checkout` 4.3.1 → 6.0.2.
-- `actions/setup-node` 4.4.0 → 6.3.0.
+- CI gains quality checks, a Docker build workflow, npm Dependabot configuration and automated PR welcome messages for new contributors.
+- GitHub Actions dependencies move to new major versions: `actions/checkout`, `actions/setup-node`, `actions/upload-pages-artifact`, `cypress-io/github-action` and `docker/login-action`.
 
 ### Security
 
-- Hardened CI workflows.
-- Scoped Dependabot to non-vulnerable packages.
+- CI workflows are hardened with tighter GitHub Actions permissions, actions pinned to commit SHAs, and script injection mitigations.
+- Dependabot now updates only `/docs` and `/packages`, excluding the intentionally vulnerable root application.
 
-## [v2.10.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.10.0) - 2026-03-05
+## [v2.10.0] - 2026-03-05
 
-### Added
-
-- Profile takeover lab scenarios.
-- Docker Hub auto-publish workflow.
-
-### Changed
-
-- Docker setup option in docs and walkthroughs.
-- Fixed missing walkthrough slug.
-
-## [v2.9.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.9.0) - 2026-03-01
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.10.0)
 
 ### Added
 
-- Added a new vulnerability flag.
+- New challenges: two profile takeover flags built on a self-XSS and CSRF chain.
+- Docker images are published automatically to Docker Hub on each release.
 
 ### Changed
 
-- Added a walkthrough for the weak session management vulnerability.
-- Improved walkthrough texts, README, and CONTRIBUTING documentation.
-- Upgraded Astro to the latest version.
+- The README and lab walkthroughs now offer Docker as a setup alternative, with direct links to Docker Hub.
+- The weak session flag now has its missing `walkthroughSlug`.
 
-## [v2.8.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.8.0) - 2026-02-26
+## [v2.9.0] - 2026-03-01
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.9.0)
 
 ### Added
 
-- Docker support: The application can now be run entirely via Docker and docker-compose, removing the need for a local Node.js installation.
-- Insecure password reset flag.
+- New challenge: open redirect on the login form, to practice finding and exploiting open redirect flaws in authentication flows.
 
 ### Changed
 
-- Added a pull request template to standardize contributions.
+- New walkthrough for the weak session management vulnerability.
+- Walkthrough texts, the README and the CONTRIBUTING documentation are improved.
+- Astro is upgraded to the latest version.
+
+## [v2.8.0] - 2026-02-26
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.8.0)
+
+### Added
+
+- The application runs entirely via Docker and docker-compose, with `npm run docker:*` helper scripts; no local Node.js needed.
+- New challenge: Insecure password reset, a password reset flow with predictable, weak token generation.
+
+### Changed
+
+- A pull request template standardizes contributions.
 
 ### Fixed
 
-- Prisma Studio no longer auto-opens a browser during the setup process.
-- Improved plaintext password test reliability: Made the assertion more specific to avoid flaky test results.
+- Prisma Studio no longer opens a browser automatically during setup.
+- The plaintext password test uses a more specific assertion to avoid flaky results.
 
-## [v2.7.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.7.0) - 2026-02-22
+## [v2.7.0] - 2026-02-22
 
-### Added
-
-- Automated test suite: Added unit tests, API tests (endpoint-based scenarios).
-- CI-enforced branch protection: The develop branch has been removed in favor of a single main branch.
-
-### Changed
-
-- Updated documentation in the README and CONTRIBUTING.
-- Upgraded GitHub Pages dependencies.
-
-## [v2.6.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.6.0) - 2026-02-18
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.7.0)
 
 ### Added
 
-- XXE injection (supplier order import).
-- Image lightbox on blog posts.
+- An automated test suite of unit, API and Cypress end-to-end tests guards existing flags against regressions.
+- The develop branch is gone; changes reach main only through pull requests with CI-run tests.
 
 ### Changed
 
-- Admin dashboard navigation.
+- The README and CONTRIBUTING documentation is updated.
+- GitHub Pages dependencies are upgraded.
 
-## [v2.5.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.5.0) - 2026-02-17
+## [v2.6.0] - 2026-02-18
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.6.0)
 
 ### Added
 
-- Added a new Plaintext Password in Logs vulnerability scenario, featuring: https://github.com/kOaDT/oss-oopssec-store/issues/67.
-- Global server-side console instrumentation via instrumentation.ts that captures all server output.
-- A deliberately left debug statement in the login route that exposes plaintext credentials in logs.
+- New challenge: XXE injection in the supplier order import enables arbitrary file reads; admin access is required.
+- Blog post images open in a fullscreen lightbox, closed with the close button, Escape key, or a backdrop click.
 
 ### Changed
 
-- Added the missing walkthrough for the Malicious File Upload / Stored XSS vulnerability to the seed file.
-- Added a "Good First Issues" link and a forks badge to the repository.
+- The admin dashboard uses a responsive card grid instead of a button list, with consistent “Back to admin” navigation.
+
+## [v2.5.0] - 2026-02-17
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.5.0)
+
+### Added
+
+- New challenge: Plaintext Password in Logs, where the login route leaks credentials readable from the SIEM dashboard at `/monitoring/siem`.
+- New walkthrough for the Product Search SQL Injection flag.
+
+### Changed
+
+- The seed file now includes the missing walkthrough for the Malicious File Upload / Stored XSS vulnerability.
+- The repository now has a "Good First Issues" link and a forks badge.
 
 ### Fixed
 
-- Fixed incorrect documentation links for flags displayed in the player dashboard.
+- Documentation links for flags in the player dashboard now point to the correct pages.
 
-## [v2.4.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.4.0) - 2026-02-12
+## [v2.4.0] - 2026-02-12
 
-### Added
-
-- Introduced a new admin review moderation workflow with customizable display names and an author filtering system.
-- Implemented a progressive hints system for CTF flags to help guide players through challenges.
-
-### Changed
-
-- Auth tokens are no longer stored in `localStorage`; they are now handled via HTTP-only cookies with `sameSite:lax`, enabling more accurate simulation of real-world CSRF scenarios.
-- Authentication flow redesigned to rely on HTTP-only cookie based JWTs, providing a more realistic browser security model.
-- Frontend API layer updated to automatically include credentials in requests.
-
-## [v2.3.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.3.1) - 2026-02-07
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.4.0)
 
 ### Added
 
-- Brute Force vulnerability walkthrough.
+- New admin review moderation workflow with display names and author filtering, plus a second-order SQL injection challenge in its filters.
+- CTF flags now have a progressive hints system to guide players through challenges.
 
 ### Changed
 
-- Enhanced project documentation.
-- Updated README: Added new Repography statistics.
-- Fixed BOLA vulnerability documentation.
+- Auth tokens move from `localStorage` to HTTP-only cookies with `sameSite:lax`, for more realistic CSRF scenarios.
+- Authentication now relies on HTTP-only cookie-based JWTs for a more realistic browser security model.
+- The frontend API layer automatically includes credentials in requests.
+- Documentation and walkthroughs are updated for the new authentication and vulnerability mechanics.
+
+## [v2.3.1] - 2026-02-07
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.3.1)
+
+### Added
+
+- New walkthrough for the Brute Force flag challenge.
+
+### Changed
+
+- Project documentation moved from `CLAUDE.md` to Cursor rules and `AGENTS.md`.
+- The README shows new Repography statistics.
+- The BOLA vulnerability documentation now has its missing `walkthroughSlug` field.
 
 ### Fixed
 
-- Fixed Stored XSS vulnerability in production builds.
+- The Stored XSS challenge works in production builds (`npm start`): uploaded SVG files are served through the new `/api/uploads/` API route.
 
-## [v2.3.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.3.0) - 2026-01-31
+## [v2.3.0] - 2026-01-31
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.3.0)
 
 ### Added
 
-- Added new BOLA (Broken Object Level Authorization) vulnerability.
+- New challenge: the **BOLA (Broken Object Level Authorization)** vulnerability.
 
 ### Changed
 
-- Enhanced the prompt injection documentation with clearer explanations and more concrete examples.
-- Fixed a minor typo in `CONTRIBUTING.md`.
+- The **prompt injection** documentation now has clearer explanations and more concrete examples.
+- A minor typo in `CONTRIBUTING.md` is corrected.
 
-## [v2.2.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.2.0) - 2026-01-25
+## [v2.2.0] - 2026-01-25
 
-### Added
-
-- Introduced a prompt-injection training challenge in the AI assistant.
-
-## [v2.1.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.1.1) - 2026-01-25
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.2.0)
 
 ### Added
 
-- Added 404 and 500 error pages for improved error handling.
-- Introduced PDF invoice generation system with automatic invoice creation on order placement.
-- Added directory browsing and PDF viewing functionality on the admin documents page.
+- New challenge: AI Assistant Prompt Injection, where crafted inputs bypass the assistant's constraints to reveal sensitive information.
+
+## [v2.1.1] - 2026-01-25
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.1.1)
+
+### Added
+
+- The app has 404 and 500 error pages for better error handling.
+- A PDF invoice generation system creates an invoice automatically when an order is placed.
+- The admin documents page supports directory browsing and PDF viewing.
 
 ### Changed
 
-- Moved documents page to admin section with proper access controls.
+- The documents page moved to the admin section, with proper access controls.
 
 ### Fixed
 
-- Fixed npm package installation to include building step.
-- Fixed typo in Astro homepage command documentation.
+- The npm package installation now includes the build step.
+- A typo in the Astro homepage command documentation is corrected.
 
-## [v2.1.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.1.0) - 2026-01-24
+## [v2.1.0] - 2026-01-24
 
-### Added
-
-- X-Forwarded-For Header SQL Injection Vulnerability.
-- Admin Analytics Page.
-- Visitor Tracking Endpoint.
-
-### Changed
-
-- File Upload XSS Attack Chain.
-- Exploitation Guides.
-
-## [v2.0.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.0.0) - 2026-01-23
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.1.0)
 
 ### Added
 
-- Player Dashboard.
-- Persistent Flag Progress Tracking.
-- Walkthrough Documentation Site.
+- New challenge: X-Forwarded-For Header SQL Injection, an SQL injection through the `X-Forwarded-For` header with silent visitor tracking via `VisitorTracker`.
+- New Admin Analytics page: the `/admin/analytics` dashboard uses vulnerability-specific rendering techniques.
+- New Visitor Tracking endpoint: `/api/tracking` processes visitor data and detects SQL injection attempts.
+- New walkthrough in the exploitation documentation for the X-Forwarded-For SQL injection vulnerability.
 
 ### Changed
 
-- Improved documentation site build and configuration to fully support GitHub Pages subpath deployments.
-- Refined CI/CD workflows to deploy documentation from the main branch only for production stability.
-- Flag Progress Storage Change.
+- The File Upload XSS Attack Chain extends the malicious file upload vulnerability to show cross-user impact scenarios.
+- New exploitation guides with detailed walkthroughs for attacks related to file uploads.
+
+## [v2.0.0] - 2026-01-23
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.0.0)
+
+### Added
+
+- The new Player Dashboard at `/player-dashboard` tracks CTF progress by completion, difficulty, category and elapsed time.
+- Flag progress is stored in the database instead of browser `localStorage`, persisting across sessions with a timestamp per captured flag.
+- A searchable walkthrough documentation site covers XSS, JWT, IDOR, SSRF, mass assignment, weak cryptography and client-side logic flaws.
+
+### Changed
+
+- **Breaking:** Flag progress is no longer stored in browser `localStorage` but in the database, which impacts existing players whose progress was stored locally.
+- The documentation site build and configuration fully support GitHub Pages subpath deployments.
+- CI/CD workflows deploy the documentation from the main branch only.
 
 ### Fixed
 
-- Fixed Pagefind bundle path handling to ensure search works correctly when deployed under a base path.
-- Corrected breadcrumb navigation issues on the walkthroughs website.
-- Excluded documentation files from Next.js TypeScript compilation to prevent build errors.
+- Walkthrough site fixes cover Pagefind search, breadcrumbs, Astro URLs, Open Graph images, Next.js TypeScript builds and `.nojekyll` on GitHub Pages.
 
 ### Security
 
-- XSS Challenge Redesign.
-- JWT Vulnerability Realism.
+- The XSS challenge no longer discloses the flag automatically; players must chain XSS with same-origin static file access.
+- The JWT vulnerability now uses HS256 with a weak secret instead of `alg: none`.
 
-## [v1.11.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.11.0) - 2026-01-17
+## [v1.11.0] - 2026-01-17
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.11.0)
 
 ### Added
 
-- New Brute Force Vulnerability Challenge.
-- Enhanced CSRF Exploit Interface.
+- New challenge: Brute Force, where `vis.bruta@example.com` has no rate limiting and a weak password from common wordlists.
+- The CSRF exploit demonstration now uses a realistic Mail mode interface with a PayPal security alert phishing scenario.
 
 ### Changed
 
-- News Page Data Leak Enhancement.
-- Flag Toast Notification System.
-- CSRF Documentation Updates.
+- The News page leaked data section shows email addresses alongside password hashes, with some hashes redacted.
+- A persistent flag toast notification appears on the home page after a challenge is completed.
+- The CSRF documentation clarifies localStorage-based versus cookie-based scenarios and same-origin versus cross-site attack vectors.
+- Flag seeding uses upsert operations instead of createMany, so new flags can be added without recreating the entire dataset.
 
-## [v1.10.1](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.10.1) - 2026-01-16
+## [v1.10.1] - 2026-01-16
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.10.1)
 
 ### Fixed
 
-- Fixed CSRF vulnerability demonstration that stopped working after the migration to token-based authentication.
+- The CSRF vulnerability demonstration works again after the token-based authentication migration, with its exploit reading tokens from local storage.
 
-## [v1.10.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.10.0) - 2026-01-16
+## [v1.10.0] - 2026-01-16
 
-### Added
-
-- Hall of Fame page.
-- New flags: Added two new flags for security testing.
-- Product search with SQL injection vulnerability.
-
-### Changed
-
-- Weak MD5 hashing vulnerability.
-- Replaced ROADMAP.md with GitHub project and updated related links.
-- Removed redundant cookie-based authentication code.
-
-## [v1.9.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.9.0) - 2026-01-13
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.10.0)
 
 ### Added
 
-- Added malicious file upload vulnerability demonstration with stored XSS.
-- Includes admin product image management page with file upload functionality.
-- Demonstrates weak Content-Type validation allowing SVG files containing JavaScript.
+- New page: Hall of Fame, a community-driven page of player profiles.
+- New flags: SQL injection in product search, and session fixation with weak session management.
 
 ### Changed
 
-- Redesigned README header with centered layout and updated copy.
-- Added ASCII to create-oss-store CLI, setup.sh, and browser console welcome message.
-- Updated badges section with additional metrics.
+- The Weak MD5 hashing vulnerability requires chained exploits such as SQL injection; the hash is no longer shown on `/news`.
+- The `ROADMAP.md` file is replaced by a GitHub project, and related links are updated.
+- Redundant cookie-based authentication code is removed.
+
+## [v1.9.0] - 2026-01-13
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.9.0)
+
+### Added
+
+- New challenge: malicious SVG file upload with stored XSS on the admin product image management page.
+- The application now has a favicon.
+
+### Changed
+
+- The README header is redesigned with a centered layout and updated copy.
+- ASCII art now appears in the `create-oss-store` CLI, `setup.sh` and the browser console welcome message.
+- The badges section shows additional metrics.
+- A new `CLAUDE.md` file provides project context and documentation references.
 
 ### Fixed
 
-- Fixed writeups link in footer.
+- The writeups link in the footer is fixed.
 
-## [v1.8.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.8.0) - 2026-01-12
+## [v1.8.0] - 2026-01-12
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.8.0)
 
 ### Added
 
-- Added difficulty and category metadata to flags, with a corresponding UI to better classify and navigate challenges.
-- Introduced a new Information Disclosure API error flag to improve coverage of common security issues.
-- Added direct links to documentation pages within the Flag Checker component for faster access to reference material.
+- Flags carry difficulty and category metadata, with a UI to classify and navigate challenges.
+- New challenge: an Information Disclosure flag exposed through API errors.
+- The Flag Checker component links directly to documentation pages.
+- The README includes a Repography integration, and the site footer links to Writeups.
 
 ### Changed
 
-- Added a new ROADMAP.md and updated README.md and CONTRIBUTING.md to better document project direction and contribution guidelines.
+- A new `ROADMAP.md` documents project direction, and `README.md` and `CONTRIBUTING.md` are updated with contribution guidelines.
 
 ### Fixed
 
-- Fixed missing export of the `User` type from `client-auth`, restoring proper type availability for downstream consumers.
+- The `User` type is exported from `client-auth` again, so downstream consumers can use it.
 
-## [v1.7.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.7.0) - 2026-01-08
+## [v1.7.0] - 2026-01-08
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.7.0)
 
 ### Added
 
-- Added SQL injection flag.
-- Added special styling when all flags are found.
+- New challenge: a SQL injection flag.
+- Special styling appears once all flags are found.
 
 ### Changed
 
-- Introduced `useAuth` hook and centralized authentication utilities to reduce duplication across components.
-- Centralized shared types in `lib/types` for better type management.
-- Refactored API layer with a centralized API client (`lib/api.ts`) and typed methods.
+- A new `useAuth` hook and shared authentication utilities cut duplicated code across components.
+- Shared types now live in one place, `lib/types`.
+- The API layer now goes through a single API client, `lib/api.ts`, with typed methods.
+- Server-side auth moved from `lib/auth.ts` to `lib/server-auth.ts`, and client-side auth from `lib/utils/auth.ts` to `lib/client-auth.ts`.
+- Base URL configuration is now set in one place.
+- `getDatabaseUrl` now lives in a shared module.
+- The unused `lib/vulnerabilities.ts` file is removed.
+- A typo in the CSRF flag documentation is corrected.
 
 ### Fixed
 
-- Fixed CLI publish workflow to allow the same version to be published.
+- The CLI publish workflow now allows the same version to be published again.
 
-## [v1.6.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.6.0) - 2026-01-07
+## [v1.6.0] - 2026-01-07
 
-### Added
-
-- Introduced an SSRF challenge and a reusable flag component.
-
-### Changed
-
-- Improved flag validation feedback, showcase usability, and documentation.
-
-## [1.5.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.5.0) - 2026-01-02
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v1.6.0)
 
 ### Added
 
-- Added the `create-oss-store` npm CLI for quick setup.
+- New challenge: an SSRF flag expands the list of supported vulnerabilities and attack scenarios.
+- Flags are displayed through a generic component, making the UI more consistent and new flag types easier to add.
 
 ### Changed
 
-- Improved showcase navigation, README badges, and Git hygiene.
+- The flag validation button plays a small animation, making the validation flow feel more responsive and clearer.
+- Quick start commands now sit at the top of the showcase hero section, so new users start without scrolling.
+- The showcase website setup instructions are clarified, and the README shows an npm badge with the latest package version.
 
-## [1.4.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.4.0) - 2025-12-28
+## [1.5.0] - 2026-01-02
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.5.0)
 
 ### Added
 
-- Added mass-assignment/parameter-pollution and path-traversal challenges.
+- `npx create-oss-store my-ctf-lab` sets up the store with seeded CTF flags; then run `cd my-ctf-lab` and `npm run dev`.
+- The CLI package lives in `packages/create-oss-store/` and is published on npm.
+- The `.github/workflows/publish-cli.yml` workflow publishes the CLI automatically on each new release.
 
 ### Changed
 
-- Passed the client-side price-manipulation flag through the order confirmation URL.
+- The showcase site's navigation menu now responds correctly to screen size.
+- The README shows GitHub shields for license, release and stars, and its SEO is better.
+- `.env` is no longer tracked in version control because the setup script generates it.
 
-## [1.3.0](https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.3.0) - 2025-12-22
+## [1.4.0] - 2025-12-28
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.4.0)
 
 ### Added
 
-- Added IDOR, XSS, and CSRF training challenges.
+- New challenge: Mass Assignment/Parameter Pollution, letting attackers modify fields that should not be user-controllable.
+- New challenge: Path Traversal, using sequences like `../` to access files outside the intended directory.
 
 ### Changed
 
-- Removed an unnecessary MD5 reference from the news page.
+- The client-side (CSR) price manipulation flag is passed as a URL parameter and shown on the order confirmation page.
+
+## [1.3.0] - 2025-12-22
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.3.0)
+
+### Added
+
+- New challenge: IDOR flag, an Insecure Direct Object Reference that lets attackers reach unauthorized resources by manipulating identifiers.
+- New challenge: XSS flag, a Cross-Site Scripting vulnerability that shows client-side code injection and its impact.
+- New challenge: CSRF flag, a Cross-Site Request Forgery vulnerability that exposes missing or misconfigured CSRF protections.
+
+### Changed
+
+- The news page no longer shows an unneeded MD5 reference.
+
+[v2.22.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.1...v2.22.0
+[v2.21.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.0...v2.21.1
+[v2.21.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.20.0...v2.21.0
+[v2.20.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.19.0...v2.20.0
+[v2.19.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.18.0...v2.19.0
+[v2.18.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.17.0...v2.18.0
+[v2.17.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.16.3...v2.17.0
+[v2.16.3]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.16.2...v2.16.3
+[v2.16.2]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.16.1...v2.16.2
+[v2.16.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.16.0...v2.16.1
+[v2.16.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.15.1...v2.16.0
+[v2.15.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.15.0...v2.15.1
+[v2.15.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.14.2...v2.15.0
+[v2.14.2]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.14.1...v2.14.2
+[v2.14.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.14.0...v2.14.1
+[v2.14.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.13.0...v2.14.0
+[v2.13.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.12.0...v2.13.0
+[v2.12.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.11.0...v2.12.0
+[v2.11.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.10.0...v2.11.0
+[v2.10.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.9.0...v2.10.0
+[v2.9.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.8.0...v2.9.0
+[v2.8.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.7.0...v2.8.0
+[v2.7.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.6.0...v2.7.0
+[v2.6.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.5.0...v2.6.0
+[v2.5.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.4.0...v2.5.0
+[v2.4.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.3.1...v2.4.0
+[v2.3.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.3.0...v2.3.1
+[v2.3.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.2.0...v2.3.0
+[v2.2.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.1.1...v2.2.0
+[v2.1.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.1.0...v2.1.1
+[v2.1.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.0.0...v2.1.0
+[v2.0.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.11.0...v2.0.0
+[v1.11.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.10.1...v1.11.0
+[v1.10.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.10.0...v1.10.1
+[v1.10.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.9.0...v1.10.0
+[v1.9.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.8.0...v1.9.0
+[v1.8.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.7.0...v1.8.0
+[v1.7.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v1.6.0...v1.7.0
+[v1.6.0]: https://github.com/kOaDT/oss-oopssec-store/compare/1.5.0...v1.6.0
+[1.5.0]: https://github.com/kOaDT/oss-oopssec-store/compare/1.4.0...1.5.0
+[1.4.0]: https://github.com/kOaDT/oss-oopssec-store/compare/1.3.0...1.4.0
+[1.3.0]: https://github.com/kOaDT/oss-oopssec-store/releases/tag/1.3.0
