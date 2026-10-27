@@ -3,6 +3,7 @@ name: Publish Docker image
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,8 +20,11 @@ jobs:
       platforms: linux/amd64,linux/arm64
       # The secrets context is unavailable in a reusable workflow's `with:`.
       meta-images: leogra/oss-oopssec-store
-      # Pushes the release tag as is, plus `latest`.
-      meta-tags: type=ref,event=tag
+      # A release pushes its tag as is, plus `latest`. A manual run pushes a
+      # throwaway tag and never moves `latest`, even when dispatched on a tag.
+      meta-tags: |
+        type=ref,event=tag,enable=${{ github.event_name == 'release' }}
+        type=raw,value=test-${{ github.run_id }},enable=${{ github.event_name == 'workflow_dispatch' }}
     secrets:
       registry-auths: |
         - registry: docker.io
