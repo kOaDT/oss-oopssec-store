@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - ".github/workflows/docker-build.yml"
       - "Dockerfile"
       - ".dockerignore"
       - ".nvmrc"
@@ -26,8 +27,13 @@ concurrency:
 
 jobs:
   build:
-    name: Docker Build Test
-    runs-on: ubuntu-latest
+    name: Docker Build Test (${{ matrix.runner }})
+    # Same hosts as the docker/github-builder defaults, which publish the image.
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-26.04, ubuntu-26.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
