@@ -4,6 +4,28 @@ All notable changes to OopsSec Store are documented here. This changelog follows
 
 Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/oss-oopssec-store/releases) at each release.
 
+## [v2.23.0] - 2026-10-27
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.23.0)
+
+### Added
+
+- The Docker image now covers `linux/amd64` and `linux/arm64`, so ARM64 machines run it natively via `docker pull leogra/oss-oopssec-store`.
+- A new `CHANGELOG.md` in Keep a Changelog format summarizes every release from its GitHub release notes.
+
+### Changed
+
+- The breach notice on the News page now ends with a nod to how the store hashes passwords.
+- Pull request CI now builds and smoke-tests the Docker image on amd64 and arm64, loading native modules `better-sqlite3` and `libxmljs2`.
+- Docker images are now published through `docker/github-builder`; manual runs push a throwaway `test-<run id>` tag, never `latest`.
+- The Dockerfile now excludes `docs/`, `tests/`, `cypress/`, `.cursor/`, `.husky/` and the CLI package, since BuildKit ignores `.dockerignore` for Git contexts.
+- Docs site, `create-oss-store` CLI and CI dependencies are updated, including majors `eslint-plugin-astro` 3.1.0 and `chalk` 6.0.0; app dependencies are unchanged.
+
+### Fixed
+
+- The "Add" button and cart icon on product cards now add to cart, sending signed-out visitors to the login page.
+- On the SIEM monitoring login, the Username and Password labels are now tied to their inputs.
+
 ## [v2.22.0] - 2026-10-07
 
 [Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.22.0)
@@ -748,6 +770,7 @@ Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/
 
 - The news page no longer shows an unneeded MD5 reference.
 
+[v2.23.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.22.0...v2.23.0
 [v2.22.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.1...v2.22.0
 [v2.21.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.0...v2.21.1
 [v2.21.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.20.0...v2.21.0
