@@ -1,3 +1,6 @@
+# Filters a local build context only: BuildKit skips this file for a Git
+# context, which the published image builds from. A tracked path excluded here
+# must be excluded by the Dockerfile too, or the two images drift.
 node_modules/
 .next/
 .git/
@@ -17,11 +20,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 docs/
-# ...except the curriculum, which the app itself imports: `lib/discussions.ts`
-# reads challenge titles from it so a discussion thread is named the same
-# whether it was opened from the app or from a walkthrough. Keep this file
-# free of imports — nothing else under docs/ ships in the image, so any
-# dependency it grows would break the Docker build and only the Docker build.
+# ...except the curriculum, which the image ships on its own.
 !docs/src/data/roadmap.ts
 packages/create-oss-store/
 tests/
@@ -34,3 +33,4 @@ prisma/*.pem
 .claude/
 .plan/
 .venv/
+*.tsbuildinfo

@@ -18,7 +18,8 @@ import { formatSlug } from "./format";
  * cannot import from here.
  *
  * This import is the one thing the app pulls out of `docs/`, which the Docker
- * image otherwise excludes wholesale — see the exception in `.dockerignore`.
+ * image otherwise excludes wholesale: the Dockerfile copies the curriculum on
+ * its own.
  */
 const TITLES = new Map(
   CURRICULUM.flatMap((chapter) => chapter.challenges).map(
