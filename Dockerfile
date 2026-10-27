@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Keep this default in sync with .nvmrc; tests/unit/node-version-parity.test.ts
 # fails the build if they drift.
 ARG NODE_VERSION=22
@@ -13,7 +15,14 @@ COPY package*.json ./
 # binary its postinstall would otherwise download.
 RUN CYPRESS_INSTALL_BINARY=0 npm ci && npm cache clean --force
 
-COPY . .
+# The published image builds from a Git context, which BuildKit never filters
+# through .dockerignore: these exclusions decide what ships.
+COPY --exclude=docs --exclude=tests --exclude=cypress --exclude=.cursor \
+  --exclude=.husky --exclude=packages/create-oss-store . .
+# The app imports the curriculum to title discussion threads the way the
+# walkthroughs do. Keep it free of imports: nothing else under docs/ ships, so
+# a dependency it grows would break the Docker build and only the Docker build.
+COPY docs/src/data/roadmap.ts docs/src/data/roadmap.ts
 
 # Prisma v6 requires DATABASE_URL even during generate; use a throwaway value
 RUN DATABASE_URL=file:/tmp/build.db npx prisma generate

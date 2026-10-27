@@ -244,8 +244,8 @@ describe("docs/src/data/roadmap.ts", () => {
   });
 
   it("stays free of imports so the Docker image can ship it alone", () => {
-    /* `lib/discussions.ts` imports this file, and `.dockerignore` re-includes
-     * it as the single exception to excluding `docs/`. An import added here
+    /* `lib/discussions.ts` imports this file, and the Dockerfile copies it as
+     * the single exception to excluding `docs/`. An import added here
      * would resolve everywhere except inside the image, where it fails at
      * `next build` — a break invisible to every check that runs before it. */
     const source = read("docs", "src", "data", "roadmap.ts");
