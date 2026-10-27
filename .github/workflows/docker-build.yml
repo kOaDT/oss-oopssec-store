@@ -56,6 +56,11 @@ jobs:
             sleep 2
           done
 
+      # better-sqlite3 loads its binary on the first Database, libxmljs2 on the
+      # first request to its route: the startup above loads neither.
+      - name: Load the native modules
+        run: docker exec smoke node -e "new (require('better-sqlite3'))(':memory:'); require('libxmljs2').parseXmlString('<a/>')"
+
       - name: Show container logs
         if: failure()
         run: docker logs smoke
