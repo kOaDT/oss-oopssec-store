@@ -11,12 +11,21 @@ on:
       - "docker-compose.yml"
       - "docker-entrypoint.sh"
       - "package*.json"
+      # tsconfig.json puts every root .ts in the type check, and next build
+      # runs ESLint.
+      - "*.ts"
+      - "*.mjs"
+      - "tsconfig.json"
+      - ".env.local"
       - "prisma/**"
       - "app/**"
       - "lib/**"
       - "public/**"
       - "hooks/**"
       - "scripts/**"
+      - "content/**"
+      - "hall-of-fame/**"
+      - "docs/src/data/roadmap.ts"
 
 permissions:
   contents: read
