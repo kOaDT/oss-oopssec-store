@@ -1,6 +1,12 @@
 name: Publish Docker image
 
 on:
+  # Builds both platforms without pushing, so a change to this workflow, such
+  # as a github-builder bump, is exercised before it reaches a release.
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/docker-publish.yml"
   release:
     types: [published]
   workflow_dispatch:
@@ -16,15 +22,17 @@ jobs:
       id-token: write
     with:
       output: image
-      push: true
+      push: ${{ github.event_name != 'pull_request' }}
       platforms: linux/amd64,linux/arm64
       # The secrets context is unavailable in a reusable workflow's `with:`.
       meta-images: leogra/oss-oopssec-store
       # A release pushes its tag as is, plus `latest`. A manual run pushes a
       # throwaway tag and never moves `latest`, even when dispatched on a tag.
+      # A pull request names its unpushed image pr-<number>.
       meta-tags: |
         type=ref,event=tag,enable=${{ github.event_name == 'release' }}
         type=raw,value=test-${{ github.run_id }},enable=${{ github.event_name == 'workflow_dispatch' }}
+        type=ref,event=pr
     secrets:
       registry-auths: |
         - registry: docker.io
