@@ -231,6 +231,8 @@ No Node.js required. Just [Docker](https://docs.docker.com/get-docker/).
 docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
+The image is published for `linux/amd64` and `linux/arm64`, so Apple Silicon and other ARM64 machines run it without emulation.
+
 To persist data across restarts:
 
 ```bash
