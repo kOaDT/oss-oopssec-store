@@ -228,12 +228,13 @@ Recommended setup for classrooms: each student runs the app on their own machine
 
 ### What are the system requirements?
 
-| Setup      | Requirements                     |
-| ---------- | -------------------------------- |
-| Node.js    | Node 22+, npm                    |
-| Docker     | Docker Desktop or Docker Engine  |
-| Disk space | ~500 MB                          |
-| RAM        | 512 MB minimum, 1 GB recommended |
+| Setup        | Requirements                            |
+| ------------ | --------------------------------------- |
+| Node.js      | Node 22+, npm                           |
+| Docker       | Docker Desktop or Docker Engine         |
+| Architecture | x86-64 or ARM64, Apple Silicon included |
+| Disk space   | ~500 MB                                 |
+| RAM          | 512 MB minimum, 1 GB recommended        |
 
 ### Can I contribute new challenges for my course?
 
