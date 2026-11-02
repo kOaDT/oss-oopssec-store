@@ -42,4 +42,5 @@ export const FLAGS = {
   JWT_ALGORITHM_CONFUSION: "OSS{jwt_4lg_c0nfus10n}",
   NPM_SUPPLY_CHAIN_TYPOSQUAT: "OSS{npm_typ0sqv4tt1ng_dr0p_4i_rul3s}",
   AI_RULES_FILE_BACKDOOR: "OSS{rul3s_f1l3_b4ckd00r_3xpl01t3d}",
+  EXPOSED_GIT_REPOSITORY: "OSS{g1t_st4sh_n3v3r_f0rg3ts}",
 } as const;

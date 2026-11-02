@@ -5,7 +5,7 @@ title: "About - OopsSec Store"
 
 **Security training for the apps you actually ship.**
 
-OopsSec Store is an open-source, deliberately vulnerable e-commerce app built on **Next.js, React, TypeScript and Prisma**. It holds 36 challenges across web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP. Find the bugs, exploit them, and understand why they work.
+OopsSec Store is an open-source, deliberately vulnerable e-commerce app built on **Next.js, React, TypeScript and Prisma**. It holds 37 challenges across web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP. Find the bugs, exploit them, and understand why they work.
 
 This site hosts the walkthroughs: one per challenge, from vulnerability to exploit to fix.
 
@@ -41,7 +41,7 @@ The curriculum also covers the attack surface that arrived with AI-assisted deve
 
 ## Features
 
-- 36 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](/oss-oopssec-store/roadmap)
+- 37 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](/oss-oopssec-store/roadmap)
 - A walkthrough and an in-app vulnerability reference for each challenge
 - A player dashboard tracking progress by difficulty and category
 - A Hall of Fame for players who capture every flag, with a shareable badge

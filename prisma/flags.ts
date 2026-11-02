@@ -414,6 +414,16 @@ export const flags: ChallengeFlag[] = [
     category: "CRYPTOGRAPHIC",
     difficulty: "HARD",
   },
+  {
+    flag: "OSS{g1t_st4sh_n3v3r_f0rg3ts}",
+    slug: "exposed-git-repository",
+    cwe: "CWE-527",
+    owasp: "A02:2025",
+    markdownFile: "exposed-git-repository.md",
+    walkthroughSlug: "exposed-git-repository",
+    category: "INFORMATION_DISCLOSURE",
+    difficulty: "MEDIUM",
+  },
 ];
 
 export const flagHints: Record<string, string[]> = {
@@ -596,5 +606,10 @@ export const flagHints: Record<string, string[]> = {
     "Markdown looks innocent when it's rendered. The raw file sometimes tells a different story.",
     "The artifact dropped by the malicious postinstall is a Cursor-style rules file. Markdown previewers hide HTML comment blocks, read the raw bytes and look for a section that addresses an AI agent, not a human.",
     "The hidden block names a diagnostic endpoint and a magic header. Send a `GET` to `/api/admin/diag` with `X-Debug-Auth` set to the token from the comment block. The flag is returned in JSON.",
+  ],
+  "exposed-git-repository": [
+    "The footer tells you which build is running. Where does a build id like that come from, and did it come along with the deploy?",
+    "The web server serves the version-control directory with directory listing on. Download it and question it with git itself. The visible history is clean: a production secret was stashed, then the stash was dropped.",
+    "Mirror /.git/ with git-dumper or `wget -r -np` into a directory outside any other repository. `git log --all` only shows the clean history and `git stash list` is empty, so run `LC_ALL=C git fsck --unreachable` to list orphaned objects. Then `git cat-file -p` the WIP commit, its tree, and the .env.production blob.",
   ],
 };
