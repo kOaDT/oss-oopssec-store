@@ -16,7 +16,7 @@ Or with Docker (no Node.js required):
 docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
-Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) as their entry point. It lays out all 36 challenges in a visual learning path, with chapters ordered from easy to hard, and recommends a self-guided approach (try the challenge first, then read the walkthrough).
+Point your students to the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) as their entry point. It lays out all 37 challenges in a visual learning path, with chapters ordered from easy to hard, and recommends a self-guided approach (try the challenge first, then read the walkthrough).
 
 ---
 
@@ -49,7 +49,7 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 | OWASP Category                                  | Challenges covered                                                                                                                                                                         |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **A01 - Broken Access Control**                 | IDOR (orders), BOLA (wishlist), BFLA (live stream hijack), Open Redirect, Path Traversal, Middleware Authorization Bypass (CVE-2025-29927), CSRF, CSRF + Self-XSS chain (profile takeover) |
-| **A02 - Security Misconfiguration**             | Public environment variable exposure, Information disclosure via API errors, XXE (supplier import)                                                                                         |
+| **A02 - Security Misconfiguration**             | Public environment variable exposure, Information disclosure via API errors, Exposed .git repository (dropped stash), XXE (supplier import)                                                |
 | **A03 - Software Supply Chain Failures**        | npm Typosquat → AI Rules File Backdoor chain (typosquatted package drops a malicious Cursor/Claude rules file with a hidden prompt-injection payload that steers the dev's AI agent)       |
 | **A04 - Cryptographic Failures**                | Weak JWT secret, Weak MD5 Hashing, Padding Oracle (AES-CBC), Insecure Randomness (gift card code generation), JWT Algorithm Confusion (RS256 → HS256 on the Partner API)                   |
 | **A05 - Injection**                             | Stored XSS (product reviews), Self-XSS (profile injection), SQL Injection (login), Product Search SQLi, Second-Order SQLi, X-Forwarded-For SQLi, Prompt Injection, MCP Server Poisoning    |
@@ -67,7 +67,7 @@ OopsSec Store covers the full **OWASP Top 10 (2025)** plus advanced topics relev
 
 A visual version of this catalog is available as the [Roadmap](https://koadt.github.io/oss-oopssec-store/roadmap) on the docs site, grouped into 11 thematic chapters.
 
-Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — every column of the table below (number, title, chapter, category, difficulty, estimated minutes) plus prerequisites and the walkthrough URL, regenerated on every docs deploy. Each entry carries a `slug` that joins with the app's `/api/flags`; it is unique across the feed. Note that `walkthrough.slug` is **not** — a chained challenge shares its write-up with the challenge it builds on (14 and 16, 34 and 35), so deduplicating on that field would drop entries.
+Building a tool around the curriculum? The same data is published as JSON at [`challenges.json`](https://koadt.github.io/oss-oopssec-store/challenges.json) — every column of the table below (number, title, chapter, category, difficulty, estimated minutes) plus prerequisites and the walkthrough URL, regenerated on every docs deploy. Each entry carries a `slug` that joins with the app's `/api/flags`; it is unique across the feed. Note that `walkthrough.slug` is **not** — a chained challenge shares its write-up with the challenge it builds on (15 and 17, 35 and 36), so deduplicating on that field would drop entries.
 
 Difficulty: 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced
 
@@ -78,41 +78,42 @@ The Category column uses the same vocabulary as the app's `FlagCategory` enum (`
 | 1   | Public env variable leak                                 | Reconnaissance & Disclosure | Information Disclosure | 🟢         | 15–20 min  |
 | 2   | Information disclosure via API errors                    | Reconnaissance & Disclosure | Information Disclosure | 🟢         | 15–20 min  |
 | 3   | Plaintext passwords in logs                              | Reconnaissance & Disclosure | Information Disclosure | 🟡         | 30 min     |
-| 4   | Insecure Direct Object Reference (IDOR)                  | Broken Access Control       | Authorization          | 🟢         | 20–30 min  |
-| 5   | Open redirect to login bypass                            | Broken Access Control       | Input Validation       | 🟢         | 20–30 min  |
-| 6   | Broken Object Level Authorization (BOLA)                 | Broken Access Control       | Authorization          | 🟡         | 45–60 min  |
-| 7   | Broken Function Level Authorization (live stream hijack) | Broken Access Control       | Authorization          | 🟡         | 45–60 min  |
-| 8   | Path traversal in document API                           | Broken Access Control       | Input Validation       | 🟡         | 30–45 min  |
-| 9   | Client-side price manipulation                           | Trusting the Client         | Input Validation       | 🟡         | 30–45 min  |
-| 10  | Mass assignment to admin role                            | Trusting the Client         | Input Validation       | 🟡         | 45–60 min  |
-| 11  | Middleware bypass (CVE-2025-29927)                       | Trusting the Client         | Authorization          | 🟡         | 30–45 min  |
-| 12  | Race condition coupon abuse                              | Trusting the Client         | Insecure Design        | 🔴         | 45–90 min  |
-| 13  | Stored XSS in product reviews                            | Cross-Site Attacks          | Injection              | 🟢         | 30–45 min  |
-| 14  | Self-XSS in profile bio                                  | Cross-Site Attacks          | Injection              | 🟢         | 20–30 min  |
-| 15  | CSRF on admin order update                               | Cross-Site Attacks          | Request Forgery        | 🟡         | 45–60 min  |
-| 16  | CSRF + Self-XSS profile takeover                         | Cross-Site Attacks          | Request Forgery        | 🔴         | 90–120 min |
-| 17  | SQL injection in order search                            | SQL Injection Deep Dive     | Injection              | 🟡         | 30–45 min  |
-| 18  | Product search SQLi                                      | SQL Injection Deep Dive     | Injection              | 🟡         | 30–45 min  |
-| 19  | X-Forwarded-For SQLi                                     | SQL Injection Deep Dive     | Injection              | 🔴         | 60–90 min  |
-| 20  | Second-order SQL injection                               | SQL Injection Deep Dive     | Injection              | 🔴         | 60–90 min  |
-| 21  | Malicious file upload (SVG XSS)                          | Parsers Behaving Badly      | Injection              | 🔴         | 45–60 min  |
-| 22  | XXE in supplier order import                             | Parsers Behaving Badly      | Injection              | 🔴         | 45–60 min  |
-| 23  | Weak JWT secret                                          | Authentication Failures     | Authentication         | 🟡         | 45–60 min  |
-| 24  | Brute force, no rate limiting                            | Authentication Failures     | Authentication         | 🟡         | 30–45 min  |
-| 25  | Session fixation                                         | Authentication Failures     | Authentication         | 🟡         | 60–90 min  |
-| 26  | Insecure password reset                                  | Authentication Failures     | Authentication         | 🟡         | 45–60 min  |
-| 27  | SSRF internal page access                                | Server-Side Request Forgery | Request Forgery        | 🟡         | 45–60 min  |
-| 28  | Weak MD5 password hashing                                | Cryptography Done Wrong     | Cryptographic          | 🟡         | 30–45 min  |
-| 29  | Insecure randomness in gift cards                        | Cryptography Done Wrong     | Cryptographic          | 🟡         | 45–60 min  |
-| 30  | AES-CBC padding oracle                                   | Cryptography Done Wrong     | Cryptographic          | 🔴         | 90–120 min |
-| 31  | JWT algorithm confusion (partner API)                    | Cryptography Done Wrong     | Cryptographic          | 🔴         | 90–120 min |
-| 32  | Prompt injection in AI assistant                         | AI & LLM Security           | Injection              | 🟡         | 60–90 min  |
-| 33  | MCP malicious server                                     | AI & LLM Security           | Injection              | 🔴         | 90–120 min |
-| 34  | npm typosquat                                            | Supply Chain & Framework    | Supply Chain           | 🔴         | 60–90 min  |
-| 35  | AI rules file backdoor                                   | Supply Chain & Framework    | Supply Chain           | 🟡         | 20–30 min  |
-| 36  | react2shell (CVE-2025-55182)                             | Supply Chain & Framework    | Remote Code Execution  | 🔴         | 120+ min   |
+| 4   | Exposed .git repository                                  | Reconnaissance & Disclosure | Information Disclosure | 🟡         | 20–30 min  |
+| 5   | Insecure Direct Object Reference (IDOR)                  | Broken Access Control       | Authorization          | 🟢         | 20–30 min  |
+| 6   | Open redirect to login bypass                            | Broken Access Control       | Input Validation       | 🟢         | 20–30 min  |
+| 7   | Broken Object Level Authorization (BOLA)                 | Broken Access Control       | Authorization          | 🟡         | 45–60 min  |
+| 8   | Broken Function Level Authorization (live stream hijack) | Broken Access Control       | Authorization          | 🟡         | 45–60 min  |
+| 9   | Path traversal in document API                           | Broken Access Control       | Input Validation       | 🟡         | 30–45 min  |
+| 10  | Client-side price manipulation                           | Trusting the Client         | Input Validation       | 🟡         | 30–45 min  |
+| 11  | Mass assignment to admin role                            | Trusting the Client         | Input Validation       | 🟡         | 45–60 min  |
+| 12  | Middleware bypass (CVE-2025-29927)                       | Trusting the Client         | Authorization          | 🟡         | 30–45 min  |
+| 13  | Race condition coupon abuse                              | Trusting the Client         | Insecure Design        | 🔴         | 45–90 min  |
+| 14  | Stored XSS in product reviews                            | Cross-Site Attacks          | Injection              | 🟢         | 30–45 min  |
+| 15  | Self-XSS in profile bio                                  | Cross-Site Attacks          | Injection              | 🟢         | 20–30 min  |
+| 16  | CSRF on admin order update                               | Cross-Site Attacks          | Request Forgery        | 🟡         | 45–60 min  |
+| 17  | CSRF + Self-XSS profile takeover                         | Cross-Site Attacks          | Request Forgery        | 🔴         | 90–120 min |
+| 18  | SQL injection in order search                            | SQL Injection Deep Dive     | Injection              | 🟡         | 30–45 min  |
+| 19  | Product search SQLi                                      | SQL Injection Deep Dive     | Injection              | 🟡         | 30–45 min  |
+| 20  | X-Forwarded-For SQLi                                     | SQL Injection Deep Dive     | Injection              | 🔴         | 60–90 min  |
+| 21  | Second-order SQL injection                               | SQL Injection Deep Dive     | Injection              | 🔴         | 60–90 min  |
+| 22  | Malicious file upload (SVG XSS)                          | Parsers Behaving Badly      | Injection              | 🔴         | 45–60 min  |
+| 23  | XXE in supplier order import                             | Parsers Behaving Badly      | Injection              | 🔴         | 45–60 min  |
+| 24  | Weak JWT secret                                          | Authentication Failures     | Authentication         | 🟡         | 45–60 min  |
+| 25  | Brute force, no rate limiting                            | Authentication Failures     | Authentication         | 🟡         | 30–45 min  |
+| 26  | Session fixation                                         | Authentication Failures     | Authentication         | 🟡         | 60–90 min  |
+| 27  | Insecure password reset                                  | Authentication Failures     | Authentication         | 🟡         | 45–60 min  |
+| 28  | SSRF internal page access                                | Server-Side Request Forgery | Request Forgery        | 🟡         | 45–60 min  |
+| 29  | Weak MD5 password hashing                                | Cryptography Done Wrong     | Cryptographic          | 🟡         | 30–45 min  |
+| 30  | Insecure randomness in gift cards                        | Cryptography Done Wrong     | Cryptographic          | 🟡         | 45–60 min  |
+| 31  | AES-CBC padding oracle                                   | Cryptography Done Wrong     | Cryptographic          | 🔴         | 90–120 min |
+| 32  | JWT algorithm confusion (partner API)                    | Cryptography Done Wrong     | Cryptographic          | 🔴         | 90–120 min |
+| 33  | Prompt injection in AI assistant                         | AI & LLM Security           | Injection              | 🟡         | 60–90 min  |
+| 34  | MCP malicious server                                     | AI & LLM Security           | Injection              | 🔴         | 90–120 min |
+| 35  | npm typosquat                                            | Supply Chain & Framework    | Supply Chain           | 🔴         | 60–90 min  |
+| 36  | AI rules file backdoor                                   | Supply Chain & Framework    | Supply Chain           | 🟡         | 20–30 min  |
+| 37  | react2shell (CVE-2025-55182)                             | Supply Chain & Framework    | Remote Code Execution  | 🔴         | 120+ min   |
 
-**Total estimated time:** 27–38 hours for the full curriculum depending on student level. Challenges 34 and 35 are chained — once the chain is started for flag #34, flag #35 follows in a few minutes.
+**Total estimated time:** 27–38 hours for the full curriculum depending on student level. Challenges 35 and 36 are chained — once the chain is started for flag #35, flag #36 follows in a few minutes.
 You don't need to cover everything. Pick the challenges that match your course objectives and time constraints.
 
 ---
@@ -125,7 +126,7 @@ Designed for a 5-day security bootcamp with 3–4 hours of lab time per day.
 
 | Day   | Focus                          | Challenges                                                                                                                                                                |
 | ----- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Day 1 | Recon & injection fundamentals | Public Env Variable, Info Disclosure API, SQL Injection (login), Product Search SQLi, X-Forwarded-For SQLi                                                                |
+| Day 1 | Recon & injection fundamentals | Public Env Variable, Info Disclosure API, Exposed .git, SQL Injection (login), Product Search SQLi, X-Forwarded-For SQLi                                                  |
 | Day 2 | Client-side attacks            | Stored XSS (review), Self-XSS (profile), SVG Upload XSS, CSRF, CSRF + Self-XSS chain                                                                                      |
 | Day 3 | Auth & access control          | IDOR, BOLA, Open Redirect, Weak JWT, Session Fixation, Brute Force, Password Reset, Middleware Bypass (CVE-2025-29927)                                                    |
 | Day 4 | Crypto, data & server-side     | Weak MD5, Padding Oracle, JWT Algorithm Confusion, Insecure Randomness (gift card), Plaintext Logs, Path Traversal, SSRF, Client-Side Price Manipulation, Mass Assignment |
@@ -141,7 +142,7 @@ Designed to complement a web security or application security course over 6–10
 
 | Week | Topic                             | Challenges                                                                                                    | Learning outcomes                                                     |
 | ---- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| 1    | Lab setup & recon                 | Public Env Variable, Info Disclosure API                                                                      | Understand the app architecture and attack surface                    |
+| 1    | Lab setup & recon                 | Public Env Variable, Info Disclosure API, Exposed .git                                                        | Understand the app architecture and attack surface                    |
 | 2    | SQL Injection                     | SQL Injection (login), Product Search SQLi, X-Forwarded-For SQLi                                              | Identify and exploit injection in modern ORMs                         |
 | 3    | XSS & client-side attacks         | Stored XSS, Self-XSS (profile), SVG Upload XSS                                                                | Understand DOM context and stored payload execution                   |
 | 4    | Access control & input validation | IDOR, BOLA, Open Redirect, Path Traversal, Client-Side Price Manipulation, Middleware Bypass (CVE-2025-29927) | Enumerate and exploit broken access controls                          |
@@ -181,10 +182,10 @@ npx create-oss-store my-lab && cd my-lab && npm start
 Designed for pentesters or developers onboarding to a security-aware team.
 
 **Recommended path for developers** (focus on understanding, not exploitation):
-Public Env Variable, Info Disclosure API, IDOR, Open Redirect, Stored XSS, Self-XSS (recon & basics) → SQL Injection (login), Product Search SQLi → CSRF → Path Traversal → Prompt Injection. Focus on the "How to Fix" section of each walkthrough.
+Public Env Variable, Info Disclosure API, Exposed .git, IDOR, Open Redirect, Stored XSS, Self-XSS (recon & basics) → SQL Injection (login), Product Search SQLi → CSRF → Path Traversal → Prompt Injection. Focus on the "How to Fix" section of each walkthrough.
 
 **Recommended path for junior pentesters** (focus on technique):
-Full catalog in roadmap order. Target: complete all 36 challenges in 4–5 weeks of part-time practice.
+Full catalog in roadmap order. Target: complete all 37 challenges in 4–5 weeks of part-time practice.
 
 ---
 

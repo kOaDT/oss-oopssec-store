@@ -1,5 +1,6 @@
 import Link from "next/link";
 import packageJson from "../../package.json";
+import { HEAD_COMMIT } from "@/lib/exposed-git-repository";
 import {
   DEV_TO_URL,
   DOCS_ROADMAP_URL,
@@ -158,7 +159,7 @@ export default function Footer() {
             <p className="text-sm text-slate-600 dark:text-slate-400">
               {new Date().getFullYear()} OSS – OopsSec Store.
               <span className="ml-2 text-xs text-slate-500 dark:text-slate-500">
-                v{packageJson.version}
+                v{packageJson.version} · build {HEAD_COMMIT.slice(0, 7)}
               </span>
             </p>
             <div className="flex gap-6 text-sm">
