@@ -4,6 +4,21 @@ All notable changes to OopsSec Store are documented here. This changelog follows
 
 Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/oss-oopssec-store/releases) at each release.
 
+## [v2.24.0] - 2026-11-02
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.24.0)
+
+### Added
+
+- New challenge: Exposed .git repository, where players dump a leftover `.git` directory to recover a production secret.
+- Exposed .git repository joins the Reconnaissance & Disclosure chapter, and the README, `EDUCATORS.md` and docs About page show 37 challenges.
+- Existing installs need `npm run db:upgrade` to add the new flag and its hints, and player progress is kept.
+
+### Changed
+
+- New unit and API regression tests make CI fail if the Exposed .git repository challenge becomes impossible to exploit.
+- The CI workflow now uses `cypress-io/github-action` 7.4.8, up from 7.4.6.
+
 ## [v2.23.0] - 2026-10-27
 
 [Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.23.0)
@@ -770,6 +785,7 @@ Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/
 
 - The news page no longer shows an unneeded MD5 reference.
 
+[v2.24.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.23.0...v2.24.0
 [v2.23.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.22.0...v2.23.0
 [v2.22.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.1...v2.22.0
 [v2.21.1]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.0...v2.21.1
