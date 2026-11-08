@@ -179,21 +179,21 @@ Server-rendered components, middleware and ORMs introduce different trust bounda
 
 The curriculum also covers the attack surface that arrived with AI-assisted development: prompt injection against a customer-support agent, MCP tool poisoning, a backdoored coding-agent rules file, and an npm typosquat chain simulated end to end.
 
-|                                                | OopsSec Store                                           | Juice Shop                                                       | DVWA                      |
-| ---------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------- |
-| Stack                                          | Next.js · React · TypeScript · Prisma                   | Node.js · Express · Angular                                      | PHP · MySQL               |
-| Setup                                          | `npx create-oss-store` (< 1 min) / Docker               | Docker / npm                                                     | Docker / manual LAMP      |
-| CTF flags                                      | ✅ Built in (static flags)                              | ✅ Opt-in, per-instance flags (`CTF_KEY`); CTFd/RootTheBox/FBCTF | ❌                        |
-| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 37 flags                     | ❌ Score board only                                              | Partial (security levels) |
-| Walkthrough for every challenge                | ✅                                                      | ✅ Companion guide                                               | Partial (hints)           |
-| LLM prompt injection                           | ✅ Plug in a free API key                               | ✅ v20+, bring & configure your own LLM                          | ❌                        |
-| MCP tool poisoning                             | ✅                                                      | ❌                                                               | ❌                        |
-| AI coding-agent backdoor (poisoned rules file) | ✅                                                      | ❌                                                               | ❌                        |
-| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor | Partial (identification only)                                    | ❌                        |
-| Challenges built on real CVEs                  | ✅ Next.js / React framework CVEs                       | Partial (vulnerable npm dependencies)                            | ❌                        |
-| Hall of Fame for players                       | ✅                                                      | ❌                                                               | ❌                        |
+|                                                | OopsSec Store                                           | Juice Shop                                                         | DVWA                      |
+| ---------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------- |
+| Stack                                          | Next.js · React · TypeScript · Prisma                   | Node.js · Express · Angular                                        | PHP · MySQL               |
+| Setup                                          | `npx create-oss-store` / Docker                         | Docker / npm                                                       | Docker / manual LAMP      |
+| CTF flags                                      | ✅ Built in (static flags)                              | ✅ Opt-in, per-instance flags (`CTF_KEY`); CTFd/RootTheBox/FBCTF   | ❌                        |
+| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 37 flags                     | ❌ Score board only                                                | Partial (security levels) |
+| Walkthrough for every challenge                | ✅                                                      | ✅ Companion guide                                                 | Partial (hints)           |
+| LLM prompt injection                           | ✅ Bring a Mistral API key                              | ✅ v20+, local Ollama by default or any OpenAI-compatible endpoint | ❌                        |
+| MCP tool poisoning                             | ✅                                                      | ❌                                                                 | ❌                        |
+| AI coding-agent backdoor (poisoned rules file) | ✅                                                      | ❌                                                                 | ❌                        |
+| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor | Partial (identification only)                                      | ❌                        |
+| Challenges built on real CVEs                  | ✅ Next.js / React framework CVEs                       | Partial (vulnerable npm dependencies)                              | ❌                        |
+| Hall of Fame for players                       | ✅                                                      | ❌                                                                 | ❌                        |
 
-<sub>Last verified September 2026, against Juice Shop v20 and DVWA 2.x. Spotted an inaccuracy? [Open an issue](https://github.com/kOaDT/oss-oopssec-store/issues) or [open a PR](https://github.com/kOaDT/oss-oopssec-store/pulls).</sub>
+<sub>Last verified November 2026, against Juice Shop v20.4 and DVWA 2.5. Sources and a side-by-side reading guide: [OopsSec Store vs Juice Shop vs DVWA](https://koadt.github.io/oss-oopssec-store/compare). Spotted an inaccuracy? [Open an issue](https://github.com/kOaDT/oss-oopssec-store/issues) or [open a PR](https://github.com/kOaDT/oss-oopssec-store/pulls).</sub>
 
 ## Installation
 

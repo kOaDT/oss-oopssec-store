@@ -3,6 +3,12 @@ import { join } from "path";
 import { flags, flagHints } from "../../prisma/flags";
 import { CANARY_SLUGS } from "../../lib/sql-injection-canary";
 import { CURRICULUM, TOTAL_CHALLENGES } from "../../docs/src/data/roadmap";
+import {
+  COMPARISON,
+  LABS,
+  LAST_VERIFIED,
+  type Cell,
+} from "../../docs/src/data/comparison";
 import { CATEGORY_LABELS } from "../../lib/format";
 import { askAboutChallengeUrl } from "../../lib/discussions";
 import { FLAGS } from "../helpers/flags";
@@ -38,6 +44,13 @@ const DIFFICULTY_EMOJI: Record<string, string> = {
 function formatEstimate([min, max]: [number, number | null]): string {
   if (max === null) return `${min}+ min`;
   return min === max ? `${min} min` : `${min}–${max} min`;
+}
+
+/** Renders a comparison cell the way the README table spells it. */
+function markdownCell({ status, detail }: Cell): string {
+  if (status === "partial") return detail ? `Partial (${detail})` : "Partial";
+  const mark = status === "yes" ? "✅" : status === "no" ? "❌" : "";
+  return [mark, detail].filter(Boolean).join(" ");
 }
 
 /** Markdown table rows following the header line that starts with `marker`. */
@@ -382,6 +395,33 @@ describe("README.md", () => {
     expect(comparison).not.toBeNull();
     expect(Number(comparison![1])).toBe(CURRICULUM.length);
     expect(Number(comparison![2])).toBe(flags.length);
+  });
+
+  it("carries the comparison table of the docs site, cell for cell", () => {
+    const header = readme
+      .split("\n")
+      .find(
+        (line) =>
+          line.startsWith("|") && LABS.every((lab) => line.includes(lab.name))
+      );
+    expect(header).toBeDefined();
+
+    const labNames = header!
+      .split("|")
+      .slice(1, -1)
+      .map((cell) => cell.trim());
+    expect(labNames).toEqual(["", ...LABS.map((lab) => lab.name)]);
+
+    expect(tableRows(readme, header!)).toEqual(
+      COMPARISON.map((row) => [
+        row.criterion,
+        ...LABS.map((lab) => markdownCell(row.cells[lab.key])),
+      ])
+    );
+
+    expect(readme).toContain(
+      `Last verified ${LAST_VERIFIED.month}, against ${LAST_VERIFIED.against}.`
+    );
   });
 });
 
