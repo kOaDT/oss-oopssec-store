@@ -1,0 +1,322 @@
+---
+import { Code } from "astro:components";
+import Layout from "@/layouts/Layout.astro";
+import Main from "@/layouts/Main.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { SITE } from "@/config";
+import { CURRICULUM, TOTAL_CHALLENGES } from "@/data/roadmap";
+import {
+  COMPARISON,
+  LABS,
+  LAST_VERIFIED,
+  type Status,
+} from "@/data/comparison";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const STATUS_LABEL: Record<Status, string> = {
+  yes: "Yes",
+  partial: "Partial",
+  no: "No",
+};
+const STATUS_GLYPH: Record<Status, string> = {
+  yes: "✓",
+  partial: "◐",
+  no: "✗",
+};
+
+const pageTitle = "OopsSec Store vs Juice Shop vs DVWA";
+const quickStart = `# With Node.js
+npx create-oss-store my-ctf-lab && cd my-ctf-lab && npm start
+
+# With Docker
+docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store`;
+---
+
+<Layout
+  title={`${pageTitle} | ${SITE.title}`}
+  description={`Looking for a Juice Shop alternative built on Next.js? OopsSec Store, OWASP Juice Shop and DVWA compared feature by feature, last verified ${LAST_VERIFIED.month}.`}
+>
+  <Header />
+  <Main
+    pageTitle={pageTitle}
+    pageDesc="Three intentionally vulnerable web apps, compared feature by feature."
+  >
+    <div class="app-prose max-w-app">
+      <p>
+        OWASP Juice Shop and DVWA are the reference labs for learning web
+        application security, and both are actively maintained. OopsSec Store
+        covers the same ground on the stack many teams ship today: a Next.js App
+        Router storefront with React Server Components, middleware and Prisma.
+        It adds challenges aimed at the attack surface that came with
+        AI-assisted development.
+      </p>
+    </div>
+
+    <table class="cmp" role="table">
+      <caption class="sr-only">
+        Feature comparison of OopsSec Store, OWASP Juice Shop and DVWA
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">
+            <span class="sr-only">Criterion</span>
+          </th>
+          {
+            LABS.map(lab => (
+              <th
+                scope="col"
+                role="columnheader"
+                class:list={{ "is-oopssec": lab.key === "oopssec" }}
+              >
+                {lab.name}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        {
+          COMPARISON.map(row => (
+            <tr role="row">
+              <th scope="row" role="rowheader">
+                {row.criterion}
+              </th>
+              {LABS.map(lab => {
+                const { status, detail } = row.cells[lab.key];
+                return (
+                  <td
+                    role="cell"
+                    data-label={lab.name}
+                    class:list={{ "is-oopssec": lab.key === "oopssec" }}
+                  >
+                    <div class="cmp-cell">
+                      {status && (
+                        <span class="cmp-status" data-status={status}>
+                          <span aria-hidden="true">{STATUS_GLYPH[status]}</span>
+                          {STATUS_LABEL[status]}
+                        </span>
+                      )}
+                      {detail && (
+                        <span
+                          class:list={[
+                            "cmp-detail",
+                            { "is-secondary": status },
+                          ]}
+                        >
+                          {detail
+                            .split("`")
+                            .map((part, i) =>
+                              i % 2 === 1 ? <code>{part}</code> : part
+                            )}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+
+    <p class="cmp-note">
+      Last verified {LAST_VERIFIED.month}, against {LAST_VERIFIED.against}.
+      Sources:{" "}
+      {
+        LAST_VERIFIED.sources.flatMap((source, i) => [
+          i > 0 ? ", " : "",
+          <a href={source.url}>{source.label}</a>,
+        ])
+      }. Spotted an inaccuracy? <a
+        href="https://github.com/kOaDT/oss-oopssec-store/issues"
+        >Open an issue</a
+      >.
+    </p>
+
+    <section
+      class="app-prose mt-12 max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
+    >
+      <h2>When to pick which</h2>
+
+      <h3>OWASP Juice Shop</h3>
+      <p>
+        Pick it for breadth. It has the largest catalog of the three, with 118
+        challenges in v20.4, plus coding challenges where you spot the
+        vulnerable code, then pick the right fix. Its companion CTF tool exports
+        per-instance flags to CTFd, RootTheBox or FBCTF, which makes it the
+        stronger choice for a scored event. Its AI challenges run against a
+        local Ollama model by default, so they work offline.
+      </p>
+
+      <h3>DVWA</h3>
+      <p>
+        Pick it for the fundamentals. It teaches the classic bug classes in
+        their simplest form, in PHP. Every module comes in four security levels
+        (low, medium, high, impossible): you exploit the same bug as the
+        defenses tighten, then compare the source of each level side by side.
+      </p>
+
+      <h3>OopsSec Store</h3>
+      <p>
+        Pick it for the modern stack. It fits if you build or review Next.js and
+        React apps, or want to train on the attack surface AI-assisted
+        development opened: prompt injection against a support agent, MCP tool
+        poisoning, a backdoored coding-agent rules file and an npm typosquat
+        chain simulated end to end. Two challenges reproduce framework CVEs
+        (CVE-2025-29927 in Next.js middleware, CVE-2025-55182 in React Server
+        Components), and the {TOTAL_CHALLENGES} challenges are laid out across the
+        {CURRICULUM.length} chapters of a
+        <a href={`${base}/roadmap`}>roadmap</a>, each with a walkthrough. The AI
+        challenges need a Mistral API key.
+      </p>
+
+      <h2>Start the lab</h2>
+      <Code
+        code={quickStart}
+        lang="bash"
+        themes={{ light: "min-light", dark: "night-owl" }}
+        defaultColor={false}
+      />
+      <p>
+        Then open <code>http://localhost:3000</code> and follow the
+        <a href={`${base}/roadmap`}>roadmap</a> from challenge #1.
+      </p>
+    </section>
+  </Main>
+  <Footer />
+</Layout>
+
+<style>
+  .cmp {
+    width: 100%;
+    margin-top: 1.5rem;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+  .cmp th,
+  .cmp td {
+    padding: 0.75rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    text-align: start;
+    vertical-align: top;
+  }
+  .cmp thead th {
+    width: 26%;
+    border-bottom-width: 2px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .cmp thead th:first-child {
+    width: 22%;
+  }
+  .cmp tbody th {
+    font-weight: 600;
+  }
+  .cmp .is-oopssec {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .cmp thead .is-oopssec {
+    color: var(--accent);
+  }
+
+  .cmp-status {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: baseline;
+    font-weight: 600;
+  }
+  .cmp-status[data-status="yes"] {
+    color: var(--accent);
+  }
+  .cmp-status[data-status="partial"] {
+    opacity: 0.8;
+  }
+  .cmp-status[data-status="no"] {
+    opacity: 0.5;
+  }
+  .cmp-detail {
+    display: block;
+  }
+  .cmp-detail.is-secondary {
+    margin-top: 0.2rem;
+    opacity: 0.8;
+  }
+  .cmp code {
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--muted) 75%, transparent);
+    font-size: 0.85em;
+    overflow-wrap: anywhere;
+  }
+
+  .cmp-note {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+  .cmp-note a {
+    text-decoration: underline dashed;
+    text-underline-offset: 4px;
+  }
+  .cmp-note a:hover {
+    color: var(--accent);
+  }
+
+  /* Below Tailwind's sm breakpoint, each criterion becomes a card. The ARIA
+     roles on the table keep its semantics once display is no longer table. */
+  @media (width < 40rem) {
+    .cmp,
+    .cmp tbody,
+    .cmp tr,
+    .cmp th,
+    .cmp td {
+      display: block;
+    }
+    .cmp thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .cmp tbody tr {
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+    .cmp tbody th {
+      width: auto;
+      background: color-mix(in srgb, var(--muted) 30%, transparent);
+    }
+    .cmp td {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      gap: 0.75rem;
+    }
+    .cmp td:last-child {
+      border-bottom: 0;
+    }
+    .cmp td::before {
+      content: attr(data-label);
+      padding-top: 0.15rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+    .cmp td.is-oopssec::before {
+      color: var(--accent);
+      opacity: 1;
+    }
+  }
+</style>

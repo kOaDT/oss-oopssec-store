@@ -39,6 +39,8 @@ Server-rendered components, middleware and ORMs introduce different trust bounda
 
 The curriculum also covers the attack surface that arrived with AI-assisted development: prompt injection against a customer-support agent, MCP tool poisoning, a backdoored coding-agent rules file, and an npm typosquat chain simulated end to end.
 
+Weighing it against OWASP Juice Shop or DVWA? The [comparison](/oss-oopssec-store/compare) puts the three side by side, with sources.
+
 ## Features
 
 - 37 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](/oss-oopssec-store/roadmap)
