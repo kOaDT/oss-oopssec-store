@@ -171,6 +171,9 @@ const fakeChallengeDatabase = (flagRows: FlagRow[], hintRows: HintRow[]) => {
       deleteMany: async () => {},
       upsert: async () => {},
     },
+    revokedHubToken: {
+      deleteMany: async () => ({ count: 0 }),
+    },
   };
 
   return client as unknown as PrismaClient;

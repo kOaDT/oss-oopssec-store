@@ -10,7 +10,7 @@
 <b>Security training for the apps you actually ship.</b>
 </p>
 <p>
-37 challenges across <b>web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP</b>.
+38 challenges across <b>web, API, authentication, business logic, cryptography, supply chain, AI agents and MCP</b>.
 </p>
 <p>
 Break a deliberately vulnerable e-commerce app built on <b>Next.js, React, TypeScript and Prisma</b>.<br>
@@ -166,7 +166,7 @@ The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orde
 - Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
 - Built with Next.js (App Router), React, TypeScript, Prisma, and SQLite
 - REST API with documented attack vectors
-- 37 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
+- 38 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
 - A guided [TryHackMe room](https://tryhackme.com/jr/oopssecstorethesummeraudit): _The Summer Audit_, 8 tasks and 7 flags, as a narrative on-ramp for newcomers
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
@@ -184,7 +184,7 @@ The curriculum also covers the attack surface that arrived with AI-assisted deve
 | Stack                                          | Next.js · React · TypeScript · Prisma                   | Node.js · Express · Angular                                        | PHP · MySQL               |
 | Setup                                          | `npx create-oss-store` / Docker                         | Docker / npm                                                       | Docker / manual LAMP      |
 | CTF flags                                      | ✅ Built in (static flags)                              | ✅ Opt-in, per-instance flags (`CTF_KEY`); CTFd/RootTheBox/FBCTF   | ❌                        |
-| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 37 flags                     | ❌ Score board only                                                | Partial (security levels) |
+| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 38 flags                     | ❌ Score board only                                                | Partial (security levels) |
 | Walkthrough for every challenge                | ✅                                                      | ✅ Companion guide                                                 | Partial (hints)           |
 | LLM prompt injection                           | ✅ Bring a Mistral API key                              | ✅ v20+, local Ollama by default or any OpenAI-compatible endpoint | ❌                        |
 | MCP tool poisoning                             | ✅                                                      | ❌                                                                 | ❌                        |

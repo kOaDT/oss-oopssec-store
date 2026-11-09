@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
   // does not follow the redirect and falls back to reachable objects only.
   skipTrailingSlashRedirect: true,
   async rewrites() {
-    return [{ source: "/.git/:path*", destination: "/api/vcs/:path*" }];
+    return [
+      { source: "/.git/:path*", destination: "/api/vcs/:path*" },
+      { source: "/.mcp.json", destination: "/api/mcp-config" },
+      { source: "/hf-mirror/:path*", destination: "/api/hub/:path*" },
+    ];
   },
   images: {
     remotePatterns: [

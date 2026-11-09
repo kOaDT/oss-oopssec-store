@@ -54,6 +54,10 @@ export const seedChallengeData = async (prisma: PrismaClient) => {
   console.log(`Ensured hints for ${Object.keys(flagHints).length} flags`);
 
   await seedCanaries(prisma);
+
+  // Revoking the leaked Hub token locks its owner out, the player included:
+  // replaying the challenge data hands it back.
+  await prisma.revokedHubToken.deleteMany();
 };
 
 /**
