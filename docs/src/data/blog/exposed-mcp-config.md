@@ -98,6 +98,8 @@ The token is truncated here; yours is the full 37 characters. It's a fake token,
 
 ## Triage
 
+> **Outside the lab, stop at the prefix.** Using a token you found, even for a `whoami`, means using someone else's credential, which can amount to unauthorized access under computer-crime laws.
+
 ### Which provider
 
 The `hf_` prefix and the 34 letters after it make a Hugging Face user access token. The variable names agree: `HF_TOKEN` is what the Hugging Face libraries and the official Hugging Face MCP server (`@llmindset/hf-mcp-server`) read.
@@ -108,9 +110,10 @@ The second server also sets `HF_ENDPOINT`. `huggingface_hub` sends every request
 
 > In the lab, the real Hugging Face Hub has never heard of it.
 
-Put both values in your environment:
+Put both values in your environment, with an empty `HF_HOME`. If `HF_TOKEN` comes out empty, say because `jq` is missing, the client falls back on the token you saved with `hf auth login` and sends it to whatever `HF_ENDPOINT` names. That's harmless on localhost, but pointing `HF_ENDPOINT` at a mirror you don't trust hands it your token.
 
 ```bash
+export HF_HOME=$(mktemp -d)
 export HF_ENDPOINT=http://localhost:3000/hf-mirror
 export HF_TOKEN=$(curl -s http://localhost:3000/.mcp.json | jq -r '.mcpServers["support-evals"].env.HF_TOKEN')
 ```
@@ -252,7 +255,7 @@ venv/bin/hf auth whoami
 Error: Invalid user token. The token from HF_TOKEN environment variable is invalid. Note that HF_TOKEN takes precedence over `hf auth login`.
 ```
 
-> Revoke last: it locks you out as well. In the lab, `npm run db:upgrade` hands the token back; with Docker, restart the container, its entrypoint replays the challenge data on start.
+> Revoke last in the lab only: it locks you out as well. In the lab, `npm run db:upgrade` hands the token back; with Docker, restart the container, its entrypoint replays the challenge data on start.
 
 ## Vulnerability chain
 
