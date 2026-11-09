@@ -221,6 +221,14 @@ model InternalSecret {
   @@map("internal_secrets")
 }
 
+model RevokedHubToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  revokedAt DateTime @default(now())
+
+  @@map("revoked_hub_tokens")
+}
+
 model VisitorLog {
   id        String   @id @default(cuid())
   ip        String

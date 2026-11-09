@@ -424,6 +424,16 @@ export const flags: ChallengeFlag[] = [
     category: "INFORMATION_DISCLOSURE",
     difficulty: "MEDIUM",
   },
+  {
+    flag: "OSS{mcp_c0nf1g_l34ks_hf_t0k3n}",
+    slug: "exposed-mcp-config",
+    cwe: "CWE-538",
+    owasp: "A02:2025",
+    markdownFile: "exposed-mcp-config.md",
+    walkthroughSlug: "exposed-mcp-config",
+    category: "INFORMATION_DISCLOSURE",
+    difficulty: "MEDIUM",
+  },
 ];
 
 export const flagHints: Record<string, string[]> = {
@@ -611,5 +621,10 @@ export const flagHints: Record<string, string[]> = {
     "The footer tells you which build is running. Where does a build id like that come from, and did it come along with the deploy?",
     "The web server serves the version-control directory with directory listing on. Download it and question it with git itself. The visible history is clean: a production secret was stashed, then the stash was dropped.",
     "Mirror /.git/ with git-dumper or `wget -r -np` into a directory outside any other repository. `git log --all` only shows the clean history and `git stash list` is empty, so run `LC_ALL=C git fsck --unreachable` to list orphaned objects. Then `git cat-file -p` the WIP commit, its tree, and the .env.production blob.",
+  ],
+  "exposed-mcp-config": [
+    "The storefront was deployed straight from a developer's checkout, dotfiles included. AI coding agents keep their own configuration at the root of a project.",
+    "Public scanners ship templates for exposed MCP client configs. A token's prefix names the provider that issued it, and the same file says which Hub endpoint the tooling talks to. Ask that endpoint who owns the token and what it is scoped to.",
+    'Fetch `/.mcp.json` and export the `HF_ENDPOINT` and `HF_TOKEN` it sets. `curl "$HF_ENDPOINT/api/whoami-v2" -H "Authorization: Bearer $HF_TOKEN"` shows the fine-grained scope, then `hf download <repo> --repo-type dataset` fetches the private dataset it names. The flag sits in one of its records.',
   ],
 };
