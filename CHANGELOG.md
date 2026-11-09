@@ -4,6 +4,22 @@ All notable changes to OopsSec Store are documented here. This changelog follows
 
 Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/oss-oopssec-store/releases) at each release.
 
+## [v2.25.0] - 2026-11-09
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.25.0)
+
+### Added
+
+- New challenge: Exposed MCP config, after Exposed .git repository, uses a leaked `.mcp.json` Hugging Face token; run `npm run db:upgrade`.
+- A new `/compare` docs page compares OopsSec Store, OWASP Juice Shop and DVWA, linked from the README table.
+
+### Changed
+
+- New API and unit regression tests fail CI if the Exposed MCP config challenge stops being exploitable.
+- A parity check fails CI when the README comparison table drifts from the docs site's comparison data.
+- `generateInvoice` has unit tests covering invoices folder creation and the returned file path, checked against a real PDF.
+- CI dependencies are updated: `cypress-io/github-action` 7.4.8 → 7.4.9 and the `docker/github-builder` build workflow 1.18.1 → 1.19.0.
+
 ## [v2.24.0] - 2026-11-02
 
 [Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.24.0)
@@ -785,6 +801,7 @@ Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/
 
 - The news page no longer shows an unneeded MD5 reference.
 
+[v2.25.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.24.0...v2.25.0
 [v2.24.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.23.0...v2.24.0
 [v2.23.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.22.0...v2.23.0
 [v2.22.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.21.1...v2.22.0
