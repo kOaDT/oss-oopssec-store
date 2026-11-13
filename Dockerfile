@@ -53,6 +53,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:/app/data/dev.db
 ENV PARTNER_SIGNING_KEY_PATH=/app/data/partner-signing-key.pem
 ENV NEXT_PUBLIC_BASE_URL=http://localhost:3000
+# localhost is the container itself: the image expects Ollama as a container
+# named `ollama` on the same network.
+ENV LLM_BASE_URL=http://ollama:11434/v1
 
 EXPOSE 3000
 ENTRYPOINT ["./docker-entrypoint.sh"]

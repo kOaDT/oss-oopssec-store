@@ -46,6 +46,8 @@
     "setup": "bash scripts/setup.sh",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
+    "docker:up:ollama": "docker compose -f docker-compose.yml -f docker-compose.ollama.yml up -d",
+    "docker:ollama": "docker compose -f docker-compose.yml -f docker-compose.ollama.yml exec ollama ollama",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "docker:reset": "docker compose down -v && docker compose up -d",

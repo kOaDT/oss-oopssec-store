@@ -9,6 +9,7 @@ on:
       - ".dockerignore"
       - ".nvmrc"
       - "docker-compose.yml"
+      - "docker-compose.ollama.yml"
       - "docker-entrypoint.sh"
       - "package*.json"
       # tsconfig.json puts every root .ts in the type check, and next build
@@ -46,6 +47,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate the Compose files
+        run: docker compose -f docker-compose.yml -f docker-compose.ollama.yml config --quiet
 
       - name: Build Docker image
         run: docker build -t oss-oopssec-store:test .
