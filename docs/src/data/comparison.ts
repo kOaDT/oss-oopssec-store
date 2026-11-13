@@ -92,7 +92,10 @@ export const COMPARISON: ComparisonRow[] = [
   {
     criterion: "LLM prompt injection",
     cells: {
-      oopssec: { status: "yes", detail: "Bring a Mistral API key" },
+      oopssec: {
+        status: "yes",
+        detail: "Local Ollama by default, or any OpenAI-compatible endpoint",
+      },
       juiceShop: {
         status: "yes",
         detail:

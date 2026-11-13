@@ -35,21 +35,17 @@ Or with Docker (no Node.js required):
 docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 ```
 
-The AI assistant lives at `http://localhost:3000/support/ai-assistant` and needs a Mistral AI API key.
+The AI assistant lives at `http://localhost:3000/support/ai-assistant`. It runs on a local [Ollama](https://ollama.com/download) model by default: install Ollama, then pull the model before you start.
 
-### Obtaining a Mistral API key
+```bash
+ollama pull gemma4:e4b
+```
 
-1. Visit [console.mistral.ai](https://console.mistral.ai/)
-2. Create a free account or sign in
-3. Select the **Experiment** plan (free tier)
-4. Navigate to [API Keys](https://console.mistral.ai/api-keys/)
-5. Create and copy your key
-
-The free tier gives you plenty of requests for this challenge.
+Running the lab in Docker, or using another provider? Follow the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
 
 ## Reconnaissance
 
-Navigate to `/support/ai-assistant` and plug in your API key. The assistant introduces itself as **OSSBot** and says it can help with product inquiries, order tracking, and store policies.
+Navigate to `/support/ai-assistant`. The assistant introduces itself as **OSSBot** and says it can help with product inquiries, order tracking, and store policies.
 
 ![Initial interaction with OSSBot](../../assets/images/prompt-injection-ai-assistant/initial-interaction.png)
 
