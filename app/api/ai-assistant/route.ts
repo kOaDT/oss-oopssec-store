@@ -43,7 +43,7 @@ interface McpTool {
   inputSchema: Record<string, unknown>;
 }
 
-interface MistralToolCall {
+interface ToolCall {
   id: string;
   type: "function";
   function: {
@@ -52,10 +52,10 @@ interface MistralToolCall {
   };
 }
 
-interface MistralMessage {
+interface ChatMessage {
   role: string;
   content?: string | null;
-  tool_calls?: MistralToolCall[];
+  tool_calls?: ToolCall[];
   tool_call_id?: string;
   name?: string;
 }
@@ -99,7 +99,7 @@ async function discoverTools(
   }
 }
 
-function mcpToolsToMistralFormat(tools: McpTool[]) {
+function toChatTools(tools: McpTool[]) {
   return tools.map((tool) => ({
     type: "function" as const,
     function: {
@@ -129,10 +129,10 @@ async function callMcpTool(
   return JSON.stringify(response.result || response.error || {});
 }
 
-async function callMistral(
+async function callLlm(
   apiKey: string,
-  messages: MistralMessage[],
-  tools?: ReturnType<typeof mcpToolsToMistralFormat>
+  messages: ChatMessage[],
+  tools?: ReturnType<typeof toChatTools>
 ) {
   const body: Record<string, unknown> = {
     model: "mistral-small-2603",
@@ -211,14 +211,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const mistralTools = mcpToolsToMistralFormat(allTools);
+    const chatTools = toChatTools(allTools);
 
-    const messages: MistralMessage[] = [
+    const messages: ChatMessage[] = [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: message },
     ];
 
-    let response = await callMistral(apiKey, messages, mistralTools);
+    let response = await callLlm(apiKey, messages, chatTools);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
         toolCallCount++;
       }
 
-      response = await callMistral(apiKey, messages, mistralTools);
+      response = await callLlm(apiKey, messages, chatTools);
 
       if (!response.ok) {
         return NextResponse.json(
