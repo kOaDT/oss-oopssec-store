@@ -1,0 +1,14 @@
+# Local model for the AI challenges: https://koadt.github.io/oss-oopssec-store/ai-setup
+services:
+  app:
+    depends_on:
+      - ollama
+
+  # No published port: the app reaches it as ollama:11434 on the Compose network.
+  ollama:
+    image: ollama/ollama:0.40.16
+    volumes:
+      - ollama-models:/root/.ollama
+
+volumes:
+  ollama-models:
