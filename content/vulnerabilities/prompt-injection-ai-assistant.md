@@ -40,7 +40,7 @@ const messages = [
   { role: "user", content: message },
 ];
 
-const response = await callMistral(apiKey, messages, mistralTools);
+const response = await callLlm(apiKey, messages, chatTools);
 ```
 
 Two compounding mistakes:
