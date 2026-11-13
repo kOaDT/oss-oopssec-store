@@ -154,6 +154,12 @@ npm run test:e2e           # needs a running server
 npm run docs:build         # validates walkthroughSlug against the posts
 ```
 
+The AI assistant suites in `test:api` drive the chat route against a stub model, not a real one. Start the server pointed at it, or they fail and print this command:
+
+```bash
+LLM_BASE_URL=http://127.0.0.1:11435/v1 LLM_MODEL=stub LLM_API_KEY=stub-key npm run dev
+```
+
 ### Writing walkthroughs
 
 The [walkthroughs site](https://kOaDT.github.io/oss-oopssec-store) accepts community contributions.

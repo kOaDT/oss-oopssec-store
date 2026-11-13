@@ -2,8 +2,10 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("./instrumentation.node");
     const { assertDatabaseIsCurrent } = await import("./lib/schema-guard");
+    const { resolveLlmConfig } = await import("./lib/llm");
 
     try {
+      resolveLlmConfig();
       await assertDatabaseIsCurrent();
     } catch (error) {
       // A rejected register() leaves Next listening and answering every request

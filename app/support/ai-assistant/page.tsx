@@ -2,8 +2,13 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AIAssistantChat from "./AIAssistantChat";
 import Link from "next/link";
+import { connection } from "next/server";
+import { resolveLlmConfig } from "@/lib/llm";
 
-export default function AIAssistantPage() {
+export default async function AIAssistantPage() {
+  await connection();
+  const { model, baseUrl } = resolveLlmConfig();
+
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-900">
       <Header />
@@ -16,7 +21,7 @@ export default function AIAssistantPage() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
                 </span>
-                Powered by Mistral AI
+                AI-powered support
               </div>
               <h1 className="mb-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
                 AI Support Assistant
@@ -30,7 +35,7 @@ export default function AIAssistantPage() {
         </section>
 
         <section className="container mx-auto px-4 py-12">
-          <AIAssistantChat />
+          <AIAssistantChat model={model} endpointHost={new URL(baseUrl).host} />
 
           <div className="mx-auto mt-8 max-w-2xl text-center">
             <p className="text-sm text-slate-500 dark:text-slate-400">

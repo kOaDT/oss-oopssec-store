@@ -92,13 +92,29 @@ describe("MCP Malicious Server — Indirect Prompt Injection (E2E)", () => {
 
   it("AI assistant chat UI has MCP server settings", () => {
     cy.visit("/support/ai-assistant");
-    cy.window().then((win) => {
-      win.localStorage.setItem("mistral_api_key", "test-key");
-    });
-    cy.reload();
 
     cy.get("button[title='MCP Server Settings']").should("be.visible").click();
     cy.get("input#mcpServerUrl").should("be.visible");
     cy.contains("Connect an external MCP server").should("be.visible");
+  });
+
+  it("tells the player how to start the model when it cannot be reached", () => {
+    cy.intercept("POST", "/api/ai-assistant", {
+      statusCode: 502,
+      body: {
+        code: "llm_unreachable",
+        error: "The AI assistant could not reach its language model.",
+      },
+    });
+    cy.visit("/support/ai-assistant");
+
+    cy.get("input[placeholder='Type your message...']").type("Hello{enter}");
+
+    cy.contains("[role='alert']", "OSSBot can't reach its language model")
+      .should("contain.text", "ollama pull ")
+      .find("a")
+      .contains("AI assistant setup guide")
+      .should("have.attr", "href")
+      .and("match", /\/ai-setup$/);
   });
 });

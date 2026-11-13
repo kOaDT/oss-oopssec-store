@@ -40,7 +40,7 @@ const messages = [
   { role: "user", content: message },
 ];
 
-const response = await callLlm(apiKey, messages, chatTools);
+const assistantMessage = await callLlm(llmConfig, messages, chatTools);
 ```
 
 Two compounding mistakes:

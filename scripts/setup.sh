@@ -17,6 +17,13 @@ if [ ! -f .env ]; then
   PROJECT_ROOT=$(pwd)
   echo "DATABASE_URL=\"file:${PROJECT_ROOT}/prisma/dev.db\"" > .env
   echo "PARTNER_SIGNING_KEY_PATH=\"${PROJECT_ROOT}/prisma/partner-signing-key.pem\"" >> .env
+  cat >> .env <<'EOF'
+# AI assistant: a local Ollama model by default. Set these to use another
+# OpenAI-compatible endpoint: https://koadt.github.io/oss-oopssec-store/ai-setup
+# LLM_BASE_URL="http://localhost:11434/v1"
+# LLM_MODEL="gemma4:e4b"
+# LLM_API_KEY=""
+EOF
   echo ".env file created"
 else
   echo ".env file already exists"

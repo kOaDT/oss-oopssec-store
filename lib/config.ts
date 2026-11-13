@@ -5,6 +5,7 @@ export function getBaseUrl(): string {
 const DOCS_SITE_URL = "https://koadt.github.io/oss-oopssec-store";
 export const DOCS_BASE_URL = `${DOCS_SITE_URL}/posts`;
 export const DOCS_ROADMAP_URL = `${DOCS_SITE_URL}/roadmap`;
+export const DOCS_AI_SETUP_URL = `${DOCS_SITE_URL}/ai-setup`;
 
 /**
  * Hall of Fame badges, rendered at docs build time from `hall-of-fame/data.json`
