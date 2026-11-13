@@ -21,6 +21,8 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
 
 Then open [http://localhost:3000](http://localhost:3000) and start hacking.
 
+The two AI challenges also need a local model: see the [AI assistant setup guide](/oss-oopssec-store/ai-setup).
+
 ## Getting started
 
 1. **Start the lab** with one of the commands above. The store comes up on `localhost:3000`.

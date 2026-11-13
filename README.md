@@ -179,19 +179,19 @@ Server-rendered components, middleware and ORMs introduce different trust bounda
 
 The curriculum also covers the attack surface that arrived with AI-assisted development: prompt injection against a customer-support agent, MCP tool poisoning, a backdoored coding-agent rules file, and an npm typosquat chain simulated end to end.
 
-|                                                | OopsSec Store                                           | Juice Shop                                                         | DVWA                      |
-| ---------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------- |
-| Stack                                          | Next.js · React · TypeScript · Prisma                   | Node.js · Express · Angular                                        | PHP · MySQL               |
-| Setup                                          | `npx create-oss-store` / Docker                         | Docker / npm                                                       | Docker / manual LAMP      |
-| CTF flags                                      | ✅ Built in (static flags)                              | ✅ Opt-in, per-instance flags (`CTF_KEY`); CTFd/RootTheBox/FBCTF   | ❌                        |
-| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 38 flags                     | ❌ Score board only                                                | Partial (security levels) |
-| Walkthrough for every challenge                | ✅                                                      | ✅ Companion guide                                                 | Partial (hints)           |
-| LLM prompt injection                           | ✅ Bring a Mistral API key                              | ✅ v20+, local Ollama by default or any OpenAI-compatible endpoint | ❌                        |
-| MCP tool poisoning                             | ✅                                                      | ❌                                                                 | ❌                        |
-| AI coding-agent backdoor (poisoned rules file) | ✅                                                      | ❌                                                                 | ❌                        |
-| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor | Partial (identification only)                                      | ❌                        |
-| Challenges built on real CVEs                  | ✅ Next.js / React framework CVEs                       | Partial (vulnerable npm dependencies)                              | ❌                        |
-| Hall of Fame for players                       | ✅                                                      | ❌                                                                 | ❌                        |
+|                                                | OopsSec Store                                                 | Juice Shop                                                         | DVWA                      |
+| ---------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------- |
+| Stack                                          | Next.js · React · TypeScript · Prisma                         | Node.js · Express · Angular                                        | PHP · MySQL               |
+| Setup                                          | `npx create-oss-store` / Docker                               | Docker / npm                                                       | Docker / manual LAMP      |
+| CTF flags                                      | ✅ Built in (static flags)                                    | ✅ Opt-in, per-instance flags (`CTF_KEY`); CTFd/RootTheBox/FBCTF   | ❌                        |
+| Guided learning roadmap                        | ✅ 1 roadmap, 11 chapters, 38 flags                           | ❌ Score board only                                                | Partial (security levels) |
+| Walkthrough for every challenge                | ✅                                                            | ✅ Companion guide                                                 | Partial (hints)           |
+| LLM prompt injection                           | ✅ Local Ollama by default, or any OpenAI-compatible endpoint | ✅ v20+, local Ollama by default or any OpenAI-compatible endpoint | ❌                        |
+| MCP tool poisoning                             | ✅                                                            | ❌                                                                 | ❌                        |
+| AI coding-agent backdoor (poisoned rules file) | ✅                                                            | ❌                                                                 | ❌                        |
+| Supply-chain attack chain                      | ✅ Simulated end to end: npm typosquat → rules backdoor       | Partial (identification only)                                      | ❌                        |
+| Challenges built on real CVEs                  | ✅ Next.js / React framework CVEs                             | Partial (vulnerable npm dependencies)                              | ❌                        |
+| Hall of Fame for players                       | ✅                                                            | ❌                                                                 | ❌                        |
 
 <sub>Last verified November 2026, against Juice Shop v20.4 and DVWA 2.5. Sources and a side-by-side reading guide: [OopsSec Store vs Juice Shop vs DVWA](https://koadt.github.io/oss-oopssec-store/compare). Spotted an inaccuracy? [Open an issue](https://github.com/kOaDT/oss-oopssec-store/issues) or [open a PR](https://github.com/kOaDT/oss-oopssec-store/pulls).</sub>
 
@@ -253,6 +253,10 @@ docker compose down -v    # Stop and wipe data for a fresh start
 With npm installed, the same four are `npm run docker:up`, `docker:logs`, `docker:down` and `docker:reset`.
 
 The database initializes on first start. Data persists across restarts via Docker named volumes, including flag progress, users and uploads.
+
+### AI challenges
+
+The prompt injection and MCP challenges talk to a language model. By default the lab calls `gemma4:e4b` on a local [Ollama](https://ollama.com/download), so pull it once with `ollama pull gemma4:e4b`. For Docker setups, other models and hosted providers, see the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
 
 ### Updating an existing install
 

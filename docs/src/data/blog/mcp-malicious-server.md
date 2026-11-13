@@ -36,21 +36,19 @@ Or with Docker (no Node.js required):
 docker run -p 127.0.0.1:3000:3000 --add-host=host.docker.internal:host-gateway leogra/oss-oopssec-store
 ```
 
-The AI assistant lives at `http://localhost:3000/support/ai-assistant` and needs a Mistral AI API key.
+The AI assistant lives at `http://localhost:3000/support/ai-assistant`. It runs on a local [Ollama](https://ollama.com/download) model by default: install Ollama, then pull the model before you start.
 
-### Obtaining a Mistral API key
+```bash
+ollama pull gemma4:e4b
+```
 
-1. Visit [console.mistral.ai](https://console.mistral.ai/)
-2. Create a free account or sign in
-3. Select the **Experiment** plan (free tier)
-4. Navigate to [API Keys](https://console.mistral.ai/api-keys/)
-5. Create and copy your key
+Running the lab in Docker, or using another provider? Follow the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
 
 ## Reconnaissance
 
 ### Discovering the MCP integration
 
-Navigate to `/support/ai-assistant` and enter your API key. Send any message, then open the Network tab in DevTools and look at the JSON response. There's more than just the assistant's text:
+Navigate to `/support/ai-assistant` and send any message, then open the Network tab in DevTools and look at the JSON response. There's more than just the assistant's text:
 
 ```json
 {
@@ -218,7 +216,7 @@ The `mcpTools` field now lists your external tool (`get_product_reviews` from `h
 
 ![Network](../../assets/images/mcp-malicious-server/network.png)
 
-Here's the chain of events on the backend: the backend called `tools/list` on both MCP servers and merged 4 tools into one pool. Mistral picked `get_product_reviews` (from your server) and got back the poisoned response. It followed the fake compliance directive and called `get_compliance_report` on the internal server. The backend attached its `X-MCP-Session` header to that call, access was granted, and the flag ended up in the AI's response.
+Here's the chain of events on the backend: the backend called `tools/list` on both MCP servers and merged 4 tools into one pool. The model picked `get_product_reviews` (from your server) and got back the poisoned response. It followed the fake compliance directive and called `get_compliance_report` on the internal server. The backend attached its `X-MCP-Session` header to that call, access was granted, and the flag ended up in the AI's response.
 
 ### The flag
 
@@ -281,7 +279,6 @@ curl -s -X POST http://localhost:3000/api/ai-assistant \
   -H "Content-Type: application/json" \
   -d '{
     "message": "hello",
-    "apiKey": "your-key",
     "mcpServerUrl": "http://169.254.169.254/latest/meta-data/"
   }'
 ```

@@ -194,15 +194,21 @@ Full catalog in roadmap order. Target: complete all 38 challenges in 4–5 weeks
 
 ### Can I run this in a classroom with no internet access?
 
-Yes. Both the local Node.js and Docker setups are fully self-contained. No external network calls are required after initial setup.
+Yes, once the images and the model are on each machine. The two AI challenges run on a local Ollama model, so pull it while you are still online.
 
 ```bash
-# Pre-pull the Docker image on your network
+# While online: the lab, Ollama and the model
 docker pull leogra/oss-oopssec-store
+docker network create oss-lab
+docker run -d --name ollama --network oss-lab -v ollama:/root/.ollama ollama/ollama:0.40.16
+docker exec ollama ollama pull gemma4:e4b   # rerun if Ollama is still starting
 
-# Students run locally with no internet
-docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
+# In class, with no internet
+docker start ollama
+docker run -p 127.0.0.1:3000:3000 --network oss-lab leogra/oss-oopssec-store
 ```
+
+The npm setup works the same way with a native Ollama: run `ollama pull gemma4:e4b` before class. Model sizes and the other setups are in the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
 
 ### Can multiple students share one instance?
 
