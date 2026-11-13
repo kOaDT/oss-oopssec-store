@@ -10,6 +10,14 @@ const REPO = "kOaDT/oss-oopssec-store";
 const FALLBACK_REF = "main";
 const DEGIT_CACHE = join(homedir(), ".degit", "github", ...REPO.split("/"));
 
+const LLM_ENV_TEMPLATE = [
+  "# AI assistant: a local Ollama model by default. Set these to use another",
+  "# OpenAI-compatible endpoint: https://koadt.github.io/oss-oopssec-store/ai-setup",
+  '# LLM_BASE_URL="http://localhost:11434/v1"',
+  '# LLM_MODEL="gemma4:e4b"',
+  '# LLM_API_KEY=""',
+];
+
 const ASCII_ART = [
   String.raw`   ____  ____ ____     ____                  ____            ____  _                  `,
   String.raw`  / __ \/ __// __/    / __ \ ___   ___  ___ / __/ ___  ____ / __/ / /_ ___   ____ ___ `,
@@ -45,7 +53,10 @@ export async function createOssStore(projectName, { ref } = {}) {
   try {
     const envPath = join(targetPath, ".env");
     const dbPath = join(targetPath, "prisma", "dev.db");
-    writeFileSync(envPath, `DATABASE_URL="file:${dbPath}"\n`);
+    writeFileSync(
+      envPath,
+      [`DATABASE_URL="file:${dbPath}"`, ...LLM_ENV_TEMPLATE, ""].join("\n")
+    );
     envSpinner.succeed(".env file created");
   } catch (error) {
     envSpinner.fail("Failed to create .env file");

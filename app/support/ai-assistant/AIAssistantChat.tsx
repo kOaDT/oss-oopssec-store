@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import type { LlmErrorCode } from "@/lib/llm";
+import ModelSetupPanel, { isSetupErrorCode } from "./ModelSetupPanel";
 
 interface Message {
   id: string;
@@ -9,25 +11,27 @@ interface Message {
   timestamp: Date;
 }
 
-export default function AIAssistantChat() {
-  const [apiKey, setApiKey] = useState("");
-  const [apiKeyInput, setApiKeyInput] = useState("");
-  const [isApiKeySet, setIsApiKeySet] = useState(false);
+interface ChatError {
+  message: string;
+  code?: LlmErrorCode;
+}
+
+interface AIAssistantChatProps {
+  model: string;
+  endpointHost: string;
+}
+
+export default function AIAssistantChat({
+  model,
+  endpointHost,
+}: AIAssistantChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ChatError | null>(null);
   const [mcpServerUrl, setMcpServerUrl] = useState("");
   const [showMcpSettings, setShowMcpSettings] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem("mistral_api_key");
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-      setIsApiKeySet(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (messagesContainerRef.current) {
@@ -35,25 +39,6 @@ export default function AIAssistantChat() {
         messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
-
-  const handleSetApiKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (apiKeyInput.trim()) {
-      const key = apiKeyInput.trim();
-      setApiKey(key);
-      localStorage.setItem("mistral_api_key", key);
-      setIsApiKeySet(true);
-      setError(null);
-    }
-  };
-
-  const handleClearApiKey = () => {
-    setApiKey("");
-    setApiKeyInput("");
-    localStorage.removeItem("mistral_api_key");
-    setIsApiKeySet(false);
-    setMessages([]);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +64,6 @@ export default function AIAssistantChat() {
         },
         body: JSON.stringify({
           message: userMessage.content,
-          apiKey: apiKey,
           ...(mcpServerUrl.trim() && { mcpServerUrl: mcpServerUrl.trim() }),
         }),
       });
@@ -87,14 +71,11 @@ export default function AIAssistantChat() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 401) {
-          setError(
-            "Invalid API key. Please check your Mistral API key and try again."
-          );
-          handleClearApiKey();
-          return;
-        }
-        throw new Error(data.error || "Failed to get response");
+        setError({
+          message: data.error || "Failed to get response",
+          code: data.code,
+        });
+        return;
       }
 
       const assistantMessage: Message = {
@@ -106,132 +87,13 @@ export default function AIAssistantChat() {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError({
+        message: err instanceof Error ? err.message : "An error occurred",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (!isApiKeySet) {
-    return (
-      <div className="mx-auto max-w-2xl">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
-              <svg
-                className="h-8 w-8 text-primary-600 dark:text-primary-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-              API Key Required
-            </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              To use this feature, you need a Mistral AI API key. Everything
-              happens locally; your key will never leave your local project
-              instance. Mistral offers a free service with a limited number of
-              requests. This is perfect for this project.
-            </p>
-          </div>
-
-          <div className="mb-6 rounded-lg bg-slate-50 p-4 dark:bg-slate-700/50">
-            <h3 className="mb-2 font-medium text-slate-900 dark:text-white">
-              How to get a free API key:
-            </h3>
-            <ol className="list-inside list-decimal space-y-2 text-sm text-slate-600 dark:text-slate-400">
-              <li>
-                Visit{" "}
-                <a
-                  href="https://console.mistral.ai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-600 underline hover:text-primary-700 dark:text-primary-400"
-                >
-                  console.mistral.ai
-                </a>
-              </li>
-              <li>Create a free account or sign in</li>
-              <li>
-                Navigate to{" "}
-                <a
-                  href="https://console.mistral.ai/upgrade/plans"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-600 underline hover:text-primary-700 dark:text-primary-400"
-                >
-                  Choose a Plan
-                </a>{" "}
-                and select Experiment (free)
-              </li>
-              <li>
-                Navigate to{" "}
-                <a
-                  href="https://console.mistral.ai/api-keys/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-600 underline hover:text-primary-700 dark:text-primary-400"
-                >
-                  API Keys
-                </a>
-              </li>
-              <li>Click &quot;Create new key&quot;</li>
-              <li>Copy your API key and paste it below</li>
-            </ol>
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
-              Note: Mistral offers a free tier with limited requests. You
-              don&apos;t have to pay anything to use it.
-            </p>
-          </div>
-
-          <form onSubmit={handleSetApiKey}>
-            <div className="mb-4">
-              <label
-                htmlFor="apiKey"
-                className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Mistral API Key
-              </label>
-              <input
-                type="password"
-                id="apiKey"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                placeholder="Enter your Mistral API key"
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-500"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-primary-600 px-4 py-3 font-medium text-white transition-colors hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:bg-primary-500 dark:hover:bg-primary-600"
-            >
-              Start Chat
-            </button>
-          </form>
-
-          <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-500">
-            Everything happens locally; your key will never leave your local
-            project instance. To find out exactly what the code does:
-            <a
-              className="underline"
-              href="https://github.com/search?q=repo%3AkOaDT%2Foss-oopssec-store%20mistral&type=code"
-            >
-              Check it here!
-            </a>
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto flex h-[800px] max-w-3xl flex-col rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
@@ -261,43 +123,35 @@ export default function AIAssistantChat() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowMcpSettings(!showMcpSettings)}
-            className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 ${
-              mcpServerUrl.trim()
-                ? "text-primary-600 dark:text-primary-400"
-                : "text-slate-600 dark:text-slate-400"
-            }`}
-            title="MCP Server Settings"
+        <button
+          onClick={() => setShowMcpSettings(!showMcpSettings)}
+          className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 ${
+            mcpServerUrl.trim()
+              ? "text-primary-600 dark:text-primary-400"
+              : "text-slate-600 dark:text-slate-400"
+          }`}
+          title="MCP Server Settings"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={handleClearApiKey}
-            className="cursor-pointer rounded-lg px-3 py-1.5 text-sm text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
-          >
-            Change API Key
-          </button>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+        </button>
       </div>
 
       {showMcpSettings && (
@@ -420,11 +274,23 @@ export default function AIAssistantChat() {
         )}
       </div>
 
-      {error && (
-        <div className="border-t border-red-200 bg-red-50 px-4 py-3 dark:border-red-900 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
+      {error &&
+        (isSetupErrorCode(error.code) ? (
+          <ModelSetupPanel
+            code={error.code}
+            model={model}
+            endpointHost={endpointHost}
+          />
+        ) : (
+          <div
+            role="alert"
+            className="border-t border-red-200 bg-red-50 px-4 py-3 dark:border-red-900 dark:bg-red-900/20"
+          >
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {error.message}
+            </p>
+          </div>
+        ))}
 
       <form
         onSubmit={handleSubmit}

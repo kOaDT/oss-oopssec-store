@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: "file:${{ github.workspace }}/prisma/test.db"
-      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
 
     steps:
       - name: Checkout repository
@@ -36,6 +35,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: "file:${{ github.workspace }}/prisma/test.db"
+      # Must match LLM_STUB_URL, LLM_STUB_MODEL and LLM_STUB_API_KEY: the AI
+      # suites start that stub and fail unless the server calls it.
+      LLM_BASE_URL: "http://127.0.0.1:11435/v1"
+      LLM_MODEL: "stub"
+      LLM_API_KEY: "stub-key"
 
     steps:
       - name: Checkout repository

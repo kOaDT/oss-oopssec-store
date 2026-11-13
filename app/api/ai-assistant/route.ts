@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MCP_SESSION_HEADER, MCP_SESSION_VALUE } from "@/lib/mcp-constants";
 import { containsBlockedPattern } from "@/lib/prompt-injection-filter";
+import {
+  LLM_UNREACHABLE,
+  llmFailure,
+  providerErrorMessage,
+  resolveLlmConfig,
+  type LlmConfig,
+  type LlmFailure,
+} from "@/lib/llm";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
 import { aiAssistantBodySchema } from "@/lib/validation/schemas/ai-assistant";
@@ -129,40 +137,72 @@ async function callMcpTool(
   return JSON.stringify(response.result || response.error || {});
 }
 
+class LlmError extends Error {
+  constructor(readonly failure: LlmFailure) {
+    super(failure.error);
+  }
+}
+
 async function callLlm(
-  apiKey: string,
+  config: LlmConfig,
   messages: ChatMessage[],
-  tools?: ReturnType<typeof toChatTools>
-) {
+  tools: ReturnType<typeof toChatTools>
+): Promise<ChatMessage | undefined> {
   const body: Record<string, unknown> = {
-    model: "mistral-small-2603",
+    model: config.model,
     messages,
     max_tokens: 1024,
     temperature: 0.7,
   };
 
-  if (tools && tools.length > 0) {
+  if (tools.length > 0) {
     body.tools = tools;
-    body.tool_choice = "auto";
   }
 
-  const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${config.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(config.apiKey && { Authorization: `Bearer ${config.apiKey}` }),
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    logger.warn(
+      { err: error, route: "/api/ai-assistant", baseUrl: config.baseUrl },
+      "LLM endpoint unreachable"
+    );
+    throw new LlmError(LLM_UNREACHABLE);
+  }
 
-  return response;
+  if (!response.ok) {
+    const providerMessage = providerErrorMessage(
+      await response.json().catch(() => null)
+    );
+    logger.warn(
+      {
+        route: "/api/ai-assistant",
+        status: response.status,
+        model: config.model,
+        providerMessage,
+      },
+      "LLM endpoint returned an error"
+    );
+    throw new LlmError(llmFailure(response.status, providerMessage));
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const parsed = await parseBody(request, aiAssistantBodySchema);
     if (!parsed.success) return parsed.response;
-    const { message, apiKey, mcpServerUrl } = parsed.data;
+    const { message, mcpServerUrl } = parsed.data;
+    const llmConfig = resolveLlmConfig();
 
     if (containsBlockedPattern(message)) {
       return NextResponse.json(
@@ -218,36 +258,7 @@ export async function POST(request: NextRequest) {
       { role: "user", content: message },
     ];
 
-    let response = await callLlm(apiKey, messages, chatTools);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-
-      if (response.status === 401) {
-        return NextResponse.json(
-          { error: "Invalid API key. Please check your Mistral API key." },
-          { status: 401 }
-        );
-      }
-
-      if (response.status === 429) {
-        return NextResponse.json(
-          { error: "Rate limit exceeded. Please try again later." },
-          { status: 429 }
-        );
-      }
-
-      return NextResponse.json(
-        {
-          error:
-            errorData.message || "Failed to get response from AI assistant",
-        },
-        { status: response.status }
-      );
-    }
-
-    let data = await response.json();
-    let assistantMessage = data.choices?.[0]?.message;
+    let assistantMessage = await callLlm(llmConfig, messages, chatTools);
     let toolCallCount = 0;
 
     while (
@@ -288,20 +299,7 @@ export async function POST(request: NextRequest) {
         toolCallCount++;
       }
 
-      response = await callLlm(apiKey, messages, chatTools);
-
-      if (!response.ok) {
-        return NextResponse.json(
-          {
-            error:
-              "AI assistant encountered an error during tool processing. Please try again.",
-          },
-          { status: 502 }
-        );
-      }
-
-      data = await response.json();
-      assistantMessage = data.choices?.[0]?.message;
+      assistantMessage = await callLlm(llmConfig, messages, chatTools);
     }
 
     const finalContent =
@@ -319,6 +317,10 @@ export async function POST(request: NextRequest) {
       })),
     });
   } catch (error) {
+    if (error instanceof LlmError) {
+      const { code, status, error: message } = error.failure;
+      return NextResponse.json({ error: message, code }, { status });
+    }
     logger.error(
       { err: error, route: "/api/ai-assistant" },
       "AI Assistant error"
