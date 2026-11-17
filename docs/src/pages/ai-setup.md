@@ -5,6 +5,13 @@ title: "AI assistant setup"
 
 Two challenges go through OSSBot, the store's AI support assistant: [prompt injection](/oss-oopssec-store/posts/prompt-injection-ai-assistant/) and the [malicious MCP server](/oss-oopssec-store/posts/mcp-malicious-server/). OSSBot needs a language model. By default the lab calls a local [Ollama](https://ollama.com/download) model: no account, no API key, and no internet once the model is downloaded.
 
+Pick your setup:
+
+- [With npm](#with-npm): `npx create-oss-store` or a clone, with Ollama installed on your machine.
+- [With Docker Compose](#with-docker-compose): a clone of the repository, with Ollama in a container next to the lab.
+- [With `docker run`](#with-docker-run): the published image, without cloning anything.
+- [With another provider](#with-another-provider): Mistral or any OpenAI-compatible endpoint, instead of Ollama.
+
 ## Which model
 
 `gemma4:e4b` is the default, and the model we recommend. It refuses to hand over a flag when asked outright, then falls for the techniques in the walkthroughs, which is what both challenges need. Smaller or larger is not better here: `gemma4:e2b` gives both flags to a plain question, and `mistral-small` gives away the prompt injection flag the same way. The numbers are under [Verified setups](#verified-setups).
