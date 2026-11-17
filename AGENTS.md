@@ -82,6 +82,8 @@ npm run docker:down          # Stop and remove container
 npm run docker:build         # Rebuild Docker image
 npm run docker:logs          # Follow container logs
 npm run docker:reset         # Wipe volumes and restart (full reset)
+npm run docker:up:ollama     # Start with an Ollama container for the AI challenges
+npm run docker:ollama        # Ollama CLI in that container (e.g. -- pull gemma4:e4b)
 
 # Testing
 npm run test                 # Run all Jest tests
@@ -170,6 +172,9 @@ Special cases: a new `FlagCategory` must be added to `prisma/schema.prisma`, `li
 DATABASE_URL=              # SQLite connection string
 NEXT_PUBLIC_BASE_URL=      # Base URL (default: http://localhost:3000)
 PARTNER_SIGNING_KEY_PATH=  # Partner API RSA key pair (default: next to the database file)
+LLM_BASE_URL=              # OpenAI-compatible endpoint for the AI assistant (default: http://localhost:11434/v1; Docker image: http://ollama:11434/v1)
+LLM_MODEL=                 # Model name (default: gemma4:e4b)
+LLM_API_KEY=               # Bearer token for hosted providers (default: none)
 ```
 
 ## Common Patterns
@@ -201,7 +206,7 @@ Security regression tests validate that all vulnerability chains and flags remai
 
 - **Jest unit tests** (`tests/unit/`): Test utility functions (MD5 hashing, JWT signing, input filters)
 - **Challenge parity** (`tests/unit/challenge-parity.test.ts`): Cross-checks `prisma/flags.ts` against `content/vulnerabilities/`, `tests/helpers/flags.ts`, `docs/src/data/roadmap.ts`, `docs/src/data/blog/` and the counts in `README.md` / `EDUCATORS.md`. Fails when a challenge is half-added.
-- **Jest API tests** (`tests/api/`): Test exploitation scenarios against API endpoints
+- **Jest API tests** (`tests/api/`): Test exploitation scenarios against API endpoints. The AI assistant suites drive the chat route against an OpenAI-compatible stub: start the server with `LLM_BASE_URL=http://127.0.0.1:11435/v1 LLM_MODEL=stub LLM_API_KEY=stub-key`
 - **Cypress E2E tests** (`cypress/e2e/`): Test full exploitation workflows through the UI
 - **CI/CD** (`.github/workflows/test.yml`): Runs on PRs to `main` — 3 parallel jobs (unit, API, E2E)
 

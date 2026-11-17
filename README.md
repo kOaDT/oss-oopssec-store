@@ -256,7 +256,7 @@ The database initializes on first start. Data persists across restarts via Docke
 
 ### AI challenges
 
-The prompt injection and MCP challenges talk to a language model. By default the lab calls `gemma4:e4b` on a local [Ollama](https://ollama.com/download), so pull it once with `ollama pull gemma4:e4b`. For Docker setups, other models and hosted providers, see the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
+The prompt injection and MCP challenges talk to a language model: `gemma4:e4b` on a local [Ollama](https://ollama.com/download) by default. With npm, install Ollama and pull the model once with `ollama pull gemma4:e4b`. With Docker, the lab needs an Ollama container instead: the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup) gives the commands, and covers other models and hosted providers.
 
 ### Updating an existing install
 
