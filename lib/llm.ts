@@ -20,7 +20,7 @@ export interface LlmFailure {
   error: string;
 }
 
-// Compose forwards unset variables as empty strings.
+// An empty value, such as LLM_API_KEY="" left in .env, means unset.
 function readVar(env: NodeJS.ProcessEnv, name: string): string | undefined {
   return env[name]?.trim() || undefined;
 }
@@ -55,6 +55,12 @@ export const LLM_UNREACHABLE: LlmFailure = {
   error: "The AI assistant could not reach its language model.",
 };
 
+export const LLM_NO_MESSAGE: LlmFailure = {
+  code: "llm_failed",
+  status: 502,
+  error: "The language model answered without a message.",
+};
+
 /** Maps a non-2xx answer from the chat completions endpoint to the route's reply. */
 export function llmFailure(
   status: number,
@@ -67,11 +73,20 @@ export function llmFailure(
       error: "The language model endpoint rejected the server's credentials.",
     };
   }
-  if (status === 404) {
+  // A missing model and a wrong path both answer 404; only the former names the model.
+  if (status === 404 && providerMessage && /\bmodel\b/i.test(providerMessage)) {
     return {
       code: "llm_model_not_found",
       status: 502,
       error: "The configured language model is not available.",
+    };
+  }
+  if (status === 404) {
+    return {
+      code: "llm_failed",
+      status: 502,
+      error:
+        "The language model endpoint answered 404 Not Found. Check LLM_BASE_URL: OpenAI-compatible APIs usually end in /v1.",
     };
   }
   if (status === 429) {

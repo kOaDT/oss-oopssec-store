@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MCP_SESSION_HEADER, MCP_SESSION_VALUE } from "@/lib/mcp-constants";
 import { containsBlockedPattern } from "@/lib/prompt-injection-filter";
 import {
+  LLM_NO_MESSAGE,
   LLM_UNREACHABLE,
   llmFailure,
   providerErrorMessage,
@@ -147,7 +148,7 @@ async function callLlm(
   config: LlmConfig,
   messages: ChatMessage[],
   tools: ReturnType<typeof toChatTools>
-): Promise<ChatMessage | undefined> {
+): Promise<ChatMessage> {
   const body: Record<string, unknown> = {
     model: config.model,
     messages,
@@ -194,7 +195,15 @@ async function callLlm(
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message;
+  const message: ChatMessage | undefined = data.choices?.[0]?.message;
+  if (!message) {
+    logger.warn(
+      { route: "/api/ai-assistant", model: config.model, body: data },
+      "LLM endpoint answered without a message"
+    );
+    throw new LlmError(LLM_NO_MESSAGE);
+  }
+  return message;
 }
 
 export async function POST(request: NextRequest) {
@@ -262,7 +271,7 @@ export async function POST(request: NextRequest) {
     let toolCallCount = 0;
 
     while (
-      assistantMessage?.tool_calls &&
+      assistantMessage.tool_calls &&
       assistantMessage.tool_calls.length > 0 &&
       toolCallCount < MAX_TOOL_CALLS
     ) {
@@ -303,7 +312,7 @@ export async function POST(request: NextRequest) {
     }
 
     const finalContent =
-      assistantMessage?.content ||
+      assistantMessage.content ||
       "I apologize, but I was unable to generate a response. Please try again.";
 
     return NextResponse.json({
