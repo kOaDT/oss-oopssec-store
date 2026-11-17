@@ -29,11 +29,11 @@ To use another model, add `LLM_MODEL="name:tag"` with the name of a model you pu
 From a clone of the repository, start the lab together with an Ollama container, then pull the model into it:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.ollama.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.ollama.yml up -d
 docker compose -f docker-compose.yml -f docker-compose.ollama.yml exec ollama ollama pull gemma4:e4b
 ```
 
-With Node.js installed, `npm run docker:up:ollama` and `npm run docker:ollama -- pull gemma4:e4b` do the same. The model lands in the `ollama-models` volume and survives restarts.
+With Node.js installed, `npm run docker:up:ollama` and `npm run docker:ollama -- pull gemma4:e4b` do the same. The model lands in the `ollama-models` volume and survives restarts. The first `up` builds the lab image; add `--build` after pulling a new version. To stop everything, run `npm run docker:down`, or pass the same two files to `docker compose down`. `npm run docker:reset` keeps the models but restarts the lab without Ollama: start it again with `npm run docker:up:ollama`.
 
 To use another model, pull it the same way, then set it in a `docker-compose.override.yml` next to the other Compose files:
 
@@ -44,7 +44,7 @@ services:
       - LLM_MODEL=name:tag
 ```
 
-Compose stops loading that file on its own once `-f` is given, so add `-f docker-compose.override.yml` to the `up` command.
+Compose stops loading that file on its own once `-f` is given, so add `-f docker-compose.override.yml` to the `up` command. `npm run docker:up:ollama` does not read it.
 
 The Ollama container publishes no port: the app reaches it as `ollama:11434`, and nothing outside the Compose network can. It runs on the CPU, so answers take longer than with a native Ollama on a GPU. To give it an NVIDIA GPU on Linux, follow [Ollama's Docker guide](https://docs.ollama.com/docker). Docker Desktop passes a GPU to containers only on Windows with WSL 2 ([Docker docs](https://docs.docker.com/desktop/features/gpu/)), so on a Mac the npm setup with the native Ollama app is faster.
 

@@ -36,13 +36,13 @@ Or with Docker (no Node.js required):
 docker run -p 127.0.0.1:3000:3000 --add-host=host.docker.internal:host-gateway leogra/oss-oopssec-store
 ```
 
-The AI assistant lives at `http://localhost:3000/support/ai-assistant`. It runs on a local [Ollama](https://ollama.com/download) model by default: install Ollama, then pull the model before you start.
+The AI assistant lives at `http://localhost:3000/support/ai-assistant` and runs on a local [Ollama](https://ollama.com/download) model by default. With the npm setup, install Ollama and pull the model before you start:
 
 ```bash
 ollama pull gemma4:e4b
 ```
 
-Running the lab in Docker, or using another provider? Follow the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
+With Docker, the lab needs an Ollama container on its network instead. The [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup) gives the commands, and covers hosted providers too.
 
 ## Reconnaissance
 

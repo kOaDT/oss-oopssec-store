@@ -205,7 +205,7 @@ docker exec ollama ollama pull gemma4:e4b   # rerun if Ollama is still starting
 
 # In class, with no internet
 docker start ollama
-docker run -p 127.0.0.1:3000:3000 --network oss-lab leogra/oss-oopssec-store
+docker run -p 127.0.0.1:3000:3000 --network oss-lab --add-host=host.docker.internal:host-gateway leogra/oss-oopssec-store
 ```
 
 The npm setup works the same way with a native Ollama: run `ollama pull gemma4:e4b` before class. Model sizes and the other setups are in the [AI assistant setup guide](https://koadt.github.io/oss-oopssec-store/ai-setup).
