@@ -33,38 +33,86 @@ const linkClassName =
 const inlineCodeClassName =
   "rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/40";
 
+const LOOPBACK_HOSTNAMES = ["localhost", "127.0.0.1", "[::1]"];
+
+type EndpointKind = "local" | "container" | "hosted";
+
+// The Docker image calls a container named `ollama`; `ollama pull` typed by the
+// player only reaches a model server on their own machine.
+function endpointKind(endpointHost: string): EndpointKind {
+  const { hostname } = new URL(`http://${endpointHost}`);
+  if (LOOPBACK_HOSTNAMES.includes(hostname)) return "local";
+  return hostname === "ollama" ? "container" : "hosted";
+}
+
+function unreachableBody(kind: EndpointKind, endpoint: ReactNode): ReactNode {
+  switch (kind) {
+    case "local":
+      return (
+        <>
+          Nothing is answering at {endpoint}. OSSBot runs on a local model
+          served by{" "}
+          <a
+            href="https://ollama.com/download"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={linkClassName}
+          >
+            Ollama
+          </a>
+          : start it, pull the model, then send your message again.
+        </>
+      );
+    case "container":
+      return (
+        <>
+          Nothing is answering at {endpoint}. Start the Ollama container on the
+          lab&apos;s network, then send your message again.
+        </>
+      );
+    case "hosted":
+      return (
+        <>
+          Nothing is answering at {endpoint}. Check the lab&apos;s network
+          access and <code className={inlineCodeClassName}>LLM_BASE_URL</code>,
+          then send your message again.
+        </>
+      );
+  }
+}
+
+const MODEL_NOT_FOUND_BODY: Record<EndpointKind, ReactNode> = {
+  local: "Pull it into Ollama, then send your message again.",
+  container: "Pull it into the Ollama container, then send your message again.",
+  hosted: (
+    <>
+      Check <code className={inlineCodeClassName}>LLM_MODEL</code> against the
+      provider&apos;s model names, then restart the lab.
+    </>
+  ),
+};
+
 function panelContent(
   code: SetupErrorCode,
   model: string,
   endpointHost: string
 ): PanelContent {
+  const kind = endpointKind(endpointHost);
+  const command = kind === "local" ? `ollama pull ${model}` : undefined;
+  const endpoint = <code className={inlineCodeClassName}>{endpointHost}</code>;
+
   switch (code) {
     case "llm_unreachable":
       return {
         title: "OSSBot can't reach its language model",
-        body: (
-          <>
-            Nothing is answering at{" "}
-            <code className={inlineCodeClassName}>{endpointHost}</code>. OSSBot
-            runs on a local model served by{" "}
-            <a
-              href="https://ollama.com/download"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={linkClassName}
-            >
-              Ollama
-            </a>
-            : start it, pull the model, then send your message again.
-          </>
-        ),
-        command: `ollama pull ${model}`,
+        body: unreachableBody(kind, endpoint),
+        command,
       };
     case "llm_model_not_found":
       return {
         title: `The ${model} model isn't available`,
-        body: "Pull it into Ollama, then send your message again.",
-        command: `ollama pull ${model}`,
+        body: MODEL_NOT_FOUND_BODY[kind],
+        command,
       };
     case "llm_unauthorized":
       return {
