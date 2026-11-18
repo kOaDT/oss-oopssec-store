@@ -96,7 +96,7 @@ You will be told which way the triage went, including when a report is judged ou
 - Test only against **your own** local instance.
 - Never attack an instance you do not own, a shared classroom deployment, or any host you have no written authorization to test.
 - Do not test the third-party infrastructure this project rides on — GitHub, npm, Docker Hub, GitHub Pages. Report issues there to those vendors.
-- Do not use this project, its payloads or its walkthroughs against systems you are not authorized to test. See the [disclaimer](README.md#disclaimer).
+- Do not use this project, its payloads or its walkthroughs against systems you are not authorized to test. See the [disclaimer](README.md#installation).
 
 ## Running the lab safely
 

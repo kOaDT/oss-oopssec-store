@@ -386,7 +386,7 @@ describe("README.md", () => {
   const readme = read("README.md");
 
   it("advertises the current challenge and chapter counts", () => {
-    const feature = readme.match(/(\d+) CTF challenges across (\d+) chapters/);
+    const feature = readme.match(/(\d+) challenges across (\d+) chapters/);
     expect(feature).not.toBeNull();
     expect(Number(feature![1])).toBe(flags.length);
     expect(Number(feature![2])).toBe(CURRICULUM.length);
