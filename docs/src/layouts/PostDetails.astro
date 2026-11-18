@@ -3,7 +3,6 @@ import { render, type CollectionEntry } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Tag from "@/components/Tag.astro";
 import Datetime from "@/components/Datetime.astro";
 import Author from "@/components/Author.astro";
 import EditPost from "@/components/EditPost.astro";
@@ -134,11 +133,7 @@ const nextPost =
 
     <hr class="my-8 border-dashed" />
 
-    <EditPost class="sm:hidden" {hideEditPost} {post} />
-
-    <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />)}
-    </ul>
+    <EditPost class="mb-8 sm:hidden" {hideEditPost} {post} />
 
     <BackToTopButton />
 
