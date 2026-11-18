@@ -4,6 +4,25 @@ All notable changes to OopsSec Store are documented here. This changelog follows
 
 Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/oss-oopssec-store/releases) at each release.
 
+## [v2.26.0] - 2026-11-18
+
+[Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.26.0)
+
+### Added
+
+- AI challenges run offline or on any tool-calling OpenAI-compatible endpoint; `npm run setup` and `npx create-oss-store` add commented `LLM_*` variables.
+- New `docker-compose.ollama.yml` runs Ollama beside the lab; `npm run docker:up:ollama` starts both, `npm run docker:ollama` runs its CLI.
+- The AI assistant chat explains failures, shows the configured model and host, and suggests `ollama pull` for local Ollama.
+- The app now refuses to start when `LLM_BASE_URL` is not an `http(s)` URL, with an explicit error.
+
+### Changed
+
+- **Breaking:** The AI assistant (prompt injection, malicious MCP server challenges) replaces browser Mistral keys with server-side `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY`; run `ollama pull gemma4:e4b`, or `npm run docker:up:ollama` then `npm run docker:ollama -- pull gemma4:e4b`; `docker run` needs an `ollama` container.
+- New AI assistant setup guide (npm, Docker Compose, `docker run`, hosted providers) is linked from README, `EDUCATORS.md` and About page.
+- The README is shorter; project structure and test commands moved to `CONTRIBUTING.md`.
+- `npm run test:api` and CI test the AI assistant against a local OpenAI-compatible stub instead of a live Mistral key.
+- CI validates the Compose files, including the Ollama overlay, before building the Docker image.
+
 ## [v2.25.0] - 2026-11-09
 
 [Release notes](https://github.com/kOaDT/oss-oopssec-store/releases/tag/v2.25.0)
@@ -801,6 +820,7 @@ Entries are summarized from the [GitHub release notes](https://github.com/kOaDT/
 
 - The news page no longer shows an unneeded MD5 reference.
 
+[v2.26.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.25.0...v2.26.0
 [v2.25.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.24.0...v2.25.0
 [v2.24.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.23.0...v2.24.0
 [v2.23.0]: https://github.com/kOaDT/oss-oopssec-store/compare/v2.22.0...v2.23.0
