@@ -233,6 +233,8 @@ The flag is `OSS{mcp_c0nf1g_l34ks_hf_t0k3n}`.
 
 ## Revoking the token
 
+> **Outside the lab, weigh what revoking breaks.** You can't see from the outside what runs on the token. Revoked, it fails everywhere at once, a production service included, until the owner issues a new one and deploys it. On a pentest, report the token and let the client rotate it, unless your rules of engagement cover revocation.
+
 You don't need the owner's account to kill a Hugging Face token you found. `POST /api/credentials/revoke` takes the raw value, needs no authentication, and always answers `202`, whether the token existed or not, so it can't be used to test a token:
 
 ```bash
@@ -255,7 +257,7 @@ venv/bin/hf auth whoami
 Error: Invalid user token. The token from HF_TOKEN environment variable is invalid. Note that HF_TOKEN takes precedence over `hf auth login`.
 ```
 
-> Revoke last in the lab only: it locks you out as well. In the lab, `npm run db:upgrade` hands the token back; with Docker, restart the container, its entrypoint replays the challenge data on start.
+> In the lab, revoke last: it locks you out as well. In the lab, `npm run db:upgrade` hands the token back; with Docker, restart the container, its entrypoint replays the challenge data on start.
 
 ## Vulnerability chain
 
