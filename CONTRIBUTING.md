@@ -75,7 +75,7 @@ In the `flagHints` map of the same file, keyed by your slug. Level 1 is a vague 
 
 Write the vulnerable code path — API route, page, feature — that hands out the flag. It has to be genuinely exploitable, not simulated. Along the way you may need to:
 
-- seed the rows your challenge needs (a product, a coupon, an order) in `seedChallengeData` (`prisma/challenge-data.ts`), with upserts only — `found_flags` and `revealed_hints` point at ids a delete-and-recreate would break. That function is what `npm run db:upgrade` replays, and the only way a database already in use ever receives them.
+- seed the rows your challenge needs (a product, a coupon, an order) in `seedChallengeData` (`prisma/challenge-data.ts`), with upserts only — `found_flags` and `revealed_hints` point at ids a delete-and-recreate would break. That function is what `npm run db:upgrade` replays, and the only way a database already in use ever receives them. Rows added to `prisma/seed.ts` only ever reach a fresh install: the full seed deletes and recreates demo rows such as Bob's orders, so the upgrade never replays it.
 - add a model to `prisma/schema.prisma`, then run `npm run db:generate && npm run db:push`;
 - give players a way in — a link in `app/components/Header.tsx`, `Footer.tsx` or the admin dashboard. A challenge nobody can find is a challenge nobody solves.
 

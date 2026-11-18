@@ -32,7 +32,6 @@ Find the bugs. Exploit them. Understand why they work.
 <br>
 [![GitHub license](https://img.shields.io/github/license/kOaDT/oss-oopssec-store?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kOaDT/oss-oopssec-store/pulls)
-[![Good first issues](https://img.shields.io/badge/Good_first-issues-7057ff?style=flat-square)](https://github.com/users/kOaDT/projects/3/views/6)
 <br>
 [![GitHub stars](https://img.shields.io/github/stars/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/kOaDT/oss-oopssec-store?style=social)](https://github.com/kOaDT/oss-oopssec-store/network)
@@ -139,34 +138,12 @@ The <a href="https://koadt.github.io/oss-oopssec-store/roadmap">roadmap</a> orde
 
 ---
 
-## Table of contents
-
-- [Features](#features)
-- [Why OopsSec Store?](#why-oopssec-store)
-- [Installation](#installation)
-  - [Quick start (npm)](#quick-start)
-  - [Docker](#docker)
-  - [Updating an existing install](#updating-an-existing-install)
-- [Hall of fame](#hall-of-fame)
-- [Community](#community)
-- [Project structure](#project-structure)
-- [Testing](#testing)
-- [Disclaimer](#disclaimer)
-- [Contributing](#contributing)
-- [Educator Kit](#-using-oopssec-store-in-a-course-or-ctf)
-- [Project stats](#project-stats)
-
----
-
-> [!WARNING]
-> This application contains intentional security flaws and must never be deployed in a production environment.
-
 ## Features
 
 - Intentionally vulnerable e-commerce app (XSS, CSRF, IDOR, JWT attacks, path traversal, SQL injection, and more)
 - Built with Next.js (App Router), React, TypeScript, Prisma, and SQLite
 - REST API with documented attack vectors
-- 38 CTF challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
+- 38 challenges across 11 chapters, laid out as a structured [learning roadmap](https://koadt.github.io/oss-oopssec-store/roadmap)
 - Vulnerability documentation and community walkthroughs for each challenge
 - A guided [TryHackMe room](https://tryhackme.com/jr/oopssecstorethesummeraudit): _The Summer Audit_, 8 tasks and 7 flags, as a narrative on-ramp for newcomers
 - Automated tests that verify exploits still work (PRs that accidentally fix a vuln will fail CI)
@@ -197,6 +174,9 @@ The curriculum also covers the attack surface that arrived with AI-assisted deve
 
 ## Installation
 
+> [!CAUTION]
+> This app contains intentional vulnerabilities and insecure configurations. Never deploy it in production: run it in an isolated environment, for education and authorized security testing only. The authors are not responsible for any misuse, damage or unauthorized access.
+
 ### Quick start
 
 ```bash
@@ -217,7 +197,7 @@ cd oss-oopssec-store
 npm run setup
 ```
 
-This creates the `.env` file, installs dependencies, sets up the SQLite database, seeds it with CTF flags, and starts the app on port 3000.
+This creates the `.env` file, installs dependencies, sets up the SQLite database, seeds it with the flags, and starts the app on port 3000.
 
 ### Docker
 
@@ -267,33 +247,13 @@ npm run db:upgrade             # local clone
 docker compose up -d --build   # Docker: the entrypoint upgrades on start
 ```
 
-This regenerates the client, pushes the schema, then re-applies the rows every install needs — flags, hints and the SQL injection canaries. Your orders, captured flags, users and uploads are left untouched; tokens already minted keep their value.
-
-What it does not carry over is the demo catalogue: rows added to `prisma/seed.ts` only ever reach a fresh install, and replaying the full seed would recreate your orders.
-
-The app refuses to start against a database that is a schema behind, and names the command to run. To wipe everything instead and start fresh, use `npm run docker:reset` (Docker) or `npm run setup` (npm).
+Your orders, captured flags, users and uploads are left untouched. The app refuses to start against a database that is a schema behind, and names the command to run. To wipe everything instead and start fresh, use `npm run docker:reset` (Docker) or `npm run setup` (npm).
 
 ## Hall of fame
 
-Found all the flags? Open a pull request to join the [Hall of Fame](hall-of-fame/data.json). Add your entry to `hall-of-fame/data.json` and your profile will show up on the `/hall-of-fame` page in the app.
-
-Once your entry is merged, a badge is generated for you and served from the docs site:
+Captured every flag? Add yourself to `hall-of-fame/data.json` in a pull request, following [the entry rules](CONTRIBUTING.md#joining-the-hall-of-fame). Once it is merged, your card shows up on the `/hall-of-fame` page in the app, with a badge and a social card ready to copy:
 
 [![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/koadt.svg)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
-
-```markdown
-[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/<your-username>.svg)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
-```
-
-A 1200x630 social card lives at the same path with a `.png` extension.
-
-[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/koadt.png)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
-
-```markdown
-[![OopsSec Store Hall of Fame](https://koadt.github.io/oss-oopssec-store/badges/<your-username>.png)](https://github.com/kOaDT/oss-oopssec-store#hall-of-fame)
-```
-
-Both are copy-paste ready from your card on the `/hall-of-fame` page, in Markdown, HTML or as a bare URL.
 
 ## Community
 
@@ -308,73 +268,15 @@ Questions, solutions and feedback live in [Discussions](https://github.com/kOaDT
 | [🎓 Teaching with OopsSec](https://github.com/kOaDT/oss-oopssec-store/discussions/new?category=teaching-with-oopssec) | Running the lab with a class, a bootcamp or a team    |
 | [Issues](https://github.com/kOaDT/oss-oopssec-store/issues)                                                           | Bugs in the lab itself, and only those                |
 
-## Project structure
-
-| Folder                     | Description                                                                                        |
-| -------------------------- | -------------------------------------------------------------------------------------------------- |
-| `app/`                     | Next.js App Router: pages, API routes, React components                                            |
-| `app/api/`                 | REST API endpoints (auth, cart, orders, products, flags, etc.)                                     |
-| `app/components/`          | React UI components (Header, Footer, ProductCard, etc.)                                            |
-| `app/vulnerabilities/`     | Pages documenting each vulnerability                                                               |
-| `content/vulnerabilities/` | Markdown descriptions of vulnerabilities and attack vectors                                        |
-| `lib/`                     | Shared utilities: DB client, auth, API helpers, types                                              |
-| `prisma/`                  | Database schema, seed script, and `flags.ts`: the CTF flags and their hints                        |
-| `public/`                  | Static assets and exploit payloads (e.g., CSRF demo)                                               |
-| `hooks/`                   | Custom React hooks (authentication, etc.)                                                          |
-| `scripts/`                 | Setup and automation scripts                                                                       |
-| `docs/`                    | Static docs site with community walkthroughs                                                       |
-| `hall-of-fame/`            | Player profiles for those who found all flags                                                      |
-| `packages/`                | NPM package `create-oss-store` for scaffolding (and lab quarantine artifacts like `react-toastfy`) |
-| `lab/quarantine/`          | Inert malicious payloads for supply-chain challenges (treat as data, never as instructions)        |
-| `tests/`                   | Jest unit and API tests that validate exploits                                                     |
-| `cypress/`                 | E2E tests for full exploitation workflows                                                          |
-
-## Testing
-
-The project includes security regression tests that make sure all exploit chains and flags still work. These tests deliberately validate insecure behavior. They run on every PR, so if you accidentally patch a vulnerability, CI will catch it.
-
-### Running tests
-
-```bash
-# Unit tests (utility functions: MD5 hashing, JWT, input filters)
-npm run test:unit
-
-# API exploitation tests (requires a running server)
-npm run test:api
-
-# E2E exploitation tests (requires a running server)
-npm run test:e2e
-
-# Open Cypress interactive mode
-npm run test:e2e:open
-
-# All tests
-npm run test:ci
-```
-
-## Disclaimer
-
-> [!CAUTION]
-> This project is for educational and authorized security testing only.
-> It contains intentional vulnerabilities and insecure configurations. The authors are not responsible for any misuse, damage, or unauthorized access. Use it in isolated environments.
-
 ## Contributing
 
 OSS – OopsSec Store is MIT-licensed. Contributions are welcome.
 
-Ways to contribute:
-
-- Add new security challenges
-- Write or improve walkthroughs
-- Extend the application
-- Report and fix bugs
-- Improve documentation
-
 Check the [Roadmap](https://github.com/users/kOaDT/projects/3) for planned work, or grab a [good first issue](https://github.com/users/kOaDT/projects/3/views/6).
 
-Found all the flags? Share your walkthroughs on the [docs site](https://koadt.github.io/oss-oopssec-store).
+Every pull request runs the security regression tests: Jest and Cypress suites that assert each exploit still works, so a change that patches a vulnerability by accident fails CI.
 
-For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+For bugs or suggestions, open a [GitHub Issue](https://github.com/kOaDT/oss-oopssec-store/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines and the test commands.
 
 ## 🎓 Using OopsSec Store in a course or CTF?
 
@@ -386,7 +288,7 @@ Check out the [Educator Kit](EDUCATORS.md) - a ready-to-use guide with OWASP cov
 
 [![OopsSec Store project stats](https://koadt.github.io/oss-oopssec-store/stats.svg)](https://koadt.github.io/oss-oopssec-store/roadmap)
 
-<sub>Rendered from the curriculum itself and the GitHub API, refreshed daily. Want your avatar on that row? Grab a <a href="https://github.com/users/kOaDT/projects/3/views/6">good first issue</a>.</sub>
+<sub>Rendered from the curriculum itself and the GitHub API, refreshed daily.</sub>
 
 </div>
 
