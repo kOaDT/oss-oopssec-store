@@ -33,85 +33,78 @@ const next = entry ? getNext(entry.number) : null;
 const siblings = entry ? getChapterSiblings(walkthroughSlug) : [];
 ---
 
-{
-  entry && placement === "top" && (
-    <aside class="rmctx-top" aria-label="Roadmap context">
-      <a class="rmctx-chapter" href={`${base}/topics/${entry.chapterSlug}`}>
-        Chapter {pad(entry.chapterIndex)} · {entry.chapterTitle}
-      </a>
-      <span class="rmctx-sep" aria-hidden="true">
-        ·
-      </span>
-      <a
-        class="rmctx-link"
-        href={`${base}/roadmap#challenge-${pad(entry.number)}`}
-      >
-        Challenge {pad(entry.number)} on the roadmap
-      </a>
-      <span class="rmctx-difficulty" data-difficulty={entry.difficulty}>
-        {DIFFICULTY_LABEL[entry.difficulty]}
-      </span>
-      {prerequisites.length > 0 && (
-        <span class="rmctx-prereqs">
-          <span class="rmctx-prereqs-label">Builds on</span>
-          {prerequisites.map((p, i) => (
-            <>
-              {i > 0 && (
-                <span class="rmctx-sep" aria-hidden="true">
-                  ·
-                </span>
-              )}
-              <a class="rmctx-link" href={`${base}/posts/${p.walkthroughSlug}`}>
-                {p.title}
-              </a>
-            </>
-          ))}
-        </span>
-      )}
-    </aside>
-  )
-}
-
-{
-  entry && placement === "bottom" && (next || siblings.length > 0) && (
-    <aside class="rmctx-bottom" aria-label="Continue the roadmap">
-      <p class="rmctx-eyebrow">Continue the roadmap</p>
-      {next && (
-        <p class="rmctx-next">
-          <span class="rmctx-next-label">Next challenge</span>
-          <a
-            class="rmctx-next-link"
-            href={`${base}/posts/${next.walkthroughSlug}`}
-          >
-            {pad(next.number)} · {next.title}
-          </a>
-        </p>
-      )}
-      {siblings.length > 0 && (
-        <div class="rmctx-more">
-          <span class="rmctx-more-label">
-            More in{" "}
-            <a class="rmctx-link" href={`${base}/topics/${entry.chapterSlug}`}>
-              {entry.chapterTitle}
+{entry && placement === "top" && (
+  <aside class="rmctx-top" aria-label="Roadmap context">
+    <a class="rmctx-chapter" href={`${base}/topics/${entry.chapterSlug}`}>
+      Chapter {pad(entry.chapterIndex)} · {entry.chapterTitle}
+    </a>
+    <span class="rmctx-sep" aria-hidden="true">
+      ·
+    </span>
+    <a
+      class="rmctx-link"
+      href={`${base}/roadmap#challenge-${pad(entry.number)}`}
+    >
+      Challenge {pad(entry.number)} on the roadmap
+    </a>
+    <span class="rmctx-difficulty" data-difficulty={entry.difficulty}>
+      {DIFFICULTY_LABEL[entry.difficulty]}
+    </span>
+    {prerequisites.length > 0 && (
+      <span class="rmctx-prereqs">
+        <span class="rmctx-prereqs-label">Builds on</span>
+        {prerequisites.map((p, i) => (
+          <>
+            {i > 0 && (
+              <span class="rmctx-sep" aria-hidden="true">
+                ·
+              </span>
+            )}
+            <a class="rmctx-link" href={`${base}/posts/${p.walkthroughSlug}`}>
+              {p.title}
             </a>
-          </span>
-          <ul class="rmctx-more-list">
-            {siblings.map(s => (
-              <li>
-                <a
-                  class="rmctx-link"
-                  href={`${base}/posts/${s.walkthroughSlug}`}
-                >
-                  {s.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </aside>
-  )
-}
+          </>
+        ))}
+      </span>
+    )}
+  </aside>
+)}
+
+{entry && placement === "bottom" && (next || siblings.length > 0) && (
+  <aside class="rmctx-bottom" aria-label="Continue the roadmap">
+    <p class="rmctx-eyebrow">Continue the roadmap</p>
+    {next && (
+      <p class="rmctx-next">
+        <span class="rmctx-next-label">Next challenge</span>
+        <a
+          class="rmctx-next-link"
+          href={`${base}/posts/${next.walkthroughSlug}`}
+        >
+          {pad(next.number)} · {next.title}
+        </a>
+      </p>
+    )}
+    {siblings.length > 0 && (
+      <div class="rmctx-more">
+        <span class="rmctx-more-label">
+          More in{" "}
+          <a class="rmctx-link" href={`${base}/topics/${entry.chapterSlug}`}>
+            {entry.chapterTitle}
+          </a>
+        </span>
+        <ul class="rmctx-more-list">
+          {siblings.map(s => (
+            <li>
+              <a class="rmctx-link" href={`${base}/posts/${s.walkthroughSlug}`}>
+                {s.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </aside>
+)}
 
 <style>
   /* ─── Top context strip ─────────────────────────────────────── */

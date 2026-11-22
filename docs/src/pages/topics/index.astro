@@ -20,23 +20,21 @@ const description = `Browse OopsSec Store walkthroughs by vulnerability class: $
     pageDesc="Every walkthrough grouped by vulnerability class, following the roadmap chapters."
   >
     <ul class="topics-list">
-      {
-        chapters.map(chapter => (
-          <li class="topics-item">
-            <a href={`${base}/topics/${chapter.slug}`} class="topics-link">
-              <span class="topics-num">{pad(chapter.index)}</span>
-              <span class="topics-body">
-                <span class="topics-title">{chapter.title}</span>
-                <span class="topics-tagline">{chapter.tagline}</span>
-                <span class="topics-count">
-                  {chapter.walkthroughSlugs.length} walkthrough
-                  {chapter.walkthroughSlugs.length === 1 ? "" : "s"}
-                </span>
+      {chapters.map(chapter => (
+        <li class="topics-item">
+          <a href={`${base}/topics/${chapter.slug}`} class="topics-link">
+            <span class="topics-num">{pad(chapter.index)}</span>
+            <span class="topics-body">
+              <span class="topics-title">{chapter.title}</span>
+              <span class="topics-tagline">{chapter.tagline}</span>
+              <span class="topics-count">
+                {chapter.walkthroughSlugs.length} walkthrough
+                {chapter.walkthroughSlugs.length === 1 ? "" : "s"}
               </span>
-            </a>
-          </li>
-        ))
-      }
+            </span>
+          </a>
+        </li>
+      ))}
     </ul>
   </Main>
   <Footer />

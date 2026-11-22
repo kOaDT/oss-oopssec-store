@@ -30,57 +30,55 @@ const challenges = getWalkthroughChallenges(walkthroughSlug);
 const chained = challenges.length > 1;
 ---
 
-{
-  challenges.length > 0 && (
-    <aside class="ask-cta" aria-label="Discuss this challenge">
-      <span class="ask-cta__icon" aria-hidden="true">
-        <IconGitHub />
-      </span>
-      <div class="ask-cta__body">
-        <p class="ask-cta__text">
-          <span class="ask-cta__lead">Still not firing?</span>{" "}
-          {challenges.map((challenge, index) => (
-            <Fragment>
-              {index > 0 && " or "}
-              <a
-                class="ask-cta__link"
-                href={challengeDiscussionUrl("stuck", challenge)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Ask about {challenge.title}
-                <span class="sr-only"> (opens in a new tab)</span>
-              </a>
-            </Fragment>
-          ))}{" "}
-          — paste your actual payload and the response you get back.
-        </p>
-        <p class="ask-cta__text">
-          <span class="ask-cta__lead">Got the flag another way?</span>{" "}
-          {challenges.map((challenge, index) => (
-            <Fragment>
-              {index > 0 && " or "}
-              <a
-                class="ask-cta__link"
-                href={challengeDiscussionUrl("solve", challenge)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {/* Naming the challenge only matters when there are two to tell
+{challenges.length > 0 && (
+  <aside class="ask-cta" aria-label="Discuss this challenge">
+    <span class="ask-cta__icon" aria-hidden="true">
+      <IconGitHub />
+    </span>
+    <div class="ask-cta__body">
+      <p class="ask-cta__text">
+        <span class="ask-cta__lead">Still not firing?</span>{" "}
+        {challenges.map((challenge, index) => (
+          <Fragment>
+            {index > 0 && " or "}
+            <a
+              class="ask-cta__link"
+              href={challengeDiscussionUrl("stuck", challenge)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ask about {challenge.title}
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </Fragment>
+        ))}{" "}
+        — paste your actual payload and the response you get back.
+      </p>
+      <p class="ask-cta__text">
+        <span class="ask-cta__lead">Got the flag another way?</span>{" "}
+        {challenges.map((challenge, index) => (
+          <Fragment>
+            {index > 0 && " or "}
+            <a
+              class="ask-cta__link"
+              href={challengeDiscussionUrl("solve", challenge)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {/* Naming the challenge only matters when there are two to tell
                     apart; on the 34 single-challenge pages it just repeats the
                     title in the heading above. */}
-                {chained
-                  ? `Post your route for ${challenge.title}`
-                  : "Post your route"}
-                <span class="sr-only"> (opens in a new tab)</span>
-              </a>
-            </Fragment>
-          ))}
-        </p>
-      </div>
-    </aside>
-  )
-}
+              {chained
+                ? `Post your route for ${challenge.title}`
+                : "Post your route"}
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </Fragment>
+        ))}
+      </p>
+    </div>
+  </aside>
+)}
 
 <style>
   /* Same weight class as the Hall of Fame callout it sits next to: this is the
