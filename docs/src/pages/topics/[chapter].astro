@@ -42,17 +42,23 @@ const description = `${chapter.tagline} ${posts.length} OopsSec Store walkthroug
       <a
         href={`${base}/roadmap#chapter-${pad(chapter.index)}`}
         class="underline decoration-dashed underline-offset-4 hover:text-accent"
-        >roadmap</a
-      >. Work through each walkthrough below, or browse{" "}
+      >
+        roadmap
+      </a>
+      . Work through each walkthrough below, or browse{" "}
       <a
         href={`${base}/topics`}
         class="underline decoration-dashed underline-offset-4 hover:text-accent"
-        >every topic</a
-      >.
+      >
+        every topic
+      </a>
+      .
     </p>
 
     <ul>
-      {posts.map(post => <Card {...post} />)}
+      {posts.map(post => (
+        <Card {...post} />
+      ))}
     </ul>
 
     <div class="mt-8">

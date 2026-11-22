@@ -135,20 +135,18 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
     <aside class="track-toc" aria-label="Chapter navigation">
       <p class="track-toc-title">Chapters</p>
       <ol class="track-toc-list">
-        {
-          CURRICULUM.map((chapter, ci) => (
-            <li>
-              <a
-                href={`#${chapterAnchorId(ci + 1)}`}
-                class="track-toc-link"
-                data-chapter-link={pad(ci + 1)}
-              >
-                <span class="track-toc-num">{pad(ci + 1)}</span>
-                <span class="track-toc-text">{chapter.title}</span>
-              </a>
-            </li>
-          ))
-        }
+        {CURRICULUM.map((chapter, ci) => (
+          <li>
+            <a
+              href={`#${chapterAnchorId(ci + 1)}`}
+              class="track-toc-link"
+              data-chapter-link={pad(ci + 1)}
+            >
+              <span class="track-toc-num">{pad(ci + 1)}</span>
+              <span class="track-toc-text">{chapter.title}</span>
+            </a>
+          </li>
+        ))}
       </ol>
     </aside>
 
@@ -168,10 +166,11 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
         </div>
         <div class="track-stat">
           <div class="track-stat-value">
-            {CHALLENGES_BY_DIFFICULTY.EASY}<span class="track-stat-sep">/</span
-            >{CHALLENGES_BY_DIFFICULTY.MEDIUM}<span class="track-stat-sep"
-              >/</span
-            >{CHALLENGES_BY_DIFFICULTY.HARD}
+            {CHALLENGES_BY_DIFFICULTY.EASY}
+            <span class="track-stat-sep">/</span>
+            {CHALLENGES_BY_DIFFICULTY.MEDIUM}
+            <span class="track-stat-sep">/</span>
+            {CHALLENGES_BY_DIFFICULTY.HARD}
           </div>
           <div class="track-stat-label">Easy / Med / Hard</div>
         </div>
@@ -203,7 +202,10 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
       <div class="track-legend" aria-label="Difficulty legend">
         <span class="track-legend-label">Legend</span>
         <span class="track-legend-item">
-          <span class="challenge-dot" data-difficulty="EASY" aria-hidden="true"
+          <span
+            class="challenge-dot"
+            data-difficulty="EASY"
+            aria-hidden="true"
           ></span>
           Easy
         </span>
@@ -211,143 +213,143 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
           <span
             class="challenge-dot"
             data-difficulty="MEDIUM"
-            aria-hidden="true"></span>
+            aria-hidden="true"
+          ></span>
           Medium
         </span>
         <span class="track-legend-item">
-          <span class="challenge-dot" data-difficulty="HARD" aria-hidden="true"
+          <span
+            class="challenge-dot"
+            data-difficulty="HARD"
+            aria-hidden="true"
           ></span>
           Hard
         </span>
       </div>
 
       <div class="track-stage">
-        {
-          sections.map(section => (
-            <section
-              class:list={["track-section", `track-section--${section.side}`]}
-              id={chapterAnchorId(section.index)}
-              data-chapter-id={pad(section.index)}
-              style={`--section-h: ${section.sectionHeight}px;`}
+        {sections.map(section => (
+          <section
+            class:list={["track-section", `track-section--${section.side}`]}
+            id={chapterAnchorId(section.index)}
+            data-chapter-id={pad(section.index)}
+            style={`--section-h: ${section.sectionHeight}px;`}
+          >
+            <svg
+              class="track-section-svg"
+              viewBox={`0 0 100 ${section.sectionHeight}`}
+              preserveAspectRatio="none"
+              role="presentation"
+              aria-hidden="true"
             >
-              <svg
-                class="track-section-svg"
-                viewBox={`0 0 100 ${section.sectionHeight}`}
-                preserveAspectRatio="none"
-                role="presentation"
-                aria-hidden="true"
-              >
-                {section.challengeYs.map(cY => {
-                  const start =
-                    section.side === "right" ? CHAPTER_EDGE_R : CHAPTER_EDGE_L;
-                  const end =
-                    section.side === "right"
-                      ? CHALLENGE_EDGE_R
-                      : CHALLENGE_EDGE_L;
-                  const mid = (start + end) / 2;
-                  return (
-                    <path
-                      d={`M ${start} ${section.chapterCenterY} C ${mid} ${section.chapterCenterY}, ${mid} ${cY}, ${end} ${cY}`}
-                      class="track-curve"
-                    />
-                  );
-                })}
-              </svg>
+              {section.challengeYs.map(cY => {
+                const start =
+                  section.side === "right" ? CHAPTER_EDGE_R : CHAPTER_EDGE_L;
+                const end =
+                  section.side === "right"
+                    ? CHALLENGE_EDGE_R
+                    : CHALLENGE_EDGE_L;
+                const mid = (start + end) / 2;
+                return (
+                  <path
+                    d={`M ${start} ${section.chapterCenterY} C ${mid} ${section.chapterCenterY}, ${mid} ${cY}, ${end} ${cY}`}
+                    class="track-curve"
+                  />
+                );
+              })}
+            </svg>
 
-              <article class="chapter-card">
-                <p class="chapter-eyebrow">
-                  Chapter {pad(section.index)}{" "}
-                  <span class="chapter-eyebrow-sep">/</span>{" "}
-                  {pad(CURRICULUM.length)}
-                </p>
-                <h2 class="chapter-title">
-                  <a
-                    href={`${base}/topics/${section.topicSlug}`}
-                    class="chapter-link"
+            <article class="chapter-card">
+              <p class="chapter-eyebrow">
+                Chapter {pad(section.index)}{" "}
+                <span class="chapter-eyebrow-sep">/</span>{" "}
+                {pad(CURRICULUM.length)}
+              </p>
+              <h2 class="chapter-title">
+                <a
+                  href={`${base}/topics/${section.topicSlug}`}
+                  class="chapter-link"
+                >
+                  {section.chapter.title}
+                </a>
+              </h2>
+              <p class="chapter-tagline">{section.chapter.tagline}</p>
+            </article>
+
+            <ol class="challenges-group">
+              {section.chapter.challenges.map((challenge, i) => {
+                const number = section.startChallengeNumber + i;
+                const isLast = i === section.chapter.challenges.length - 1;
+                const needsPrereqsGap =
+                  !!challenge.prerequisites &&
+                  challenge.prerequisites.length > 0 &&
+                  !isLast;
+                return (
+                  <li
+                    class="challenge-item"
+                    id={challengeAnchorId(number)}
+                    data-prereqs-followed={needsPrereqsGap ? "true" : undefined}
                   >
-                    {section.chapter.title}
-                  </a>
-                </h2>
-                <p class="chapter-tagline">{section.chapter.tagline}</p>
-              </article>
-
-              <ol class="challenges-group">
-                {section.chapter.challenges.map((challenge, i) => {
-                  const number = section.startChallengeNumber + i;
-                  const isLast = i === section.chapter.challenges.length - 1;
-                  const needsPrereqsGap =
-                    !!challenge.prerequisites &&
-                    challenge.prerequisites.length > 0 &&
-                    !isLast;
-                  return (
-                    <li
-                      class="challenge-item"
-                      id={challengeAnchorId(number)}
-                      data-prereqs-followed={
-                        needsPrereqsGap ? "true" : undefined
-                      }
+                    <a
+                      href={`${base}/posts/${challenge.walkthroughSlug}`}
+                      class="challenge-card"
+                      aria-label={`Challenge ${pad(number)}: ${challenge.title} (${DIFFICULTY_LABEL[challenge.difficulty]})`}
                     >
-                      <a
-                        href={`${base}/posts/${challenge.walkthroughSlug}`}
-                        class="challenge-card"
-                        aria-label={`Challenge ${pad(number)}: ${challenge.title} (${DIFFICULTY_LABEL[challenge.difficulty]})`}
-                      >
-                        <div class="challenge-head">
-                          <span class="challenge-number">{pad(number)}</span>
+                      <div class="challenge-head">
+                        <span class="challenge-number">{pad(number)}</span>
+                        <span
+                          class="challenge-difficulty"
+                          data-difficulty={challenge.difficulty}
+                        >
                           <span
-                            class="challenge-difficulty"
+                            class="challenge-dot"
                             data-difficulty={challenge.difficulty}
+                            aria-hidden="true"
+                          />
+                          <span>{DIFFICULTY_CHIP[challenge.difficulty]}</span>
+                        </span>
+                      </div>
+                      <h3 class="challenge-title">{challenge.title}</h3>
+                    </a>
+                    {challenge.prerequisites &&
+                      challenge.prerequisites.length > 0 && (
+                        <div
+                          class="challenge-prereqs"
+                          aria-label={`Builds on challenges ${challenge.prerequisites.map(n => pad(n)).join(", ")}`}
+                        >
+                          <span
+                            class="challenge-prereqs-label"
+                            aria-hidden="true"
                           >
-                            <span
-                              class="challenge-dot"
-                              data-difficulty={challenge.difficulty}
-                              aria-hidden="true"
-                            />
-                            <span>{DIFFICULTY_CHIP[challenge.difficulty]}</span>
+                            Builds on
                           </span>
-                        </div>
-                        <h3 class="challenge-title">{challenge.title}</h3>
-                      </a>
-                      {challenge.prerequisites &&
-                        challenge.prerequisites.length > 0 && (
-                          <div
-                            class="challenge-prereqs"
-                            aria-label={`Builds on challenges ${challenge.prerequisites.map(n => pad(n)).join(", ")}`}
-                          >
-                            <span
-                              class="challenge-prereqs-label"
-                              aria-hidden="true"
-                            >
-                              Builds on
-                            </span>
-                            {challenge.prerequisites.map((n, idx) => (
-                              <>
-                                {idx > 0 && (
-                                  <span
-                                    class="challenge-prereqs-sep"
-                                    aria-hidden="true"
-                                  >
-                                    ·
-                                  </span>
-                                )}
-                                <a
-                                  href={`#${challengeAnchorId(n)}`}
-                                  class="challenge-prereqs-link"
-                                  aria-label={`Jump to challenge ${pad(n)}`}
+                          {challenge.prerequisites.map((n, idx) => (
+                            <>
+                              {idx > 0 && (
+                                <span
+                                  class="challenge-prereqs-sep"
+                                  aria-hidden="true"
                                 >
-                                  {pad(n)}
-                                </a>
-                              </>
-                            ))}
-                          </div>
-                        )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </section>
-          ))
-        }
+                                  ·
+                                </span>
+                              )}
+                              <a
+                                href={`#${challengeAnchorId(n)}`}
+                                class="challenge-prereqs-link"
+                                aria-label={`Jump to challenge ${pad(n)}`}
+                              >
+                                {pad(n)}
+                              </a>
+                            </>
+                          ))}
+                        </div>
+                      )}
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        ))}
 
         <section class="track-end">
           <article class="end-card">
@@ -364,12 +366,15 @@ const pageDesc = `${CURRICULUM.length} chapters covering the bug classes that sh
               <a href={HALL_OF_FAME_URL} class="track-inline-link">
                 Hall of Fame
               </a>
-              if you flagged everything. And if you know a vulnerability pattern that
-              belongs in here, open a{" "}
+              if you flagged everything. And if you know a vulnerability pattern
+              that belongs in here, open a{" "}
               <a
                 href="https://github.com/kOaDT/oss-oopssec-store"
-                class="track-inline-link">pull request</a
-              >. New challenges are always welcome.
+                class="track-inline-link"
+              >
+                pull request
+              </a>
+              . New challenges are always welcome.
             </p>
           </article>
         </section>
