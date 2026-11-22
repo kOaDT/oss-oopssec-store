@@ -46,14 +46,11 @@ const sortedPosts = getSortedPosts(posts);
 
       <p>
         An intentionally vulnerable e-commerce application for hands-on web
-        security training. Master real-world attack vectors through a realistic <i
-          >Capture The Flag</i
-        > platform. Hunt for flags, exploit vulnerabilities, and level up your security
-        skills.
+        security training. Master real-world attack vectors through a realistic{" "}
+        <i>Capture The Flag</i> platform. Hunt for flags, exploit
+        vulnerabilities, and level up your security skills.
       </p>
-      <div
-        class="app-prose mt-4 prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
-      >
+      <div class="app-prose mt-4 prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)">
         <Code
           code={`# With Node.js
 $ npx create-oss-store && cd oss-oopssec-store && npm start
@@ -71,7 +68,8 @@ $ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
           href="https://github.com/kOaDT/oss-oopssec-store?tab=readme-ov-file#oss---oopssec-store"
         >
           README
-        </LinkButton> for more info.
+        </LinkButton>{" "}
+        for more info.
       </p>
       {
         // only display if at least one social link is enabled
@@ -84,19 +82,17 @@ $ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store
       }
     </section>
 
-    {
-      sortedPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
-          <ul>
-            {sortedPosts.map(
-              (data, index) =>
-                index < SITE.postPerIndex && <Card variant="h3" {...data} />
-            )}
-          </ul>
-        </section>
-      )
-    }
+    {sortedPosts.length > 0 && (
+      <section id="recent-posts" class="pt-12 pb-6">
+        <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
+        <ul>
+          {sortedPosts.map(
+            (data, index) =>
+              index < SITE.postPerIndex && <Card variant="h3" {...data} />
+          )}
+        </ul>
+      </section>
+    )}
 
     <div class="my-8 text-center">
       <LinkButton href={`${base}/posts/`}>

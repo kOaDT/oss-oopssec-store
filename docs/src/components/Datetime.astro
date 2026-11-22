@@ -41,15 +41,15 @@ const date = datetime.format("D MMM, YYYY"); // e.g., '22 Mar, 2025'
       { "scale-90": size === "sm" },
     ]}
   />
-  {
-    isModified && (
-      <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
-        Updated:
-      </span>
-    )
-  }
+  {isModified && (
+    <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
+      Updated:
+    </span>
+  )}
   <time
     class:list={["text-sm", { "sm:text-base": size === "lg" }]}
-    datetime={datetime.toISOString()}>{date}</time
+    datetime={datetime.toISOString()}
   >
+    {date}
+  </time>
 </div>

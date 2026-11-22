@@ -63,82 +63,73 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store`;
           <th scope="col" role="columnheader">
             <span class="sr-only">Criterion</span>
           </th>
-          {
-            LABS.map(lab => (
-              <th
-                scope="col"
-                role="columnheader"
-                class:list={{ "is-oopssec": lab.key === "oopssec" }}
-              >
-                {lab.name}
-              </th>
-            ))
-          }
+          {LABS.map(lab => (
+            <th
+              scope="col"
+              role="columnheader"
+              class:list={{ "is-oopssec": lab.key === "oopssec" }}
+            >
+              {lab.name}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody role="rowgroup">
-        {
-          COMPARISON.map(row => (
-            <tr role="row">
-              <th scope="row" role="rowheader">
-                {row.criterion}
-              </th>
-              {LABS.map(lab => {
-                const { status, detail } = row.cells[lab.key];
-                return (
-                  <td
-                    role="cell"
-                    data-label={lab.name}
-                    class:list={{ "is-oopssec": lab.key === "oopssec" }}
-                  >
-                    <div class="cmp-cell">
-                      {status && (
-                        <span class="cmp-status" data-status={status}>
-                          <span aria-hidden="true">{STATUS_GLYPH[status]}</span>
-                          {STATUS_LABEL[status]}
-                        </span>
-                      )}
-                      {detail && (
-                        <span
-                          class:list={[
-                            "cmp-detail",
-                            { "is-secondary": status },
-                          ]}
-                        >
-                          {detail
-                            .split("`")
-                            .map((part, i) =>
-                              i % 2 === 1 ? <code>{part}</code> : part
-                            )}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                );
-              })}
-            </tr>
-          ))
-        }
+        {COMPARISON.map(row => (
+          <tr role="row">
+            <th scope="row" role="rowheader">
+              {row.criterion}
+            </th>
+            {LABS.map(lab => {
+              const { status, detail } = row.cells[lab.key];
+              return (
+                <td
+                  role="cell"
+                  data-label={lab.name}
+                  class:list={{ "is-oopssec": lab.key === "oopssec" }}
+                >
+                  <div class="cmp-cell">
+                    {status && (
+                      <span class="cmp-status" data-status={status}>
+                        <span aria-hidden="true">{STATUS_GLYPH[status]}</span>
+                        {STATUS_LABEL[status]}
+                      </span>
+                    )}
+                    {detail && (
+                      <span
+                        class:list={["cmp-detail", { "is-secondary": status }]}
+                      >
+                        {detail
+                          .split("`")
+                          .map((part, i) =>
+                            i % 2 === 1 ? <code>{part}</code> : part
+                          )}
+                      </span>
+                    )}
+                  </div>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
       </tbody>
     </table>
 
     <p class="cmp-note">
       Last verified {LAST_VERIFIED.month}, against {LAST_VERIFIED.against}.
       Sources:{" "}
-      {
-        LAST_VERIFIED.sources.flatMap((source, i) => [
-          i > 0 ? ", " : "",
-          <a href={source.url}>{source.label}</a>,
-        ])
-      }. Spotted an inaccuracy? <a
-        href="https://github.com/kOaDT/oss-oopssec-store/issues"
-        >Open an issue</a
-      >.
+      {LAST_VERIFIED.sources.flatMap((source, i) => [
+        i > 0 ? ", " : "",
+        <a href={source.url}>{source.label}</a>,
+      ])}
+      . Spotted an inaccuracy?{" "}
+      <a href="https://github.com/kOaDT/oss-oopssec-store/issues">
+        Open an issue
+      </a>
+      .
     </p>
 
-    <section
-      class="app-prose mt-12 max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
-    >
+    <section class="app-prose mt-12 max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)">
       <h2>When to pick which</h2>
 
       <h3>OWASP Juice Shop</h3>
@@ -167,11 +158,11 @@ docker run -p 127.0.0.1:3000:3000 leogra/oss-oopssec-store`;
         poisoning, a backdoored coding-agent rules file and an npm typosquat
         chain simulated end to end. Two challenges reproduce framework CVEs
         (CVE-2025-29927 in Next.js middleware, CVE-2025-55182 in React Server
-        Components), and the {TOTAL_CHALLENGES} challenges are laid out across the
-        {CURRICULUM.length} chapters of a
-        <a href={`${base}/roadmap`}>roadmap</a>, each with a walkthrough. The AI
-        challenges run on a local Ollama model by default, so they work offline
-        too.
+        Components), and the {TOTAL_CHALLENGES} challenges are laid out across
+        the
+        {CURRICULUM.length} chapters of a<a href={`${base}/roadmap`}>roadmap</a>
+        , each with a walkthrough. The AI challenges run on a local Ollama model
+        by default, so they work offline too.
       </p>
 
       <h2>Start the lab</h2>

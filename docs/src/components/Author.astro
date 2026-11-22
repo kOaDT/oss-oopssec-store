@@ -30,21 +30,19 @@ const textSize = size === "lg" ? "sm:text-base" : "";
     loading="lazy"
     decoding="async"
   />
-  {
-    authorGithubUrl ? (
-      <a
-        href={authorGithubUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        class:list={[
-          "text-sm opacity-80 hover:underline hover:opacity-100",
-          textSize,
-        ]}
-      >
-        {author}
-      </a>
-    ) : (
-      <span class:list={["text-sm opacity-80", textSize]}>{author}</span>
-    )
-  }
+  {authorGithubUrl ? (
+    <a
+      href={authorGithubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={[
+        "text-sm opacity-80 hover:underline hover:opacity-100",
+        textSize,
+      ]}
+    >
+      {author}
+    </a>
+  ) : (
+    <span class:list={["text-sm opacity-80", textSize]}>{author}</span>
+  )}
 </div>

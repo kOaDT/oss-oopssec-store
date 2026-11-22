@@ -50,36 +50,35 @@ const breadcrumbSchema = {
   is:inline
   set:html={JSON.stringify(breadcrumbSchema)}
 />
-
 <nav class="app-layout mt-8 mb-1" aria-label="breadcrumb">
-  <ul
-    class="font-light [&>li]:inline [&>li:not(:last-child)>a]:hover:opacity-100"
-  >
+  <ul class="font-light [&>li]:inline [&>li:not(:last-child)>a]:hover:opacity-100">
     <li>
-      <a href={`${base}/`} class="opacity-80">Home</a>
-      <span aria-hidden="true" class="opacity-80">&raquo;</span>
+      <a href={`${base}/`} class="opacity-80">
+        Home
+      </a>
+      <span aria-hidden="true" class="opacity-80">
+        &raquo;
+      </span>
     </li>
-    {
-      breadcrumbList.map((breadcrumb, index) =>
-        index + 1 === breadcrumbList.length ? (
-          <li>
-            <span
-              class:list={["capitalize opacity-75", { lowercase: index > 0 }]}
-              aria-current="page"
-            >
-              {/* make the last part lowercase in Home > Topics > some-topic */}
-              {decodeURIComponent(breadcrumb)}
-            </span>
-          </li>
-        ) : (
-          <li>
-            <a href={`${base}/${breadcrumb}/`} class="capitalize opacity-70">
-              {breadcrumb}
-            </a>
-            <span aria-hidden="true">&raquo;</span>
-          </li>
-        )
+    {breadcrumbList.map((breadcrumb, index) =>
+      index + 1 === breadcrumbList.length ? (
+        <li>
+          <span
+            class:list={["capitalize opacity-75", { lowercase: index > 0 }]}
+            aria-current="page"
+          >
+            {/* make the last part lowercase in Home > Topics > some-topic */}
+            {decodeURIComponent(breadcrumb)}
+          </span>
+        </li>
+      ) : (
+        <li>
+          <a href={`${base}/${breadcrumb}/`} class="capitalize opacity-70">
+            {breadcrumb}
+          </a>
+          <span aria-hidden="true">&raquo;</span>
+        </li>
       )
-    }
+    )}
   </ul>
 </nav>
