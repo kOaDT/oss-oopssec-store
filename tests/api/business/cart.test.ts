@@ -2,9 +2,14 @@ import {
   apiRequest,
   loginOrFail,
   authHeaders,
+  extractAuthTokenFromHeaders,
   TEST_USERS,
   getFirstProductId,
 } from "../../helpers/api";
+import {
+  MAX_CART_ITEM_QUANTITY,
+  MAX_CART_ITEM_QUANTITY_MESSAGE,
+} from "@/lib/cart";
 
 interface CartResponse {
   cartItems: {
@@ -246,6 +251,85 @@ describe("Cart (Business Logic)", () => {
       });
 
       expect(status).toBe(404);
+    });
+  });
+
+  describe("quantity limit", () => {
+    let token: string;
+
+    const add = (quantity: number) =>
+      apiRequest<{ error?: string }>("/api/cart/add", {
+        method: "POST",
+        headers: authHeaders(token),
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+    const findItem = async () => {
+      const { status, data } = await apiRequest<CartResponse>("/api/cart", {
+        headers: authHeaders(token),
+      });
+      expect(status).toBe(200);
+      return data.cartItems.find((i) => i.productId === productId);
+    };
+
+    beforeEach(async () => {
+      const { headers } = await apiRequest("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({
+          email: `cart-limit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`,
+          password: "cart-limit-password",
+        }),
+      });
+      const signupToken = extractAuthTokenFromHeaders(headers);
+      if (!signupToken) throw new Error("Signup returned no authToken");
+      token = signupToken;
+    });
+
+    it("rejects a single add above the limit", async () => {
+      const { status, data } = await add(MAX_CART_ITEM_QUANTITY + 1);
+
+      expect(status).toBe(400);
+      expect(data.error).toBe(MAX_CART_ITEM_QUANTITY_MESSAGE);
+      expect(await findItem()).toBeUndefined();
+    });
+
+    it("rejects an add that would push an existing item past the limit", async () => {
+      expect((await add(MAX_CART_ITEM_QUANTITY)).status).toBe(200);
+
+      const { status, data } = await add(1);
+
+      expect(status).toBe(400);
+      expect(data.error).toBe(MAX_CART_ITEM_QUANTITY_MESSAGE);
+      expect((await findItem())?.quantity).toBe(MAX_CART_ITEM_QUANTITY);
+    });
+
+    it.each([MAX_CART_ITEM_QUANTITY + 1, 2147483648])(
+      "rejects PATCH to %i and keeps the cart readable",
+      async (quantity) => {
+        await add(1);
+        const item = await findItem();
+
+        const { status } = await apiRequest(`/api/cart/items/${item!.id}`, {
+          method: "PATCH",
+          headers: authHeaders(token),
+          body: JSON.stringify({ quantity }),
+        });
+
+        expect(status).toBe(400);
+        expect((await findItem())?.quantity).toBe(1);
+      }
+    );
+
+    it("applies concurrent adds atomically without crossing the limit", async () => {
+      await add(MAX_CART_ITEM_QUANTITY - 4);
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => add(1))
+      );
+
+      expect(results.filter((r) => r.status === 200)).toHaveLength(4);
+      expect(results.filter((r) => r.status === 400)).toHaveLength(6);
+      expect((await findItem())?.quantity).toBe(MAX_CART_ITEM_QUANTITY);
     });
   });
 });

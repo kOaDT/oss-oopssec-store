@@ -4,6 +4,10 @@ import { withAuth } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 import { parseBody } from "@/lib/validation";
 import { addCartItemBodySchema } from "@/lib/validation/schemas/cart";
+import {
+  MAX_CART_ITEM_QUANTITY,
+  MAX_CART_ITEM_QUANTITY_MESSAGE,
+} from "@/lib/cart";
 
 export const POST = withAuth(async (request: NextRequest, _context, user) => {
   try {
@@ -38,12 +42,21 @@ export const POST = withAuth(async (request: NextRequest, _context, user) => {
     );
 
     if (existingCartItem) {
-      await prisma.cartItem.update({
-        where: { id: existingCartItem.id },
-        data: {
-          quantity: existingCartItem.quantity + quantity,
+      // One conditional UPDATE: concurrent adds can neither lose an increment nor cross the limit.
+      const { count } = await prisma.cartItem.updateMany({
+        where: {
+          id: existingCartItem.id,
+          quantity: { lte: MAX_CART_ITEM_QUANTITY - quantity },
         },
+        data: { quantity: { increment: quantity } },
       });
+
+      if (count === 0) {
+        return NextResponse.json(
+          { error: MAX_CART_ITEM_QUANTITY_MESSAGE },
+          { status: 400 }
+        );
+      }
     } else {
       await prisma.cartItem.create({
         data: {
