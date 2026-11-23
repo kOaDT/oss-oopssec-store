@@ -1,0 +1,18 @@
+# Trecho do log do servidor Next.js (dev) durante a sessao
+# Endpoint POST /api/support — status por requisicao
+# (os dois 400 correspondem ao cenario de campo obrigatorio ausente;
+#  os 200 incluem e-mail invalido, campos vazios, SSRF externo/interno,
+#  esquema file:// e payload HTML — todos aceitos pelo endpoint)
+
+ ○ Compiling /api/support ...
+ ✓ Compiled /api/support in 576ms
+ POST /api/support 200 in 655ms   # fluxo feliz
+ POST /api/support 200 in  88ms   # e-mail invalido aceito
+ POST /api/support 200 in  72ms   # campos vazios aceitos
+ POST /api/support 400 in  83ms   # description ausente -> 400 (unico caso validado)
+ POST /api/support 400 in 102ms
+ POST /api/support 200 in 474ms   # SSRF externo (example.com)
+ POST /api/support 200 in 976ms   # SSRF interno (/internal)
+ POST /api/support 200 in  96ms   # esquema file:// (conteudo nulo, erro tratado)
+ POST /api/support 200 in  87ms   # data: text/html (sink recebe HTML cru)
+ POST /api/support 200 in 185ms   # description com 50.000 caracteres aceita

@@ -181,7 +181,13 @@ export default function CartClient() {
                           <div className="flex items-center overflow-hidden rounded-lg border-2 border-slate-200 dark:border-slate-700">
                             <button
                               onClick={() =>
-                                handleUpdateQuantity(item.id, item.quantity - 1)
+                                handleUpdateQuantity(
+                                  item.id,
+                                  Math.min(
+                                    item.quantity - 1,
+                                    MAX_CART_ITEM_QUANTITY
+                                  )
+                                )
                               }
                               disabled={
                                 isUpdating === item.id || item.quantity <= 1
