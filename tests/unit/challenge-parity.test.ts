@@ -71,6 +71,62 @@ function tableRows(markdown: string, marker: string): string[][] {
   return rows;
 }
 
+interface CountTarget {
+  label: string;
+  expected: number;
+}
+
+interface CountRule {
+  pattern: RegExp;
+  targets: CountTarget[];
+  minMatches?: number;
+}
+
+/** 1-based line number of character offset `index` within `text`. */
+function lineAt(text: string, index: number): number {
+  return text.slice(0, index).split("\n").length;
+}
+
+/**
+ * Checks every match of each `CountRule` in `content` and returns formatted
+ * `<file>:<line>: ...` messages for missing patterns or mismatched counts.
+ */
+function findCountMismatches(
+  file: string,
+  content: string,
+  rules: CountRule[]
+): string[] {
+  const mismatches: string[] = [];
+
+  for (const { pattern, targets, minMatches = 1 } of rules) {
+    const regexFlags = pattern.flags.includes("g")
+      ? pattern.flags
+      : `${pattern.flags}g`;
+    const globalPattern = new RegExp(pattern.source, regexFlags);
+    const matches = [...content.matchAll(globalPattern)];
+
+    if (matches.length < minMatches) {
+      mismatches.push(
+        `${file}: expected >= ${minMatches} match(es) for /${pattern.source}/, found ${matches.length}`
+      );
+    }
+
+    for (const match of matches) {
+      const line = lineAt(content, match.index);
+      targets.forEach(({ label, expected }, index) => {
+        const found = Number(match[index + 1]);
+        if (found !== expected) {
+          mismatches.push(
+            `${file}:${line}: expected ${expected} ${label}, found ${found}`
+          );
+        }
+      });
+    }
+  }
+
+  return mismatches;
+}
+
 describe("prisma/flags.ts", () => {
   it("uses the OSS{...} format with unique values and kebab-case slugs", () => {
     for (const { flag, slug } of flags) {
@@ -386,15 +442,32 @@ describe("README.md", () => {
   const readme = read("README.md");
 
   it("advertises the current challenge and chapter counts", () => {
-    const feature = readme.match(/(\d+) challenges across (\d+) chapters/);
-    expect(feature).not.toBeNull();
-    expect(Number(feature![1])).toBe(flags.length);
-    expect(Number(feature![2])).toBe(CURRICULUM.length);
+    const mismatches = findCountMismatches("README.md", readme, [
+      {
+        pattern: /(\d+) challenges across <b>/g,
+        targets: [{ label: "challenges", expected: flags.length }],
+      },
+      {
+        pattern: /Challenge roadmap across (\d+) chapters/g,
+        targets: [{ label: "chapters", expected: CURRICULUM.length }],
+      },
+      {
+        pattern: /(\d+) challenges across (\d+) chapters/g,
+        targets: [
+          { label: "challenges", expected: flags.length },
+          { label: "chapters", expected: CURRICULUM.length },
+        ],
+      },
+      {
+        pattern: /(\d+) chapters, (\d+) flags/g,
+        targets: [
+          { label: "chapters", expected: CURRICULUM.length },
+          { label: "flags", expected: flags.length },
+        ],
+      },
+    ]);
 
-    const comparison = readme.match(/(\d+) chapters, (\d+) flags/);
-    expect(comparison).not.toBeNull();
-    expect(Number(comparison![1])).toBe(CURRICULUM.length);
-    expect(Number(comparison![2])).toBe(flags.length);
+    expect(mismatches).toEqual([]);
   });
 
   it("carries the comparison table of the docs site, cell for cell", () => {
@@ -429,13 +502,19 @@ describe("EDUCATORS.md", () => {
   const educators = read("EDUCATORS.md");
 
   it("advertises the current challenge and chapter counts", () => {
-    const intro = educators.match(/all (\d+) challenges/);
-    expect(intro).not.toBeNull();
-    expect(Number(intro![1])).toBe(flags.length);
+    const mismatches = findCountMismatches("EDUCATORS.md", educators, [
+      {
+        pattern: /all (\d+) challenges/g,
+        targets: [{ label: "challenges", expected: flags.length }],
+        minMatches: 2,
+      },
+      {
+        pattern: /grouped into (\d+) thematic chapters/g,
+        targets: [{ label: "chapters", expected: CURRICULUM.length }],
+      },
+    ]);
 
-    const chapters = educators.match(/grouped into (\d+) thematic chapters/);
-    expect(chapters).not.toBeNull();
-    expect(Number(chapters![1])).toBe(CURRICULUM.length);
+    expect(mismatches).toEqual([]);
   });
 
   it("keeps the challenge catalog in sync with the roadmap", () => {
