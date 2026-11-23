@@ -1,3 +1,15 @@
+const clearCart = () =>
+  cy.request("GET", "/api/cart").then((response) => {
+    const items = response.body.cartItems || [];
+    items.forEach(
+      (item: { id: string }) =>
+        void cy.request({
+          method: "DELETE",
+          url: `/api/cart/items/${item.id}`,
+        })
+    );
+  });
+
 describe("Cart (E2E)", () => {
   beforeEach(() => {
     cy.loginAsAlice();
@@ -34,16 +46,7 @@ describe("Cart (E2E)", () => {
   });
 
   it("updates cart item quantity with +/- buttons", () => {
-    cy.request("GET", "/api/cart").then((cartResponse) => {
-      const items = cartResponse.body.cartItems || [];
-      items.forEach(
-        (item: { id: string }) =>
-          void cy.request({
-            method: "DELETE",
-            url: `/api/cart/items/${item.id}`,
-          })
-      );
-    });
+    clearCart();
 
     cy.request("GET", "/api/products").then((response) => {
       const product = response.body[0];
@@ -89,21 +92,37 @@ describe("Cart (E2E)", () => {
   });
 
   it("shows empty cart message when no items", () => {
-    cy.request("GET", "/api/cart").then((response) => {
-      const items = response.body.cartItems || [];
-      items.forEach(
-        (item: { id: string }) =>
-          void cy.request({
-            method: "DELETE",
-            url: `/api/cart/items/${item.id}`,
-          })
-      );
-    });
+    clearCart();
 
     cy.visit("/cart");
 
     cy.contains("Your cart is empty").should("be.visible");
     cy.contains("Continue Shopping").should("be.visible");
+  });
+
+  describe("quantity limit", () => {
+    afterEach(clearCart);
+
+    it("disables the increase button at the limit", () => {
+      clearCart();
+
+      cy.request("GET", "/api/products").then((response) => {
+        const product = response.body[0];
+
+        cy.request({
+          method: "POST",
+          url: "/api/cart/add",
+          body: { productId: product.id, quantity: 99 },
+        });
+
+        cy.visit("/cart");
+        cy.contains(product.name).should("be.visible");
+
+        cy.get('button[aria-label="Increase quantity"]')
+          .first()
+          .should("be.disabled");
+      });
+    });
   });
 
   it("redirects to login when not authenticated", () => {

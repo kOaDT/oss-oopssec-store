@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { getStoredUser } from "@/lib/client-auth";
 import type { CartData } from "@/lib/types";
+import { MAX_CART_ITEM_QUANTITY } from "@/lib/cart";
 
 export default function CartClient() {
   const [cartData, setCartData] = useState<CartData | null>(null);
@@ -180,7 +181,13 @@ export default function CartClient() {
                           <div className="flex items-center overflow-hidden rounded-lg border-2 border-slate-200 dark:border-slate-700">
                             <button
                               onClick={() =>
-                                handleUpdateQuantity(item.id, item.quantity - 1)
+                                handleUpdateQuantity(
+                                  item.id,
+                                  Math.min(
+                                    item.quantity - 1,
+                                    MAX_CART_ITEM_QUANTITY
+                                  )
+                                )
                               }
                               disabled={
                                 isUpdating === item.id || item.quantity <= 1
@@ -197,7 +204,10 @@ export default function CartClient() {
                               onClick={() =>
                                 handleUpdateQuantity(item.id, item.quantity + 1)
                               }
-                              disabled={isUpdating === item.id}
+                              disabled={
+                                isUpdating === item.id ||
+                                item.quantity >= MAX_CART_ITEM_QUANTITY
+                              }
                               className="cursor-pointer bg-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
                               aria-label="Increase quantity"
                             >

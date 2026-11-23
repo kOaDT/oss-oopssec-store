@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiError } from "@/lib/api";
 import type { Review, ProductDetailClientProps } from "@/lib/types";
+import { MAX_CART_ITEM_QUANTITY } from "@/lib/cart";
 import AddToWishlistButton from "@/app/components/AddToWishlistButton";
 
 export default function ProductDetailClient({
@@ -22,7 +23,6 @@ export default function ProductDetailClient({
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
   const reviewRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
-  const maxQuantity = 99;
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -99,14 +99,14 @@ export default function ProductDetailClient({
   };
 
   const handleIncrement = () => {
-    if (quantity < maxQuantity) {
+    if (quantity < MAX_CART_ITEM_QUANTITY) {
       setQuantity(quantity + 1);
     }
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= 1 && value <= maxQuantity) {
+    if (!isNaN(value) && value >= 1 && value <= MAX_CART_ITEM_QUANTITY) {
       setQuantity(value);
     }
   };
@@ -114,11 +114,6 @@ export default function ProductDetailClient({
   const handleAddToCart = async () => {
     if (!user) {
       router.push("/login");
-      return;
-    }
-
-    if (quantity > maxQuantity) {
-      alert(`Maximum order limit is ${maxQuantity} per customer`);
       return;
     }
 
@@ -245,7 +240,7 @@ export default function ProductDetailClient({
               >
                 Quantity{" "}
                 <span className="font-normal text-slate-500 dark:text-slate-400">
-                  ({maxQuantity} available)
+                  ({MAX_CART_ITEM_QUANTITY} available)
                 </span>
               </label>
               <div className="flex items-center gap-3">
@@ -262,7 +257,7 @@ export default function ProductDetailClient({
                     type="number"
                     value={quantity}
                     min={1}
-                    max={maxQuantity}
+                    max={MAX_CART_ITEM_QUANTITY}
                     onChange={handleQuantityChange}
                     className="w-20 border-x-2 border-slate-200 p-2 text-center font-semibold outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                     aria-label="Quantity"
@@ -287,7 +282,7 @@ export default function ProductDetailClient({
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 Max order limit:{" "}
                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {maxQuantity} per customer
+                  {MAX_CART_ITEM_QUANTITY} per customer
                 </span>
               </p>
             </div>
