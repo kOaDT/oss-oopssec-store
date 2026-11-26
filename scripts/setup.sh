@@ -10,6 +10,17 @@ echo " \____/___//___/     \____/ \___// .__/___/___/  \__/ \__//___/  \__/ \___
 echo "                                /_/                                                   "
 echo ""
 
+# npm only warns about engines.node, so refuse an older Node here, before
+# anything is installed or the existing database is removed.
+REQUIRED_NODE_MAJOR=$(sed -n 's/.*"node": *">=\([0-9]*\).*/\1/p' package.json | head -n 1)
+NODE_VERSION=$(node --version)
+NODE_MAJOR=$(echo "$NODE_VERSION" | sed 's/^v\([0-9]*\).*/\1/')
+if [ "$NODE_MAJOR" -lt "$REQUIRED_NODE_MAJOR" ]; then
+  echo "OopsSec Store needs Node.js ${REQUIRED_NODE_MAJOR} or newer, but this is ${NODE_VERSION}." >&2
+  echo "Install it with \"nvm install ${REQUIRED_NODE_MAJOR} && nvm use ${REQUIRED_NODE_MAJOR}\", or from https://nodejs.org, then run npm run setup again." >&2
+  exit 1
+fi
+
 echo "Starting project setup..."
 
 if [ ! -f .env ]; then
