@@ -2,7 +2,9 @@
 // /api/flags/progress returns while the tab stays open (another client solving
 // a flag, a database reset) and expect the checker to follow the server.
 
-const progressBody = (found: number, total: number) => ({
+const TOTAL_FLAGS = 38;
+
+const progressBody = (found: number) => ({
   foundFlags: Array.from({ length: found }, (_, i) => ({
     slug: `stub-flag-${i}`,
     category: "OTHER",
@@ -14,16 +16,16 @@ const progressBody = (found: number, total: number) => ({
     foundAt: new Date(0).toISOString(),
   })),
   initializedAt: null,
-  totalFlags: total,
+  totalFlags: TOTAL_FLAGS,
   statsByCategory: {},
   statsByDifficulty: {},
 });
 
 describe("Flag checker progress (E2E)", () => {
-  let progress = progressBody(0, 0);
+  let progress = progressBody(0);
 
-  const visitWithProgress = (found: number, total: number) => {
-    progress = progressBody(found, total);
+  const visitWithProgress = (found: number) => {
+    progress = progressBody(found);
     cy.intercept("GET", "/api/flags/progress", (req) => req.reply(progress)).as(
       "progress"
     );
@@ -35,67 +37,92 @@ describe("Flag checker progress (E2E)", () => {
     cy.wait("@progress");
   };
 
-  const serverProgressBecomes = (found: number, total: number) =>
+  const serverProgressBecomes = (found: number) =>
     cy.then(() => {
-      progress = progressBody(found, total);
+      progress = progressBody(found);
     });
 
   const openChecker = () => cy.get('button[aria-label="Check flag"]').click();
   const closeChecker = () => cy.get('button[aria-label="Close"]').click();
 
+  const submitFlag = (flag: string) => {
+    cy.get("input#flag-input").type(flag, { parseSpecialCharSequences: false });
+    cy.contains("button", "Verify").click();
+  };
+
+  const counter = (found: number) => `${found}/${TOTAL_FLAGS} flags found`;
+
   it("picks up a flag solved from another client when reopened", () => {
-    visitWithProgress(9, 37);
+    visitWithProgress(9);
     openChecker();
-    cy.contains("9/37 flags found").should("be.visible");
+    cy.contains(counter(9)).should("be.visible");
     closeChecker();
 
-    serverProgressBecomes(10, 37);
+    serverProgressBecomes(10);
     openChecker();
-    cy.contains("10/37 flags found").should("be.visible");
+    cy.contains(counter(10)).should("be.visible");
   });
 
   it("refreshes the counter after an invalid submission", () => {
-    visitWithProgress(9, 37);
+    visitWithProgress(9);
     openChecker();
-    cy.contains("9/37 flags found").should("be.visible");
+    cy.contains(counter(9)).should("be.visible");
 
-    serverProgressBecomes(10, 37);
-    cy.get("input#flag-input").type("OSS{not_a_real_flag}", {
-      parseSpecialCharSequences: false,
-    });
-    cy.contains("button", "Verify").click();
+    serverProgressBecomes(10);
+    submitFlag("OSS{not_a_real_flag}");
     cy.contains("Invalid flag. Try again!").should("be.visible");
-    cy.contains("10/37 flags found").should("be.visible");
+    cy.contains(counter(10)).should("be.visible");
   });
 
-  it("refreshes the counter on client-side navigation", () => {
-    visitWithProgress(9, 37);
-
-    serverProgressBecomes(10, 37);
-    cy.intercept("GET", "/api/flags/progress", (req) => req.reply(progress)).as(
-      "navigationProgress"
-    );
-    cy.contains("header a:visible", "About").click();
-    cy.location("pathname").should("eq", "/about");
-    cy.wait("@navigationProgress");
-
-    // Opening the checker must not be what brings the counter up to date.
-    cy.intercept("GET", "/api/flags/progress", { forceNetworkError: true });
+  it("ignores an older progress response that arrives last", () => {
+    visitWithProgress(9);
+    cy.intercept(
+      { method: "GET", url: "/api/flags/progress", times: 1 },
+      (req) => req.reply({ body: progressBody(9), delay: 1500 })
+    ).as("slowProgress");
     openChecker();
-    cy.contains("10/37 flags found").should("be.visible");
+
+    serverProgressBecomes(10);
+    submitFlag("OSS{not_a_real_flag}");
+    cy.contains(counter(10)).should("be.visible");
+
+    cy.wait("@slowProgress");
+    // Nothing on screen marks the late response being handled, so give it a
+    // moment to land before checking it was discarded.
+    cy.wait(300);
+    cy.contains(counter(10)).should("be.visible");
+  });
+
+  it("confirms a new flag without a count when progress cannot be read", () => {
+    visitWithProgress(9);
+    openChecker();
+    cy.contains(counter(9)).should("be.visible");
+
+    cy.intercept("POST", "/api/flags/verify", {
+      valid: true,
+      alreadyFound: false,
+      slug: "stub-flag-new",
+    });
+    cy.intercept("GET", "/api/flags/progress", {
+      statusCode: 500,
+      body: { error: "Failed to fetch progress" },
+    });
+    submitFlag("OSS{stubbed_valid_flag}");
+    cy.contains("Congrats! Flag found!").should("be.visible");
+    cy.contains(counter(9)).should("be.visible");
   });
 
   it("allows submitting again after the database is reset", () => {
-    visitWithProgress(38, 38);
+    visitWithProgress(TOTAL_FLAGS);
     openChecker();
     cy.contains("h2", "All Flags Found").should("be.visible");
     cy.get("input#flag-input").should("not.exist");
     closeChecker();
 
-    serverProgressBecomes(0, 38);
+    serverProgressBecomes(0);
     openChecker();
     cy.contains("h2", "Verify Flag").should("be.visible");
-    cy.contains("0/38 flags found").should("be.visible");
+    cy.contains(counter(0)).should("be.visible");
     cy.get("input#flag-input").should("be.visible");
   });
 });

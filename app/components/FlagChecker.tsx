@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import confetti from "canvas-confetti";
 import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
 import { GITHUB_REPO } from "@/lib/config";
@@ -27,7 +26,6 @@ interface Progress {
 export default function FlagChecker({
   totalFlags: initialTotalFlags,
 }: FlagCheckerProps) {
-  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [flagInput, setFlagInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -39,11 +37,15 @@ export default function FlagChecker({
   const [supportBannerSlug, setSupportBannerSlug] = useState<string | null>(
     null
   );
+  const latestProgressRequest = useRef(0);
 
   // The checker lives in the root layout and survives client navigations, so
-  // progress is re-read from the server instead of being tracked locally:
+  // progress is re-read from the server on open and after each submission:
   // flags can be solved from another client and the database can be reset.
+  // Only the latest request writes state, so a late, older response cannot
+  // roll the counter back.
   const fetchProgress = useCallback(async (): Promise<Progress | null> => {
+    const requestId = ++latestProgressRequest.current;
     try {
       const response = await fetch("/api/flags/progress", {
         cache: "no-store",
@@ -54,8 +56,10 @@ export default function FlagChecker({
         found: data.foundFlags.map((f) => f.slug),
         total: data.totalFlags,
       };
-      setFoundFlags(progress.found);
-      setTotalFlags(progress.total);
+      if (requestId === latestProgressRequest.current) {
+        setFoundFlags(progress.found);
+        setTotalFlags(progress.total);
+      }
       return progress;
     } catch (error) {
       console.error("Error fetching progress:", error);
@@ -65,19 +69,6 @@ export default function FlagChecker({
 
   useEffect(() => {
     fetchProgress();
-  }, [fetchProgress, pathname]);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") fetchProgress();
-    };
-
-    window.addEventListener("focus", fetchProgress);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      window.removeEventListener("focus", fetchProgress);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, [fetchProgress]);
 
   const openChecker = useCallback(() => {
@@ -151,7 +142,7 @@ export default function FlagChecker({
     });
   };
 
-  const allFlagsFound = totalFlags > 0 && foundFlags.length >= totalFlags;
+  const allFlagsFound = foundFlags.length === totalFlags && totalFlags > 0;
 
   const handleVerify = async () => {
     if (!flagInput.trim()) {
@@ -181,22 +172,17 @@ export default function FlagChecker({
         return;
       }
 
-      const serverProgress = await fetchProgress();
+      // Only a newly found flag waits for the refreshed count, so the modal is
+      // not held open by this request after any other submission.
+      const progressRequest = fetchProgress();
 
       if (data.valid) {
         if (data.alreadyFound) {
           setMessage("Flag already found!");
         } else {
-          const { found: newFoundFlags, total } = serverProgress ?? {
-            found: [
-              ...foundFlags.filter((slug) => slug !== data.slug),
-              data.slug,
-            ],
-            total: totalFlags,
-          };
-          if (!serverProgress) setFoundFlags(newFoundFlags);
+          const progress = await progressRequest;
 
-          if (newFoundFlags.length >= total) {
+          if (progress && progress.found.length === progress.total) {
             triggerVictoryCelebration();
             setMessage("Congratulations! You found all flags!");
             setTimeout(() => {
@@ -205,7 +191,9 @@ export default function FlagChecker({
           } else {
             triggerConfetti();
             setMessage(
-              `Congrats! ${newFoundFlags.length}/${total} flags already found`
+              progress
+                ? `Congrats! ${progress.found.length}/${progress.total} flags already found`
+                : "Congrats! Flag found!"
             );
             setTimeout(() => {
               setMessage(null);
