@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import confetti from "canvas-confetti";
 import SupportBanner, { shouldShowSupportBanner } from "./SupportBanner";
@@ -13,30 +13,66 @@ interface FlagCheckerProps {
   totalFlags: number;
 }
 
-export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
+interface ProgressResponse {
+  foundFlags: { slug: string }[];
+  totalFlags: number;
+}
+
+interface Progress {
+  found: string[];
+  total: number;
+}
+
+export default function FlagChecker({
+  totalFlags: initialTotalFlags,
+}: FlagCheckerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [flagInput, setFlagInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [foundFlags, setFoundFlags] = useState<string[]>([]);
+  const [totalFlags, setTotalFlags] = useState(initialTotalFlags);
   const [isInitialAnimation, setIsInitialAnimation] = useState(true);
   const [highlightVerify, setHighlightVerify] = useState(false);
   const [supportBannerSlug, setSupportBannerSlug] = useState<string | null>(
     null
   );
-  const fetchProgress = useCallback(async () => {
+  const latestProgressRequest = useRef(0);
+
+  // The checker lives in the root layout and survives client navigations, so
+  // progress is re-read from the server on open and after each submission:
+  // flags can be solved from another client and the database can be reset.
+  // Only the latest request writes state, so a late, older response cannot
+  // roll the counter back.
+  const fetchProgress = useCallback(async (): Promise<Progress | null> => {
+    const requestId = ++latestProgressRequest.current;
     try {
-      const response = await fetch("/api/flags/progress");
-      if (response.ok) {
-        const data = await response.json();
-        setFoundFlags(data.foundFlags.map((f: { slug: string }) => f.slug));
+      const response = await fetch("/api/flags/progress", {
+        cache: "no-store",
+      });
+      if (!response.ok) return null;
+      const data: ProgressResponse = await response.json();
+      const progress = {
+        found: data.foundFlags.map((f) => f.slug),
+        total: data.totalFlags,
+      };
+      if (requestId === latestProgressRequest.current) {
+        setFoundFlags(progress.found);
+        setTotalFlags(progress.total);
       }
+      return progress;
     } catch (error) {
       console.error("Error fetching progress:", error);
+      return null;
     }
   }, []);
 
   useEffect(() => {
+    fetchProgress();
+  }, [fetchProgress]);
+
+  const openChecker = useCallback(() => {
+    setIsOpen(true);
     fetchProgress();
   }, [fetchProgress]);
 
@@ -55,7 +91,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
       const detail = (event as CustomEvent<{ prefill?: string }>).detail;
       setIsInitialAnimation(false);
       setMessage(null);
-      setIsOpen(true);
+      openChecker();
       if (detail?.prefill) {
         setFlagInput(detail.prefill);
         setHighlightVerify(true);
@@ -65,7 +101,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
     window.addEventListener("oss:open-flag-checker", handleOpenRequest);
     return () =>
       window.removeEventListener("oss:open-flag-checker", handleOpenRequest);
-  }, []);
+  }, [openChecker]);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -136,14 +172,17 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
         return;
       }
 
+      // Only a newly found flag waits for the refreshed count, so the modal is
+      // not held open by this request after any other submission.
+      const progressRequest = fetchProgress();
+
       if (data.valid) {
         if (data.alreadyFound) {
           setMessage("Flag already found!");
         } else {
-          const newFoundFlags = [...foundFlags, data.slug];
-          setFoundFlags(newFoundFlags);
+          const progress = await progressRequest;
 
-          if (newFoundFlags.length === totalFlags) {
+          if (progress && progress.found.length === progress.total) {
             triggerVictoryCelebration();
             setMessage("Congratulations! You found all flags!");
             setTimeout(() => {
@@ -152,7 +191,9 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
           } else {
             triggerConfetti();
             setMessage(
-              `Congrats! ${newFoundFlags.length}/${totalFlags} flags already found`
+              progress
+                ? `Congrats! ${progress.found.length}/${progress.total} flags already found`
+                : "Congrats! Flag found!"
             );
             setTimeout(() => {
               setMessage(null);
@@ -231,7 +272,7 @@ export default function FlagChecker({ totalFlags }: FlagCheckerProps) {
             </>
           )}
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={openChecker}
             className="group relative z-10 flex h-14 w-14 cursor-pointer items-center gap-3 overflow-hidden rounded-full bg-primary-600 px-4 text-white shadow-lg transition-all duration-300 hover:w-auto hover:bg-primary-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:bg-primary-500 dark:hover:bg-primary-600"
             style={
               isInitialAnimation
